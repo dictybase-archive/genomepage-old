@@ -23,7 +23,7 @@ __PACKAGE__->attr(
 __PACKAGE__->attr(
     mode => (
         chained => 1,
-        default => sub { ($ENV{MOJO_MODE} || 'development') }
+        default => sub { ( $ENV{MOJO_MODE} || 'development' ) }
     )
 );
 __PACKAGE__->attr(
@@ -56,22 +56,27 @@ sub new {
     my $self = shift->SUPER::new();
 
     # Namespace
-    $self->routes->namespace(ref $self);
+    $self->routes->namespace( ref $self );
 
     # Types
-    $self->renderer->types($self->types);
-    $self->static->types($self->types);
+    $self->renderer->types( $self->types );
+    $self->static->types( $self->types );
 
     # Root
-    $self->home->detect(ref $self);
-    $self->renderer->root($self->home->rel_dir('templates'));
-    $self->static->root($self->home->rel_dir('public'));
+    $self->home->detect( ref $self );
+    $self->renderer->root( $self->home->rel_dir('templates') );
+    $self->static->root( $self->home->rel_dir('public') );
 
     # Mode
     my $mode = $self->mode;
 
     # Log file
-		$self->log->path($self->home->rel_file("log/$mode.log"));
+    if ( $mode ne 'development' ) {
+        $self->log->path( $self->home->rel_file("/var/log/$mode.log") );
+    }
+    else {
+        $self->log->path( $self->home->rel_file("log/$mode.log") );
+    }
 
     # Run mode
     $mode = $mode . '_mode';
@@ -81,23 +86,23 @@ sub new {
     $self->startup(@_);
 
     # Load context class
-    Mojo::Loader->new->load($self->ctx_class);
+    Mojo::Loader->new->load( $self->ctx_class );
 
     return $self;
 }
 
 sub build_ctx {
     my $self = shift;
-    return $self->ctx_class->new(app => $self, tx => shift);
+    return $self->ctx_class->new( app => $self, tx => shift );
 }
 
 # You could just overload this method
 sub dispatch {
-    my ($self, $c) = @_;
+    my ( $self, $c ) = @_;
 
-		#fix the path 
-		#missing out the first part from mod_perl handler
-		$c->req->url(Mojo::URL->new($c->req->url->base.$c->req->url->path));
+    #fix the path
+    #missing out the first part from mod_perl handler
+    $c->req->url( Mojo::URL->new( $c->req->url->base . $c->req->url->path ) );
 
     # Try to find a static file
     my $done = $self->static->dispatch($c);
@@ -105,7 +110,7 @@ sub dispatch {
     # Use routes if we don't have a response yet
     $done ||= $self->routes->dispatch($c);
 
-    $self->log->info($c->req->url);
+    $self->log->info( $c->req->url );
 
     # Nothing found
     $self->static->serve_404($c) unless $done;
@@ -113,23 +118,25 @@ sub dispatch {
 
 # Bite my shiny metal ass!
 sub handler {
-    my ($self, $tx) = @_;
+    my ( $self, $tx ) = @_;
 
     # Build context and dispatch
-    $self->dispatch($self->build_ctx($tx));
+    $self->dispatch( $self->build_ctx($tx) );
 
     return $tx;
 }
 
 # This will run once at startup
-sub startup { 
-	my ($self) = @_;
-	my $router = $self->routes();
-	my $base = $router->namespace();
-	$router->namespace($base.'::Controller');
-	$router->route('/gene/:id/:tab/:section')->to(controller =>'gene',  action => 'section');
-	$router->route('/gene/:id/:tab')->to(controller =>'gene',  action => 'tab');
-	$router->route('/gene/:id')->to(controller =>'gene',  action => 'tab');
+sub startup {
+    my ($self) = @_;
+    my $router = $self->routes();
+    my $base   = $router->namespace();
+    $router->namespace( $base . '::Controller' );
+    $router->route('/gene/:id/:tab/:section')
+        ->to( controller => 'gene', action => 'section' );
+    $router->route('/gene/:id/:tab')
+        ->to( controller => 'gene', action => 'tab' );
+    $router->route('/gene/:id')->to( controller => 'gene', action => 'tab' );
 
 }
 
