@@ -145,5 +145,34 @@ sub section {
     $c->res->body($js);
 }
 
+sub sub_section {
+    my ( $self, $c ) = @_;
+
+    my $tab     = $c->url_param('tab');
+    my $id      = $c->url_param('subid');
+    my $section = $c->url_param('section');
+    my $js;
+
+    eval {
+        my $factory = dicty::Factory::Tabview::Section->new(
+            -primary_id => $id,
+            -section    => $section,
+            -tab        => $tab,
+        );
+        my $sec = $factory->instantiate;
+        $js = $sec->process();
+    };
+    if ($@) {
+        $c->res->code(404);
+        $c->res->body($@);
+        return;
+    }
+
+    $c->res->headers->content_type('application/json');
+    $c->res->code(200);
+    $c->res->body($js);
+
+}
+
 1;
 

@@ -126,6 +126,8 @@ sub startup {
     my $router = $self->routes();
     my $base   = $router->namespace();
     $router->namespace( $base . '::Controller' );
+    $router->route('/gene/:id/:tab/:subid/:section')
+        ->to( controller => 'gene', action => 'sub_section' );
     $router->route('/gene/:id/:tab/:section')
         ->to( controller => 'gene', action => 'section' );
     $router->route('/gene/:id/:tab')
