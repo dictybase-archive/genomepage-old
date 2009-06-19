@@ -2,7 +2,15 @@ use strict;
 use warnings;
 use Module::Build;
 
-my $builder = Module::Build->new(
+my $class = Module::Build->subclass (
+	 class => 'DictyREST::Builder',
+	 code => q {
+	 		sub ACTION_deploy {
+	 			 my ($self) = @_;
+			}
+	 },
+);
+my $builder = $class->new(
     module_name         => 'DictyREST',
     license             => 'perl',
     dist_author         => 'Siddhartha Basu <siddhartha-basu@northwestern.edu>',
