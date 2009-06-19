@@ -11,6 +11,7 @@ use dicty::Factory::Tabview::Section;
 use dicty::Gene;
 
 my $GENE_ID_RGX = qr/^DDB_G\d{6,}/;
+my $DDB_ID_RGX  = qr/^DDB\d{7,}/;
 
 sub tab {
     my ( $self, $c ) = @_;
@@ -52,10 +53,7 @@ sub tab {
         }
 
         $c->res->headers->content_type('application/json');
-        if ($c->app->mode =~ /production/i) {
-        	 $c->app->log->info($js);
-				}
-				$c->res->code(200);
+        $c->res->code(200);
         $c->res->body($js);
 
     }
@@ -70,13 +68,13 @@ sub tab {
             -template   => $conf->param("genepage.template")
         );
 
-    	  $c->res->headers->content_type('text/html');
-    	  $c->res->code(200);
+        $c->res->headers->content_type('text/html');
+        $c->res->code(200);
         $c->res->body( $page->process() );
 
     }
     else {
-    	  $c->res->headers->content_type('text/html');
+        $c->res->headers->content_type('text/html');
         $c->res->body("nothing for you");
     }
 }
@@ -103,6 +101,29 @@ sub section {
     }
 
     my $js;
+
+    if ( $section =~ /$GENE_ID_RGX|$DDB_ID_RGX/ ) {
+        eval {
+            my $factory = dicty::Factory::Tabview::Tab->new(
+                -tab        => $tab,
+                -primary_id => $section,
+            );
+
+            my $tabobj = $factory->instantiate;
+            $js = $tabobj->process;
+        };
+        if ($@) {
+
+            $c->res->code(404);
+            $c->res->body($@);
+            return;
+        }
+
+        $c->res->headers->content_type('application/json');
+        $c->res->code(200);
+        $c->res->body($js);
+        return;
+    }
 
     eval {
         my $factory = dicty::Factory::Tabview::Section->new(
