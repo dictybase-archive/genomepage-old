@@ -1,26 +1,37 @@
+#!/usr/bin/perl -w
 use strict;
 use warnings;
-use Module::Build;
+use lib '.';
+use DictyRESTBuilder;
 
-my $class = Module::Build->subclass (
-	 class => 'DictyREST::Builder',
-	 code => q {
-	 		sub ACTION_deploy {
-	 			 my ($self) = @_;
-			}
-	 },
-);
-my $builder = $class->new(
-    module_name         => 'DictyREST',
-    license             => 'perl',
-    dist_author         => 'Siddhartha Basu <siddhartha-basu@northwestern.edu>',
+my $builder = DictyRESTBuilder->new(
+    module_name  => 'DictyREST',
+    license      => 'perl',
+    dist_author  => 'Siddhartha Basu <siddhartha-basu@northwestern.edu>',
     dist_version => '1.0',
-    requires => {
-    	 'Mojo' => '',
-    	 'Apache2::Mojo' => ''
+    requires     => {
+        'Mojo'          => '',
+        'Apache2::Mojo' => ''
     },
-    add_to_cleanup      => [ 'DictyREST-*' ],
-    create_readme => 1,
+    build_requires => {
+    	 'Archive::Extract' => '',
+		},
+    add_to_cleanup => ['DictyREST-*'],
+    create_readme  => 1,
 );
 
 $builder->create_build_script();
+
+
+package DictyRESTBuilder;
+
+use base qw/Module::Build/;
+
+sub ACTION_deploy {
+    my ($self) = @_;
+    $self->depends('dist');
+    my $file = catfile( $self->base_dir, $self->dist_dir . '.tar.gz' );
+    print $file, "\n";
+}
+
+1;
