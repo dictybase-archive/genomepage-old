@@ -96,7 +96,8 @@ sub dispatch {
 
     #fix the path
     #missing out the first part from mod_perl handler
-    $c->req->url( Mojo::URL->new( $c->req->url->base . $c->req->url->path ) );
+    #did not need it now fixed the Apache2::Mojo itself
+    #$c->req->url( Mojo::URL->new( $c->req->url->base . $c->req->url->path ) );
 
     # Try to find a static file
     my $done = $self->static->dispatch($c);
