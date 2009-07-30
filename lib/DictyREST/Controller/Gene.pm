@@ -13,6 +13,13 @@ use dicty::Gene;
 my $GENE_ID_RGX = qr/^DDB_G\d{6,}/;
 my $DDB_ID_RGX  = qr/^DDB\d{7,}/;
 
+sub absent { 
+	my ($self,  $c) = @_;
+	$c->res->code(404);
+	$c->res->body("Resource Not Implemented");
+	return;
+}
+
 sub tab {
     my ( $self, $c ) = @_;
     my $id  = $c->url_param('id');

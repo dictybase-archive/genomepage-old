@@ -13,6 +13,7 @@ use DictyREST::Dispatcher;
 use DictyREST::Renderer;
 use MojoX::Dispatcher::Static;
 use MojoX::Types;
+use Time::HiRes ();
 
 __PACKAGE__->attr(
     ctx_class => (
@@ -35,7 +36,8 @@ __PACKAGE__->attr(
 __PACKAGE__->attr(
     routes => (
         chained => 1,
-        default => sub { DictyREST::Dispatcher->new }
+        #default => sub { DictyREST::Dispatcher->new }
+        default => sub { MojoX::Dispatcher::Routes->new }
     )
 );
 __PACKAGE__->attr(
@@ -74,13 +76,23 @@ sub new {
 
     # Run mode
     $mode = $mode . '_mode';
-    $self->$mode if $self->can($mode);
+    eval { $self->$mode } if $self->can($mode);
+    $self->log->error(qq/Mode "$mode" failed: $@/) if $@;
+
 
     # Startup
-    $self->startup(@_);
+    eval { $self->startup(@_) };
+    $self->log->error("Startup failed: $@") if $@;
 
-    # Load context class
-    Mojo::Loader->new->load( $self->ctx_class );
+	# Load context class
+    my $class = $self->ctx_class;
+    if (my $e = Mojo::Loader->new->load($class)) {
+        $self->log->error(
+            ref $e
+            ? qq/Couldn't load context class "$class": $e/
+            : qq/Context class "$class" doesn't exist./
+        );
+    }
 
     return $self;
 }
@@ -91,35 +103,59 @@ sub build_ctx {
 }
 
 # You could just overload this method
-sub dispatch {
-    my ( $self, $c ) = @_;
 
-    #fix the path
-    #missing out the first part from mod_perl handler
-    #did not need it now fixed the Apache2::Mojo itself
-    #$c->req->url( Mojo::URL->new( $c->req->url->base . $c->req->url->path ) );
+sub dispatch {
+    my ($self, $c) = @_;
+
+    # New request
+    my $path = $c->req->url->path;
+    $self->log->debug(qq/*** Request for "$path". ***/);
 
     # Try to find a static file
-    my $done = $self->static->dispatch($c);
+    my $e = $self->static->dispatch($c);
 
     # Use routes if we don't have a response yet
-    $done ||= $self->routes->dispatch($c);
+    $e = $self->routes->dispatch($c) if $e;
 
-    $self->log->info( $c->req->url );
+    # Exception
+    if (ref $e) {
+
+        # Development mode
+        if ($self->mode eq 'development') {
+            $c->stash(exception => $e);
+            $c->res->code(500);
+            $c->render(template => 'exception.html');
+        }
+
+        # Production mode
+        else { $self->static->serve_500($c) }
+    }
 
     # Nothing found
-    $self->static->serve_404($c) unless $done;
+    elsif ($e) { $self->static->serve_404($c) }
 }
 
 # Bite my shiny metal ass!
 sub handler {
-    my ( $self, $tx ) = @_;
+    my ($self, $tx) = @_;
 
-    # Build context and dispatch
-    $self->dispatch( $self->build_ctx($tx) );
+    # Start timer
+    my $start = [Time::HiRes::gettimeofday()];
 
-    return $tx;
+    # Build context and process
+    eval { $self->process($self->build_ctx($tx)) };
+    $self->log->error("Processing request failed: $@") if $@;
+
+    # End timer
+    my $elapsed = sprintf '%f',
+      Time::HiRes::tv_interval($start, [Time::HiRes::gettimeofday()]);
+    my $rps = $elapsed == 0 ? '??' : sprintf '%.3f', 1 / $elapsed;
+    $self->log->debug("Request took $elapsed seconds ($rps/s).");
 }
+
+
+# This will run for each request
+sub process { shift->dispatch(@_) }
 
 # This will run once at startup
 sub startup {
@@ -131,9 +167,8 @@ sub startup {
         ->to( controller => 'gene', action => 'sub_section' );
     $router->route('/gene/:id/:tab/:section')
         ->to( controller => 'gene', action => 'section' );
-    $router->route('/gene/:id/:tab')
-        ->to( controller => 'gene', action => 'tab' );
-    $router->route('/gene/:id')->to( controller => 'gene', action => 'tab' );
+    $router->route('/gene/:id/:tab')->to( controller => 'gene', action => 'tab' );
+	$router->route('/gene/:id')->to(controller => 'gene',  action => 'tab');
 
 }
 
