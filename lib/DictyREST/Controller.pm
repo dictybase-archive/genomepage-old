@@ -5,7 +5,8 @@ package DictyREST::Controller;
 use strict;
 use warnings;
 
-use base 'MojoX::Dispatcher::Routes::Controller';
+#use base 'MojoX::Dispatcher::Routes::Controller';
+use base qw/Mojolicious::Controller/;
 
 # Well, at least here you'll be treated with dignity.
 # Now strip naked and get on the probulator.

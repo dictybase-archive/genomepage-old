@@ -34,7 +34,6 @@ $client->process_app('DictyREST',  $tx);
 is($tx->res->code, 200, 'is a successful response for DDB_G0288511');
 like($tx->res->headers->content_type,  qr/html/,  'is a html response for DDB_G0288511');
 like($tx->res->body,  qr/Gene page for sadA/i,  'is the title for DDB_G0288511 gene page');
-exit;
 
 
 

@@ -10,10 +10,13 @@ use base 'Mojo';
 use Mojo::Loader;
 use Mojo::URL;
 use DictyREST::Dispatcher;
-use DictyREST::Renderer;
+use MojoX::Renderer;
 use MojoX::Dispatcher::Static;
 use MojoX::Types;
 use Time::HiRes ();
+use Config::Simple;
+use Carp;
+use File::Spec::Functions;
 
 __PACKAGE__->attr(
     ctx_class => (
@@ -30,7 +33,7 @@ __PACKAGE__->attr(
 __PACKAGE__->attr(
     renderer => (
         chained => 1,
-        default => sub { DictyREST::Renderer->new }
+        default => sub { MojoX::Renderer->new }
     )
 );
 __PACKAGE__->attr(
@@ -52,6 +55,8 @@ __PACKAGE__->attr(
         default => sub { MojoX::Types->new }
     )
 );
+
+__PACKAGE__->attr('config',  default => sub { Config::Simple->new()});
 
 # The usual constructor stuff
 sub new {
@@ -161,6 +166,8 @@ sub process { shift->dispatch(@_) }
 sub startup {
     my ($self) = @_;
     my $router = $self->routes();
+
+    #routing setup
     my $base   = $router->namespace();
     $router->namespace( $base . '::Controller' );
     $router->route('/gene/:id/:tab/:subid/:section')
@@ -169,6 +176,36 @@ sub startup {
         ->to( controller => 'gene', action => 'section' );
     $router->route('/gene/:id/:tab')->to( controller => 'gene', action => 'tab' );
 	$router->route('/gene/:id')->to(controller => 'gene',  action => 'tab');
+
+	#config file setup
+	$self->set_config();
+
+}
+
+#set up config file usually look under conf folder
+#supports similar profile as log file
+sub set_config { 
+	my ($self,  $c) = @_;
+	my $folder = $self->home->rel_dir('conf');
+	if (!-e $folder) { 
+		return;
+	}
+	$self->log->debug(qq/got folder $folder/);
+
+	#now the file name,  default which is developmental mode resolves to <name>.conf. For
+	#test and production it will be <name>.test.conf and <name>.production.conf respectively.
+	my $mode = $self->mode();
+	my $suffix = '.conf' ;
+	if ($mode eq 'production' or $mode eq 'test' ) { 
+		$suffix = '.'.$mode.'.conf';
+	}
+
+	opendir my $conf,  $folder or confess "cannot open folder $!:$folder";
+	my ($file) = grep { /$suffix$/ } readdir $conf;
+	closedir $conf;
+
+	$self->log->debug(qq/got config file $file/);
+	$self->config->read(catfile($folder,  $file));
 
 }
 
