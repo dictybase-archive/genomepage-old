@@ -27,6 +27,8 @@ $client->process_app('DictyREST',  $tx);
 is($tx->res->code, 200, 'is a successful response for sadA');
 like($tx->res->headers->content_type,  qr/html/,  'is a html response for sadA');
 like($tx->res->body,  qr/Gene page for sadA/i,  'is the title for sadA gene page');
+diag($tx->res->body);
+exit;
 
 #canonical url with gene id
 $tx = Mojo::Transaction->new_get('/gene/DDB_G0288511');

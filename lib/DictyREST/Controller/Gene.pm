@@ -8,14 +8,66 @@ use dicty::Factory::Tabview::Tab;
 use dicty::Factory::Tabview::Section;
 use dicty::Gene;
 
-my $GENE_ID_RGX = qr/^DDB_G\d{6,}/;
+my $GENE_ID_RGX = qr/^D[A-Z]+_G\d{6,}$/;
 my $DDB_ID_RGX  = qr/^DDB\d{7,}/;
 
-sub absent { 
-	my ($self,  $c) = @_;
-	$c->res->code(404);
-	$c->res->body("Resource Not Implemented");
-	return;
+sub is_name {
+    my ( $self, $id ) = @_;
+    return 0 if $id =~ $GENE_ID_RGX;
+    return 1;
+}
+
+sub name2id {
+    my ( $self, $id ) = @_;
+    my $feat;
+    eval { $feat = dicty::Gene->new( -name => $id ); };
+    return 0 if $@;
+    return $feat->primary_id();
+}
+
+sub id {
+    my ( $self, $c ) = @_;
+    my $id      = $c->stash('id');
+    my $gene_id = $id;
+    if ( $self->is_name($id) ) {
+        $gene_id = $self->name2id($id);
+
+        #in case the name does not get resolved
+        #handle it here
+        if ( !$gene_id ) {
+            $self->render(
+                template => $self->app->config->param('genepage.error'),
+                message  => "Input $id not found",
+            );
+            return;
+        }
+    }
+
+    my $db = dicty::UI::Tabview::Page::Gene->new(
+        -primary_id => $gene_id,
+        -active_tab => 'gene',
+    );
+
+    my $format = $c->stash('format');
+    if ( !$format or $format eq 'html' ) {
+        $c->stash( $db->result() );
+        $self->render(
+            template => $self->app->config->param('genepage.template') );
+    }
+    elsif ( $format eq 'json' ) {
+        $self->app->static->serve_404( $c, '404_nr.html' );
+    }
+    else {    #unsupported format handle it here
+        $self->app->static->serve_404( $c, '404_nf.html' );
+    }
+
+}
+
+sub absent {
+    my ( $self, $c ) = @_;
+    $c->res->code(404);
+    $c->res->body("Resource Not Implemented");
+    return;
 }
 
 sub tab {

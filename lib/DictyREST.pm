@@ -9,7 +9,6 @@ use base 'Mojo';
 
 use Mojo::Loader;
 use Mojo::URL;
-use DictyREST::Dispatcher;
 use MojoX::Renderer;
 use MojoX::Dispatcher::Static;
 use MojoX::Types;
@@ -17,6 +16,9 @@ use Time::HiRes ();
 use Config::Simple;
 use Carp;
 use File::Spec::Functions;
+use DictyREST::Dispatcher;
+use DictyREST::Renderer::TT;
+use DictyREST::Renderer::JSON;
 
 __PACKAGE__->attr(
     ctx_class => (
@@ -39,7 +41,6 @@ __PACKAGE__->attr(
 __PACKAGE__->attr(
     routes => (
         chained => 1,
-        #default => sub { DictyREST::Dispatcher->new }
         default => sub { MojoX::Dispatcher::Routes->new }
     )
 );
@@ -56,7 +57,9 @@ __PACKAGE__->attr(
     )
 );
 
-__PACKAGE__->attr('config',  default => sub { Config::Simple->new()});
+__PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
+__PACKAGE__->attr('template_path');
+__PACKAGE__->attr( 'has_config', default => 0 );
 
 # The usual constructor stuff
 sub new {
@@ -84,14 +87,13 @@ sub new {
     eval { $self->$mode } if $self->can($mode);
     $self->log->error(qq/Mode "$mode" failed: $@/) if $@;
 
-
     # Startup
     eval { $self->startup(@_) };
     $self->log->error("Startup failed: $@") if $@;
 
-	# Load context class
+    # Load context class
     my $class = $self->ctx_class;
-    if (my $e = Mojo::Loader->new->load($class)) {
+    if ( my $e = Mojo::Loader->new->load($class) ) {
         $self->log->error(
             ref $e
             ? qq/Couldn't load context class "$class": $e/
@@ -110,7 +112,7 @@ sub build_ctx {
 # You could just overload this method
 
 sub dispatch {
-    my ($self, $c) = @_;
+    my ( $self, $c ) = @_;
 
     # New request
     my $path = $c->req->url->path;
@@ -123,13 +125,13 @@ sub dispatch {
     $e = $self->routes->dispatch($c) if $e;
 
     # Exception
-    if (ref $e) {
+    if ( ref $e ) {
 
         # Development mode
-        if ($self->mode eq 'development') {
-            $c->stash(exception => $e);
+        if ( $self->mode eq 'development' ) {
+            $c->stash( exception => $e );
             $c->res->code(500);
-            $c->render(template => 'exception.html');
+            $c->render( template => 'exception.html' );
         }
 
         # Production mode
@@ -142,22 +144,21 @@ sub dispatch {
 
 # Bite my shiny metal ass!
 sub handler {
-    my ($self, $tx) = @_;
+    my ( $self, $tx ) = @_;
 
     # Start timer
-    my $start = [Time::HiRes::gettimeofday()];
+    my $start = [ Time::HiRes::gettimeofday() ];
 
     # Build context and process
-    eval { $self->process($self->build_ctx($tx)) };
+    eval { $self->process( $self->build_ctx($tx) ) };
     $self->log->error("Processing request failed: $@") if $@;
 
     # End timer
     my $elapsed = sprintf '%f',
-      Time::HiRes::tv_interval($start, [Time::HiRes::gettimeofday()]);
+        Time::HiRes::tv_interval( $start, [ Time::HiRes::gettimeofday() ] );
     my $rps = $elapsed == 0 ? '??' : sprintf '%.3f', 1 / $elapsed;
     $self->log->debug("Request took $elapsed seconds ($rps/s).");
 }
-
 
 # This will run for each request
 sub process { shift->dispatch(@_) }
@@ -168,45 +169,82 @@ sub startup {
     my $router = $self->routes();
 
     #routing setup
-    my $base   = $router->namespace();
+    my $base = $router->namespace();
     $router->namespace( $base . '::Controller' );
     $router->route('/gene/:id/:tab/:subid/:section')
         ->to( controller => 'gene', action => 'sub_section' );
     $router->route('/gene/:id/:tab/:section')
         ->to( controller => 'gene', action => 'section' );
-    $router->route('/gene/:id/:tab')->to( controller => 'gene', action => 'tab' );
-	$router->route('/gene/:id')->to(controller => 'gene',  action => 'tab');
+    $router->route('/gene/:id/:tab')
+        ->to( controller => 'gene', action => 'tab' );
+    $router->route('/gene/:id')->to( controller => 'gene', action => 'id' );
 
-	#config file setup
-	$self->set_config();
+    #config file setup
+    $self->set_config();
+
+    #set up various renderer
+    $self->set_renderer();
 
 }
 
 #set up config file usually look under conf folder
 #supports similar profile as log file
-sub set_config { 
-	my ($self,  $c) = @_;
-	my $folder = $self->home->rel_dir('conf');
-	if (!-e $folder) { 
-		return;
-	}
-	$self->log->debug(qq/got folder $folder/);
+sub set_config {
+    my ( $self, $c ) = @_;
+    my $folder = $self->home->rel_dir('conf');
+    if ( !-e $folder ) {
+        return;
+    }
+    $self->log->debug(qq/got folder $folder/);
 
 	#now the file name,  default which is developmental mode resolves to <name>.conf. For
 	#test and production it will be <name>.test.conf and <name>.production.conf respectively.
-	my $mode = $self->mode();
-	my $suffix = '.conf' ;
-	if ($mode eq 'production' or $mode eq 'test' ) { 
-		$suffix = '.'.$mode.'.conf';
-	}
+    my $mode   = $self->mode();
+    my $suffix = '.conf';
+    if ( $mode eq 'production' or $mode eq 'test' ) {
+        $suffix = '.' . $mode . '.conf';
+    }
 
-	opendir my $conf,  $folder or confess "cannot open folder $!:$folder";
-	my ($file) = grep { /$suffix$/ } readdir $conf;
-	closedir $conf;
+    opendir my $conf, $folder or confess "cannot open folder $!:$folder";
+    my ($file) = grep {/$suffix$/} readdir $conf;
+    closedir $conf;
 
-	$self->log->debug(qq/got config file $file/);
-	$self->config->read(catfile($folder,  $file));
+    $self->log->debug(qq/got config file $file/);
+    $self->config->read( catfile( $folder, $file ) );
+    $self->has_config(1);
 
+}
+
+sub set_renderer {
+    my ($self) = @_;
+
+    #try to set the default template path for TT
+    #keep in mind this setup is separate from the Mojo's default template path
+    #if something not specifically is not set it defaults to Mojo's default
+    $self->template_path( $self->renderer->root );
+    if ( $self->has_config and $self->config->param('base.template_path') ) {
+        $self->template_path( $self->config->param('base.template_path') );
+    }
+
+    my $tpath = $self->template_path;
+    $self->log->debug(qq/default template path for TT $tpath/);
+
+    my $tt = DictyREST::Renderer::TT->new(
+        path   => $self->template_path,
+        option => {
+            PRE_PROCESS  => $self->config->param('genepage.header') || '',
+            POST_PROCESS => $self->config->param('genepage.footer') || '',
+        },
+    );
+
+    $self->types->type( json => 'application/json' );
+    my $json = DictyREST::Renderer::JSON->new();
+
+    $self->renderer->add_handler(
+        html => $tt->build(),
+        json => $json->build(),
+    );
+    $self->renderer->default_handler('html');
 }
 
 1;
