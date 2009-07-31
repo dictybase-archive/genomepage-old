@@ -222,8 +222,8 @@ sub set_renderer {
     #keep in mind this setup is separate from the Mojo's default template path
     #if something not specifically is not set it defaults to Mojo's default
     $self->template_path( $self->renderer->root );
-    if ( $self->has_config and $self->config->param('base.template_path') ) {
-        $self->template_path( $self->config->param('base.template_path') );
+    if ( $self->has_config and $self->config->param('default.template_path') ) {
+        $self->template_path( $self->config->param('default.template_path') );
     }
 
     my $tpath = $self->template_path;
@@ -237,14 +237,13 @@ sub set_renderer {
         },
     );
 
-    $self->types->type( json => 'application/json' );
     my $json = DictyREST::Renderer::JSON->new();
 
     $self->renderer->add_handler(
-        html => $tt->build(),
+        tt => $tt->build(),
         json => $json->build(),
     );
-    $self->renderer->default_handler('html');
+    $self->renderer->default_handler('tt');
 }
 
 1;

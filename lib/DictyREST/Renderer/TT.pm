@@ -2,7 +2,7 @@ package DictyREST::Renderer::TT;
 
 use warnings;
 use strict;
-use Carp;
+use Carp qw/confess cluck carp/;
 
 use version; our $VERSION = qv('1.0.0');
 
@@ -49,7 +49,7 @@ sub process {
         = $self->template->process( $template, { %{ $c->stash }, c => $c },
         $output );
     if ( !$status ) {
-        carp $self->template->error;
+        cluck $self->template->error;
         return 0;
     }
     return 1;

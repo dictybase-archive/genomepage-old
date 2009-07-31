@@ -49,12 +49,16 @@ sub id {
     );
 
     my $format = $c->stash('format');
+    $self->app->log->debug(qq/serving format $format/);
     if ( !$format or $format eq 'html' ) {
         $c->stash( $db->result() );
         $self->render(
-            template => $self->app->config->param('genepage.template') );
+            template => $self->app->config->param('genepage.template'),
+        );
+    	$self->app->log->warn($c->stash('format'));
     }
     elsif ( $format eq 'json' ) {
+    	$self->app->log->debug("serving json");
         $self->app->static->serve_404( $c, '404_nr.html' );
     }
     else {    #unsupported format handle it here
