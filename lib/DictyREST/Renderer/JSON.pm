@@ -9,9 +9,12 @@ use version; our $VERSION = qv('1.0.0');
 # Other modules:
 use base 'Mojo::Base';
 use JSON;
+use Data::Dumper;
 
 # Module implementation
 #
+
+__PACKAGE__->attr('json');
 
 sub new {
     my ( $class, %arg ) = @_;
@@ -22,14 +25,20 @@ sub new {
 
 sub build {
     my ( $self, %arg ) = @_;
+    $self->json( JSON->new() );
     return sub { $self->process(@_); };
 }
 
 sub process {
     my ( $self, $renderer, $c, $output ) = @_;
-    my $result = $c->stash('result');
-    eval { $$output = objToJson($result) };
-    return 0 if $@;
+    return if $c->stash('format') ne 'json';
+    my $obj = $c->stash('data');
+
+    #routine to get perl data structure that will be converted to json
+    $obj->init();
+    my $conf = $obj->config();
+    $$output = $self->json->objToJson(
+        [ map { $_->to_json } @{ $conf->panels } ] );
     return 1;
 }
 

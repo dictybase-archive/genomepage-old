@@ -44,6 +44,8 @@ sub build {
 
 sub process {
     my ( $self, $renderer, $c, $output ) = @_;
+    $c->app->log->warn("from tt template");
+    return 0 if $c->stash('format') ne 'html';
     my $template = $c->stash('template');
     my $status
         = $self->template->process( $template, { %{ $c->stash }, c => $c },
