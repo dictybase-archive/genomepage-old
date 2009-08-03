@@ -10,10 +10,12 @@ use Carp;
 use File::Spec::Functions;
 use DictyREST::Renderer::TT;
 use DictyREST::Renderer::JSON;
+use DictyREST::Helper;
 
 __PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
 __PACKAGE__->attr('template_path');
 __PACKAGE__->attr( 'has_config', default => 0 );
+__PACKAGE__->attr( 'helper', default => sub { DictyREST::Helper->new() } );
 
 # This will run once at startup
 sub startup {
@@ -24,12 +26,12 @@ sub startup {
     my $base = $router->namespace();
     $router->namespace( $base . '::Controller' );
     $router->route('/gene/:id/:tab/:subid/:section')
-        ->to( controller => 'gene', action => 'sub_section' );
+        ->to( controller => 'tab', action => 'sub_section' );
     $router->route('/gene/:id/:tab/:section')
-        ->to( controller => 'gene', action => 'section' );
+        ->to( controller => 'tab', action => 'section' );
     $router->route('/gene/:id/:tab')
-        ->to( controller => 'gene', action => 'tab' );
-    $router->route('/gene/:id')->to( controller => 'gene', action => 'id' );
+        ->to( controller => 'page', action => 'tab' );
+    $router->route('/gene/:id')->to( controller => 'page', action => 'index' );
 
     #config file setup
     $self->set_config();

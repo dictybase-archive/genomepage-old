@@ -1,46 +1,36 @@
-package DictyREST::Renderer::JSON;
-
-use warnings;
-use strict;
-use Carp;
+package DictyREST::Helper;
 
 use version; our $VERSION = qv('1.0.0');
 
 # Other modules:
-use base 'Mojo::Base';
-use JSON;
-use Data::Dumper;
+use base qw/Mojo::Base/;
+use dicty::Gene;
 
 # Module implementation
 #
 
-__PACKAGE__->attr('json');
-
-sub new {
-    my ( $class, %arg ) = @_;
-    my $self = {};
-    bless $self, $class;
-    return $self;
-}
-
-sub build {
-    my ( $self, %arg ) = @_;
-    $self->json( JSON->new() );
-    return sub { $self->process(@_); };
-}
-
-sub process {
-    my ( $self, $renderer, $c, $output ) = @_;
-    return if $c->stash('format') ne 'json';
-    my $obj = $c->stash('data');
-    $c->app->log->debug("in json renderer");
-
-    #routine to get perl data structure that will be converted to json
-    $obj->init();
-    my $conf = $obj->config();
-    $$output = $self->json->objToJson(
-        [ map { $_->to_json } @{ $conf->panels } ] );
+sub is_name {
+    my ( $self, $id ) = @_;
+    return 0 if $id =~ /^D[A-Z]+_G\d+$/;
     return 1;
+}
+
+sub name2id {
+    my ( $self, $id ) = @_;
+    my $feat;
+    eval { $feat = dicty::Gene->new( -name => $id ); };
+    return 0 if $@;
+    return $feat->primary_id();
+}
+
+sub process_id {
+    my ( $self, $id ) = @_;
+    my $gene_id = $id;
+    if ( $self->is_name($id) ) {
+        $gene_id = $self->name2id($id);
+        return 0 if !$gene_id;
+    }
+    return $gene_id;
 }
 
 1;    # Magic true value required at end of module
@@ -49,7 +39,7 @@ __END__
 
 =head1 NAME
 
-DictyREST::Renderer::TT - [Template toolkit renderer for DictyREST application]
+<DictyREST::Helper> - [Module providing some common methods for the entire application]
 
 
 =head1 VERSION
