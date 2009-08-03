@@ -33,7 +33,7 @@ sub process {
     my ( $self, $renderer, $c, $output ) = @_;
     return if $c->stash('format') ne 'json';
     my $obj = $c->stash('data');
-    $c->app->log->debug("in json renderer");
+    #$c->app->log->debug("in json renderer");
 
     #routine to get perl data structure that will be converted to json
     $obj->init();

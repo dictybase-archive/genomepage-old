@@ -2,6 +2,7 @@ package DictyREST::Controller::Page;
 
 use strict;
 use warnings;
+use Data::Dumper;
 use base qw/Mojolicious::Controller/;
 use dicty::UI::Tabview::Page::Gene;
 use dicty::Factory::Tabview::Tab;
@@ -35,6 +36,7 @@ sub index {
     #default rendering
     $c->stash( $db->result() );
     $self->render( template => $app->config->param('genepage.template') );
+    #$app->log->debug( $c->res->headers->content_type );
 
     #have to handle unrecognized format,  however does anybody care ????
 
@@ -62,7 +64,8 @@ sub tab {
         );
         my $tabobj = $factory->instantiate;
         $self->render( handler => 'json', data => $tabobj );
-        return;
+        #$app->log->debug( $c->res->headers->content_type );
+        #return;
     }
 
     my $db = dicty::UI::Tabview::Page::Gene->new(
@@ -73,6 +76,7 @@ sub tab {
     #result
     $c->stash( $db->result() );
     $self->render( template => $app->config->param('genepage.template'), );
+    #$app->log->debug( $c->res->headers->content_type );
 
     #have to handle unrecognized format,  however does anybody care ????
 

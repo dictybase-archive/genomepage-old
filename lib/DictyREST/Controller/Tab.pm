@@ -27,11 +27,21 @@ sub section {
     #the default format is json here
     $c->stash('format') || $c->stash( format => 'json' );
     if ( $c->stash('format') eq 'json' ) {
-        my $factory = dicty::Factory::Tabview::Section->new(
-            -primary_id => $gene_id,
-            -section    => $section,
-            -tab        => $tab,
-        );
+        my $factory;
+        if ( $app->helper->is_ddb($section) ) {
+            $factory = dicty::Factory::Tabview::Tab->new(
+                -tab        => $tab,
+                -primary_id => $section,
+            );
+        }
+        else {
+
+            $factory = dicty::Factory::Tabview::Section->new(
+                -primary_id => $gene_id,
+                -section    => $section,
+                -tab        => $tab,
+            );
+        }
 
         my $obj = $factory->instantiate;
         $self->render( handler => 'json', data => $obj );

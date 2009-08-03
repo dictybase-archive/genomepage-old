@@ -58,6 +58,15 @@ is($tx->res->code, 200, 'is a successful response for protein info sequence');
 like($tx->res->headers->content_type,  qr/json/,  'is a json content for protein sequence');
 like($tx->res->body,  qr/layout.+row/,  'has a row layout in protein sequence');
 
+#request for section sequence under protein topic with explicit json requirement 
+$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/protein/DDB0191090/sequence.json');
+$client->process_app('DictyREST',  $tx);
+is($tx->res->code, 200, 'is a successful json response for protein info sequence');
+like($tx->res->headers->content_type,  qr/json/,  'is a json content for protein sequence');
+like($tx->res->body,  qr/layout.+row/,  'has a row layout in protein sequence');
+
+
+
 #request for function section under GO topic 
 $tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/go/function');
 $client->process_app('DictyREST',  $tx);

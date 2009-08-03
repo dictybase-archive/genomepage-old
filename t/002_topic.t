@@ -15,6 +15,15 @@ use_ok('DictyREST');
 
 my $client = Mojo::Client->new();
 
+#request for gene 
+my $tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/gene.json');
+$client->process_app('DictyREST',  $tx);
+is($tx->res->code, 200, 'is a successful response for gene');
+like($tx->res->headers->content_type,  qr/json/,  'is a json content for gene');
+like($tx->res->body,  qr/layout.+accordion/,  'has a accordion layout in json content');
+
+
+
 #request for GO 
 my $tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/go');
 $client->process_app('DictyREST',  $tx);

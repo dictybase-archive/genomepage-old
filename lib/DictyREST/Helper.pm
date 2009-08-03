@@ -4,7 +4,7 @@ use version; our $VERSION = qv('1.0.0');
 
 # Other modules:
 use base qw/Mojo::Base/;
-use dicty::Gene;
+use Module::Load;
 
 # Module implementation
 #
@@ -15,9 +15,16 @@ sub is_name {
     return 1;
 }
 
+sub is_ddb { 
+	my ($self,  $id) = @_;
+	return 1 if $id =~ /^DDB\d+$/;
+	return 0;
+}
+
 sub name2id {
     my ( $self, $id ) = @_;
     my $feat;
+    load dicty::Gene;
     eval { $feat = dicty::Gene->new( -name => $id ); };
     return 0 if $@;
     return $feat->primary_id();

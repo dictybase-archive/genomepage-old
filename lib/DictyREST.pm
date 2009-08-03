@@ -22,6 +22,7 @@ sub startup {
     my ($self) = @_;
     my $router = $self->routes();
 
+	$self->log->debug("starting up");
     #routing setup
     my $base = $router->namespace();
     $router->namespace( $base . '::Controller' );
@@ -39,6 +40,7 @@ sub startup {
     #set up various renderer
     $self->set_renderer();
 
+	$self->log->debug("done with startup");
 }
 
 #set up config file usually look under conf folder
@@ -49,7 +51,7 @@ sub set_config {
     if ( !-e $folder ) {
         return;
     }
-    $self->log->debug(qq/got folder $folder/);
+    #$self->log->debug(qq/got folder $folder/);
 
 	#now the file name,  default which is developmental mode resolves to <name>.conf. For
 	#test and production it will be <name>.test.conf and <name>.production.conf respectively.
@@ -63,7 +65,7 @@ sub set_config {
     my ($file) = grep {/$suffix$/} readdir $conf;
     closedir $conf;
 
-    $self->log->debug(qq/got config file $file/);
+    #$self->log->debug(qq/got config file $file/);
     $self->config->read( catfile( $folder, $file ) );
     $self->has_config(1);
 
@@ -81,7 +83,7 @@ sub set_renderer {
     }
 
     my $tpath = $self->template_path;
-    $self->log->debug(qq/default template path for TT $tpath/);
+    #$self->log->debug(qq/default template path for TT $tpath/);
 
     my $tt = DictyREST::Renderer::TT->new(
         path   => $self->template_path,
