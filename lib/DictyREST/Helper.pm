@@ -40,6 +40,11 @@ sub process_id {
     return $gene_id;
 }
 
+sub is_dynamic { 
+	my ($self,  $name) = @_;
+
+}
+
 1;    # Magic true value required at end of module
 
 __END__

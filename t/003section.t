@@ -16,21 +16,21 @@ use_ok('DictyREST');
 my $client = Mojo::Client->new();
 
 #request for section info under default gene topic 
-my $tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/gene/info');
+my $tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/gene/info.json');
 $client->process_app('DictyREST',  $tx);
 is($tx->res->code, 200, 'is a successful response for info section');
 like($tx->res->headers->content_type,  qr/json/,  'is a json content for info');
 like($tx->res->body,  qr/layout.+row/,  'has a row layout in info');
 
 #request for section sequences under default gene topic 
-$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/gene/sequences');
+$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/gene/sequences.json');
 $client->process_app('DictyREST',  $tx);
 is($tx->res->code, 200, 'is a successful response for sequences section');
 like($tx->res->headers->content_type,  qr/json/,  'is a json content for sequences');
 like($tx->res->body,  qr/layout.+row/,  'has a row layout in sequences');
 
 #request for section links under default gene topic 
-$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/gene/links');
+$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/gene/links.json');
 $client->process_app('DictyREST',  $tx);
 is($tx->res->code, 200, 'is a successful response for links section');
 like($tx->res->headers->content_type,  qr/json/,  'is a json content for links');
@@ -68,7 +68,7 @@ like($tx->res->body,  qr/layout.+row/,  'has a row layout in protein sequence');
 
 
 #request for function section under GO topic 
-$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/go/function');
+$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/go/function.json');
 $client->process_app('DictyREST',  $tx);
 is($tx->res->code, 200, 'is a successful response for function section under GO');
 like($tx->res->headers->content_type,  qr/json/,  'is a json content for function');
@@ -80,6 +80,16 @@ $client->process_app('DictyREST',  $tx);
 is($tx->res->code, 200, 'is a successful response for component section under GO');
 like($tx->res->headers->content_type,  qr/json/,  'is a json content for component');
 like($tx->res->body,  qr/layout.+json/,  'has a json layout in componet');
+
+#request for feature tab 
+$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/feature/DDB0191090');
+$client->process_app('DictyREST',  $tx);
+is($tx->res->code, 200, 'is a successful response for feature section');
+like($tx->res->headers->content_type,  qr/html/,  'is a html content for feature');
+like($tx->res->body,  qr/Gene page for sadA/i,  'is the title for sadA gene page');
+like($tx->res->body,  qr/Supported by NIH/i,  'is the common footer for every gene page');
+diag(Dumper $tx->res->body);
+
 
 
 

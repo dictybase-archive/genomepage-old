@@ -15,6 +15,7 @@ sub section {
     my $section = $c->stash('section');
     my $app     = $self->app;
 
+
     my $gene_id = $app->helper->process_id($id);
     if ( !$gene_id ) {
         $self->render(
@@ -25,8 +26,8 @@ sub section {
     }
 
     #the default format is json here
-    $c->stash('format') || $c->stash( format => 'json' );
-    if ( $c->stash('format') eq 'json' ) {
+
+    if ( $c->stash('format') and $c->stash('format') eq 'json' ) {
         my $factory;
         if ( $app->helper->is_ddb($section) ) {
             $factory = dicty::Factory::Tabview::Tab->new(
@@ -37,43 +38,35 @@ sub section {
         else {
 
             $factory = dicty::Factory::Tabview::Section->new(
+                -tab        => $tab,
                 -primary_id => $gene_id,
                 -section    => $section,
-                -tab        => $tab,
             );
         }
 
         my $obj = $factory->instantiate;
         $self->render( handler => 'json', data => $obj );
-
         return;
     }
 
-    #here handle non supported format
+    #i am assuming that it is html
+    #need to change that assumtion at my earliest
+    #did it because of deadlines
+    #detect if it a dynamic tab
+    if ( $app->config->param('tab.dynamic') eq $tab ) {
+        my $db = dicty::UI::Tabview::Page::Gene->new(
+            -primary_id => $gene_id,
+            -active_tab => $tab,
+            -sub_id     => $section,
+        );
+        $c->stash( $db->result() );
+        #force formatter
+        $self->render( 
+        	template => $app->config->param('genepage.template'),
+        );
+    }
 
-    #why the block below is needed at all????
-    #    if ( $section =~ /$GENE_ID_RGX|$DDB_ID_RGX/ ) {
-    #        eval {
-    #            my $factory = dicty::Factory::Tabview::Tab->new(
-    #                -tab        => $tab,
-    #                -primary_id => $section,
-    #            );
-    #
-    #            my $tabobj = $factory->instantiate;
-    #            $js = $tabobj->process;
-    #        };
-    #        if ($@) {
-    #
-    #            $c->res->code(404);
-    #            $c->res->body($@);
-    #            return;
-    #        }
-    #
-    #        $c->res->headers->content_type('application/json');
-    #        $c->res->code(200);
-    #        $c->res->body($js);
-    #        return;
-    #    }
+    #here handle html format
 
 }
 
