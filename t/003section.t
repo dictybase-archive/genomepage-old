@@ -88,7 +88,6 @@ is($tx->res->code, 200, 'is a successful response for feature section');
 like($tx->res->headers->content_type,  qr/html/,  'is a html content for feature');
 like($tx->res->body,  qr/Gene page for sadA/i,  'is the title for sadA gene page');
 like($tx->res->body,  qr/Supported by NIH/i,  'is the common footer for every gene page');
-diag(Dumper $tx->res->body);
 
 
 
