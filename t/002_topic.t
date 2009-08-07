@@ -89,4 +89,11 @@ like($tx->res->headers->content_type,  qr/json/,  'is a json content for referen
 like($tx->res->body,  qr/layout.+column/,  'has a column layout in json content');
 
 
+#request for gene 
+$tx = Mojo::Transaction->new_get('/gene/DDB_G0286355/gene.json');
+$client->process_app('DictyREST',  $tx);
+is($tx->res->code, 200, 'is a successful response for mhcA gene');
+like($tx->res->headers->content_type,  qr/json/,  'is a json content for gene');
+like($tx->res->body,  qr/layout.+accordion/,  'has a accordion layout in json content');
+
 

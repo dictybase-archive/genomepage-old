@@ -10,19 +10,21 @@ use version; our $VERSION = qv('1.0.0');
 use base 'Mojo::Base';
 use Template;
 use Path::Class;
+use File::Spec;
 
 # Module implementation
 #
 __PACKAGE__->attr('path');
 __PACKAGE__->attr('template');
 __PACKAGE__->attr('option');
+__PACKAGE__->attr('compile_dir');
 
 sub new {
     my ( $class, %arg ) = @_;
     my $self = {};
     bless $self, $class;
 
-    foreach my $param (qw/path option/) {
+    foreach my $param (qw/path option compile_dir/) {
         $self->$param( $arg{$param} ) if defined $arg{$param};
     }
     return $self;
@@ -37,6 +39,9 @@ sub build {
     my $subdir = [ map { $_->stringify } grep { -d $_ } $dir->children ];
     my $option = $self->option || '';
     $option->{INCLUDE_PATH} = $subdir;
+    $option->{CACHE_SIZE} = 128;
+    $option->{COMPILE_EXT} = '.ttc';
+    $option->{COMPILE_DIR} = $self->compile_dir;
     $self->template( Template->new($option) );
 
     return sub { $self->process(@_); };

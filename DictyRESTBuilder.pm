@@ -19,8 +19,11 @@ sub ACTION_deploy {
     }
     $archive->extract( to => $path ) or confess $archive->error;
     my $logpath = catdir( $fullpath, 'log' );
+    my $cache_path = catdir($logpath,  'prod_cache');
     mkpath( $logpath, { verbose => 1, mode => 0777 } );
     chmod 0777, $logpath;
+    mkpath( $cache_path, { verbose => 1, mode => 0777 } );
+    chmod 0777, $cache_path;
 
 }
 

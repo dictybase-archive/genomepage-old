@@ -3,7 +3,6 @@ package DictyREST;
 use strict;
 use warnings;
 
-
 use base 'Mojolicious';
 use Config::Simple;
 use Carp;
@@ -22,7 +21,8 @@ sub startup {
     my ($self) = @_;
     my $router = $self->routes();
 
-	$self->log->debug("starting up");
+    $self->log->debug("starting up");
+
     #routing setup
     my $base = $router->namespace();
     $router->namespace( $base . '::Controller' );
@@ -32,7 +32,8 @@ sub startup {
         ->to( controller => 'tab', action => 'section' );
     $router->route('/gene/:id/:tab')
         ->to( controller => 'page', action => 'tab' );
-    $router->route('/gene/:id')->to( controller => 'page', action => 'index' );
+    $router->route('/gene/:id')
+        ->to( controller => 'page', action => 'index' );
 
     #config file setup
     $self->set_config();
@@ -40,7 +41,7 @@ sub startup {
     #set up various renderer
     $self->set_renderer();
 
-	$self->log->debug("done with startup");
+    $self->log->debug("done with startup");
 }
 
 #set up config file usually look under conf folder
@@ -51,10 +52,11 @@ sub set_config {
     if ( !-e $folder ) {
         return;
     }
+
     #$self->log->debug(qq/got folder $folder/);
 
-	#now the file name,  default which is developmental mode resolves to <name>.conf. For
-	#test and production it will be <name>.test.conf and <name>.production.conf respectively.
+#now the file name,  default which is developmental mode resolves to <name>.conf. For
+#test and production it will be <name>.test.conf and <name>.production.conf respectively.
     my $mode   = $self->mode();
     my $suffix = '.conf';
     if ( $mode eq 'production' or $mode eq 'test' ) {
@@ -78,23 +80,32 @@ sub set_renderer {
     #keep in mind this setup is separate from the Mojo's default template path
     #if something not specifically is not set it defaults to Mojo's default
     $self->template_path( $self->renderer->root );
-    if ( $self->has_config and $self->config->param('default.template_path') ) {
+    if ( $self->has_config and $self->config->param('default.template_path') )
+    {
         $self->template_path( $self->config->param('default.template_path') );
     }
 
     my $tpath = $self->template_path;
+
     #$self->log->debug(qq/default template path for TT $tpath/);
 
+    my $mode = $self->mode();
+    my $compile_dir
+        = $mode eq 'development'
+        ? $self->home->rel_dir('log')
+        : $self->home->rel_dir('log/prod_cache');
+
     my $tt = DictyREST::Renderer::TT->new(
-        path   => $self->template_path,
-        option => {
+        path        => $self->template_path,
+        compile_dir => $compile_dir,
+        option      => {
             PRE_PROCESS  => $self->config->param('genepage.header') || '',
             POST_PROCESS => $self->config->param('genepage.footer') || '',
         },
     );
     my $json = DictyREST::Renderer::JSON->new();
     $self->renderer->add_handler(
-        tt => $tt->build(),
+        tt   => $tt->build(),
         json => $json->build(),
     );
     $self->renderer->default_handler('tt');
