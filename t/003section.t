@@ -90,6 +90,12 @@ like($tx->res->body,  qr/Gene page for sadA/i,  'is the title for sadA gene page
 like($tx->res->body,  qr/Supported by NIH/i,  'is the common footer for every gene page');
 
 
+#request for feature tab 
+$tx = Mojo::Transaction->new_get('/gene/DDB_G0288511/feature');
+$client->process_app('DictyREST',  $tx);
+is($tx->res->code, 200, 'is a successful response for feature section');
+
+
 
 
 

@@ -15,10 +15,10 @@ sub is_name {
     return 1;
 }
 
-sub is_ddb { 
-	my ($self,  $id) = @_;
-	return 1 if $id =~ /^DDB\d+$/;
-	return 0;
+sub is_ddb {
+    my ( $self, $id ) = @_;
+    return 1 if $id =~ /^DDB\d+$/;
+    return 0;
 }
 
 sub name2id {
@@ -40,9 +40,19 @@ sub process_id {
     return $gene_id;
 }
 
-sub is_dynamic { 
-	my ($self,  $name) = @_;
+sub is_dynamic {
+    my ( $self, $name ) = @_;
 
+}
+
+sub transcript_id {
+    my ( $self, $id ) = @_;
+    load dicty::Feature;
+    my $gene;
+    eval { $gene = dicty::Feature->new( -primary_id => $id ); };
+    return 0 if $@;
+    my ($trans) = @{ $gene->primary_features() };
+    return $trans->primary_id if $trans;
 }
 
 1;    # Magic true value required at end of module

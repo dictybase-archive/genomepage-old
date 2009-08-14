@@ -36,6 +36,7 @@ sub index {
     #default rendering
     $c->stash( $db->result() );
     $self->render( template => $app->config->param('genepage.template') );
+
     #$app->log->debug( $c->res->headers->content_type );
 
     #have to handle unrecognized format,  however does anybody care ????
@@ -64,18 +65,38 @@ sub tab {
         );
         my $tabobj = $factory->instantiate;
         $self->render( handler => 'json', data => $tabobj );
-        #$app->log->debug( $c->res->headers->content_type );
-        #return;
+        return;
     }
 
-    my $db = dicty::UI::Tabview::Page::Gene->new(
-        -primary_id => $gene_id,
-        -active_tab => $tab,
-    );
+    #another kludge
+    #man we need to think seriously about this routing
+    my $db;
+    if ( $app->config->param('tab.dynamic') eq $tab ) {
+
+        #convert gene id to its primary DDB id
+        my $trans_id = $app->helper->transcript_id($gene_id);
+        if ( !$trans_id ) {    #do some octocat based template here
+            return;
+        }
+        $db = dicty::UI::Tabview::Page::Gene->new(
+            -primary_id => $gene_id,
+            -active_tab => $tab,
+            -sub_id     => $trans_id,
+        );
+
+    }
+
+    else {
+        $db = dicty::UI::Tabview::Page::Gene->new(
+            -primary_id => $gene_id,
+            -active_tab => $tab,
+        );
+    }
 
     #result
     $c->stash( $db->result() );
-    $self->render( template => $app->config->param('genepage.template'), );
+    $self->render( template => $app->config->param('genepage.template') );
+
     #$app->log->debug( $c->res->headers->content_type );
 
     #have to handle unrecognized format,  however does anybody care ????
