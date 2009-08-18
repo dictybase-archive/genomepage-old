@@ -19,7 +19,7 @@ sub section {
     my $gene_id = $app->helper->process_id($id);
     if ( !$gene_id ) {
         $self->render(
-            template => $app->config->param('genepage.error'),
+            template => $app->config->param('genepage.Error'),
             message  => "Input $id not found",
         );
         return;
@@ -36,14 +36,14 @@ sub section {
                 message => "$gene_id has been replaced by",
                 replaced => 1, 
                 id      => $replaced,
-            	header => 'error page', 
+            	header => 'Error page', 
             );
         }
         else {
             $c->stash(
                 deleted => 1, 
                 message => "$gene_id has been deleted from dictyBase",
-            	header => 'error page', 
+            	header => 'Error page', 
             );
 
         }

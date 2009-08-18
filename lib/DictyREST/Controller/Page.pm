@@ -16,10 +16,10 @@ sub index {
     my $gene_id = $app->helper->process_id($id);
     if ( !$gene_id ) {
         $self->render(
-            template => $app->config->param('genepage.error'),
+            template => $app->config->param('genepage.Error'),
             message  => "Input $id not found",
-            error => 1, 
-            header => 'error page', 
+            error    => 1,
+            header   => 'Error page',
         );
         return;
     }
@@ -30,17 +30,17 @@ sub index {
         if ( my $replaced = $gene_feat->replaced_by() )
         {    #is it being replaced
             $c->stash(
-                message => "$gene_id has been replaced by",
-                replaced => 1, 
-                id      => $replaced,
-            	header => 'error page', 
+                message  => "$gene_id has been replaced by",
+                replaced => 1,
+                id       => $replaced,
+                header   => 'Error page',
             );
         }
         else {
             $c->stash(
-                deleted => 1, 
+                deleted => 1,
                 message => "$gene_id has been deleted from dictyBase",
-            	header => 'error page', 
+                header  => 'Error page',
             );
 
         }
@@ -79,8 +79,9 @@ sub tab {
     my $gene_id = $app->helper->process_id($id);
     if ( !$gene_id ) {
         $self->render(
-            template => $app->config->param('genepage.error'),
+            template => $app->config->param('genepage.Error'),
             message  => "Input $id not found",
+            error    => 1,
         );
         return;
     }
@@ -93,24 +94,23 @@ sub tab {
         if ( my $replaced = $gene_feat->replaced_by() )
         {    #is it being replaced
             $c->stash(
-                message => "$gene_id has been replaced by",
-                replaced => 1, 
-                id      => $replaced,
-            	header => 'error page', 
+                message  => "$gene_id has been replaced by",
+                replaced => 1,
+                id       => $replaced,
+                header   => 'Error page',
             );
         }
         else {
             $c->stash(
-                deleted => 1, 
+                deleted => 1,
                 message => "$gene_id has been deleted from dictyBase",
-            	header => 'error page', 
+                header  => 'Error page',
             );
 
         }
         $self->render( template => $app->config->param('genepage.error') );
         return;
     }
-
 
     if ( $c->stash('format') and $c->stash('format') eq 'json' ) {
         my $factory = dicty::Factory::Tabview::Tab->new(
@@ -126,6 +126,7 @@ sub tab {
     #man we need to think seriously about this routing
     my $db;
     if ( $app->config->param('tab.dynamic') eq $tab ) {
+
         #convert gene id to its primary DDB id
         my $trans_id = $app->helper->transcript_id($gene_id);
         if ( !$trans_id ) {    #do some octocat based template here

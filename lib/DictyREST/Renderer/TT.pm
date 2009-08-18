@@ -39,9 +39,9 @@ sub build {
     my $subdir = [ map { $_->stringify } grep { -d $_ } $dir->children ];
     my $option = $self->option || '';
     $option->{INCLUDE_PATH} = $subdir;
-    $option->{CACHE_SIZE} = 128;
-    $option->{COMPILE_EXT} = '.ttc';
-    $option->{COMPILE_DIR} = $self->compile_dir;
+    $option->{CACHE_SIZE}   = 128;
+    $option->{COMPILE_EXT}  = '.ttc';
+    $option->{COMPILE_DIR}  = $self->compile_dir;
     $self->template( Template->new($option) );
 
     return sub { $self->process(@_); };
@@ -54,7 +54,8 @@ sub process {
     $c->app->log->warn(qq/template $template/);
 
     #the template will decide how to display the page title
-    $c->stash(default => 1);
+    #except the error page
+    $c->stash( default => 1 ) if $c->stash('header') ne 'Error page';
     my $status
         = $self->template->process( $template, { %{ $c->stash }, c => $c },
         $output );
