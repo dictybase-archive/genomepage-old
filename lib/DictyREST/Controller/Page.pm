@@ -34,6 +34,7 @@ sub index {
                 replaced => 1,
                 id       => $replaced,
                 header   => 'Error page',
+            	url => 'http://'.$ENV{WEB_URL_ROOT}.'/gene', 
             );
         }
         else {
@@ -98,6 +99,7 @@ sub tab {
                 replaced => 1,
                 id       => $replaced,
                 header   => 'Error page',
+            	url => 'http://'.$ENV{WEB_URL_ROOT}.'/gene', 
             );
         }
         else {
