@@ -52,6 +52,9 @@ sub process {
     return 0 if $c->stash('format') ne 'html';
     my $template = $c->stash('template');
     $c->app->log->warn(qq/template $template/);
+
+    #the template will decide how to display the page title
+    $c->stash(default => 1);
     my $status
         = $self->template->process( $template, { %{ $c->stash }, c => $c },
         $output );

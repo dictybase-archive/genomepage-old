@@ -25,8 +25,35 @@ sub section {
         return;
     }
 
-    #the default format is json here
+	#logic for deleted feature
+	#the logic is repeated however i cannot put it in helper because it conflict with the
+	#loading of dicty::Feature under mod_perl
+    my $gene_feat = dicty::Feature->new( -primary_id => $gene_id );
+    if ( $gene_feat->is_deleted() ) {
+        if ( my $replaced = $gene_feat->replaced_by() )
+        {    #is it being replaced
+            $c->stash(
+                message => "$gene_id has been replaced by",
+                replaced => 1, 
+                id      => $replaced,
+            	header => 'error page', 
+            );
+        }
+        else {
+            $c->stash(
+                deleted => 1, 
+                message => "$gene_id has been deleted from dictyBase",
+            	header => 'error page', 
+            );
 
+        }
+        $self->render( template => $app->config->param('genepage.error') );
+        return;
+    }
+
+
+
+    #the default format is json here
     if ( $c->stash('format') and $c->stash('format') eq 'json' ) {
         my $factory;
         if ( $app->helper->is_ddb($section) ) {
