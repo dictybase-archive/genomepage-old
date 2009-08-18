@@ -30,7 +30,7 @@ sub index {
         if ( my $replaced = $gene_feat->replaced_by() )
         {    #is it being replaced
             $c->stash(
-                message  => "$gene_id has been replaced by",
+                message  => "$gene_id has been deleted from dictyBase. It has been replaced by",
                 replaced => 1,
                 id       => $replaced,
                 header   => 'Error page',
@@ -95,7 +95,7 @@ sub tab {
         if ( my $replaced = $gene_feat->replaced_by() )
         {    #is it being replaced
             $c->stash(
-                message  => "$gene_id has been replaced by",
+                message  => "$gene_id has been deleted from dictyBase. It has been replaced by",
                 replaced => 1,
                 id       => $replaced,
                 header   => 'Error page',
