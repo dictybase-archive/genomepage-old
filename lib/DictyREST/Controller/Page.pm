@@ -16,7 +16,7 @@ sub index {
     my $gene_id = $app->helper->process_id($id);
     if ( !$gene_id ) {
         $self->render(
-            template => $app->config->param('genepage.Error'),
+            template => $app->config->param('genepage.error'),
             message  => "Input $id not found",
             error    => 1,
             header   => 'Error page',
@@ -85,7 +85,7 @@ sub tab {
     my $gene_id = $app->helper->process_id($id);
     if ( !$gene_id ) {
         $self->render(
-            template => $app->config->param('genepage.Error'),
+            template => $app->config->param('genepage.error'),
             message  => "Input $id not found",
             error    => 1,
         );
