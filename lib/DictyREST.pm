@@ -21,7 +21,7 @@ sub startup {
     my ($self) = @_;
     my $router = $self->routes();
 
-    $self->log->debug("starting up");
+    #$self->log->debug("starting up");
 
     #routing setup
     my $base = $router->namespace();
@@ -41,7 +41,7 @@ sub startup {
     #set up various renderer
     $self->set_renderer();
 
-    $self->log->debug("done with startup");
+    #$self->log->debug("done with startup");
 }
 
 #set up config file usually look under conf folder
