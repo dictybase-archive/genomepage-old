@@ -30,11 +30,12 @@ sub index {
         if ( my $replaced = $gene_feat->replaced_by() )
         {    #is it being replaced
             $c->stash(
-                message  => "$gene_id has been deleted from dictyBase. It has been replaced by",
+                message =>
+                    "$gene_id has been deleted from dictyBase. It has been replaced by",
                 replaced => 1,
                 id       => $replaced,
                 header   => 'Error page',
-            	url => 'http://'.$ENV{WEB_URL_ROOT}.'/gene', 
+                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
             );
         }
         else {
@@ -49,17 +50,21 @@ sub index {
         return;
     }
 
+    #now rendering
+    if ( $c->stash(' format') and $c->stash('format') eq 'json' ) {
+        my $factory = dicty::Factory::Tabview::Tab->new(
+            -tab        => 'gene',
+            -primary_id => $gene_id,
+        );
+        $self->render( handler => 'json', data => $factory->instantiate );
+        return;
+    }
+
     #database query
     my $db = dicty::UI::Tabview::Page::Gene->new(
         -primary_id => $gene_id,
         -active_tab => ' gene ',
     );
-
-    #now rendering
-    if ( $c->stash(' format') and $c->stash('format') eq 'json' ) {
-        $self->render( handler => 'json', data => $db );
-        return;
-    }
 
     #default rendering
     $c->stash( $db->result() );
@@ -87,19 +92,20 @@ sub tab {
         return;
     }
 
-	#logic for deleted feature
-	#the logic is repeated however i cannot put it in helper because it conflict with the
-	#loading of dicty::Feature under mod_perl
+#logic for deleted feature
+#the logic is repeated however i cannot put it in helper because it conflict with the
+#loading of dicty::Feature under mod_perl
     my $gene_feat = dicty::Feature->new( -primary_id => $gene_id );
     if ( $gene_feat->is_deleted() ) {
         if ( my $replaced = $gene_feat->replaced_by() )
         {    #is it being replaced
             $c->stash(
-                message  => "$gene_id has been deleted from dictyBase. It has been replaced by",
+                message =>
+                    "$gene_id has been deleted from dictyBase. It has been replaced by",
                 replaced => 1,
                 id       => $replaced,
                 header   => 'Error page',
-            	url => 'http://'.$ENV{WEB_URL_ROOT}.'/gene', 
+                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
             );
         }
         else {
