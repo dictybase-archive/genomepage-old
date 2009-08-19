@@ -19,6 +19,9 @@ __PACKAGE__->attr( 'helper', default => sub { DictyREST::Helper->new() } );
 # This will run once at startup
 sub startup {
     my ($self) = @_;
+
+    #default log level
+    $self->log->level('error');
     my $router = $self->routes();
 
     #$self->log->debug("starting up");
