@@ -21,7 +21,7 @@ sub startup {
     my ($self) = @_;
 
     #default log level
-    $self->log->level('error');
+    $self->log->level('debug');
     my $router = $self->routes();
 
     #$self->log->debug("starting up");

@@ -17,7 +17,9 @@ sub is_name {
 
 sub is_ddb {
     my ( $self, $id ) = @_;
-    return 1 if $id =~ /^DDB\d+$/;
+
+    ##should get the id signature  from config file
+    return 1 if $id =~ /^[A-Z]{3}\d+$/;
     return 0;
 }
 
