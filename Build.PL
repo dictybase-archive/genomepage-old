@@ -12,6 +12,10 @@ my $builder = DictyRESTBuilder->new(
     requires     => {
         'Mojo'          => '',
         'Apache2::Mojo' => ''
+        'dicty::Feature' => '', 
+        'dicty::Search::Gene' => '', 
+        'ModConfig' => '', 
+        'dicty::Tests::Test_setup' => '', 
     },
     build_requires => {
     	 'Archive::Extract' => '',
