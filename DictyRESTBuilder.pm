@@ -1,51 +1,53 @@
-
 package DictyRESTBuilder;
 use File::Spec::Functions;
 use Carp;
 use Archive::Extract;
 use File::Path;
 use Path::Class;
-use IPC::Cmd qw/run/;
-use dicty::Tests::Test_setup;
-
+use dicty::Tests::Data;
+use Try::Tiny;
+use TAP::Harness;
 use base qw/Module::Build/;
+
+sub load_core_fixture {
+    my ($self) = @_;
+    my $data = dicty::Tests::Data->new();
+    $self->notes( loader => $data );
+
+    if ( !$data->check_chromosome() ) {
+        try {
+            $data->insert_core_data();
+        }
+        catch {
+            die "unable to insert data: $_";
+        }
+    }
+}
 
 sub load_fixture {
     my ($self) = @_;
+    my $data = dicty::Tests::Data->new();
+    $self->notes( loader => $data );
 
-    eval { dicty::Tests::Test_setup->check_fake_whole_chromosome() };
-    return if !$@;
-
-    my $script
-        = file( $self->base_dir(), 'bin', 'load_fixture.pl' )->stringify;
-    die "fixture script $script do not exist\n" if !-e $script;
-
-    my ( $success, $error_code, $full_buff ) = run(
-        command => [ 'perl', $script ],
-        verbose => 0
-    );
-
-    if ( !$success ) {
-        die join( "\n", @$full_buff ), "\n";
+    if ( !$data->check_chromosome() ) {
+        try {
+            $data->insert_whole_chromosome();
+        }
+        catch {
+            die "unable to insert data: $_";
+        }
     }
-
 }
 
 sub unload_fixture {
     my ($self) = @_;
-    my $script
-        = file( $self->base_dir(), 'bin', 'unload_fixture.pl' )->stringify;
-    die "fixture script $script do not exist\n" if !-e $script;
-
-    my ( $success, $error_code, $full_buff ) = run(
-        command => [ 'perl', $script ],
-        verbose => 0
-    );
-
-    if ( !$success ) {
-        die join( "\n", @$full_buff ), "\n";
+    my $loader = $self->notes('loader');
+    try {
+        $loader->unload_data();
     }
-
+    catch {
+        die "error in unloading: $_";
+    }
 }
 
 sub ACTION_deploy {
@@ -60,7 +62,7 @@ sub ACTION_deploy {
     }
     $archive->extract( to => $path ) or confess $archive->error;
     my $logpath    = catdir( $fullpath, 'log' );
-    my $cache_path = catdir( $logpath,  'prod_cache' );
+    my $cache_path = catdir( $fullpath, 'tmp' );
 
     mkpath( $logpath, { verbose => 1, mode => 0777 } );
     chmod 0777, $logpath;
@@ -78,11 +80,22 @@ sub ACTION_deploy {
 sub ACTION_testcore {
     my ($self) = @_;
 
-    $self->load_fixture;
+    $self->load_core_fixture;
 
-    my $test_files = [ grep { !/optional/ } @{ $self->find_test_files } ];
-    $self->run_tap_harness($test_files);
+    $self->depends_on('build');
+    my $tap = TAP::Harness->new(
+        { lib => [ catdir( $self->base_dir, 'blib', 'lib' ) ] } );
 
+    my @test_files = grep { !/optional/ } @{ $self->find_test_files };
+    $tap->runtests(@test_files);
+
+    $self->unload_fixture;
+}
+
+sub ACTION_test {
+    my ( $self, @arg ) = @_;
+    $self->load_fixture();
+    $self->SUPER::ACTION_test(@arg);
     $self->unload_fixture;
 }
 

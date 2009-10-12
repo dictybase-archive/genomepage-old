@@ -90,13 +90,13 @@ sub set_renderer {
 
     my $tpath = $self->template_path;
 
-    #$self->log->debug(qq/default template path for TT $tpath/);
+    $self->log->debug(qq/default template path for TT $tpath/);
 
-    my $mode = $self->mode();
-    my $compile_dir
-        = $mode eq 'development'
-        ? $self->home->rel_dir('log')
-        : $self->home->rel_dir('log/prod_cache');
+    my $mode        = $self->mode();
+    my $compile_dir = $self->home->rel_dir('tmp');
+    if ( !-e $compile_dir ) {
+        $self->log->error("folder for template compilation is absent");
+    }
 
     my $tt = DictyREST::Renderer::TT->new(
         path        => $self->template_path,

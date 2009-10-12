@@ -1,4 +1,4 @@
-#!perl
+!perl
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ use dicty::Search::Gene;
 use_ok('DictyREST');
 
 
-my $name = 'test_BFNVI_0C0011_07646';
+my $name = 'test_CURATED';
 
 my $client = Mojo::Client->new();
     my ($gene) = dicty::Search::Gene->find(

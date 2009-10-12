@@ -11,14 +11,16 @@ my $builder = DictyRESTBuilder->new(
     dist_version => '1.2.0',
     requires     => {
         'Mojo'          => '',
-        'Apache2::Mojo' => ''
+        'Apache2::Mojo' => '', 
+        'Config::Simple' => '', 
+        'Try::Tiny' => '', 
         'dicty::Feature' => '', 
         'dicty::Search::Gene' => '', 
-        'ModConfig' => '', 
-        'dicty::Tests::Test_setup' => '', 
     },
     build_requires => {
     	 'Archive::Extract' => '',
+    	 'dicty::Tests::Data' => '', 
+    	
 		},
     add_to_cleanup => ['DictyREST-*'],
     create_readme  => 1,
@@ -26,16 +28,5 @@ my $builder = DictyRESTBuilder->new(
 
 $builder->create_build_script();
 
-
-package DictyRESTBuilder;
-
-use base qw/Module::Build/;
-
-sub ACTION_deploy {
-    my ($self) = @_;
-    $self->depends('dist');
-    my $file = catfile( $self->base_dir, $self->dist_dir . '.tar.gz' );
-    print $file, "\n";
-}
 
 1;
