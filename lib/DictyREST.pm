@@ -91,13 +91,13 @@ sub set_renderer {
     my $tpath = $self->template_path;
 
     $self->log->debug(qq/default template path for TT $tpath/);
-    $self->log->info($self->renderer->root);
 
-    my $mode = $self->mode();
-    my $compile_dir = $mode eq 'production'
-        or $mode eq 'test'
-        ? $self->home->rel_dir('webtmp')
-        : $self->home->rel_dir('tmp');
+    my $mode        = $self->mode();
+    my $compile_dir = $self->home->rel_dir('tmp');
+    if ( $mode eq 'production' or $mode eq 'test' ) {
+        $compile_dir = $self->home->rel_dir('webtmp');
+    }
+    $self->log->debug(qq/default compile path for TT $compile_dir/);
     if ( !-e $compile_dir ) {
         $self->log->error("folder for template compilation is absent");
     }
