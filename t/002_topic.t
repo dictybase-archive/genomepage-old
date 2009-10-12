@@ -49,7 +49,7 @@ like( $tx->res->headers->content_type,
     qr/html/, "is a html content for $name gene" );
 like(
     $tx->res->body,
-    qr/Gene page for $name/,
+    qr/Gene Page for $name/,
     "is the title for $name gene page"
 );
 
@@ -62,7 +62,7 @@ like( $tx->res->headers->content_type,
     qr/html/, "is a html content for $name gene" );
 like(
     $tx->res->body,
-    qr/Gene page for $name/,
+    qr/Gene Page for $name/,
     "is the title for $name gene page"
 );
 
