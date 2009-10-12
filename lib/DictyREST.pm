@@ -70,7 +70,9 @@ sub set_config {
     my ($file) = grep {/$suffix$/} readdir $conf;
     closedir $conf;
 
-    #$self->log->debug(qq/got config file $file/);
+    $self->log->debug(qq/got config file $file/);
+    $self->log->debug($self->home->to_string);
+    $self->log->debug($self->home->app_class);
     $self->config->read( catfile( $folder, $file ) );
     $self->has_config(1);
 

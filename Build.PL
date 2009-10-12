@@ -16,6 +16,7 @@ my $builder = DictyRESTBuilder->new(
         'Try::Tiny' => '', 
         'dicty::Feature' => '', 
         'dicty::Search::Gene' => '', 
+        'dicty::UI::TabView::Config' => '', 
     },
     build_requires => {
     	 'Archive::Extract' => '',
