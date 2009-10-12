@@ -30,7 +30,7 @@ like($tx->res->body, qr/File not found/i, 'is a generic error response');
 #canonical url with gene name
 $tx = Mojo::Transaction->new_get("/gene/$name");
 $client->process_app('DictyREST',  $tx);
-is($tx->res->code, 200, 'is a successful response for sadA');
+is($tx->res->code, 200, "is a successful response for $name");
 like($tx->res->headers->content_type,  qr/html/,  'is a html response for gene');
 like($tx->res->body,  qr/Gene page for $name/i,  'is the title for gene page');
 like($tx->res->body,  qr/Supported by NIH/i,  'is the common footer for every gene page');
@@ -57,7 +57,6 @@ $tx = Mojo::Transaction->new_get("/gene/$name.json");
 $client->process_app('DictyREST',  $tx);
 is($tx->res->code, 200, "is a successful response for $name");
 like($tx->res->headers->content_type,  qr/json/,  "is a json response for $name");
-like($tx->res->body,  qr/tabview/,  'default layout for json response of gene');
 
 
 

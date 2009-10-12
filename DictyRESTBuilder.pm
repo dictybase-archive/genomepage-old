@@ -63,12 +63,16 @@ sub ACTION_deploy {
     $archive->extract( to => $path ) or confess $archive->error;
     my $logpath    = catdir( $fullpath, 'log' );
     my $cache_path = catdir( $fullpath, 'tmp' );
+    my $web_cache_path = catdir( $fullpath, 'webtmp' );
 
     mkpath( $logpath, { verbose => 1, mode => 0777 } );
     chmod 0777, $logpath;
 
     mkpath( $cache_path, { verbose => 1, mode => 0777 } );
     chmod 0777, $cache_path;
+
+    mkpath( $web_cache_path, { verbose => 1, mode => 0774 } );
+    chmod 0777, $web_cache_path;
 
     #now make the conf files readable
     my @conf = map { $_->stringify } dir( $fullpath, 'conf' )->children();

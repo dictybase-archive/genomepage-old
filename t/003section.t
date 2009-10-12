@@ -25,7 +25,7 @@ my ($transcript)  = @{ $gene->transcripts };
 my $transcript_id = $transcript->primary_id();
 
 #request for section info under default gene topic
-my $tx = Mojo::Transaction->new_get("/gene/DDB_G0288511/gene/info.json");
+my $tx = Mojo::Transaction->new_get("/gene/$gene_id/gene/info.json");
 $client->process_app( 'DictyREST', $tx );
 is( $tx->res->code, 200, 'is a successful response for info section' );
 like( $tx->res->headers->content_type,
