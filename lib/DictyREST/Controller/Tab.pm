@@ -15,7 +15,6 @@ sub section {
     my $section = $c->stash('section');
     my $app     = $self->app;
 
-
     my $gene_id = $app->helper->process_id($id);
     if ( !$gene_id ) {
         $self->render(
@@ -33,27 +32,26 @@ sub section {
         if ( my $replaced = $gene_feat->replaced_by() )
         {    #is it being replaced
             $c->stash(
-                message => "$gene_id has been deleted from dictyBase. It has been replaced by",
-                replaced => 1, 
-                id      => $replaced,
-            	header => 'Error page', 
-            	url => 'http://'.$ENV{WEB_URL_ROOT}.'/gene', 
+                message =>
+                    "$gene_id has been deleted from dictyBase. It has been replaced by",
+                replaced => 1,
+                id       => $replaced,
+                header   => 'Error page',
+                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
 
             );
         }
         else {
             $c->stash(
-                deleted => 1, 
+                deleted => 1,
                 message => "$gene_id has been deleted from dictyBase",
-            	header => 'Error page', 
+                header  => 'Error page',
             );
 
         }
         $self->render( template => $app->config->param('genepage.error') );
         return;
     }
-
-
 
     #the default format is json here
     if ( $c->stash('format') and $c->stash('format') eq 'json' ) {
@@ -89,9 +87,9 @@ sub section {
             -sub_id     => $section,
         );
         $c->stash( $db->result() );
+
         #force formatter
-        $self->render( 
-        	template => $app->config->param('genepage.template'),
+        $self->render( template => $app->config->param('genepage.template'),
         );
     }
 
@@ -102,18 +100,13 @@ sub section {
 sub sub_section {
     my ( $self, $c ) = @_;
 
-    $c->stash('format') || $c->stash( format => 'json' );
-    if ( $c->stash('format') eq 'json' ) {
-        my $factory = dicty::Factory::Tabview::Section->new(
-            -primary_id => $c->stash('subid'),
-            -section    => $c->stash('section'),
-            -tab        => $c->stash('tab'),
-        );
-        my $obj = $factory->instantiate;
-        $self->render( handler => 'json', data => $obj );
-    }
-
-    #here handle non supported format
+    my $factory = dicty::Factory::Tabview::Section->new(
+        -primary_id => $c->stash('subid'),
+        -section    => $c->stash('section'),
+        -tab        => $c->stash('tab'),
+    );
+    my $obj = $factory->instantiate;
+    $self->render( handler => 'json', data => $obj );
 
 }
 

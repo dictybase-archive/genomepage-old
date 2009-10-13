@@ -29,8 +29,11 @@ sub startup {
     #routing setup
     my $base = $router->namespace();
     $router->namespace( $base . '::Controller' );
+
+    #only support json response
     $router->route('/gene/:id/:tab/:subid/:section')
-        ->to( controller => 'tab', action => 'sub_section' );
+        ->to( controller => 'tab', action => 'sub_section' ,  format => 'json');
+
     $router->route('/gene/:id/:tab/:section')
         ->to( controller => 'tab', action => 'section' );
     $router->route('/gene/:id/:tab')

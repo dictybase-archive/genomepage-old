@@ -1,0 +1,50 @@
+   <tr>
+      <td class="topMenu" height="44">
+         <a href=# onmouseover='shiftmenu_forMac(event,"genome_browser");popup("genome_browser");' onmouseout=popdn()>Genome&nbsp;Browser</a>
+      </td>
+      <td class="topMenu" >
+	     <a href=# onmouseover='shiftmenu_forMac(event,"blast");popup("blast");' onmouseout=popdn()>BLAST</a>
+      </td>
+      <td class="topMenu" >
+         <a href="/biomart/martview">dictyMart</a>
+      </td>
+      <td class="topMenu" >
+         <a href="/StockCenter/StockCenter.html" onmouseover='shiftmenu_forMac(event,"stock_center");popup("stock_center");' onmouseout=popdn()>Stock Center</a>
+      </td>
+      <td class="topMenu" >
+         <a href=# onmouseover='shiftmenu_forMac(event,"research_tools");popup("research_tools");' onmouseout=popdn()>Research Tools</a>
+      </td>
+      <td class="topMenu" >
+         <a href=# onmouseover='shiftmenu_forMac(event,"faq");popup("faq");' onmouseout=popdn()>Help</a>
+      </td>
+      <td class="topMenu">
+         <a href=# onmouseover='shiftmenu_forMac(event,"links");shift_linkMenu();popup("links");' onmouseout=popdn()>Links</a>
+      </td>
+      <td class="topMenu" >
+         <a href="/db/cgi-bin/dictyBase/suggestion">Contact Us</a>
+      </td>
+   </tr>
+   <tr>
+      <td class="blue" align="left" height="2">
+         <script>PlaceMenu("genome_browser")</script>
+      </td>
+      <td class="blue" align="left">
+         <script>PlaceMenu("blast");</script>
+      </td>
+      <td class="blue" align="left">
+      </td>
+      <td class="blue" align="left">
+      <script>PlaceMenu("stock_center");</script>
+      </td>
+      <td class="blue" align="left">
+         <script>PlaceMenu("research_tools")</script>
+      </td>
+      <td class="blue" align="left">
+         <script>PlaceMenu("faq");</script>
+      </td>
+      <td class="blue" align="left">
+         <script>PlaceMenu("links");</script>
+      </td>
+      <td class="blue" align="left">
+      </td>
+   </tr>
