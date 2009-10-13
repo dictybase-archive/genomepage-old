@@ -15,7 +15,7 @@ use_ok('DictyREST');
 
 my $client = Mojo::Client->new();
 
-my $name = 'test_BFNVI_0C0011_07646';
+my $name = 'test_CURATED';
 my ($gene) = dicty::Search::Gene->find(
     -name       => $name,
     -is_deleted => 'false'

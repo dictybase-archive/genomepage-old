@@ -65,15 +65,15 @@ sub set_config {
     if ( $mode eq 'production' or $mode eq 'test' ) {
         $suffix = '.' . $mode . '.conf';
     }
+    my $app_name = lc $self->home->app_class;
 
-    opendir my $conf, $folder or confess "cannot open folder $!:$folder";
-    my ($file) = grep {/$suffix$/} readdir $conf;
-    closedir $conf;
+    #opendir my $conf, $folder or confess "cannot open folder $!:$folder";
+    #my $file = catfile()
+    #closedir $conf;
 
+    my $file = catfile($folder, $app_name.$suffix);
     $self->log->debug(qq/got config file $file/);
-    $self->log->debug($self->home->to_string);
-    $self->log->debug($self->home->app_class);
-    $self->config->read( catfile( $folder, $file ) );
+    $self->config->read( $file );
     $self->has_config(1);
 
 }

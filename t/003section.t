@@ -32,9 +32,17 @@ like( $tx->res->headers->content_type,
     qr/json/, 'is a json content for info' );
 like( $tx->res->body, qr/layout.+row/, 'has a row layout in info' );
 
+#request for product section
+$tx = Mojo::Transaction->new_get("/gene/$gene_id/gene/genomic_info.json");
+$client->process_app( 'DictyREST', $tx );
+is( $tx->res->code, 200, 'is a successful response for info section' );
+like( $tx->res->headers->content_type,
+    qr/json/, 'is a json content for product' );
+like( $tx->res->body, qr/layout.+row/, 'has a row layout in product' );
+
 
 #request for product section
-my $tx = Mojo::Transaction->new_get("/gene/$gene_id/gene/product.json");
+$tx = Mojo::Transaction->new_get("/gene/$gene_id/gene/product.json");
 $client->process_app( 'DictyREST', $tx );
 is( $tx->res->code, 200, 'is a successful response for info section' );
 like( $tx->res->headers->content_type,
