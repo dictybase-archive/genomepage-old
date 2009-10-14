@@ -9,72 +9,19 @@ use dicty::Factory::Tabview::Section;
 
 sub section {
     my ( $self, $c ) = @_;
+    my $method = 'section_' . $c->stash('format');
+    $self->$method($c);
+
+}
+
+sub section_html {
+    my ( $self, $c ) = @_;
 
     my $id      = $c->stash('id');
     my $tab     = $c->stash('tab');
     my $section = $c->stash('section');
+    my $gene_id = $c->stash('gene_id');
     my $app     = $self->app;
-
-    my $gene_id = $app->helper->process_id($id);
-    if ( !$gene_id ) {
-        $self->render(
-            template => $app->config->param('genepage.error'),
-            message  => "Input $id not found",
-        );
-        return;
-    }
-
-	#logic for deleted feature
-	#the logic is repeated however i cannot put it in helper because it conflict with the
-	#loading of dicty::Feature under mod_perl
-    my $gene_feat = dicty::Feature->new( -primary_id => $gene_id );
-    if ( $gene_feat->is_deleted() ) {
-        if ( my $replaced = $gene_feat->replaced_by() )
-        {    #is it being replaced
-            $c->stash(
-                message =>
-                    "$gene_id has been deleted from dictyBase. It has been replaced by",
-                replaced => 1,
-                id       => $replaced,
-                header   => 'Error page',
-                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
-
-            );
-        }
-        else {
-            $c->stash(
-                deleted => 1,
-                message => "$gene_id has been deleted from dictyBase",
-                header  => 'Error page',
-            );
-
-        }
-        $self->render( template => $app->config->param('genepage.error') );
-        return;
-    }
-
-    #the default format is json here
-    if ( $c->stash('format') and $c->stash('format') eq 'json' ) {
-        my $factory;
-        if ( $app->helper->is_ddb($section) ) {
-            $factory = dicty::Factory::Tabview::Tab->new(
-                -tab        => $tab,
-                -primary_id => $section,
-            );
-        }
-        else {
-
-            $factory = dicty::Factory::Tabview::Section->new(
-                -tab        => $tab,
-                -primary_id => $gene_id,
-                -section    => $section,
-            );
-        }
-
-        my $obj = $factory->instantiate;
-        $self->render( handler => 'json', data => $obj );
-        return;
-    }
 
     #i am assuming that it is html
     #need to change that assumtion at my earliest
@@ -93,8 +40,36 @@ sub section {
         );
     }
 
-    #here handle html format
+}
 
+sub section_json {
+    my ( $self, $c ) = @_;
+
+    my $id      = $c->stash('id');
+    my $tab     = $c->stash('tab');
+    my $section = $c->stash('section');
+    my $gene_id = $c->stash('gene_id');
+    my $app     = $self->app;
+
+    #the default format is json here
+    my $factory;
+    if ( $app->helper->is_ddb($section) ) {
+        $factory = dicty::Factory::Tabview::Tab->new(
+            -tab        => $tab,
+            -primary_id => $section,
+        );
+    }
+    else {
+
+        $factory = dicty::Factory::Tabview::Section->new(
+            -tab        => $tab,
+            -primary_id => $gene_id,
+            -section    => $section,
+        );
+    }
+
+    my $obj = $factory->instantiate;
+    $self->render( handler => 'json', data => $obj );
 }
 
 sub sub_section {

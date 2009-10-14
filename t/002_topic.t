@@ -77,7 +77,7 @@ is( $tx->res->code, 200,
 like( $tx->res->headers->content_type,
     qr/json/, 'is a json content for protein' );
 like( $tx->res->body, qr/layout.+accordion/, 'has a accordion layout in protein' );
-diag($tx->res->body);
+#diag($tx->res->body);
 
 
 

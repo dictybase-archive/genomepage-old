@@ -30,16 +30,33 @@ sub startup {
     my $base = $router->namespace();
     $router->namespace( $base . '::Controller' );
 
-    #only support json response
-    $router->route('/gene/:id/:tab/:subid/:section')
-        ->to( controller => 'tab', action => 'sub_section' ,  format => 'json');
+    #goes here before it passes to any other controller
+    #kind of before action
+    my $bridge = $router->bridge('/gene')->to(
+        controller => 'input',
+        action     => 'validate'
+    );
 
-    $router->route('/gene/:id/:tab/:section')
-        ->to( controller => 'tab', action => 'section' );
-    $router->route('/gene/:id/:tab')
-        ->to( controller => 'page', action => 'tab' );
-    $router->route('/gene/:id')
-        ->to( controller => 'page', action => 'index' );
+    #support both json and html
+    #default is html
+    $bridge->route('/:id')
+        ->to( controller => 'page', action => 'index',  format => 'html');
+
+	#default is html
+    $bridge->route('/:id/:tab')
+        ->to( controller => 'page', action => 'tab',  format => 'html');
+
+    #keeping the default to html as it is needed for feature tab
+    #this is the only url that is being called without any extension and gives back html
+    $bridge->route('/:id/:tab/:section')
+        ->to( controller => 'tab', action => 'section' ,  format => 'html');
+
+    #only support json response
+    $bridge->route('/:id/:tab/:subid/:section')->to(
+        controller => 'tab',
+        action     => 'sub_section',
+        format     => 'json'
+    );
 
     #config file setup
     $self->set_config();
@@ -74,9 +91,9 @@ sub set_config {
     #my $file = catfile()
     #closedir $conf;
 
-    my $file = catfile($folder, $app_name.$suffix);
+    my $file = catfile( $folder, $app_name . $suffix );
     $self->log->debug(qq/got config file $file/);
-    $self->config->read( $file );
+    $self->config->read($file);
     $self->has_config(1);
 
 }
