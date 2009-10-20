@@ -14,7 +14,7 @@ use Data::Dumper;
 # Module implementation
 #
 
-#__PACKAGE__->attr('json');
+__PACKAGE__->attr('json');
 
 sub new {
     my ( $class, %arg ) = @_;
@@ -33,6 +33,7 @@ sub process {
     my ( $self, $renderer, $c, $output ) = @_;
     return if $c->stash('format') ne 'json';
     my $obj = $c->stash('data');
+    $c->app->log->debug("i am at organism");
 
     $$output = $self->json->objToJson($obj);
     return 1;
