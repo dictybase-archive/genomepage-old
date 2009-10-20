@@ -9,6 +9,7 @@ use Carp;
 use File::Spec::Functions;
 use DictyREST::Renderer::TT;
 use DictyREST::Renderer::JSON;
+use DictyREST::Renderer::JSON_Generic;
 use DictyREST::Helper;
 
 __PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
@@ -57,6 +58,10 @@ sub startup {
         action     => 'sub_section',
         format     => 'json'
     );
+    
+    #organisms
+    $router->route('/organism')
+        ->to( controller => 'organism', action => 'index', format => 'json');
 
     #config file setup
     $self->set_config();
@@ -123,7 +128,7 @@ sub set_renderer {
     if ( !-e $compile_dir ) {
         $self->log->error("folder for template compilation is absent");
     }
-
+    
     my $tt = DictyREST::Renderer::TT->new(
         path        => $self->template_path,
         compile_dir => $compile_dir,
@@ -133,9 +138,12 @@ sub set_renderer {
         },
     );
     my $json = DictyREST::Renderer::JSON->new();
+    my $json_generic = DictyREST::Renderer::JSON_Generic->new();
+    
     $self->renderer->add_handler(
         tt   => $tt->build(),
         json => $json->build(),
+        json_generic => $json_generic->build()
     );
     $self->renderer->default_handler('tt');
 }
