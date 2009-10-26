@@ -14,8 +14,7 @@ sub index {
 sub index_json {
     my ( $self, $c ) = @_;
     my $conf = ModConfig->load();
-    my $organism = $conf->obj('ORGANISMS')->obj('ORGANISM');
-    
+    my $organism = $conf->obj('ORGANISMS')->value('ORGANISM');
     #now rendering
     $self->render( handler => 'json_generic', data => $organism );
 }

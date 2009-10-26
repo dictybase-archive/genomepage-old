@@ -33,7 +33,6 @@ sub process {
     my ( $self, $renderer, $c, $output ) = @_;
     return if $c->stash('format') ne 'json';
     my $obj = $c->stash('data');
-    $c->app->log->debug("i am at organism");
 
     $$output = $self->json->objToJson($obj);
     return 1;
