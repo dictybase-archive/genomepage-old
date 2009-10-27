@@ -4,13 +4,14 @@ use Carp;
 use Archive::Extract;
 use File::Path;
 use Path::Class;
-use dicty::Tests::Data;
 use Try::Tiny;
 use TAP::Harness;
 use base qw/Module::Build/;
 
 sub load_core_fixture {
     my ($self) = @_;
+
+    require dicty::Tests::Data;
     my $data = dicty::Tests::Data->new();
     $self->notes( loader => $data );
 
@@ -26,6 +27,8 @@ sub load_core_fixture {
 
 sub load_fixture {
     my ($self) = @_;
+
+    require dicty::Tests::Data;
     my $data = dicty::Tests::Data->new();
     $self->notes( loader => $data );
 

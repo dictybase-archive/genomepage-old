@@ -17,10 +17,10 @@ my $builder = DictyRESTBuilder->new(
         'dicty::Feature' => '', 
         'dicty::Search::Gene' => '', 
         'dicty::UI::TabView::Config' => '', 
+    	'dicty::Tests::Data' => '', 
     },
     build_requires => {
     	 'Archive::Extract' => '',
-    	 'dicty::Tests::Data' => '', 
     	
 		},
     add_to_cleanup => ['DictyREST-*'],
