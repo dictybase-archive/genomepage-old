@@ -16,7 +16,7 @@ my $builder = DictyRESTBuilder->new(
         'Try::Tiny' => '', 
         'dicty::Feature' => '', 
         'dicty::Search::Gene' => '', 
-        'dicty::UI::TabView::Config' => '', 
+        'dicty::UI::Tabview::Config' => '', 
     	'dicty::Tests::Data' => '', 
     },
     build_requires => {

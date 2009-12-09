@@ -41,3 +41,7 @@
 
 #Avoid log folder
 \blog\b
+
+#Avoid tmp folder
+\btmp\b
+\bwebtmp\b

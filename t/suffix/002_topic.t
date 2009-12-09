@@ -11,9 +11,12 @@ use Mojo::Transaction;
 use Data::Dumper;
 use dicty::Search::Gene;
 
-use_ok('DictyREST');
+use_ok('GenomeREST');
 
-my $client = Mojo::Client->new();
+
+my $species = $ENV{SPECIES} || 'discoideum';
+my $base_url = '/gene/'.$species;
+
 
 my $name = 'test_CURATED';
 my ($gene) = dicty::Search::Gene->find(
@@ -24,9 +27,11 @@ my $gene_id = $gene->primary_id;
 my ($transcript)  = @{ $gene->transcripts };
 my $transcript_id = $transcript->primary_id();
 
+my $client = Mojo::Client->new();
+
 #request for gene
-my $tx = Mojo::Transaction->new_get("/gene/$gene_id/gene.json");
-$client->process_app( 'DictyREST', $tx );
+my $tx = Mojo::Transaction->new_get("$base_url/$gene_id/gene.json");
+$client->process_app( 'GenomeREST', $tx );
 is( $tx->res->code, 200, 'is a successful response for gene' );
 like( $tx->res->headers->content_type,
     qr/json/, 'is a json content for gene' );
@@ -34,8 +39,8 @@ like( $tx->res->body, qr/layout.+accordion/,
     'has a accordion layout in json content' );
 
 #request for gene with name
-$tx = Mojo::Transaction->new_get("/gene/$name/gene.json");
-$client->process_app( 'DictyREST', $tx );
+$tx = Mojo::Transaction->new_get("$base_url/$name/gene.json");
+$client->process_app( 'GenomeREST', $tx );
 is( $tx->res->code, 200, "is a successful response for $name gene" );
 like( $tx->res->headers->content_type,
     qr/json/, 'is a json content for gene' );
@@ -43,8 +48,8 @@ like( $tx->res->body, qr/layout.+accordion/,
     'has a accordion layout in json content' );
 
 #request for protein
-$tx = Mojo::Transaction->new_get("/gene/$gene_id/protein");
-$client->process_app( 'DictyREST', $tx );
+$tx = Mojo::Transaction->new_get("$base_url/$gene_id/protein");
+$client->process_app( 'GenomeREST', $tx );
 is( $tx->res->code, 200,
     "is a successful response for protein topic of $name gene" );
 like( $tx->res->headers->content_type,
@@ -56,8 +61,8 @@ like(
 );
 
 #request for protein with gene name
-$tx = Mojo::Transaction->new_get("/gene/$name/protein");
-$client->process_app( 'DictyREST', $tx );
+$tx = Mojo::Transaction->new_get("$base_url/$name/protein");
+$client->process_app( 'GenomeREST', $tx );
 is( $tx->res->code, 200,
     "is a successful response for protein topic of $name gene" );
 like( $tx->res->headers->content_type,
@@ -70,8 +75,8 @@ like(
 
 #request for protein section for json response
 $tx = Mojo::Transaction->new_get(
-    "/gene/$gene_id/protein/$transcript_id".'.json');
-$client->process_app( 'DictyREST', $tx );
+    "$base_url/$gene_id/protein/$transcript_id".'.json');
+$client->process_app( 'GenomeREST', $tx );
 is( $tx->res->code, 200,
     'is a successful response for protein section with json query' );
 like( $tx->res->headers->content_type,

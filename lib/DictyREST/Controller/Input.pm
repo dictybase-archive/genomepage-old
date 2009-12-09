@@ -10,6 +10,12 @@ use dicty::Feature;
 # Module implementation
 #
 
+sub set_species {
+    my ( $self, $c ) = @_;
+    $self->app->helper->species( $c->stash('species') );
+    return $self->validate($c);
+}
+
 sub validate {
     my ( $self, $c ) = @_;
     my $id      = $c->stash('id');
@@ -44,7 +50,7 @@ sub validate {
         else {
             $c->stash(
                 deleted => 1,
-                message => "$gene_id has been deleted from dictyBase",
+                message => "$gene_id has been deleted",
                 header  => 'Error page',
             );
 

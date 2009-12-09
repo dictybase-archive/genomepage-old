@@ -5,13 +5,15 @@ use version; our $VERSION = qv('1.0.0');
 # Other modules:
 use base qw/Mojo::Base/;
 use Module::Load;
+use Try::Tiny;
 
 # Module implementation
 #
+__PACKAGE__->attr( 'species', default => 'discoideum' );
 
 sub is_name {
     my ( $self, $id ) = @_;
-    return 0 if $id =~ /^D[A-Z]+_G\d+$/;
+    return 0 if $id =~ /^[A-Z]+_G\d+$/;
     return 1;
 }
 
@@ -26,10 +28,17 @@ sub is_ddb {
 sub name2id {
     my ( $self, $id ) = @_;
     my $feat;
-    load dicty::Gene;
-    eval { $feat = dicty::Gene->new( -name => $id ); };
-    return 0 if $@;
-    return $feat->primary_id();
+    load dicty::Search::Gene;
+    try {
+        ($feat) = dicty::Search::Gene->find(
+            -name     => $id,
+            -organism => $self->species
+        );
+    }
+    catch { 
+    	return 0 
+    };
+    $feat->primary_id();
 }
 
 sub process_id {
@@ -51,13 +60,15 @@ sub transcript_id {
     my ( $self, $id ) = @_;
     load dicty::Feature;
     my $gene;
-    eval { $gene = dicty::Feature->new( -primary_id => $id ); };
-    return 0 if $@;
+    try {
+        $gene = dicty::Feature->new( -primary_id => $id );
+    }
+    catch { 
+    	return 0 
+    };
     my ($trans) = @{ $gene->primary_features() };
-    return $trans->primary_id if $trans;
+    $trans->primary_id if $trans;
 }
-
-
 
 1;    # Magic true value required at end of module
 
