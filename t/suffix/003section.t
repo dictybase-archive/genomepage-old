@@ -15,7 +15,7 @@ use_ok('GenomeREST');
 
 
 my $species = $ENV{SPECIES} || 'discoideum';
-my $base_url = '/gene/'.$species;
+my $base_url = '/'.$species.'/gene';
 my $name = 'test_CURATED';
 my $client = Mojo::Client->new();
 

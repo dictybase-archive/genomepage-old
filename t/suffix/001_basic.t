@@ -14,7 +14,7 @@ use_ok('GenomeREST');
 
 
 my $species = $ENV{SPECIES} || 'discoideum';
-my $base_url = '/gene/'.$species;
+my $base_url = '/'.$species.'/gene';
 my $name = 'test_CURATED';
 
 my $client = Mojo::Client->new();
@@ -24,7 +24,7 @@ my $client = Mojo::Client->new();
     );
 my $gene_id = $gene->primary_id;
 
-my $tx = Mojo::Transaction->new_get('/gene');
+my $tx = Mojo::Transaction->new_get($base_url);
 $client->process_app('GenomeREST',  $tx);
 
 is($tx->res->code, 404, 'resource does not exist');

@@ -39,7 +39,7 @@ sub startup {
     #goes here before it passes to any other controller
     #kind of before action
     #suffix based routing for multigenome setup
-    my $bridge = $router->bridge('/gene/:species')->to(
+    my $bridge = $router->bridge('/:species/gene')->to(
             controller => 'input',
             action     => 'set_species'
         );
