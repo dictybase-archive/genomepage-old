@@ -20,15 +20,20 @@ sub index_html {
     my $app     = $self->app;
     my $gene_id = $c->stash('gene_id');
 
+	#$app->log->debug($c->url_for);
+	#$app->log->debug($c->stash('base_url'));
+
     #database query
     my $db = dicty::UI::Tabview::Page::Gene->new(
         -primary_id => $gene_id,
         -active_tab => ' gene ',
+        -base_url => $c->stash('base_url')
     );
 
     #default rendering
     $c->stash( $db->result() );
     $self->render( template => $app->config->param('genepage.template') );
+
 
     #$app->log->debug( 'from html' );
 }

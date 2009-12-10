@@ -59,6 +59,8 @@ sub validate {
         return;
     }
     $c->stash( gene_id => $gene_id );
+    my $base_url = $app->helper->parse_url($self->req->url->path);
+    $c->stash(base_url => $base_url);
     return 1;
 
 }

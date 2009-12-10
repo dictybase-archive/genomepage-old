@@ -70,6 +70,13 @@ sub transcript_id {
     $trans->primary_id if $trans;
 }
 
+sub parse_url {
+	my ($self,  $path) = @_;
+	if ($path =~ /(.+gene)/) {
+		return $1;
+	}
+}
+
 1;    # Magic true value required at end of module
 
 __END__
