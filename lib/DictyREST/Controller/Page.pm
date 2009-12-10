@@ -47,6 +47,7 @@ sub index_json {
     my $factory = dicty::Factory::Tabview::Tab->new(
         -tab        => 'gene',
         -primary_id => $gene_id,
+        -base_url => $c->stash('base_url')
     );
     $self->render( handler => 'json', data => $factory->instantiate );
 
@@ -79,12 +80,14 @@ sub tab_html {
             -primary_id => $gene_id,
             -active_tab => $tab,
             -sub_id     => $trans_id,
+            -base_url => $c->stash('base_url'), 
         );
     }
     else {
         $db = dicty::UI::Tabview::Page::Gene->new(
             -primary_id => $gene_id,
             -active_tab => $tab,
+            -base_url => $c->stash('base_url'), 
         );
     }
 
@@ -104,6 +107,7 @@ sub tab_json {
     my $factory = dicty::Factory::Tabview::Tab->new(
         -tab        => $tab,
         -primary_id => $gene_id,
+        -base_url => $c->stash('base_url')
     );
     my $tabobj = $factory->instantiate;
     $self->render( handler => 'json', data => $tabobj );

@@ -23,19 +23,15 @@ sub section_html {
     my $gene_id = $c->stash('gene_id');
     my $app     = $self->app;
 
-    #i am assuming that it is html
-    #need to change that assumtion at my earliest
-    #did it because of deadlines
     #detect if it a dynamic tab
     if ( $app->config->param('tab.dynamic') eq $tab ) {
         my $db = dicty::UI::Tabview::Page::Gene->new(
             -primary_id => $gene_id,
             -active_tab => $tab,
             -sub_id     => $section,
+            -base_url   => $c->stash('base_url')
         );
         $c->stash( $db->result() );
-
-        #force formatter
         $self->render( template => $app->config->param('genepage.template'),
         );
     }
@@ -57,6 +53,7 @@ sub section_json {
         $factory = dicty::Factory::Tabview::Tab->new(
             -tab        => $tab,
             -primary_id => $section,
+            -base_url   => $c->stash('base_url')
         );
     }
     else {
@@ -65,6 +62,7 @@ sub section_json {
             -tab        => $tab,
             -primary_id => $gene_id,
             -section    => $section,
+            -base_url   => $c->stash('base_url')
         );
     }
 
@@ -79,6 +77,7 @@ sub sub_section {
         -primary_id => $c->stash('subid'),
         -section    => $c->stash('section'),
         -tab        => $c->stash('tab'),
+        -base_url   => $c->stash('base_url')
     );
     my $obj = $factory->instantiate;
     $self->render( handler => 'json', data => $obj );
