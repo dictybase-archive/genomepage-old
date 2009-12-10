@@ -11,7 +11,7 @@ use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../lib";
 use lib "$FindBin::Bin/../../lib";
 
-$ENV{MOJO_APP} = 'DictyREST';
+$ENV{MOJO_APP} = 'GenomeREST';
 
 # Check if Mojo is installed
 eval 'use Mojo::Scripts';
