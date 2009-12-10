@@ -72,7 +72,7 @@ sub transcript_id {
 
 sub parse_url {
 	my ($self,  $path) = @_;
-	if ($path =~ /(.+gene)/) {
+	if ($path =~ /^((\/\w+)?\/gene)/) {
 		return $1;
 	}
 }
