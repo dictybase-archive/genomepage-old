@@ -53,14 +53,20 @@ loader.addModule({
     'tabview', 'logger', 'container','datatable',
     'event', 'element', 'animation','selector','cookie', 
     'dom', 'button', 'button_css', 'accordion', 'yui-dispatch', 
-    'accordion_css', 'dictyitem', 'dicty_yui', 'cart'
+    'accordion_css', 'dictyitem', 'yui_css', 'skin_css', 'cart'
     ]
 });
 
 loader.addModule({
-    name: 'dicty_yui',
+    name: 'yui_css',
     type: 'css',
-    fullpath: '/inc/css/dicty_yui.css'
+    fullpath: '/inc/css/yui.css'
+});
+
+loader.addModule({
+    name: 'skin_css',
+    type: 'css',
+    fullpath: '/inc/css/[%species%].css'
 });
 
 loader.addModule({
