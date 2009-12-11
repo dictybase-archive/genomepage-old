@@ -14,7 +14,7 @@ use dicty::Feature;
 sub validate_species {
     my ( $self, $c ) = @_;
     my $name     = $c->stash('species');
-    my $organism = Chado::Organism->search_where(
+    my ($organism) = Chado::Organism->search_where(
         [   { common_name  => $name },
             { abbreviation => $name },
             { species      => $name },
@@ -30,7 +30,8 @@ sub validate_species {
         return;
 
     }
-    $self->app->helper->species($name);
+    $self->app->helper->species($organism->species);
+    $c->stash(species => $organism->species);
     return $self->validate($c);
 }
 
