@@ -41,7 +41,7 @@ sub startup {
     #suffix based routing for multigenome setup
     my $bridge = $router->bridge('/:species/gene')->to(
             controller => 'input',
-            action     => 'set_species'
+            action     => 'validate_species'
         );
 
     #support both json and html

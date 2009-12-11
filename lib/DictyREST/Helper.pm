@@ -27,17 +27,12 @@ sub is_ddb {
 
 sub name2id {
     my ( $self, $id ) = @_;
-    my $feat;
     load dicty::Search::Gene;
-    try {
-        ($feat) = dicty::Search::Gene->find(
+    my  ($feat) = dicty::Search::Gene->find(
             -name     => $id,
             -organism => $self->species
         );
-    }
-    catch { 
-    	return 0 
-    };
+	return 0 if !$feat;
     $feat->primary_id();
 }
 

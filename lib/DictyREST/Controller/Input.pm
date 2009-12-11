@@ -5,14 +5,32 @@ use strict;
 
 # Other modules:
 use base qw/Mojolicious::Controller/;
+use Chado::AutoDBI;
 use dicty::Feature;
 
 # Module implementation
 #
 
-sub set_species {
+sub validate_species {
     my ( $self, $c ) = @_;
-    $self->app->helper->species( $c->stash('species') );
+    my $name     = $c->stash('species');
+    my $organism = Chado::Organism->search_where(
+        [   { common_name  => $name },
+            { abbreviation => $name },
+            { species      => $name },
+        ]
+    );
+    if ( !$organism ) {
+        $self->render(
+            template => $self->app->config->param('genepage.error'),
+            message  => "organism $name not found",
+            error    => 1,
+            header   => 'Error page',
+        );
+        return;
+
+    }
+    $self->app->helper->species($name);
     return $self->validate($c);
 }
 
@@ -59,8 +77,8 @@ sub validate {
         return;
     }
     $c->stash( gene_id => $gene_id );
-    my $base_url = $app->helper->parse_url($self->req->url->path);
-    $c->stash(base_url => $base_url);
+    my $base_url = $app->helper->parse_url( $self->req->url->path );
+    $c->stash( base_url => $base_url );
     return 1;
 
 }
