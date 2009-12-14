@@ -27,7 +27,8 @@ td.blue {
 }
 
 td.topMenu {
-   background-color:#4E387E;
+   /* background:transparent url(../images/sprite.png) repeat-x scroll 0 -101px; */
+   background-color:#394a6f;
    padding-left:10px;
    padding-right:10px;
 }
@@ -406,7 +407,7 @@ td.unpadded {
 
 
 .nopheader   { border:1px dotted #FFFFFF; font-family: Verdana; font-size: 11pt; color: #FFFFFF; font-weight: bold; 
-               background-color: #808080; padding-left:4; padding-right:4; padding-top:1; padding-bottom:1}
+               background-color: #7f7f7f; padding-left:4; padding-right:4; padding-top:1; padding-bottom:1}
 
 .highlight_by_red { font-family: Verdana; font-size: 12pt; color: #FF0000; font-weight: bold }
 
@@ -423,7 +424,7 @@ table.ontology th {
 	padding: 3px;
 	border-style: solid;
 	border-color: white;
-	background-color: #808080;
+	background-color: #7f7f7f;
 	font-family: Verdana; 
 	font-size: 11pt; 	
 }
@@ -485,3 +486,93 @@ div.auto_complete ul strong.highlight {
     padding:0;
 }
 
+h1#curator { text-align:center }
+
+
+.cssform label{
+	/* width: 50px; */
+	 clear: left;
+	 margin: 0;
+	 padding: 5px ;
+/*	 border-top: 1px dashed gray; 
+	 height: 1%; */
+}
+
+.cssform p{
+	 font-weight: bold;
+	 text-align: right;
+	 float: left;
+/*	 margin-left: 80px; /*width of left column
+	 margin-bottom: 50px;
+	 width: 90%; /*width of labels. Should be smaller than left column (155px) to create
+	 some right margin*/
+}
+
+.cssform input[type="text"]{ /*width of text boxes. IE6 does not understand this
+	 attribute*/
+	 width: 180px;
+}
+
+
+/*.threepxfix class below:
+Targets IE6- ONLY. Adds 3 pixel indent for multi-line form contents.
+to account for 3 pixel bug: http://www.positioniseverything.net/explorer/threepxtest.html
+*/
+
+* html .threepxfix{
+	 margin-left: 3px;
+}
+
+
+.formbutton{
+	 cursor:pointer;
+	 border:outset 1px #ccc;
+	 background:#999;
+	 color:#666;
+	 font-weight:bold;
+	 padding: 1px 2px;
+	 margin-left: 10px;
+	 background:url(media/formbg.gif) repeat-x left top;
+}
+
+textarea#styled {
+	 	width: 250px;
+	 	height: 120px;
+	 	border: 3px solid #cccccc;
+	 	padding: 5px;
+	 	font-family: Tahoma, sans-serif;
+/*	 	background-image: url(media/formbg.gif);
+	 /*	background-position: bottom right;*/
+	 	background-repeat: repeat; */
+}
+
+#formbox  {
+	 width: 70%;
+	 border: 2px solid black;
+	 margin-left: 60px;
+	 margin-top: 20px;
+	 margin-bottom: 60px;
+	 padding: 10px;
+}
+
+table.download {
+            table-layout: fixed;
+   width:  100%;
+   spacing:  2px;
+   border:  none;
+
+
+}
+
+table.download td {padding:  4px}
+
+tr.row1 {
+  background-color: #ACBDCC;
+  font-weight:  bold;
+  font-size:  16px;
+}
+
+tr.row2 {
+  background-color: #dddddd;
+  font-size:  15px;
+}

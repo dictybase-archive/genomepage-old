@@ -47,7 +47,6 @@ sub section_json {
     my $gene_id = $c->stash('gene_id');
     my $app     = $self->app;
 
-    #the default format is json here
     my $factory;
     if ( $app->helper->is_ddb($section) ) {
         $factory = dicty::Factory::Tabview::Tab->new(
@@ -59,10 +58,10 @@ sub section_json {
     else {
 
         $factory = dicty::Factory::Tabview::Section->new(
-            -tab        => $tab,
+            -base_url   => $c->stash('base_url'), 
             -primary_id => $gene_id,
+            -tab        => $tab,
             -section    => $section,
-            -base_url   => $c->stash('base_url')
         );
     }
 

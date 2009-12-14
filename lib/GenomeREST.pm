@@ -8,6 +8,7 @@ use Config::Simple;
 use Carp;
 use File::Spec::Functions;
 use DictyREST::Renderer::TT;
+use DictyREST::Renderer::Index;
 use DictyREST::Renderer::JSON;
 use DictyREST::Renderer::JSON_Generic;
 use DictyREST::Helper;
@@ -36,12 +37,19 @@ sub startup {
     $router->namespace( 'DictyREST::Controller' );
 
     #routing setup
+    #suffix based routing for multigenome setup
+
+
     #goes here before it passes to any other controller
     #kind of before action
-    #suffix based routing for multigenome setup
+    $router->route('/:species')->to(
+    	controller => 'genome', 
+    	action => 'index', 
+    	format => 'html' 
+    );
     my $bridge = $router->bridge('/:species/gene')->to(
             controller => 'input',
-            action     => 'validate_species'
+            action     => 'check_species'
         );
 
     #support both json and html
@@ -140,11 +148,17 @@ sub set_renderer {
             POST_PROCESS => $self->config->param('genepage.footer') || '',
         },
     );
+   my $index_tt = DictyREST::Renderer::Index->new(
+        path        => $self->template_path,
+        compile_dir => $compile_dir,
+    );
+  
     my $json         = DictyREST::Renderer::JSON->new();
     my $json_generic = DictyREST::Renderer::JSON_Generic->new();
 
     $self->renderer->add_handler(
         tt           => $tt->build(),
+        index           => $index_tt->build(),
         json         => $json->build(),
         json_generic => $json_generic->build()
     );

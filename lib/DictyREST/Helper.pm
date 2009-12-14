@@ -6,6 +6,7 @@ use version; our $VERSION = qv('1.0.0');
 use base qw/Mojo::Base/;
 use Module::Load;
 use Try::Tiny;
+use Chado::AutoDBI;
 
 # Module implementation
 #
@@ -70,6 +71,19 @@ sub parse_url {
 	if ($path =~ /^((\/\w+)?\/gene)/) {
 		return $1;
 	}
+}
+
+sub validate_species {
+	my ($self,  $name) = @_;
+    my ($organism) = Chado::Organism->search_where(
+        [   { common_name  => $name },
+            { abbreviation => $name },
+            { species      => $name },
+        ]
+    );
+    return if !$organism;
+    $self->species($organism->species);
+    $organism;
 }
 
 1;    # Magic true value required at end of module

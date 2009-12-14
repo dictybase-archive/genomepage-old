@@ -1,84 +1,65 @@
-package DictyREST::Controller::Input;
+package DictyREST::Renderer::Index;
 
 use warnings;
 use strict;
+use Carp qw/confess cluck carp/;
+
+use version; our $VERSION = qv('1.0.0');
 
 # Other modules:
-use base qw/Mojolicious::Controller/;
-use Chado::AutoDBI;
-use dicty::Feature;
+use base 'Mojo::Base';
+use Template;
+use Path::Class;
+use File::Spec;
 
 # Module implementation
 #
+__PACKAGE__->attr('path');
+__PACKAGE__->attr('template');
+__PACKAGE__->attr('option');
+__PACKAGE__->attr('compile_dir');
 
-sub check_species {
-    my ( $self, $c ) = @_;
-    my $name     = $c->stash('species');
-    my $organism = $self->app->helper->validate_species($name);
-    if ( !$organism ) {
-    	$c->res->code(404);
-        $self->render(
-            template => $self->app->config->param('genepage.error'),
-            message  => "organism $name not found",
-            error    => 1,
-            header   => 'Error page',
-        );
-        return;
+sub new {
+    my ( $class, %arg ) = @_;
+    my $self = {};
+    bless $self, $class;
 
+    foreach my $param (qw/path option compile_dir/) {
+        $self->$param( $arg{$param} ) if defined $arg{$param};
     }
-    $c->stash(species => $organism->species);
-    return $self->validate($c);
+    return $self;
 }
 
-sub validate {
-    my ( $self, $c ) = @_;
-    my $id      = $c->stash('id');
-    my $app     = $self->app;
-    my $gene_id = $app->helper->process_id($id);
-    if ( !$gene_id ) {
-    	$c->res->code(404);
-        $self->render(
-            template => $app->config->param('genepage.error'),
-            message  => "Input $id not found",
-            error    => 1,
-            header   => 'Error page',
-        );
-        return;
+sub build {
+    my ( $self, %arg ) = @_;
+    my $path = $arg{path} || $self->path;
+    confess "template path must be set\n" if !$path;
+
+    my $dir    = dir $path;
+    my $subdir = [ map { $_->stringify } grep { -d $_ } $dir->children ];
+    my $option = $self->option || {};
+    $option->{INCLUDE_PATH} = $subdir;
+    $option->{CACHE_SIZE}   = 128;
+    $option->{COMPILE_EXT}  = '.ttc';
+    $option->{COMPILE_DIR}  = $self->compile_dir;
+    $self->template( Template->new($option) );
+
+    return sub { $self->process(@_); };
+}
+
+sub process {
+    my ( $self, $renderer, $c, $output ) = @_;
+    my $template = $c->stash('template');
+    $c->app->log->warn(qq/template $template/);
+
+    my $status
+        = $self->template->process( $template, { %{ $c->stash }, c => $c },
+        $output );
+    if ( !$status ) {
+        cluck $self->template->error;
+        return 0;
     }
-
-    #logic for deleted feature
-    my $gene_feat = dicty::Feature->new( -primary_id => $gene_id );
-    if ( $gene_feat->is_deleted() ) {
-    	$c->res->code(404);
-        if ( my $replaced = $gene_feat->replaced_by() )
-        {    #is it being replaced
-            $c->stash(
-                message =>
-                    "$gene_id has been deleted from dictyBase. It has been replaced by",
-                replaced => 1,
-                id       => $replaced,
-                header   => 'Error page',
-                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
-
-                #the ENV should be changed
-            );
-        }
-        else {
-            $c->stash(
-                deleted => 1,
-                message => "$gene_id has been deleted",
-                header  => 'Error page',
-            );
-
-        }
-        $self->render( template => $app->config->param('genepage.error') );
-        return;
-    }
-    $c->stash( gene_id => $gene_id );
-    my $base_url = $app->helper->parse_url( $self->req->url->path );
-    $c->stash( base_url => $base_url );
     return 1;
-
 }
 
 1;    # Magic true value required at end of module
@@ -87,7 +68,7 @@ __END__
 
 =head1 NAME
 
-<MODULE NAME> - [One line description of module's purpose here]
+DictyREST::Renderer::TT - [Template toolkit renderer for DictyREST application]
 
 
 =head1 VERSION

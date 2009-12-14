@@ -1,84 +1,34 @@
-package DictyREST::Controller::Input;
+package DictyREST::Controller::Genome;
 
 use warnings;
 use strict;
 
 # Other modules:
 use base qw/Mojolicious::Controller/;
-use Chado::AutoDBI;
-use dicty::Feature;
+
+# Other modules:
 
 # Module implementation
 #
 
-sub check_species {
+sub index {
     my ( $self, $c ) = @_;
     my $name     = $c->stash('species');
     my $organism = $self->app->helper->validate_species($name);
     if ( !$organism ) {
-    	$c->res->code(404);
+        $c->res->code(404);
         $self->render(
-            template => $self->app->config->param('genepage.error'),
-            message  => "organism $name not found",
-            error    => 1,
-            header   => 'Error page',
-        );
-        return;
-
-    }
-    $c->stash(species => $organism->species);
-    return $self->validate($c);
-}
-
-sub validate {
-    my ( $self, $c ) = @_;
-    my $id      = $c->stash('id');
-    my $app     = $self->app;
-    my $gene_id = $app->helper->process_id($id);
-    if ( !$gene_id ) {
-    	$c->res->code(404);
-        $self->render(
-            template => $app->config->param('genepage.error'),
-            message  => "Input $id not found",
-            error    => 1,
-            header   => 'Error page',
-        );
+            text => "organism $name does not exist in our database" );
         return;
     }
-
-    #logic for deleted feature
-    my $gene_feat = dicty::Feature->new( -primary_id => $gene_id );
-    if ( $gene_feat->is_deleted() ) {
-    	$c->res->code(404);
-        if ( my $replaced = $gene_feat->replaced_by() )
-        {    #is it being replaced
-            $c->stash(
-                message =>
-                    "$gene_id has been deleted from dictyBase. It has been replaced by",
-                replaced => 1,
-                id       => $replaced,
-                header   => 'Error page',
-                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
-
-                #the ENV should be changed
-            );
-        }
-        else {
-            $c->stash(
-                deleted => 1,
-                message => "$gene_id has been deleted",
-                header  => 'Error page',
-            );
-
-        }
-        $self->render( template => $app->config->param('genepage.error') );
-        return;
-    }
-    $c->stash( gene_id => $gene_id );
-    my $base_url = $app->helper->parse_url( $self->req->url->path );
-    $c->stash( base_url => $base_url );
-    return 1;
-
+    $self->render(
+    	handler => 'index', 
+        template    => $organism->species,
+        species     => $organism->species,
+        genus       => $organism->genus,
+        abbr        => $organism->abbreviation,
+        common_name => $organism->common_name
+    );
 }
 
 1;    # Magic true value required at end of module
