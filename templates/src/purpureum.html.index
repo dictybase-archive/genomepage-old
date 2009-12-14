@@ -25,7 +25,7 @@
             <div class="shadow">
                 <div id="container-top">
                     <div id="descriptor">
-                        <b>An Online Informatics Resource for Dictyostelium</b>
+                        <b>An Online Informatics Resource for Purpureum</b>
                     </div>
                     <table>
                         <tr>
@@ -36,9 +36,7 @@
                                 <div id="container-help">
                                     <img src="/inc/images/help-left.gif">
                                     <div>
-                                        <a href="/about">About Us</a> 
-                                        <a href="/db/cgi-bin/dictyBase/suggestion">Contact</a> 
-                                        <a href="/help">Help</a>
+                                        <a href="/db/cgi-bin/dictyBase/suggestion">Contact us</a>
                                     </div><img src="/inc/images/help-right.gif">
                                 </div>
                             </td>
@@ -52,238 +50,37 @@
                                     <div class="bd">
                                         <ul class="first-of-type">
                                             <li class="yuimenubaritem first-of-type">
-                                                <a class="yuimenubaritemlabel" href="#">Learn</a>
-                                                <div id="learn" class="yuimenu">
+                                                <a class="yuimenubaritemlabel" href="/purpureum/gbrowse/">GBrowse</a>
+                                                <div id="gbrowse" class="yuimenu">
                                                     <div class="bd">
-                                                        <ul>
+                                                        <ul class="first-of-type">
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/learn">Learn Overview</a>
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_1:1..30000">scaffold_1</a>
                                                             </li>
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/learn/dicty">Learn About Dicty</a>
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_2:1..30000">scaffold_2</a>
                                                             </li>
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/learn/genomics">Dictyostelium Genomics</a>
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_3:1..30000">scaffold_3</a>
                                                             </li>
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/learn/multimedia">Pictures/Videos</a>
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_4:1..30000">scaffold_4</a>
                                                             </li>
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/learn/art">dictyArt</a>
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_5:1..30000">scaffold_5</a>
                                                             </li>
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="learn/other">Other Useful Links</a>
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/">Many more</a>
                                                             </li>
                                                         </ul>
                                                     </div>
                                                 </div>
                                             </li>
-                                            <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="#">Research</a>
-                                                <div id="research" class="yuimenu">
-                                                    <div class="bd">
-                                                        <ul>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Research Overview</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Techniques</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Teaching Protocols</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Dicty Anatomy Ontology</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Mutant Phenotypes</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Mutant Movies</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Codon Bias Table</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Nomenclature Guidelines</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Axenic Strains History</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">STKE: cAMP Signaling</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
+                                            <li class="yuimenubaritem ">
+                                                <a class="yuimenubaritemlabel" href="/purpureum/blast">Blast</a>
                                             </li>
                                             <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="#">Tools</a>
-                                                <div id="tools" class="yuimenu">
-                                                    <div class="bd">
-                                                        <ul>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Tools Overview</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Genome Browser</a>
-                                                                <div id="pim" class="yuimenu">
-                                                                    <div class="bd">
-                                                                        <ul class="first-of-type">
-                                                                            <li class="yuimenuitem">
-                                                                                <a class="yuimenuitemlabel" href="/db/cgi-bin/ggb/gbrowse/dictyBase/?name=1:1..30000">Chromosome 1</a>
-                                                                            </li>
-                                                                            <li class="yuimenuitem">
-                                                                                <a class="yuimenuitemlabel" href="/db/cgi-bin/ggb/gbrowse/dictyBase/?name=2:1..30000">Chromosome 2</a>
-                                                                            </li>
-                                                                            <li class="yuimenuitem">
-                                                                                <a class="yuimenuitemlabel" href="/db/cgi-bin/ggb/gbrowse/dictyBase/?name=3:1..30000">Chromosome 3</a>
-                                                                            </li>
-                                                                            <li class="yuimenuitem">
-                                                                                <a class="yuimenuitemlabel" href="/db/cgi-bin/ggb/gbrowse/dictyBase/?name=4:1..30000">Chromosome 4</a>
-                                                                            </li>
-                                                                            <li class="yuimenuitem">
-                                                                                <a class="yuimenuitemlabel" href="/db/cgi-bin/ggb/gbrowse/dictyBase/?name=5:1..30000">Chromosome 5</a>
-                                                                            </li>
-                                                                            <li class="yuimenuitem">
-                                                                                <a class="yuimenuitemlabel" href="/db/cgi-bin/ggb/gbrowse/dictyBase/?name=6:1..30000">Chromosome 6</a>
-                                                                            </li>
-                                                                            <li class="yuimenuitem">
-                                                                                <a class="yuimenuitemlabel" href="/db/cgi-bin/ggb/gbrowse/dictyBase/?name=M:1..30000">Mitochondrial DNA</a>
-                                                                            </li>
-                                                                            <li class="yuimenuitem">
-                                                                                <a class="yuimenuitemlabel" href="/db/cgi-bin/ggb/gbrowse/dictyBase/?name=R:1..30000">Ribosomal DNA</a>
-                                                                            </li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Blast</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">ID Converter</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">dictyMart</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Textpresso</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Biochemical Pathways</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Third Party Tools</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="#">Stock Center</a>
-                                                <div id="stock-center" class="yuimenu">
-                                                    <div class="bd">
-                                                        <ul>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Dicty Stock Center Overview</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Search Stock Center</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Order</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Deposit</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Strain Catalog</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Plasmid Catalog</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Bacterial strain Catalog</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Additional Materials</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Nomenclature Guidelines</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Other Stock Centers</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="#">Download</a>
-                                                <div id="download" class="yuimenu">
-                                                    <div class="bd">
-                                                        <ul>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Download Overview</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Gene Information</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Sequences and annotations (incl C2 Dupl)</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Mutant Phenotypesv</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Protein Domains</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Ontologies</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">GO Association File</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">References</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="#">Community</a>
-                                                <div id="community" class="yuimenu">
-                                                    <div class="bd">
-                                                        <ul>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Community Overview</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">ListServ</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Read the dictyNews</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Update/add Colleague</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Dicty Annual Conference</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Job opportunuties</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Dicty Labs on the Web</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="#">Citing dictyBase and the Dictyostelium Genome Project</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
+                                                <a class="yuimenubaritemlabel" href="/purpureum/downloads">Download</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -292,7 +89,7 @@
                             <td>
                                 <img src="/inc/images/menu-top-right.gif">
                             </td>
-                            <td>
+                            <td style="width:100%;">
                                 <form action="/db/cgi-bin/search/search.pl">
                                     <input name="query" type="text" size="30" value="use * as a wildcard character"> <nobr><input type="submit" name="submit" value="Search All"> <input type="submit" name="genes_only" value="Gene Names Only"></nobr>
                                 </form>

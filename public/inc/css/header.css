@@ -17,6 +17,7 @@ body {
     border-spacing:0px;
     padding:0;
     margin:0;   
+    width:100%;
 }
 
 .yui-skin-sam #container-top table tbody{
@@ -34,7 +35,8 @@ body {
     vertical-align  :bottom;
 }
 .yui-skin-sam #container-top #menu-top{
-    width           :530px;
+    max-width           :530px;
+    min-width   : 300px;
 
 }
 .yui-skin-sam .yuimenubaritemlabel{
@@ -57,7 +59,8 @@ body {
     border-right    :0 none;
 }
 .yui-skin-sam #container-top form {
-    padding         :0px 10px;
+    padding         :10px 10px;
+    text-align : right;
 }
 .yui-skin-sam #container-top form input{
     font-size       :80%;
@@ -80,6 +83,8 @@ body {
 .yui-skin-sam #container-top #container-help div {
     background      :#DFE8F6;
     line-height     :2.4;
+    min-width:100px;
+    text-align:center;
 }
 #shadow-container .shadow {
 	background      :#cccccc;
@@ -100,4 +105,8 @@ body {
     left            :70px; 
     top             :25px; 
     z-index         :1; 
+}
+.yui-skin-sam .yuimenubarnav .yuimenubaritemlabel {
+    color:#FFFFFF;
+    padding-right:20px;
 }
