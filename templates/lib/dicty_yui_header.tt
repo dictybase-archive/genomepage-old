@@ -11,6 +11,10 @@
 
 [% PROCESS config.tt %]
 
+<script type="text/javascript">
+[% PROCESS "$species/menu_array.tt" %]
+</script>
+
 [%
 	icon_link ( href = "/favicon.ico" );
 	icon_link ( href = "/favicon.ico", rel = "shortcut icon");
@@ -25,7 +29,6 @@
 %]
 
 [%
-	js_link (src = "/static/js/menu_array.js");
 	js_link (src = "/static/js/mmenu.js");
 	css_link ( href = "/static/css/style.css");
 %]
