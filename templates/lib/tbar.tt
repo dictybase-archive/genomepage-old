@@ -3,8 +3,8 @@
 <table cellSpacing=0 cellpadding=0 width=100% border="0">
    <tr>
       <td class="topSpace" width="204" rowSpan="3" valign="bottom">
-         <img src="/inc/images/clearpix.gif" width="1" height="10">
-         <a href="/"><IMG src="/inc/images/dictyLogo.png" align="absBottom" border="0"></a>
+         <img src="/static/images/clearpix.gif" width="1" height="10">
+         <a href="/"><IMG src="/static/images/dictyLogo.png" align="absBottom" border="0"></a>
       </td>
       <td class="topSpace" colSpan="8" height="88" width="100%">
          <table width="100%" height="100%" border="0">
@@ -26,5 +26,9 @@
          </table>
       </td>
    </tr>
-[% INCLUDE tbarmenu.tt %]
+[% IF species %]
+	[% INCLUDE "$species/tbarmenu.tt" %]
+[% ELSE %]
+	[% INCLUDE tbarmenu.tt %]
+[% END %]
 </table>

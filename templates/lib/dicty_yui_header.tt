@@ -14,20 +14,20 @@
 [%
 	icon_link ( href = "/favicon.ico" );
 	icon_link ( href = "/favicon.ico", rel = "shortcut icon");
-	js_link (src = "/inc/js/global.js");
-	js_link (src = "/inc/js/form_utils.js");
+	js_link (src = "/static/js/global.js");
+	js_link (src = "/static/js/form_utils.js");
 %]
 
 [%
-	yui_base = "/inc/js/yui/build";
-	yui_plugin_base = '/inc/js/yui/plugins';
+	yui_base = "/static/js/yui/build";
+	yui_plugin_base = '/static/js/yui/plugins';
 	yui_css_skin = "sam";
 %]
 
 [%
-	js_link (src = "/inc/js/menu_array.js");
-	js_link (src = "/inc/js/mmenu.js");
-	css_link ( href = "/inc/css/style.css");
+	js_link (src = "/static/js/menu_array.js");
+	js_link (src = "/static/js/mmenu.js");
+	css_link ( href = "/static/css/style.css");
 %]
 
 [% IF template.loader %]
@@ -35,10 +35,14 @@
 [% END %]
 
 [% IF template.error_page %]
-	[% css_link ( href = "/inc/css/dicty_yui.css"); %]
+	[% css_link ( href = "/static/css/dicty_yui.css"); %]
 [% END %]
 
 </head>
 	<body class="yui-skin-sam">
 
-[% INCLUDE tbar.tt %]
+[% IF species %]
+	[% INCLUDE "$species/tbar.tt" %]
+[% ELSE %]
+	[% INCLUDE tbar.tt %]
+[% END %]

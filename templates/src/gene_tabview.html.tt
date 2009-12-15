@@ -2,6 +2,7 @@
 title       = 'Gene Summary'
 loader 		= 'true'
 %]
+
 <script type="text/javascript">
 
 // disabing ESC 
@@ -27,7 +28,7 @@ function catchEscape(e){
 };
 
 var loader = new YAHOO.util.YUILoader({
-    base: '[%c.req.url.base%]/inc/js/yui/build/',
+    base: '/static/js/yui/build/',
     loadOptional: true,
     onSuccess: function() {
     		
@@ -47,7 +48,7 @@ var loader = new YAHOO.util.YUILoader({
 loader.addModule({
     name: 'genetab',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/custom/item_v1.js',
+    fullpath: "/static/js/custom/item_v1.js",
     requires: [
     'yahoo', 'json', 'connection','treeview',
     'tabview', 'logger', 'container','datatable',
@@ -60,26 +61,26 @@ loader.addModule({
 loader.addModule({
     name: 'yui_css',
     type: 'css',
-    fullpath: '[%c.req.url.base%]/inc/css/yui.css'
+    fullpath: "/static/css/yui.css"
 });
 
 loader.addModule({
     name: 'skin_css',
     type: 'css',
-    fullpath: '[%c.req.url.base%]/inc/css/[%species%].css'
+    fullpath: "/static/css/[%species%].css"
 });
 
 loader.addModule({
     name: 'button_css',
     type: 'css',
-    fullpath: '[%c.req.url.base%]/inc/js/yui/build/button/assets/skins/sam/button.css'
+    fullpath: "/static/js/yui/build/button/assets/skins/sam/button.css"
 });
 
 
 loader.addModule({
     name: 'dictyitem',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/custom/panel_v1.js',
+    fullpath: "/static/js/custom/panel_v1.js",
     requires: [
     	'dictyutil','formatter','dictydispatch'
 		]	
@@ -88,70 +89,70 @@ loader.addModule({
 loader.addModule({
     name: 'formatter',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/custom/formatter_v1.js'
+    fullpath: "/static/js/custom/formatter_v1.js"
 });
 
 loader.addModule({
     name: 'dictyutil',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/custom/util_v1.js'
+    fullpath: "/static/js/custom/util_v1.js"
 });
 
 loader.addModule({
     name: 'dictydispatch',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/custom/dispatcher_v1.js'
+    fullpath: "/static/js/custom/dispatcher_v1.js"
 });
 
 loader.addModule({
     name: 'bubbling',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/yui/plugins/bubbling/bubbling-min.js'
+    fullpath: "/static/js/yui/plugins/bubbling/bubbling-min.js"
 });
 
 loader.addModule({
     name: 'yui-dispatch',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/yui/plugins/dispatcher/dispatcher-min.js'
+    fullpath: "/static/js/yui/plugins/dispatcher/dispatcher-min.js"
 });
 
 loader.addModule({
     name: 'container_css',
     type: 'css',
-    fullpath: '[%c.req.url.base%]/inc/js/yui/build/container/assets/skins/sam/container.css'
+    fullpath: "/static/js/yui/build/container/assets/skins/sam/container.css"
 });
 
 loader.addModule({
     name: 'accordion',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/yui/plugins/accordion/accordion-min.js',
+    fullpath: "/static/js/yui/plugins/accordion/accordion-min.js",
     requires: ['bubbling', 'container_css']
 });
 
 loader.addModule({
     name: 'accordion_css',
     type: 'css',
-    fullpath: '[%c.req.url.base%]/inc/js/yui/plugins/accordion/assets/accordion.css'
+    fullpath: "/static/js/yui/plugins/accordion/assets/accordion.css"
 });
 
 loader.addModule({
     name: 'tooltips',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/yui/plugins/tooltips/tooltips-min.js',
+    fullpath: "/static/js/yui/plugins/tooltips/tooltips-min.js",
     requires: ['bubbling']
 });
 
 loader.addModule({
     name: 'cart',
     type: 'js',
-    fullpath: '[%.c.req.url.base%]/inc/js/nopcart.js',
+    fullpath: "/static/js/nopcart.js",
     requires: ['language']
 });
 
 loader.addModule({
     name: 'language',
     type: 'js',
-    fullpath: '[%c.req.url.base%]/inc/js/language-en.js'
+    fullpath: "/static/js/language-en.js"
 });
 
 

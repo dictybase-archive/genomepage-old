@@ -1,103 +1,61 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-"http://www.w3.org/TR/html4/strict.dtd">
+[% PROCESS config.tt %]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title></title><!-- Fonts CSS - Recommended but not required -->
-        <link rel="stylesheet" type="text/css" href="/inc/js/yui/build/fonts/fonts-min.css"><!-- Core + Skin CSS -->
-        <link rel="stylesheet" type="text/css" href="/inc/js/yui/build/menu/assets/skins/sam/menu.css"><!-- Dependencies -->
-        <link rel="stylesheet" type="text/css" href="/inc/css/header.css">
-        <link rel="icon" href="/favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-        <script type="text/javascript" src="/inc/js/yui/build/yahoo-dom-event/yahoo-dom-event.js">
+	<head>
+
+<script type="text/javascript">
+[% PROCESS "$species/menu_array.tt" %]
 </script>
-        <script type="text/javascript" src="/inc/js/yui/build/container/container_core-min.js">
-</script>
-        <script type="text/javascript" src="/inc/js/yui/build/menu/menu-min.js">
-</script>
-        <script type="text/javascript" src="/inc/js/yui/build/animation/animation.js">
-</script>
-        <script type="text/javascript" src="/inc/js/custom/menu.js">
-</script>
-    </head>
-    <body class="yui-skin-sam">
-        <div id="shadow-container">
-            <div class="shadow">
-                <div id="container-top">
-                    <div id="descriptor">
-                        <b>An Online Informatics Resource for Purpureum</b>
-                    </div>
-                    <table>
-                        <tr>
-                            <td rowspan="2">
-                                <a href="/"><img src="/inc/images/logo.gif"></a>
-                            </td>
-                            <td colspan="4">
-                                <div id="container-help">
-                                    <img src="/inc/images/help-left.gif">
-                                    <div>
-                                        <a href="/db/cgi-bin/dictyBase/suggestion">Contact us</a>
-                                    </div><img src="/inc/images/help-right.gif">
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="menu">
-                            <td>
-                                <img src="/inc/images/menu-top-left.gif">
-                            </td>
-                            <td>
-                                <div id="menu-top" class="yuimenubar yuimenubarnav">
-                                    <div class="bd">
-                                        <ul class="first-of-type">
-                                            <li class="yuimenubaritem first-of-type">
-                                                <a class="yuimenubaritemlabel" href="/purpureum/gbrowse/">GBrowse</a>
-                                                <div id="gbrowse" class="yuimenu">
-                                                    <div class="bd">
-                                                        <ul class="first-of-type">
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_1:1..30000">scaffold_1</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_2:1..30000">scaffold_2</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_3:1..30000">scaffold_3</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_4:1..30000">scaffold_4</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/name=scaffold_5:1..30000">scaffold_5</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/">Many more</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="yuimenubaritem ">
-                                                <a class="yuimenubaritemlabel" href="/purpureum/blast">Blast</a>
-                                            </li>
-                                            <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="/purpureum/downloads">Download</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <img src="/inc/images/menu-top-right.gif">
-                            </td>
-                            <td style="width:100%;">
-                                <form action="/db/cgi-bin/search/search.pl">
-                                    <input name="query" type="text" size="30" value="use * as a wildcard character"> <nobr><input type="submit" name="submit" value="Search All"> <input type="submit" name="genes_only" value="Gene Names Only"></nobr>
-                                </form>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </body>
-</html>
+
+[%
+	css_link ( href = "/static/css/style.css");
+	js_link (src = "/static/js/mmenu.js");
+	icon_link ( href = "/favicon.ico" );
+	icon_link ( href = "/favicon.ico", rel = "shortcut icon");
+	js_link (src = "/static/js/global.js");
+	js_link (src = "/static/js/form_utils.js");
+%]
+
+
+
+		<title> 
+					[% IF species %]
+						Welcome to [% species %] base 
+					[% ELSE %]
+						Welcome to Dicty Genomes
+					[% END %]
+		</title>
+
+
+</head>
+	<body>
+
+[% INCLUDE "$species/tbar.tt" %]
+
+<table cellspacing="10" width="100%"><tr><td>
+<table class="download">
+      <col width="75%"/><col width="25%"/>
+      <tr class="row1"><td colspan="2">Gene Information</td></tr>
+      <tr class="row2"><td>DPU_G - JGI mapping</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=GeneID-JGI.txt">[tab-delimited]</a></td></tr>
+</table>
+<br/>
+<table class="download">
+      <col width="75%"/><col width="25%"/>
+      <tr class="row1"><td colspan="2">Contig Information</td></tr>
+      <tr class="row2"><td>Contig list</td><td><a href="/downloads/contig_information.html">[tab-delimited]</a></td></tr>
+</table> 
+<br/>
+<table class="download">
+      <col width="75%"/><col width="25%"/>
+      <tr class="row1"><td colspan="2">Purpureum Sequences and Alignments</td></tr>
+      <tr class="row2"><td>Sequences in FASTA format</td><td><a href="/db/cgi-bin/dictyBaseDP/download/blast_databases.pl">[download area]</a></td></tr>
+      <tr class="row2"><td>dictyBase proteins aligned on D. purpureum (75%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=matched.ddb.gz">[zip file]</a></td></tr>
+      <tr class="row2"><td>dictyBase proteins not aligned on D. purpureum (25%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=unmatched.ddb.gz">[zip file]</a></td></tr>
+      <tr class="row2"><td>ESTs aligned to genome (57%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=aligned_ests.fa.gz">[zip file]</a></td></tr>
+      <tr class="row2"><td>ESTs not aligned to genome (43%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=unaligned_ests.fa.gz">[zip file]</a></td></tr>
+</table>
+<br/>
+</td></tr></table>
+
+[% INCLUDE "$species/footer.tt" %]
+
