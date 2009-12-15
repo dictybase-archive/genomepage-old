@@ -79,11 +79,11 @@ MenuStyle,              // Properties Array - this array is declared higher up a
 ,                             // Background image for menu Color must be set to transparent for this to work
 0,                            // Scrollable Menu
 ,                             // Miscellaneous Menu Properties
-,"scaffold_1","/db/cgi-bin/ggb/gbrowse?name=scaffold_1:1..30000",,,0
-,"scaffold_2","/db/cgi-bin/ggb/gbrowse?name=scaffold_2:1..30000",,,0
-,"scaffold_3","/db/cgi-bin/ggb/gbrowse?name=scaffold_3:1..30000",,,0
-,"scaffold_4","/db/cgi-bin/ggb/gbrowse?name=scaffold_4:1..30000",,,0
-,"Many More...","/db/cgi-bin/ggb/gbrowse",,,0
+,"scaffold_1","/[%species%]/gbrowse?name=scaffold_1:1..30000",,,0
+,"scaffold_2","/gbrowse?name=scaffold_2:1..30000",,,0
+,"scaffold_3","/gbrowse?name=scaffold_3:1..30000",,,0
+,"scaffold_4","/gbrowse?name=scaffold_4:1..30000",,,0
+,"Many More...","/downloads/contig_information.html",,,0
 ])
 
 
@@ -222,7 +222,7 @@ MenuStyle,              // Properties Array - this array is declared higher up a
 ,                             // Background image for menu Color must be set to transparent for this to work
 0,                            // Scrollable Menu
 ,                             // Miscellaneous Menu Properties
-,"Blast Server" , "/db/cgi-bin/blast.pl",,,0
+,"Blast Server" , "/tools/blast",,,0
 ])
 
 addmenu(menu=[
