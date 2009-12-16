@@ -34,8 +34,7 @@ body {
     vertical-align  :bottom;
 }
 .yui-skin-sam #container-top #menu-top{
-    width           :530px;
-
+    min-width       :450px;
 }
 .yui-skin-sam .yuimenubaritemlabel{
     border          :0px none;

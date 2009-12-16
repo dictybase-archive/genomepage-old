@@ -6,7 +6,7 @@
         <title></title><!-- Fonts CSS - Recommended but not required -->
         <link rel="stylesheet" type="text/css" href="/inc/js/yui/build/fonts/fonts-min.css"><!-- Core + Skin CSS -->
         <link rel="stylesheet" type="text/css" href="/inc/js/yui/build/menu/assets/skins/sam/menu.css"><!-- Dependencies -->
-        <link rel="stylesheet" type="text/css" href="/inc/css/header.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/header.css">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <script type="text/javascript" src="/inc/js/yui/build/yahoo-dom-event/yahoo-dom-event.js">
@@ -17,7 +17,7 @@
 </script>
         <script type="text/javascript" src="/inc/js/yui/build/animation/animation.js">
 </script>
-        <script type="text/javascript" src="/inc/js/custom/menu.js">
+        <script type="text/javascript" src="/static/js/custom/menu.js">
 </script>
     </head>
     <body class="yui-skin-sam">
@@ -85,6 +85,11 @@
                             </td>
                             <td>
                                 <img src="/inc/images/menu-top-right.gif">
+                            </td>
+                            <td style="width:100%;">
+                                <form action="/db/cgi-bin/search/search.pl">
+                                    <input name="query" type="text" size="30" value="use * as a wildcard character"> <nobr><input type="submit" name="submit" value="Search All"> <input type="submit" name="genes_only" value="Gene Names Only"></nobr>
+                                </form>
                             </td>
                         </tr>
                     </table>
