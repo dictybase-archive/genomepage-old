@@ -2,60 +2,81 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 	<head>
-
-<script type="text/javascript">
-[% PROCESS "$species/menu_array.tt" %]
-</script>
+	
 
 [%
-	css_link ( href = "/static/css/style.css");
-	js_link (src = "/static/js/mmenu.js");
+	css_link ( href = "/static/css/body.css");
 	icon_link ( href = "/favicon.ico" );
 	icon_link ( href = "/favicon.ico", rel = "shortcut icon");
-	js_link (src = "/static/js/global.js");
 	js_link (src = "/static/js/form_utils.js");
+	
 %]
-
-
-
-		<title> 
-					[% IF species %]
-						Welcome to [% species %] base 
-					[% ELSE %]
-						Welcome to Dicty Genomes
-					[% END %]
-		</title>
-
-
+    <title> 
+        [% IF species %]
+            Welcome to [% species %] base 
+        [% ELSE %]
+            Welcome to Dicty Genomes
+        [% END %]
+    </title>
 </head>
-	<body>
+   <body>
+        <div id="header">
+            [% PROCESS "$species/page-header.tt" %]
+        </div>
+        <div class="wrapper threecol">
+            <div id="subnav">
+                <div class="inner_container">
+                    <h3>
+                        Welcome to Dictyostelium Purpureum Portal
+                    </h3>
+                </div>
+            </div>
+            <div class="wrapper-left-center">
+                <div class="wrapper-columns">
+                    <div class="column-center">
+                        <div id="column-center-content">
+                            <!-- Central Column start -->
+<!---
+                            <h2>
+                                Available genomes
+                            </h2>
+                            <ul>
+                                <li><a href="http://dictybase.org/">Dictyostelium Discoideum</a></li>
+                                <li><a href="/purpureum">Dictyostelium Purpureum</li>
+                            </ul>
+-->
+                            </p><!-- Central Column end -->
+                        </div>
+                    </div>
+                    <div class="column-left">
+                        <div id="column-left-content">
+                            <!-- Left Column start -->
+<!---
+                            <h4>
+                                Announcements<br/>
+                            </h4>
+                            <div class="info wide">
+                                Just added
+                                <a href="/purpureum/">Dictiostelium Purpureum portal</a>
+                            </div>
 
-[% INCLUDE "$species/tbar.tt" %]
+                            <div class="warning wide">
+                                Oops!
+                            </div>
+--->
+                            <!-- Left Column end -->
+                        </div>
+                    </div>
+                    <div class="column-right">
+                        <!-- Right Column start -->
+                        <!-- Right Column end -->
+                    </div>
+                </div>
+            </div>
+            <div id="footer">
+                [% PROCESS "$species/page-footer.tt" %]
+            </div>
+        </div>
+    </body>
 
-<table cellspacing="10" width="100%"><tr><td>
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Gene Information</td></tr>
-      <tr class="row2"><td>DPU_G - JGI mapping</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=GeneID-JGI.txt">[tab-delimited]</a></td></tr>
-</table>
-<br/>
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Contig Information</td></tr>
-      <tr class="row2"><td>Contig list</td><td><a href="/downloads/contig_information.html">[tab-delimited]</a></td></tr>
-</table> 
-<br/>
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Purpureum Sequences and Alignments</td></tr>
-      <tr class="row2"><td>Sequences in FASTA format</td><td><a href="/db/cgi-bin/dictyBaseDP/download/blast_databases.pl">[download area]</a></td></tr>
-      <tr class="row2"><td>dictyBase proteins aligned on D. purpureum (75%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=matched.ddb.gz">[zip file]</a></td></tr>
-      <tr class="row2"><td>dictyBase proteins not aligned on D. purpureum (25%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=unmatched.ddb.gz">[zip file]</a></td></tr>
-      <tr class="row2"><td>ESTs aligned to genome (57%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=aligned_ests.fa.gz">[zip file]</a></td></tr>
-      <tr class="row2"><td>ESTs not aligned to genome (43%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=unaligned_ests.fa.gz">[zip file]</a></td></tr>
-</table>
-<br/>
-</td></tr></table>
-
-[% INCLUDE "$species/footer.tt" %]
 
