@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <title></title>
+        <link rel="stylesheet" type="text/css" href="/inc/css/footer.css">
+    </head>
+    <body>
+        <div id="container-bottom">
+
+            <a href="/">Home</a>
+            Supported by NIH (NIGMS and NHGRI)
+            <a href="/db/cgi-bin/dictyBaseDP/suggestion">Contact dictyBase</a>
+
+        </div>
+    </body>
+</html>
