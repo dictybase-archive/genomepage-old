@@ -36,15 +36,24 @@
                     <div class="column-center">
                         <div id="column-center-content">
                             <!-- Central Column start -->
-<!---
                             <h2>
-                                Available genomes
+                               Currently the site contains: 
                             </h2>
                             <ul>
-                                <li><a href="http://dictybase.org/">Dictyostelium Discoideum</a></li>
-                                <li><a href="/purpureum">Dictyostelium Purpureum</li>
-                            </ul>
--->
+                                <li>Supercontigs (scaffolds) assembled by the sequencing
+                                center</li>
+                                <li>EST sequences</li>
+                                <li>Alignments of ESTs to supercontigs: 
+                                	<b>57% ESTs aligned to genome</b>
+                                </li>
+                                <li>Alignments of dictyBase primary proteins to supercontigs: 
+                                	<b>75% dictyBase proteins aligned to genome</b>
+                                </li>
+                                <li>14097 Gene Predictions from Geneid</li>
+                                <br/>
+                                Start by browsing a sample <a
+                                href="/purpureum/gene/DPU_G0051088"> gene page</a>
+                                </ul>
                             </p><!-- Central Column end -->
                         </div>
                     </div>
