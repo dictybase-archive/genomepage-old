@@ -4,18 +4,18 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title></title><!-- Fonts CSS - Recommended but not required -->
-        <link rel="stylesheet" type="text/css" href="/inc/js/yui/build/fonts/fonts-min.css"><!-- Core + Skin CSS -->
-        <link rel="stylesheet" type="text/css" href="/inc/js/yui/build/menu/assets/skins/sam/menu.css"><!-- Dependencies -->
+        <link rel="stylesheet" type="text/css" href="/static/js/yui/build/fonts/fonts-min.css"><!-- Core + Skin CSS -->
+        <link rel="stylesheet" type="text/css" href="/static/js/yui/build/menu/assets/skins/sam/menu.css"><!-- Dependencies -->
         <link rel="stylesheet" type="text/css" href="/static/css/header.css">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-        <script type="text/javascript" src="/inc/js/yui/build/yahoo-dom-event/yahoo-dom-event.js">
+        <script type="text/javascript" src="/static/js/yui/build/yahoo-dom-event/yahoo-dom-event.js">
 </script>
-        <script type="text/javascript" src="/inc/js/yui/build/container/container_core-min.js">
+        <script type="text/javascript" src="/static/js/yui/build/container/container_core-min.js">
 </script>
-        <script type="text/javascript" src="/inc/js/yui/build/menu/menu-min.js">
+        <script type="text/javascript" src="/static/js/yui/build/menu/menu-min.js">
 </script>
-        <script type="text/javascript" src="/inc/js/yui/build/animation/animation.js">
+        <script type="text/javascript" src="/static/js/yui/build/animation/animation.js">
 </script>
         <script type="text/javascript" src="/static/js/custom/menu.js">
 </script>
@@ -30,20 +30,20 @@
                     <table>
                         <tr>
                             <td rowspan="2">
-                                <a href="/"><img src="/inc/images/logo_3.gif"></a>
+                                <a href="/"><img src="/static/images/logo.gif"></a>
                             </td>
                             <td colspan="4">
                                 <div id="container-help">
-                                    <img src="/inc/images/help-left.gif">
+                                    <img src="/static/images/help-left.gif">
                                     <div>
                                         <a href="/db/cgi-bin/dictyBaseDP/suggestion">Contact us</a>
-                                    </div><img src="/inc/images/help-right.gif">
+                                    </div><img src="/static/images/help-right.gif">
                                 </div>
                             </td>
                         </tr>
                         <tr class="menu">
                             <td>
-                                <img src="/inc/images/menu-top-left.gif">
+                                <img src="/static/images/menu-top-left.gif">
                             </td>
                             <td>
                                 <div id="menu-top" class="yuimenubar yuimenubarnav">
@@ -84,7 +84,7 @@
                                 </div>
                             </td>
                             <td>
-                                <img src="/inc/images/menu-top-right.gif">
+                                <img src="/static/images/menu-top-right.gif">
                             </td>
                             <td style="width:100%;">
                                 <form action="/db/cgi-bin/search/search.pl">

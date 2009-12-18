@@ -12,7 +12,7 @@ species %]</b></div>
                <td width="70%">
                &nbsp;
                </td>
-               <td class="topSpace" width="250">
+               <td class="topSpace" width="30%">
                  <b>Search [% species %]base  :</b><br>
                  use * as a wildcard character<br>
                  <nobr>
