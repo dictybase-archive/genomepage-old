@@ -42,39 +42,45 @@ sub startup {
 
     #goes here before it passes to any other controller
     #kind of before action
-    $router->route('/:species')->to(
+    my $bridge = $router->route('/:species')->to(
     	controller => 'genome', 
     	action => 'index', 
     	format => 'html' 
     );
-    my $bridge = $router->bridge('/:species/gene')->to(
+
+    $router->route('/:species/download')->to(
+    	controller => 'download', 
+    	action => 'index', 
+    );
+
+    my $bridge2 = $router->bridge('/:species/gene')->to(
             controller => 'input',
             action     => 'check_species'
         );
 
     #support both json and html
     #default is html
-    $bridge->route('/:id')
+    $bridge2->route('/:id')
         ->to( controller => 'page', action => 'index', format => 'html' );
 
     #default is html
-    $bridge->route('/:id/:tab')
+    $bridge2->route('/:id/:tab')
         ->to( controller => 'page', action => 'tab', format => 'html' );
 
 #keeping the default to html as it is needed for feature tab
 #this is the only url that is being called without any extension and gives back html
-    $bridge->route('/:id/:tab/:section')
+    $bridge2->route('/:id/:tab/:section')
         ->to( controller => 'tab', action => 'section', format => 'html' );
 
     #only support json response
-    $bridge->route('/:id/:tab/:subid/:section')->to(
+    $bridge2->route('/:id/:tab/:subid/:section')->to(
         controller => 'tab',
         action     => 'sub_section',
         format     => 'json'
     );
 
     #organisms
-    $router->route('/organism')
+    $bridge2->route('/organism')
         ->to( controller => 'organism', action => 'index', format => 'json' );
 
     #set up various renderer
