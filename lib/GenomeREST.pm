@@ -48,7 +48,7 @@ sub startup {
     	format => 'html' 
     );
 
-    $router->route('/:species/download')->to(
+    $router->route('/:species/downloads')->to(
     	controller => 'download', 
     	action => 'index', 
     );
