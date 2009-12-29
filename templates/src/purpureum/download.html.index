@@ -1,36 +1,9 @@
-[% PROCESS config.tt %]
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-	<head>
-
-<script type="text/javascript">
-[% PROCESS "$species/menu_array.tt" %]
-</script>
-
-[%
-	css_link ( href = "/static/css/style.css");
-	js_link (src = "/static/js/mmenu.js");
-	icon_link ( href = "/favicon.ico" );
-	icon_link ( href = "/favicon.ico", rel = "shortcut icon");
-	js_link (src = "/static/js/global.js");
-	js_link (src = "/static/js/form_utils.js");
+[% META
+title       = 'Download'
+loader 		= 'true'
 %]
 
-
-
-		<title> 
-					[% IF species %]
-						Welcome to [% species %] base 
-					[% ELSE %]
-						Welcome to Dicty Genomes
-					[% END %]
-		</title>
-
-
-</head>
-	<body>
-
-[% INCLUDE "$species/tbar.tt" %]
+[% PROCESS "page-header.tt" %]
 
 <table cellspacing="10" width="100%"><tr><td>
 <table class="download">
@@ -56,6 +29,4 @@
 </table>
 <br/>
 </td></tr></table>
-
-[% INCLUDE "$species/footer.tt" %]
 

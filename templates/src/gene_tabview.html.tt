@@ -160,7 +160,7 @@ loader.require('genetab');
 loader.insert();
 </script>
 
-<div class="page_header">Gene Page for [% header %]</div> 
+<div class="page_header">Gene Information for [% header %]</div> 
 <div style="padding-left:10px; padding-right:10px;">
     <div id="container"></div>
 </div>

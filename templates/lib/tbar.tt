@@ -1,34 +1,134 @@
-<div id="Layer1" style="left:70px; top:50px; z-index:1; font:italic 12px Arial; position:absolute; color:#A7221E; "><b>An Online Informatics Resource for Dictyostelium</b></div>
+[% META
+    loader 		= 'true'
+%]       
 
-<table cellSpacing=0 cellpadding=0 width=100% border="0">
-   <tr>
-      <td class="topSpace" width="204" rowSpan="3" valign="bottom">
-         <img src="/static/images/clearpix.gif" width="1" height="10">
-         <a href="/"><IMG src="/static/images/dictyLogo.png" align="absBottom" border="0"></a>
-      </td>
-      <td class="topSpace" colSpan="8" height="88" width="100%">
-         <table width="100%" height="100%" border="0">
-         <form action="/db/cgi-bin/search/search.pl" >
-            <tr>
-               <td width="50%">
-               &nbsp;
-               </td>
-               <td class="topSpace" width="250">
-                 <b>Search dictyBase:</b><br>
-                 use * as a wildcard character<br>
-                 <nobr>
-                 <input name="query" type="text" size="25">
-                 <input type="submit" name="submit" value="Search All"><input type="submit" name="genes_only" value="Gene Names Only">
-                 </nobr>
-               </td>
-            </tr>
-         </form>
-         </table>
-      </td>
-   </tr>
-[% IF species %]
-	[% INCLUDE "$species/tbarmenu.tt" %]
-[% ELSE %]
-	[% INCLUDE tbarmenu.tt %]
-[% END %]
-</table>
+<script type="text/javascript">
+    var loader = new YAHOO.util.YUILoader({
+        base: '/static/js/yui/build/',
+        loadOptional: true,
+    });
+    
+    loader.addModule({
+        name: 'yui-css',
+        type: 'css',
+        fullpath: "/static/css/yui.css"
+    });
+    
+    loader.addModule({
+        name: 'fonts-min-css',
+        type: 'css',
+        fullpath: "/static/js/yui/build/fonts/fonts-min.css"
+    });
+    
+    loader.addModule({
+        name: 'menu-css',
+        type: 'css',
+        fullpath: "/static/js/yui/build/menu/assets/skins/sam/menu.css"
+    });
+
+    loader.addModule({
+        name: 'header-css',
+        type: 'css',
+        fullpath: "/static/css/header.css"
+    });
+
+    loader.addModule({
+        name: 'footer-css',
+        type: 'css',
+        fullpath: "/static/css/footer.css"
+    });
+
+    loader.addModule({
+        name: 'menu-custom',
+        type: 'js',
+        fullpath: "/static/js/custom/menu.js",
+        requires: [
+            'yahoo','container','event', 'menu', 'animation', 
+            'yui-css', 'fonts-min-css', 'menu-css', 'header-css', 'footer-css'
+        ]
+    });
+    loader.require('menu-custom');
+    loader.insert();
+    
+</script> 
+
+<html>
+    <body class="yui-skin-sam">
+        <div id="shadow-container">
+            <div class="shadow">
+                <div id="container-top">
+                    <div id="descriptor">
+                   <!--    <b>An Online Informatics Resource for .....</b> -->
+                    </div>
+                    <table>
+                        <tr>
+                            <td rowspan="2">
+                                <a href="/"><img src="/static/images/logo.gif"></a>
+                            </td>
+                            <td colspan="4">
+                                <div id="container-help">
+                                    <img src="/static/images/help-left.gif">
+                                    <div>
+                                        <a href="/db/cgi-bin/dictyBaseDP/suggestion">Contact us</a>
+                                    </div>
+                                    <img src="/static/images/help-right.gif">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="menu">
+                            <td>
+                                <img src="/static/images/menu-top-left.gif">
+                            </td>
+                            <td>
+                                <div id="menu-top" class="yuimenubar yuimenubarnav">
+                                    <div class="bd">
+                                        <ul class="first-of-type">
+                                            <li class="yuimenubaritem first-of-type">
+                                                <a class="yuimenubaritemlabel" href="/purpureum/gbrowse/">Genome Browser</a>
+                                                <div id="gbrowse" class="yuimenu">
+                                                    <div class="bd">
+                                                        <ul class="first-of-type">
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_1:1..30000">scaffold_1</a>
+                                                            </li>
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_2:1..30000">scaffold_2</a>
+                                                            </li>
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_3:1..30000">scaffold_4</a>
+                                                            </li>       
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_4:1..30000">scaffold_4</a>
+                                                            </li>                                  
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/purpureum/downloads/contig_information.html">more..</a>
+                                                            </li>                                                                                               
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li class="yuimenubaritem ">
+                                                <a class="yuimenubaritemlabel" href="/tools/blast">BLAST</a>
+                                            </li>
+                                            <li class="yuimenubaritem">
+                                                <a class="yuimenubaritemlabel" href="/purpureum/downloads">Download</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <img src="/static/images/menu-top-right.gif">
+                            </td>
+                            <td style="width:100%;">
+                                <form action="/db/cgi-bin/search/search.pl">
+                                    <input name="query" type="text" size="30" value="use * as a wildcard character"> <nobr><input type="submit" name="submit" value="Search All"> <input type="submit" name="genes_only" value="Gene Names Only"></nobr>
+                                </form>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
