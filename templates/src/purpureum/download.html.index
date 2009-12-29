@@ -30,3 +30,4 @@ loader 		= 'true'
 <br/>
 </td></tr></table>
 
+[% INCLUDE "page-footer.tt" %]
