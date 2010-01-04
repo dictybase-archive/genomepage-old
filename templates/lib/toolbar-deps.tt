@@ -1,0 +1,49 @@
+<script type="text/javascript">
+    var loader = new YAHOO.util.YUILoader({
+        base: '/static/js/yui/build/',
+        loadOptional: true,
+    });
+    
+    loader.addModule({
+        name: 'yui-css',
+        type: 'css',
+        fullpath: "/static/css/yui.css"
+    });
+    
+    loader.addModule({
+        name: 'fonts-min-css',
+        type: 'css',
+        fullpath: "/static/js/yui/build/fonts/fonts-min.css"
+    });
+    
+    loader.addModule({
+        name: 'menu-css',
+        type: 'css',
+        fullpath: "/static/js/yui/build/menu/assets/skins/sam/menu.css"
+    });
+
+    loader.addModule({
+        name: 'header-css',
+        type: 'css',
+        fullpath: "/static/css/header.css"
+    });
+
+    loader.addModule({
+        name: 'footer-css',
+        type: 'css',
+        fullpath: "/static/css/footer.css"
+    });
+
+    loader.addModule({
+        name: 'menu-custom',
+        type: 'js',
+        fullpath: "/static/js/custom/menu.js",
+        requires: [
+            'yahoo','container','event', 'menu', 'animation', 
+            'yui-css', 'fonts-min-css', 'menu-css', 'header-css', 'footer-css'
+        ]
+    });
+    loader.require('menu-custom');
+    loader.insert();
+    
+</script> 

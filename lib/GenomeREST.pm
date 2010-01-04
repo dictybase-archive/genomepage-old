@@ -53,6 +53,11 @@ sub startup {
     	action => 'index', 
     );
 
+    $router->route('/:species/downloads/:file')->to(
+    	controller => 'download', 
+    	action => 'retrieve', 
+    );
+
     my $bridge2 = $router->bridge('/:species/gene')->to(
             controller => 'input',
             action     => 'check_species'
@@ -149,10 +154,10 @@ sub set_renderer {
     my $tt = DictyREST::Renderer::TT->new(
         path        => $self->template_path,
         compile_dir => $compile_dir,
-        option      => {
-            PRE_PROCESS  => $self->config->param('genepage.header') || '',
-            POST_PROCESS => $self->config->param('genepage.footer') || '',
-        },
+        #option      => {
+        #    PRE_PROCESS  => $self->config->param('genepage.header') || '',
+        #    POST_PROCESS => $self->config->param('genepage.footer') || '',
+        #},
     );
    my $index_tt = DictyREST::Renderer::Index->new(
         path        => $self->template_path,
@@ -172,6 +177,7 @@ sub set_renderer {
 }
 
 1;
+
 __END__
 
 =head1 NAME

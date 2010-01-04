@@ -20,6 +20,13 @@ sub index {
 	);
 } 
 
+sub retrieve {
+	my ($self,  $c) = @_;
+	my $file = $c->stash('file');
+	my $ext = $c->stash('format');
+	$self->render(text => "Got to download this file $file with format $ext");
+}
+
 1;    # Magic true value required at end of module
 
 __END__

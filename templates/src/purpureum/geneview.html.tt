@@ -1,12 +1,14 @@
+[% title = 'Gene Summary' %]
+
  [% PROCESS "page-header.tt" 
-	require = "toolbar-body"
+	require = "toolbar-body-gene"
  %]
 
     <body class="yui-skin-sam">
         <div class="wrapper threecol">
 
         	[% PROCESS "$species/tbar.tt" %]
-        	[% PROCESS "$species/body.tt" %]
+        	[% PROCESS "$species/genebody.tt" %]
         	[% PROCESS "page-footer.tt" %]
         </div>
     </body>

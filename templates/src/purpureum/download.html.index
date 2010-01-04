@@ -1,32 +1,17 @@
-[% META
+[% 
 title       = 'Download'
 %]
 
-[% PROCESS "page-header.tt" %]
+[% PROCESS "page-header.tt" 
+	require = "toolbar-body"
+%]
 
-<table cellspacing="10" width="100%"><tr><td>
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Gene Information</td></tr>
-      <tr class="row2"><td>DPU_G - JGI mapping</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=GeneID-JGI.txt">[tab-delimited]</a></td></tr>
-</table>
-<br/>
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Contig Information</td></tr>
-      <tr class="row2"><td>Contig list</td><td><a href="/downloads/contig_information.html">[tab-delimited]</a></td></tr>
-</table> 
-<br/>
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Purpureum Sequences and Alignments</td></tr>
-      <tr class="row2"><td>Sequences in FASTA format</td><td><a href="/db/cgi-bin/dictyBaseDP/download/blast_databases.pl">[download area]</a></td></tr>
-      <tr class="row2"><td>D. discoideum proteins aligned on D. purpureum (75%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=matched.ddb.gz">[zip file]</a></td></tr>
-      <tr class="row2"><td>D. discoideum proteins not aligned on D. purpureum (25%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=unmatched.ddb.gz">[zip file]</a></td></tr>
-      <tr class="row2"><td>ESTs aligned to genome (57%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=aligned_ests.fa.gz">[zip file]</a></td></tr>
-      <tr class="row2"><td>ESTs not aligned to genome (43%)</td><td><a href="/db/cgi-bin/dictyBaseDP/download/download.pl?area=general&ID=unaligned_ests.fa.gz">[zip file]</a></td></tr>
-</table>
-<br/>
-</td></tr></table>
+<body class="yui-skin-sam">
+	<div class="wrapper threecol">
+        	[% PROCESS "$species/tbar.tt" %]
+        	[% PROCESS "$species/download-body.tt" %]
+					[% PROCESS "page-footer.tt" %]
+		</div>
+	</body>
+</html>
 
-[% INCLUDE "page-footer.tt" %]

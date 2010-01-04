@@ -1,59 +1,3 @@
-[% META
-    loader 		= 'true'
-%]       
-
-<script type="text/javascript">
-    var loader = new YAHOO.util.YUILoader({
-        base: '/static/js/yui/build/',
-        loadOptional: true,
-    });
-    
-    loader.addModule({
-        name: 'yui-css',
-        type: 'css',
-        fullpath: "/static/css/yui.css"
-    });
-    
-    loader.addModule({
-        name: 'fonts-min-css',
-        type: 'css',
-        fullpath: "/static/js/yui/build/fonts/fonts-min.css"
-    });
-    
-    loader.addModule({
-        name: 'menu-css',
-        type: 'css',
-        fullpath: "/static/js/yui/build/menu/assets/skins/sam/menu.css"
-    });
-
-    loader.addModule({
-        name: 'header-css',
-        type: 'css',
-        fullpath: "/static/css/header.css"
-    });
-
-    loader.addModule({
-        name: 'footer-css',
-        type: 'css',
-        fullpath: "/static/css/footer.css"
-    });
-
-    loader.addModule({
-        name: 'menu-custom',
-        type: 'js',
-        fullpath: "/static/js/custom/menu.js",
-        requires: [
-            'yahoo','container','event', 'menu', 'animation', 
-            'yui-css', 'fonts-min-css', 'menu-css', 'header-css', 'footer-css'
-        ]
-    });
-    loader.require('menu-custom');
-    loader.insert();
-    
-</script> 
-
-<html>
-    <body class="yui-skin-sam">
         <div id="shadow-container">
             <div class="shadow">
                 <div id="container-top">
@@ -63,7 +7,7 @@
                     <table>
                         <tr>
                             <td rowspan="2">
-                                <a href="/"><img src="/static/images/logo.gif"></a>
+                                <a href="/"><img src="/static/images/logo_3.gif"></a>
                             </td>
                             <td colspan="4">
                                 <div id="container-help">
@@ -130,5 +74,4 @@
                 </div>
             </div>
         </div>
-    </body>
-</html>
+

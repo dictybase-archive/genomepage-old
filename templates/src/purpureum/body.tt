@@ -1,0 +1,59 @@
+    <div id="subnav">
+                <div class="inner_container">
+                    <h3>
+                        Welcome to Dictyostelium Purpureum Portal
+                    </h3>
+                </div>
+            </div>
+            <div class="wrapper-left-center">
+                <div class="wrapper-columns">
+                    <div class="column-center">
+                        <div id="column-center-content">
+                            <!-- Central Column start -->
+                            <h2>
+                                Currently the site contains:
+                            </h2>
+                            <ul>
+                                <li>Supercontigs (scaffolds) assembled by the sequencing center
+                                </li>
+                                <li>EST sequences
+                                </li>
+                                <li>Alignments of ESTs to supercontigs: <b>57% ESTs aligned to genome</b>
+                                </li>
+                                <li>Alignments of dictyBase primary proteins to supercontigs: <b>75% dictyBase proteins aligned to genome</b>
+                                </li>
+                                <li>14097 Gene Predictions from Geneid
+                                </li>
+                                <li style="list-style: none">
+                                    <br>
+                                    Start by browsing a sample <a href="/purpureum/gene/DPU_G0051088">gene page</a>
+                                </li>
+                            </ul><!-- Central Column end -->
+                        </div>
+                    </div>
+                    <div class="column-left">
+                        <div id="column-left-content">
+                            <!-- Left Column start -->
+                            <!---
+                            <h4>
+                                Announcements<br/>
+                            </h4>
+                            <div class="info wide">
+                                Just added
+                                <a href="/purpureum/">Dictiostelium Purpureum portal</a>
+                            </div>
+
+                            <div class="warning wide">
+                                Oops!
+                            </div>
+=-->
+                            <!-- Left Column end -->
+                        </div>
+                    </div>
+                    <div class="column-right">
+                        <!-- Right Column start -->
+                        <!-- Right Column end -->
+                    </div>
+                </div>
+            </div>
+

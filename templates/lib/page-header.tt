@@ -4,26 +4,27 @@
 		<title> 
             [% IF default %]
                 Gene information for [% header %] 
+						[% ELSIF title %]
+								[% title %] page
             [% ELSE %]
                 [% header or "Dictybase page" %] 
             [% END %]
 		</title>
 
         [% PROCESS config.tt %]
-        
-        [% js_link (src = "/static/js/yui/build/yahoo/yahoo.js"); %]
-        [% css_link ( href = "/static/css/style.css"); %]
 
-        [% js_link (src = "/static/js/yui/build/yuiloader/yuiloader-min.js"); %]
+        [% css_link ( href = "/static/css/style.css"); %]
+        [% IF NOT template.noloader %]
+            [% js_link (src = "/static/js/yui/build/yuiloader/yuiloader-min.js"); %]
+        [% END %]
+        [% IF require %]
+        	[% PROCESS "$require-deps.tt" %]
+				[% END %]
 
         [% IF template.error_page %]
 	        [% css_link ( href = "/static/css/dicty_yui.css"); %]
         [% END %]
+
 </head>
 
-[% IF species %]
-	[% INCLUDE "$species/tbar.tt" %]
-[% ELSE %]
-	[% INCLUDE "tbar.tt" %]
-[% END %]
 
