@@ -13,9 +13,8 @@
         
         [% js_link (src = "/static/js/yui/build/yahoo/yahoo.js"); %]
         [% css_link ( href = "/static/css/style.css"); %]
-        [% IF template.loader %]
-            [% js_link (src = "/static/js/yui/build/yuiloader/yuiloader-min.js"); %]
-        [% END %]
+
+        [% js_link (src = "/static/js/yui/build/yuiloader/yuiloader-min.js"); %]
 
         [% IF template.error_page %]
 	        [% css_link ( href = "/static/css/dicty_yui.css"); %]

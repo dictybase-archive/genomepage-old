@@ -1,6 +1,5 @@
 [% META
 title       = 'Download'
-loader 		= 'true'
 %]
 
 [% PROCESS "page-header.tt" %]

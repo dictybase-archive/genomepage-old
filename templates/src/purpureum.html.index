@@ -1,28 +1,26 @@
-[% PROCESS config.tt %]
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
-	<head>
-	
+    <head>
+        <title></title>
+    </head>
+    <body>
+        [% PROCESS "page-header.tt" %]
+        
+        <script type="text/javascript">
+        var loader = new YAHOO.util.YUILoader({
+        base: '/static/js/yui/build/',
+        loadOptional: true,
+        });
 
-[%
-	css_link ( href = "/static/css/body.css");
-	icon_link ( href = "/favicon.ico" );
-	icon_link ( href = "/favicon.ico", rel = "shortcut icon");
-	js_link (src = "/static/js/form_utils.js");
-	
-%]
-    <title> 
-        [% IF species %]
-            Welcome to [% species %] base 
-        [% ELSE %]
-            Welcome to Dicty Genomes
-        [% END %]
-    </title>
-</head>
-   <body>
-        <div id="header">
-            [% PROCESS "$species/page-header.tt" %]
-        </div>
+        loader.addModule({
+        name: 'body-css',
+        type: 'css',
+        fullpath: "/static/css/body.css"
+        });
+        loader.require('body-css');
+        loader.insert();
+        </script>
+        
         <div class="wrapper threecol">
             <div id="subnav">
                 <div class="inner_container">
@@ -37,30 +35,30 @@
                         <div id="column-center-content">
                             <!-- Central Column start -->
                             <h2>
-                               Currently the site contains: 
+                                Currently the site contains:
                             </h2>
                             <ul>
-                                <li>Supercontigs (scaffolds) assembled by the sequencing
-                                center</li>
-                                <li>EST sequences</li>
-                                <li>Alignments of ESTs to supercontigs: 
-                                	<b>57% ESTs aligned to genome</b>
+                                <li>Supercontigs (scaffolds) assembled by the sequencing center
                                 </li>
-                                <li>Alignments of dictyBase primary proteins to supercontigs: 
-                                	<b>75% dictyBase proteins aligned to genome</b>
+                                <li>EST sequences
                                 </li>
-                                <li>14097 Gene Predictions from Geneid</li>
-                                <br/>
-                                Start by browsing a sample <a
-                                href="/purpureum/gene/DPU_G0051088"> gene page</a>
-                                </ul>
-                            </p><!-- Central Column end -->
+                                <li>Alignments of ESTs to supercontigs: <b>57% ESTs aligned to genome</b>
+                                </li>
+                                <li>Alignments of dictyBase primary proteins to supercontigs: <b>75% dictyBase proteins aligned to genome</b>
+                                </li>
+                                <li>14097 Gene Predictions from Geneid
+                                </li>
+                                <li style="list-style: none">
+                                    <br>
+                                    Start by browsing a sample <a href="/purpureum/gene/DPU_G0051088">gene page</a>
+                                </li>
+                            </ul><!-- Central Column end -->
                         </div>
                     </div>
                     <div class="column-left">
                         <div id="column-left-content">
                             <!-- Left Column start -->
-<!---
+                            <!---
                             <h4>
                                 Announcements<br/>
                             </h4>
@@ -72,7 +70,7 @@
                             <div class="warning wide">
                                 Oops!
                             </div>
---->
+=-->
                             <!-- Left Column end -->
                         </div>
                     </div>
@@ -83,9 +81,8 @@
                 </div>
             </div>
             <div id="footer">
-                [% PROCESS "$species/page-footer.tt" %]
+                [% PROCESS "page-footer.tt" %]
             </div>
         </div>
     </body>
-
-
+</html>
