@@ -1,0 +1,34 @@
+[% USE gbrowse = url("/$species/gbrowse/") %]
+
+ [% PROCESS "page-header.tt" 
+	require = "toolbar-body"
+ %]
+
+    <body class="yui-skin-sam">
+        <div class="wrapper threecol">
+
+        	[% PROCESS "$species/tbar.tt" %]
+
+    <h1>Contig Information</h1>
+    <p align="right"><a target="new" href="[% c.req.url.base %]/[% species %]/downloads">Back to downloads</a></p>
+    <hr>
+    <p>Click on the contig to view GBrowse image of the region </p>
+    <table class="download">
+    <tr class="row1">
+        <td>Contig name</td><td>Length</td><td>Number of genes</td>
+    </tr>
+
+    [% FOREACH item IN data %]
+    	<tr class="row2">
+    		<td> <a href="[% gbrowse(name = item.0) %]">[% item.0 %]</a> </td>
+    		<td> [% item.1 %] </td>
+    		<td> [% item.2 %] </td>
+			</tr>
+		[% END %]
+
+		</table>
+
+    [% PROCESS "page-footer.tt" %]
+    </div>
+    </body>
+</html>

@@ -24,7 +24,7 @@ sub retrieve {
 	my ($self,  $c) = @_;
 	my $file = $c->stash('file');
 	my $ext = $c->stash('format');
-	$self->render(text => "Got to download this file $file with format $ext");
+	my $success = $self->app->downloader->serve($c, $file.'.'.$ext);
 }
 
 1;    # Magic true value required at end of module

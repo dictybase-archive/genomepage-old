@@ -2,13 +2,13 @@
 <table class="download">
       <col width="75%"/><col width="25%"/>
       <tr class="row1"><td colspan="2">Gene Information</td></tr>
-      <tr class="row2"><td>DPU_G - JGI mapping</td><td><a href="/purpureum/downloads/GeneID-JGI.txt">[tab-delimited]</a></td></tr>
+      <tr class="row2"><td>DPU_G - JGI mapping</td><td><a href="/[% species %]/downloads/GeneID-JGI.txt">[tab-delimited]</a></td></tr>
 </table>
 <br/>
 <table class="download">
       <col width="75%"/><col width="25%"/>
       <tr class="row1"><td colspan="2">Contig Information</td></tr>
-      <tr class="row2"><td>Contig list</td><td><a href="/purpureum/downloads/contig_information.html">[tab-delimited]</a></td></tr>
+      <tr class="row2"><td>Contig list</td><td><a href="/[% species %]/contig">[tab-delimited]</a></td></tr>
 </table> 
 <br/>
 <table class="download">

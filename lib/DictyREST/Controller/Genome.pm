@@ -5,6 +5,8 @@ use strict;
 
 # Other modules:
 use base qw/Mojolicious::Controller/;
+use dicty::Search::Reference_feature;
+use dicty::Search::Gene;
 
 # Other modules:
 
@@ -13,22 +15,61 @@ use base qw/Mojolicious::Controller/;
 
 sub index {
     my ( $self, $c ) = @_;
-    my $name     = $c->stash('species');
-    my $organism = $self->app->helper->validate_species($name);
-    if ( !$organism ) {
-        $c->res->code(404);
-        $self->render(
-            text => "organism $name does not exist in our database" );
-        return;
-    }
+    my $organism = $c->stash('organism');
     $self->render(
-    	handler => 'index', 
+        handler     => 'index',
         template    => $organism->species,
         species     => $organism->species,
         genus       => $organism->genus,
         abbr        => $organism->abbreviation,
         common_name => $organism->common_name
     );
+}
+
+sub check_species {
+ my ( $self, $c ) = @_;
+    my $name     = $c->stash('species');
+    my $organism = $self->app->helper->validate_species($name);
+    if ( !$organism ) {
+    	$c->res->code(404);
+        $self->render(
+            template => $self->app->config->param('genepage.error'),
+            message  => "organism $name not found",
+            error    => 1,
+            header   => 'Error page',
+        );
+        return;
+
+    }
+    $c->stash('organism' => $organism);
+    return 1;
+}
+
+sub contig {
+    my ( $self, $c ) = @_;
+    my @contigs
+        = dicty::Search::Reference_feature->find( -type => 'supercontig' );
+    my @sorted_contigs
+        = sort { $self->name_digit($a) <=> $self->name_digit($b) } @contigs[0 .. 100];
+
+    my $data;
+    foreach my $contig (@sorted_contigs) {
+        my $count = dicty::Search::Gene->count(
+            -reference => { type => 'supercontig', name => $contig->name } );
+        my $length = length( $contig->sequence );
+        push @$data, [ $contig->name, $length, $count ];
+
+    }
+    $c->stash('data' => $data,  header => 'Contig page');
+    $self->render(template => $c->stash('species').'/contig');
+
+}
+
+sub name_digit {
+    my ( $self, $feat ) = @_;
+    my $str = $feat->name;
+    $str =~ m{(\d+)$};
+    $1;
 }
 
 1;    # Magic true value required at end of module

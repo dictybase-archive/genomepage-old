@@ -17,6 +17,8 @@ __PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
 __PACKAGE__->attr('template_path');
 __PACKAGE__->attr( 'has_config', default => 0 );
 __PACKAGE__->attr( 'helper', default => sub { DictyREST::Helper->new() } );
+__PACKAGE__->attr('downloader');
+__PACKAGE__->attr('schema');
 
 # This will run once at startup
 sub startup {
@@ -28,40 +30,51 @@ sub startup {
     #config file setup
     $self->set_config();
 
+    $self->downloader(
+        MojoX::Dispatcher::Static->new(
+            prefix => '/bulkfile',
+            root   => $self->config->param('download')
+        )
+    );
+
     my $router = $self->routes();
 
     #$self->log->debug("starting up");
 
-
     #reusing DictyREST controller
-    $router->namespace( 'DictyREST::Controller' );
+    $router->namespace('DictyREST::Controller');
 
     #routing setup
     #suffix based routing for multigenome setup
 
-
     #goes here before it passes to any other controller
     #kind of before action
-    my $bridge = $router->route('/:species')->to(
-    	controller => 'genome', 
-    	action => 'index', 
-    	format => 'html' 
+    #my $bridge = $router->route('/:species')->to(
+    my $bridge = $router->bridge->to(
+        controller => 'genome',
+        action     => 'check_species',
     );
 
-    $router->route('/:species/downloads')->to(
-    	controller => 'download', 
-    	action => 'index', 
+    $bridge->route('/:species')
+        ->to( controller => 'genome', action => 'index' );
+
+    $bridge->route('/:species/downloads')->to(
+        controller => 'download',
+        action     => 'index',
     );
 
-    $router->route('/:species/downloads/:file')->to(
-    	controller => 'download', 
-    	action => 'retrieve', 
+    $bridge->route('/:species/downloads/:file')->to(
+        controller => 'download',
+        action     => 'retrieve',
     );
+
+    $bridge->route('/:species/contig')
+        ->to( controller => 'genome', action => 'contig' );
 
     my $bridge2 = $router->bridge('/:species/gene')->to(
-            controller => 'input',
-            action     => 'check_species'
-        );
+        controller => 'input',
+        action     => 'check_species'
+    );
 
     #support both json and html
     #default is html
@@ -154,22 +167,23 @@ sub set_renderer {
     my $tt = DictyREST::Renderer::TT->new(
         path        => $self->template_path,
         compile_dir => $compile_dir,
+
         #option      => {
         #    PRE_PROCESS  => $self->config->param('genepage.header') || '',
         #    POST_PROCESS => $self->config->param('genepage.footer') || '',
         #},
     );
-   my $index_tt = DictyREST::Renderer::Index->new(
+    my $index_tt = DictyREST::Renderer::Index->new(
         path        => $self->template_path,
         compile_dir => $compile_dir,
     );
-  
+
     my $json         = DictyREST::Renderer::JSON->new();
     my $json_generic = DictyREST::Renderer::JSON_Generic->new();
 
     $self->renderer->add_handler(
         tt           => $tt->build(),
-        index           => $index_tt->build(),
+        index        => $index_tt->build(),
         json         => $json->build(),
         json_generic => $json_generic->build()
     );

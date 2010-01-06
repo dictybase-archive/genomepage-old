@@ -33,7 +33,6 @@ sub index_html {
     #default rendering
     $c->stash( $db->result() );
     $self->render( template => $c->stash('species').'/'.$app->config->param('genepage.template') );
-    #$self->render( template => $app->config->param('genepage.template') );
 
 
     #$app->log->debug( 'from html' );
