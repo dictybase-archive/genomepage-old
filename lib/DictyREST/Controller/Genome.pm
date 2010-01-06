@@ -27,11 +27,11 @@ sub index {
 }
 
 sub check_species {
- my ( $self, $c ) = @_;
+    my ( $self, $c ) = @_;
     my $name     = $c->stash('species');
     my $organism = $self->app->helper->validate_species($name);
     if ( !$organism ) {
-    	$c->res->code(404);
+        $c->res->code(404);
         $self->render(
             template => $self->app->config->param('genepage.error'),
             message  => "organism $name not found",
@@ -41,27 +41,35 @@ sub check_species {
         return;
 
     }
-    $c->stash('organism' => $organism);
+    $c->stash( 'organism' => $organism );
     return 1;
 }
 
 sub contig {
     my ( $self, $c ) = @_;
-    my @contigs
-        = dicty::Search::Reference_feature->find( -type => 'supercontig' );
-    my @sorted_contigs
-        = sort { $self->name_digit($a) <=> $self->name_digit($b) } @contigs[0 .. 100];
-
     my $data;
-    foreach my $contig (@sorted_contigs) {
-        my $count = dicty::Search::Gene->count(
-            -reference => { type => 'supercontig', name => $contig->name } );
-        my $length = length( $contig->sequence );
-        push @$data, [ $contig->name, $length, $count ];
+    my $model = $self->app->model;
 
+    my $contig_rs
+        = $model->resultset('Sequence::Feature')
+        ->search( { 'type.name' => 'supercontig' },
+        { join => 'type',  rows => 100 } );
+
+
+    while ( my $contig = $contig_rs->next ) {
+        my $gene_rs
+            = $contig->search_related( 'featureloc_srcfeature_ids', {} )
+            ->search_related(
+            'feature',
+            { 'type.name' => 'gene' },
+            { join        => 'type' }
+            );
+        push @$data,
+            [ $contig->name, length $contig->residues, $gene_rs->count ];
     }
-    $c->stash('data' => $data,  header => 'Contig page');
-    $self->render(template => $c->stash('species').'/contig');
+
+    $c->stash( 'data' => $data, header => 'Contig page' );
+    $self->render( template => $c->stash('species') . '/contig' );
 
 }
 
@@ -73,6 +81,7 @@ sub name_digit {
 }
 
 1;    # Magic true value required at end of module
+
 
 __END__
 

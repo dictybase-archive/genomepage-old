@@ -3,6 +3,7 @@ package GenomeREST;
 use strict;
 use warnings;
 
+use local::lib '~/modern-perl';
 use base 'Mojolicious';
 use Config::Simple;
 use Carp;
@@ -12,13 +13,14 @@ use DictyREST::Renderer::Index;
 use DictyREST::Renderer::JSON;
 use DictyREST::Renderer::JSON_Generic;
 use DictyREST::Helper;
+use Bio::Chado::Schema;
 
 __PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
 __PACKAGE__->attr('template_path');
 __PACKAGE__->attr( 'has_config', default => 0 );
 __PACKAGE__->attr( 'helper', default => sub { DictyREST::Helper->new() } );
 __PACKAGE__->attr('downloader');
-__PACKAGE__->attr('schema');
+__PACKAGE__->attr('model');
 
 # This will run once at startup
 sub startup {
@@ -37,6 +39,7 @@ sub startup {
         )
     );
 
+    $self->connect_dbh();
     my $router = $self->routes();
 
     #$self->log->debug("starting up");
@@ -188,6 +191,17 @@ sub set_renderer {
         json_generic => $json_generic->build()
     );
     $self->renderer->default_handler('tt');
+}
+
+sub connect_dbh {
+    my $self = shift;
+    my $opt = $self->config->param('database.opt');
+    my $schema = Bio::Chado::Schema->connect(
+        $self->config->param('database.dsn'),
+        $self->config->param('database.user'),
+        $self->config->param('database.pass'), { $opt => 1 } 
+    );
+    $self->model($schema);
 }
 
 1;
