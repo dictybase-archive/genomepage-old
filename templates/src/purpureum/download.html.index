@@ -8,7 +8,9 @@ title       = 'Download'
 
 <body class="yui-skin-sam">
 	<div class="wrapper threecol">
-        	[% PROCESS "$species/tbar.tt" %]
+					[% PROCESS "$species/tbar.tt" 
+        		 label = "Genomic resource for purpureum"        		
+        	%]
         	[% PROCESS "$species/download-body.tt" %]
 					[% PROCESS "page-footer.tt" %]
 		</div>

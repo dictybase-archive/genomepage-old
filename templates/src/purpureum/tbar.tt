@@ -1,9 +1,11 @@
         <div id="shadow-container">
             <div class="shadow">
                 <div id="container-top">
+                	[% IF label %]
                     <div id="descriptor">
-                   <!--    <b>An Online Informatics Resource for .....</b> -->
+                       <b>Genomic resource for purpureum</b> 
                     </div>
+									[% END %]
                     <table>
                         <tr>
                             <td rowspan="2">
