@@ -8,7 +8,7 @@
         <div class="wrapper threecol">
 
         	[% PROCESS "$species/tbar.tt" 
-        		 label = "Genomic resource for purpureum"        		
+        		 label = "Genomic resource for D.purpureum"        		
         	%]
         	[% PROCESS "$species/genebody.tt" %]
         	[% PROCESS "page-footer.tt" %]

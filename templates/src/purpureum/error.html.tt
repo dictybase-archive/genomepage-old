@@ -23,6 +23,7 @@ title = 'Error not found'
 		[% ELSE %]
 			<div class="error-warning">
 			[% message %]
+			</div>
 		[% END %]
 	
 	[% PROCESS "page-footer.tt" %]

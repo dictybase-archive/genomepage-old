@@ -1,3 +1,5 @@
+[% title = "D.purpureum" %]
+
  [% PROCESS "page-header.tt" 
 	require = "toolbar-body"
  %]
