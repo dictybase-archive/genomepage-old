@@ -9,21 +9,24 @@ title = 'Error not found'
 <body class="yui-skin-sam">
 	<div class="wrapper threecol">
 
-	[% PROCESS "toolbar.tt" %]
+    [% PROCESS "$species/tbar.tt" 
+    		 label = "Genomic resource for purpureum"        		
+    %]
 
-	[% IF replaced %]
+		[% IF replaced %]
 			<div class="error-warning">
 			[% message %]
 			[% FOREACH value IN id %]
 					[% USE path = url("$url/$value") %]
 						<a href="[% path %]"> [% value %]</a>
 			[% END %]
-	[% ELSE %]
-		<div class="error-warning">
+		[% ELSE %]
+			<div class="error-warning">
 			[% message %]
-	[% END %]
+		[% END %]
 	
 	[% PROCESS "page-footer.tt" %]
+
 	</div>
 </body>
 
