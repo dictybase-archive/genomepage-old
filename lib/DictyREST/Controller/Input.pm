@@ -11,12 +11,12 @@ use dicty::Feature;
 # Module implementation
 #
 
-sub check_species {
+sub check_name {
     my ( $self, $c ) = @_;
-    my $name     = $c->stash('species');
+    my $name     = $c->stash('name');
     my $organism = $self->app->helper->validate_species($name);
     if ( !$organism ) {
-    	$c->res->code(404);
+        $c->res->code(404);
         $self->render(
             template => $self->app->config->param('genepage.error'),
             message  => "organism $name not found",
@@ -26,7 +26,7 @@ sub check_species {
         return;
 
     }
-    $c->stash(species => $organism->species);
+    $c->stash( species => $organism->species );
     return $self->validate($c);
 }
 
@@ -36,20 +36,37 @@ sub validate {
     my $app     = $self->app;
     my $gene_id = $app->helper->process_id($id);
     if ( !$gene_id ) {
-    	$c->res->code(404);
+        $c->res->code(404);
         $self->render(
-            template => $app->config->param('genepage.error'),
-            message  => "Input $id not found",
-            error    => 1,
-            header   => 'Error page',
+            template => $c->stash('species') . '/'
+                . $app->config->param('genepage.error'),
+            message => "Input $id not found",
+            error   => 1,
+            header  => 'Error page',
         );
         return;
     }
 
+    my $gene_feat;
+
+    #logic for wrong ids
+    eval { $gene_feat = dicty::Feature->new( -primary_id => $gene_id ); };
+    if ($@) {
+        $c->res->code(404);
+        $self->render(
+            template => $c->stash('species') . '/'
+                . $app->config->param('genepage.error'),
+            message => "Input $gene_id not found",
+            error   => 1,
+            header  => 'Error page',
+        );
+        return;
+
+    }
+
     #logic for deleted feature
-    my $gene_feat = dicty::Feature->new( -primary_id => $gene_id );
     if ( $gene_feat->is_deleted() ) {
-    	$c->res->code(404);
+        $c->res->code(404);
         if ( my $replaced = $gene_feat->replaced_by() )
         {    #is it being replaced
             $c->stash(
@@ -71,7 +88,8 @@ sub validate {
             );
 
         }
-        $self->render( template => $app->config->param('genepage.error') );
+        $self->render( template => $c->stash('species') . '/'
+                . $app->config->param('genepage.error') );
         return;
     }
     $c->stash( gene_id => $gene_id );

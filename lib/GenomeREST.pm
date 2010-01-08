@@ -52,31 +52,31 @@ sub startup {
 
     #goes here before it passes to any other controller
     #kind of before action
-    #my $bridge = $router->route('/:species')->to(
+    #my $bridge = $router->route('/:name')->to(
     my $bridge = $router->bridge->to(
         controller => 'genome',
-        action     => 'check_species',
+        action     => 'check_name',
     );
 
-    $bridge->route('/:species')
+    $bridge->route('/:name')
         ->to( controller => 'genome', action => 'index' );
 
-    $bridge->route('/:species/downloads')->to(
+    $bridge->route('/:name/downloads')->to(
         controller => 'download',
         action     => 'index',
     );
 
-    $bridge->route('/:species/downloads/:file')->to(
+    $bridge->route('/:name/downloads/:file')->to(
         controller => 'download',
         action     => 'retrieve',
     );
 
-    $bridge->route('/:species/contig')
+    $bridge->route('/:name/contig')
         ->to( controller => 'genome', action => 'contig' );
 
-    my $bridge2 = $router->bridge('/:species/gene')->to(
+    my $bridge2 = $router->bridge('/:name/gene')->to(
         controller => 'input',
-        action     => 'check_species'
+        action     => 'check_name'
     );
 
     #support both json and html

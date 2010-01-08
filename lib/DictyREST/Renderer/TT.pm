@@ -38,7 +38,7 @@ sub build {
     my $subdir = [ map { $_->stringify } grep { -d $_ } $dir->children ];
     my $option = $self->option || {};
     $option->{INCLUDE_PATH} = $subdir;
-    $option->{CACHE_SIZE}   = 128;
+    $option->{CACHE_SIZE}   = 256;
     $option->{COMPILE_EXT}  = '.ttc';
     $option->{COMPILE_DIR}  = $self->compile_dir;
     $self->template( Template->new($option) );

@@ -26,14 +26,14 @@ sub index {
     );
 }
 
-sub check_species {
+sub check_name {
     my ( $self, $c ) = @_;
-    my $name     = $c->stash('species');
+    my $name     = $c->stash('name');
     my $organism = $self->app->helper->validate_species($name);
     if ( !$organism ) {
         $c->res->code(404);
         $self->render(
-            template => $self->app->config->param('genepage.error'),
+            template => 'missing',
             message  => "organism $name not found",
             error    => 1,
             header   => 'Error page',
@@ -41,7 +41,7 @@ sub check_species {
         return;
 
     }
-    $c->stash( 'organism' => $organism );
+    $c->stash( 'organism' => $organism,  species => $organism->species );
     return 1;
 }
 
