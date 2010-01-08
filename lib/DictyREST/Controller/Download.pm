@@ -13,18 +13,32 @@ use base qw/Mojolicious::Controller/;
 # Module implementation
 #
 sub index {
-	my ($self, $c) = @_;
-	my $species = $c->stash('species');
-	$c->render(handler => 'index',  
-		template => $species.'/download' 
-	);
-} 
+    my ( $self, $c ) = @_;
+    if ( $c->req->param('file') ) {
+        my $file = $c->stash('species') . '/' . $c->req->param('file');
+        $self->app->downloader->serve( $c, $file );
+        return;
+    }
+    my $species = $c->stash('species');
+    $c->render(
+        handler  => 'index',
+        template => $species . '/download'
+    );
+}
 
-sub retrieve {
-	my ($self,  $c) = @_;
-	my $file = $c->stash('file');
-	my $ext = $c->stash('format');
-	my $success = $self->app->downloader->serve($c, $file.'.'.$ext);
+sub fasta {
+    my ( $self, $c ) = @_;
+    if ( $c->req->param('file') ) {
+        my $file = $c->stash('species') . '/' . $c->req->param('file');
+        $self->app->downloader->serve( $c, $file );
+        return;
+    }
+    my $species = $c->stash('species');
+    $c->render(
+        handler  => 'index',
+        template => $species . '/fasta'
+    );
+
 }
 
 1;    # Magic true value required at end of module
