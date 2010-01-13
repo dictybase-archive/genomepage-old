@@ -66,6 +66,12 @@ sub startup {
         action     => 'index',
     );
 
+	$bridge->route('/:name/downloads/fasta')->to(
+        controller => 'download',
+        action     => 'fasta',
+    );
+
+
     $bridge->route('/:name/downloads/:file')->to(
         controller => 'download',
         action     => 'retrieve',
