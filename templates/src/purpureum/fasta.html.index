@@ -1,0 +1,19 @@
+[% 
+title       = 'Download fasta'
+%]
+
+[% PROCESS "page-header.tt" 
+	require = "toolbar-body"
+%]
+
+<body class="yui-skin-sam">
+	<div class="wrapper threecol">
+					[% PROCESS "$species/tbar.tt" 
+        		 label = "Genomic resource for D.purpureum"        		
+        	%]
+        	[% PROCESS "$species/fasta-body.tt" %]
+					[% PROCESS "page-footer.tt" %]
+		</div>
+	</body>
+</html>
+
