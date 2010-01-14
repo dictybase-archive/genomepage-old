@@ -3,7 +3,7 @@ package GenomeREST;
 use strict;
 use warnings;
 
-use local::lib '~/modern-perl';
+use local::lib '/home/ubuntu/dictyBase/Libs/modern-perl';
 use base 'Mojolicious';
 use Config::Simple;
 use Carp;

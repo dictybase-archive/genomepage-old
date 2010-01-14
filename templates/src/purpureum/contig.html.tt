@@ -10,7 +10,7 @@
         	[% PROCESS "$species/tbar.tt" %]
 
     <h1>Contig Information</h1>
-    <p align="right"><a target="new" href="[% c.req.url.base %]/[% species %]/downloads">Back to downloads</a></p>
+    <p align="right"><a target="new" href="/[% species %]/downloads">Back to downloads</a></p>
     <hr>
     <p>Click on the contig to view GBrowse image of the region </p>
     <table class="download">
