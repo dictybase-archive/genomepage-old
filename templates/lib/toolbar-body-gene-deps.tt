@@ -50,9 +50,9 @@ loader.addModule({
     'tabview', 'logger', 'container','datatable', 
     'event', 'element', 'animation','menu', 'selector','cookie', 
     'dom', 'button', 'button_css', 'accordion', 'yui-dispatch', 
-    'accordion_css', 'dictyitem', 'yui_css', 'skin_css', 'cart', 
+    'accordion_css', 'dictyitem', 'menu-custom',  'yui_css', 'skin_css', 'cart', 
 		'fonts-min-css', 'menu-css', 'header-css', 
-    'footer-css',  'body-css'
+    'footer-css',  'body-css'  
     ]
 });
 
@@ -63,10 +63,29 @@ loader.addModule({
 });
 
 loader.addModule({
-    name: 'skin_css',
-    type: 'css',
+   name: 'skin_css',
+  type: 'css',
     fullpath: "/static/css/[%species%].css"
 });
+
+loader.addModule({
+       name: 'header-css',
+       type: 'css',
+      fullpath: "/static/css/header.css"
+});
+
+loader.addModule({
+      name: 'footer-css',
+      type: 'css',
+      fullpath: "/static/css/footer.css"
+});
+
+loader.addModule({
+      name: 'body-css',
+      type: 'css',
+      fullpath: "/static/css/body.css"
+});
+
 
 loader.addModule({
     name: 'button_css',
@@ -74,6 +93,24 @@ loader.addModule({
     fullpath: "/static/js/yui/build/button/assets/skins/sam/button.css"
 });
 
+
+loader.addModule({
+      name: 'fonts-min-css',
+      type: 'css',
+      fullpath: "/static/js/yui/build/fonts/fonts-min.css"
+});
+    
+loader.addModule({
+      name: 'menu-css',
+      type: 'css',
+      fullpath: "/static/js/yui/build/menu/assets/skins/sam/menu.css"
+});
+
+loader.addModule ({
+     name: 'menu-custom',
+     type: 'js',
+     fullpath: "/static/js/custom/menu.js",
+});
 
 loader.addModule({
     name: 'dictyitem',
@@ -154,38 +191,9 @@ loader.addModule({
 });
 
     
-   loader.addModule({
-        name: 'fonts-min-css',
-        type: 'css',
-        fullpath: "/static/js/yui/build/fonts/fonts-min.css"
-    });
-    
-    loader.addModule({
-        name: 'menu-css',
-        type: 'css',
-        fullpath: "/static/js/yui/build/menu/assets/skins/sam/menu.css"
-    });
-
-    loader.addModule({
-        name: 'header-css',
-        type: 'css',
-        fullpath: "/static/css/header.css"
-    });
-
-    loader.addModule({
-        name: 'footer-css',
-        type: 'css',
-        fullpath: "/static/css/footer.css"
-    });
-
-		loader.addModule({
-        name: 'body-css',
-        type: 'css',
-        fullpath: "/static/css/body.css"
-     });
 
 
-    loader.require('genetab');
-    loader.insert();
+loader.require('genetab');
+loader.insert();
     
 </script> 

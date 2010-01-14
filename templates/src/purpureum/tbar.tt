@@ -9,7 +9,14 @@
                     <table>
                         <tr>
                             <td rowspan="2">
-                                <a href="/"><img src="/static/images/logo_3.gif"></a>
+
+                            [% IF link_to == "base" %]
+                                <a href = "[% c.req.url.base %]">
+														[% ELSE %]
+																<a href = "[% c.req.url.base %]/[% species %]">
+														[% END %]
+
+                             <img src="/static/images/logo_3.gif"></a>
                             </td>
                             <td colspan="4">
                                 <div id="container-help">
@@ -41,7 +48,7 @@
                                                                 <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_2:1..30000">scaffold_2</a>
                                                             </li>
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_3:1..30000">scaffold_4</a>
+                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_3:1..30000">scaffold_3</a>
                                                             </li>       
                                                             <li class="yuimenuitem">
                                                                 <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_4:1..30000">scaffold_4</a>
