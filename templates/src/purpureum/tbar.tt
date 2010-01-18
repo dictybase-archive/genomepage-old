@@ -16,7 +16,7 @@
 																<a href = "/[% species %]">
 														[% END %]
 
-                             <img src="/static/images/logo_3.gif"></a>
+                             <img src="/static/images/logo.gif"></a>
                             </td>
                             <td colspan="4">
                                 <div id="container-help">
