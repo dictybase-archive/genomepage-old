@@ -29,7 +29,8 @@ sub check_name {
 
     $c->stash(
         species      => $organism->species,
-        abbreviation => $organism->abbreviation
+        abbreviation => $organism->abbreviation,
+        genus        => $organism->genus
     );
 
     return $self->validate($c);

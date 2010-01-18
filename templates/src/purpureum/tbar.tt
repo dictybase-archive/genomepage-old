@@ -3,7 +3,7 @@
                 <div id="container-top">
                 	[% IF label %]
                     <div id="descriptor">
-                       <b>Genomic resource for [% abbreviation %]</b> 
+                       <b>Genomic resource for [% genus %] [% species %]</b> 
                     </div>
 									[% END %]
                     <table>
@@ -42,20 +42,11 @@
                                                     <div class="bd">
                                                         <ul class="first-of-type">
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_1:1..30000">scaffold_1</a>
+                                                                <a
+                                                                class="yuimenuitemlabel"
+                                                                href="/purpureum/contig">List
+                                                                of scaffolds</a>
                                                             </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_2:1..30000">scaffold_2</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_3:1..30000">scaffold_3</a>
-                                                            </li>       
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_4:1..30000">scaffold_4</a>
-                                                            </li>                                  
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/downloads/contig_information.html">more..</a>
-                                                            </li>                                                                                               
                                                         </ul>
                                                     </div>
                                                 </div>

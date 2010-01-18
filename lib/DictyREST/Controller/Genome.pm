@@ -42,9 +42,10 @@ sub check_name {
 
     }
     $c->stash(
-        'organism' => $organism,
-        species    => $organism->species,
-        abbreviation       => $organism->abbreviation
+        organism     => $organism,
+        species      => $organism->species,
+        abbreviation => $organism->abbreviation,
+        genus        => $organism->genus
     );
     return 1;
 }
