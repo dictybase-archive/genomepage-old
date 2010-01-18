@@ -3,7 +3,7 @@
                 <div id="container-top">
                 	[% IF label %]
                     <div id="descriptor">
-                       <b>Genomic resource for [% genus %] [% species %]</b> 
+                       <b>[% genus %] [% species %]</b> 
                     </div>
 									[% END %]
                     <table>
