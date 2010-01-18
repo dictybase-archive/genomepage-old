@@ -22,7 +22,8 @@ sub startup {
     my ($self) = @_;
 
     #default log level
-    $self->log->level('debug');
+    $self->log->level($ENV{MOJO_DEBUG} ? $ENV{MOJO_DEBUG}: 'debug');
+
     my $router = $self->routes();
 
     #$self->log->debug("starting up");

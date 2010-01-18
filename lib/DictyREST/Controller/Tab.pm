@@ -32,8 +32,8 @@ sub section_html {
             -base_url   => $c->stash('base_url')
         );
         $c->stash( $db->result() );
-        $self->render( template => $app->config->param('genepage.template'),
-        );
+        $self->render( template => $c->stash('species') . '/'
+                . $app->config->param('genepage.template') );
     }
 
 }
@@ -58,7 +58,7 @@ sub section_json {
     else {
 
         $factory = dicty::Factory::Tabview::Section->new(
-            -base_url   => $c->stash('base_url'), 
+            -base_url   => $c->stash('base_url'),
             -primary_id => $gene_id,
             -tab        => $tab,
             -section    => $section,

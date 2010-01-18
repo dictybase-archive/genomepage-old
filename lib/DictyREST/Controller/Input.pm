@@ -26,7 +26,12 @@ sub check_name {
         return;
 
     }
-    $c->stash( species => $organism->species );
+
+    $c->stash(
+        species      => $organism->species,
+        abbreviation => $organism->abbreviation
+    );
+
     return $self->validate($c);
 }
 

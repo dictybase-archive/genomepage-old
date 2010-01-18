@@ -41,7 +41,11 @@ sub check_name {
         return;
 
     }
-    $c->stash( 'organism' => $organism,  species => $organism->species );
+    $c->stash(
+        'organism' => $organism,
+        species    => $organism->species,
+        abbreviation       => $organism->abbreviation
+    );
     return 1;
 }
 
@@ -53,8 +57,7 @@ sub contig {
     my $contig_rs
         = $model->resultset('Sequence::Feature')
         ->search( { 'type.name' => 'supercontig' },
-        { join => 'type',  rows => 100 } );
-
+        { join => 'type', rows => 100 } );
 
     while ( my $contig = $contig_rs->next ) {
         my $gene_rs
@@ -81,7 +84,6 @@ sub name_digit {
 }
 
 1;    # Magic true value required at end of module
-
 
 __END__
 
