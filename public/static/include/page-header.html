@@ -4,20 +4,20 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title></title><!-- Fonts CSS - Recommended but not required -->
-        <link rel="stylesheet" type="text/css" href="/static/js/yui/build/fonts/fonts-min.css"><!-- Core + Skin CSS -->
-        <link rel="stylesheet" type="text/css" href="/static/js/yui/build/menu/assets/skins/sam/menu.css"><!-- Dependencies -->
-        <link rel="stylesheet" type="text/css" href="/static/css/header.css">
+        <link rel="stylesheet" type="text/css" href="/inc/js/yui/build/fonts/fonts-min.css"><!-- Core + Skin CSS -->
+        <link rel="stylesheet" type="text/css" href="/inc/js/yui/build/menu/assets/skins/sam/menu.css"><!-- Dependencies -->
+        <link rel="stylesheet" type="text/css" href="/inc/css/header.css">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-        <script type="text/javascript" src="/static/js/yui/build/yahoo-dom-event/yahoo-dom-event.js">
+        <script type="text/javascript" src="/inc/js/yui/build/yahoo-dom-event/yahoo-dom-event.js">
 </script>
-        <script type="text/javascript" src="/static/js/yui/build/container/container_core-min.js">
+        <script type="text/javascript" src="/inc/js/yui/build/container/container_core-min.js">
 </script>
-        <script type="text/javascript" src="/static/js/yui/build/menu/menu-min.js">
+        <script type="text/javascript" src="/inc/js/yui/build/menu/menu-min.js">
 </script>
-        <script type="text/javascript" src="/static/js/yui/build/animation/animation.js">
+        <script type="text/javascript" src="/inc/js/yui/build/animation/animation.js">
 </script>
-        <script type="text/javascript" src="/static/js/custom/menu.js">
+        <script type="text/javascript" src="/inc/js/custom/menu.js">
 </script>
     </head>
     <body class="yui-skin-sam">
@@ -25,64 +25,85 @@
             <div class="shadow">
                 <div id="container-top">
                     <div id="descriptor">
-                        <b>An Online Informatics Resource for .....</b>
+                       <!-- <b>An Online Informatics Resource for .....</b> -->
                     </div>
                     <table>
                         <tr>
                             <td rowspan="2">
-                                <a href="/"><img src="/static/images/logo_3.gif"></a>
+                                <a href="/"><img src="/inc/images/logo.gif"></a>
                             </td>
                             <td colspan="4">
                                 <div id="container-help">
-                                    <img src="/static/images/help-left.gif">
+                                    <img src="/inc/images/help-left.gif">
                                     <div>
                                         <a href="/db/cgi-bin/dictyBaseDP/suggestion">Contact us</a>
-                                    </div><img src="/static/images/help-right.gif">
+                                    </div><img src="/inc/images/help-right.gif">
                                 </div>
                             </td>
                         </tr>
                         <tr class="menu">
                             <td>
-                                <img src="/static/images/menu-top-left.gif">
+                                <img src="/inc/images/menu-top-left.gif">
                             </td>
                             <td>
                                 <div id="menu-top" class="yuimenubar yuimenubarnav">
                                     <div class="bd">
                                         <ul class="first-of-type">
                                             <li class="yuimenubaritem first-of-type">
-                                                <a class="yuimenubaritemlabel" href="/db/cgi-bin/ggb/gbrowse/">GBrowse</a>
+                                                <a class="yuimenubaritemlabel" href="/">Genomes</a>
                                                 <div id="gbrowse" class="yuimenu">
                                                     <div class="bd">
                                                         <ul class="first-of-type">
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="purpureum/gbrowse/">Dictyostelium Purpureum</a>
+                                                                <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
+                                                            </li>                                                            
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li class="yuimenubaritem">
+                                                <a class="yuimenubaritemlabel" href="/db/cgi-bin/ggb/gbrowse/">Genome Browser</a>
+                                                <div id="gbrowse" class="yuimenu">
+                                                    <div class="bd">
+                                                        <ul class="first-of-type">
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="http://dictybase.org/db/cgi-bin/ggb/gbrowse">Dictyostelium discoideum</a>
+                                                            </li>                                                            
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="purpureum/gbrowse/">Dictyostelium purpureum</a>
                                                             </li>
                                                         </ul>
                                                     </div>
                                                 </div>
                                             </li>
                                             <li class="yuimenubaritem ">
-                                                <a class="yuimenubaritemlabel" href="/tools/blast">Blast</a>
+                                                <a class="yuimenubaritemlabel" href="/tools/blast">BLAST</a>
                                             </li>
-                                            <!---
                                             <li class="yuimenubaritem">
                                                 <a class="yuimenubaritemlabel" href="/downloads">Download</a>
-                                                -->
-
+                                                <div id="download" class="yuimenu">
+                                                    <div class="bd">
+                                                        <ul class="first-of-type">
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="discoideum/Downloads/">Dictyostelium discoideum</a>
+                                                            </li>                                                             
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="purpureum/downloads/">Dictyostelium purpureum</a>
+                                                            </li>                                                                                                                       
+                                                        </ul>
+                                                    </div>
+                                                </div>
                                             </li>
                                         </ul>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <img src="/static/images/menu-top-right.gif">
+                                <img src="/inc/images/menu-top-right.gif">
                             </td>
-														<td style="width:100%;">
-                                <form action="/db/cgi-bin/search/search.pl">
-                                    <input name="query" type="text" size="30" value="use * as a wildcard character"> <nobr><input type="submit" name="submit" value="Search All"> <input type="submit" name="genes_only" value="Gene Names Only"></nobr>
-                                </form>
-                            </td>
-
                         </tr>
                     </table>
                 </div>
