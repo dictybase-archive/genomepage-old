@@ -46,26 +46,46 @@ loader.addModule({
     type: 'js',
     fullpath: "/static/js/custom/item_v1.js",
     requires: [
+    'genebody_css',
+    'fonts-min-css',  'body-css', 'menu-css',
+    'genepage-skin', 'header-css', 'footer-css','header-skin', 'footer-skin', 'body-skin'
     'yahoo', 'json', 'connection','treeview',
     'tabview', 'logger', 'container','datatable', 
     'event', 'element', 'animation','menu', 'selector','cookie', 
     'dom', 'button', 'button_css', 'accordion', 'yui-dispatch', 
-    'accordion_css', 'dictyitem', 'menu-custom',  'yui_css', 'skin_css', 'cart', 
-		'fonts-min-css', 'menu-css', 'header-css', 
-    'footer-css',  'body-css'  
+    'accordion_css', 'dictyitem', 'menu-custom',  
+     'cart',  
     ]
 });
 
-loader.addModule({
-    name: 'yui_css',
-    type: 'css',
-    fullpath: "/static/css/yui.css"
-});
+var skin_folder = "[%species%]" || 'default';
 
+// species cpecific part of css (skin)
 loader.addModule({
-   name: 'skin_css',
-  type: 'css',
-    fullpath: "/static/css/[%species%].css"
+    name: 'genepage-skin',
+    type: 'css',
+    fullpath: "/static/css/" + skin_folder + "/genepage-skin.css"
+});    
+loader.addModule({
+    name: 'header-skin',
+    type: 'css',
+    fullpath: "/static/css/" + skin_folder + "/header-skin.css"
+}); 
+loader.addModule({
+    name: 'footer-skin',
+    type: 'css',
+    fullpath: "/static/css/" + skin_folder + "/footer-skin.css"
+}); 
+loader.addModule({
+    name: 'body-skin',
+    type: 'css',
+    fullpath: "/static/css/" + skin_folder + "/body-skin.css"
+}); 
+// common part of  css
+loader.addModule({
+    name: 'genebody_css',
+    type: 'css',
+    fullpath: "/static/css/genebody.css"
 });
 
 loader.addModule({

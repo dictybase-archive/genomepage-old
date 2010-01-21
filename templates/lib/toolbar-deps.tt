@@ -3,13 +3,14 @@
         base: '/static/js/yui/build/',
         loadOptional: true,
     });
-    
+/*    
+    var skin_folder = "[%species%]" || 'default';
     loader.addModule({
-        name: 'yui-css',
+        name: 'header-skin',
         type: 'css',
-        fullpath: "/static/css/yui.css"
-    });
-    
+        fullpath: "/static/css/" + skin_folder + "/header-skin.css"
+    }); 
+*/    
     loader.addModule({
         name: 'fonts-min-css',
         type: 'css',

@@ -6,8 +6,10 @@
 
     <body class="yui-skin-sam">
         <div class="wrapper threecol">
-
-        	[% PROCESS "$species/tbar.tt" %]
+            
+        	[% PROCESS "$species/tbar.tt" 
+        		 label = "Genomic resource for D.purpureum"        		
+        	%]
         	[% PROCESS "$species/body.tt" %]
         	[% PROCESS "page-footer.tt" %]
         </div>

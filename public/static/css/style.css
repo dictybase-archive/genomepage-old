@@ -407,7 +407,7 @@ td.unpadded {
 
 
 .nopheader   { border:1px dotted #FFFFFF; font-family: Verdana; font-size: 11pt; color: #FFFFFF; font-weight: bold; 
-               background-color: #7f7f7f; padding-left:4; padding-right:4; padding-top:1; padding-bottom:1}
+               background-color: #808080; padding-left:4; padding-right:4; padding-top:1; padding-bottom:1}
 
 .highlight_by_red { font-family: Verdana; font-size: 12pt; color: #FF0000; font-weight: bold }
 
@@ -424,7 +424,7 @@ table.ontology th {
 	padding: 3px;
 	border-style: solid;
 	border-color: white;
-	background-color: #7f7f7f;
+	background-color: #808080;
 	font-family: Verdana; 
 	font-size: 11pt; 	
 }

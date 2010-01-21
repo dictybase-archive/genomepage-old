@@ -2,20 +2,18 @@
             <div class="shadow">
                 <div id="container-top">
                 	[% IF label %]
-                    <div id="descriptor">
-                       <b>[% genus %] [% species %]</b> 
-                    </div>
-									[% END %]
+                        <div id="descriptor">
+                            <b>[% genus %] [% species %]</b> 
+                        </div>
+					[% END %]
                     <table>
                         <tr>
                             <td rowspan="2">
-
-                            [% IF link_to == "base" %]
-                                <a href = "/">
-														[% ELSE %]
-																<a href = "/[% species %]">
-														[% END %]
-
+                                [% IF link_to == "base" %]
+                                    <a href = "/">
+                                [% ELSE %]
+                                    <a href = "/[% species %]">
+                                [% END %]
                              <img src="/static/images/logo.gif"></a>
                             </td>
                             <td colspan="4">
@@ -30,13 +28,28 @@
                         </tr>
                         <tr class="menu">
                             <td>
-                                <img src="/static/images/menu-top-left.gif">
+                                <img src="/static/images/purpureum/menu-top-left.gif">
                             </td>
                             <td>
                                 <div id="menu-top" class="yuimenubar yuimenubarnav">
                                     <div class="bd">
                                         <ul class="first-of-type">
                                             <li class="yuimenubaritem first-of-type">
+                                                <a class="yuimenubaritemlabel" href="/">Genomes</a>
+                                                <div id="gbrowse" class="yuimenu">
+                                                    <div class="bd">
+                                                        <ul class="first-of-type">
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
+                                                            </li>                                                            
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li class="yuimenubaritem">
                                                 <a class="yuimenubaritemlabel" href="/purpureum/gbrowse/">Genome Browser</a>
                                                 <div id="gbrowse" class="yuimenu">
                                                     <div class="bd">
@@ -62,7 +75,7 @@
                                 </div>
                             </td>
                             <td>
-                                <img src="/static/images/menu-top-right.gif">
+                                <img src="/static/images/purpureum/menu-top-right.gif">
                             </td>
                             <td style="width:100%;">
                                 <form action="/db/cgi-bin/search/search.pl">

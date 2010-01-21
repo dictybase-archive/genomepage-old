@@ -1,41 +1,58 @@
-<table cellspacing="10" width="100%"><tr><td>
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Gene Information</td></tr>
-      <tr class="row2"><td>DPU_G - JGI mapping</td><td><a href="/[% species
-      %]/downloads?file=GeneID-JGI.txt">[tab-delimited]</a></td></tr>
-</table>
+<div id="subnav">
+    <div class="inner_container">
+        <h3>Downloads</h3>
+    </div>
+</div>
+    <div class="wrapper-left-center">
+        <div class="wrapper-columns">
+            <div class="column-center">
+                <div id="column-center-content">
+                <!-- Central Column start -->
+                    <table class="download">
+                        <col width="75%"/><col width="25%"/>
+                        <tr class="row1"><td colspan="2">Gene Information</td></tr>
+                        <tr class="row2"><td>DPU_G - JGI mapping</td><td><a href="/[% species
+                                %]/downloads?file=GeneID-JGI.txt">[tab-delimited]</a></td></tr>
+                    </table>
+                    <br/>
+                    <table class="download">
+                        <col width="75%"/><col width="25%"/>
+                        <tr class="row1"><td colspan="2">Contig Information</td></tr>
+                        <tr class="row2"><td>Contig list</td><td><a href="/[% species %]/contig">[tab-delimited]</a></td></tr>
+                    </table> 
+                    <br/>
+                    <table class="download">
+                        <col width="75%"/><col width="25%"/>
+                        <tr class="row1"><td colspan="2">Purpureum Sequences and Alignments</td></tr>
+                        <tr class="row2"><td>Sequences in FASTA format</td><td><a href="/[% species
+                            %]/downloads/fasta">[fasta download area]</a></td></tr>
 
-<br/>
+                        <tr class="row2"><td>D. discoideum proteins aligned on D. purpureum (75%)</td><td><a
+                            href="/[% species %]/downloads?file=matched.ddb.gz">[zip file]</a></td></tr>
+                        
+                        <tr class="row2"><td>D. discoideum proteins not aligned on D. purpureum
+                            (25%)</td><td><a href="/[% species %]/downloads?file=unmatched.ddb.gz">[zip file]</a></td></tr>
 
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Contig Information</td></tr>
-      <tr class="row2"><td>Contig list</td><td><a href="/[% species %]/contig">[tab-delimited]</a></td></tr>
-</table> 
+                        <tr class="row2"><td>ESTs aligned to genome (57%)</td><td><a
+                            href="/[% species %]/downloads?file=aligned_ests.fa.gz">[zip file]</a></td></tr>
 
-<br/>
+                        <tr class="row2"><td>ESTs not aligned to genome (43%)</td><td><a
+                            href="/[% species %]/downloads?file=unaligned_ests.fa.gz">[zip file]</a></td></tr>
+                    </table>
+                </div>
+                <div class="column-left">
+                    <div id="column-left-content">
+                    <!-- Left Column start -->
+                    <!-- Left Column end -->
+                    </div>
+                </div>
+                <div class="column-right">
+                <!-- Right Column start -->
+                <!-- Right Column end -->
+                </div>
+            </div>
+        </div>
+    </div>
 
-<table class="download">
-      <col width="75%"/><col width="25%"/>
-      <tr class="row1"><td colspan="2">Purpureum Sequences and Alignments</td></tr>
-      <tr class="row2"><td>Sequences in FASTA format</td><td><a href="/[% species
-      %]/downloads/fasta">[fasta download area]</a></td></tr>
-
-      <tr class="row2"><td>D. discoideum proteins aligned on D. purpureum (75%)</td><td><a
-      href="/[% species %]/downloads?file=matched.ddb.gz">[zip file]</a></td></tr>
-
-      <tr class="row2"><td>D. discoideum proteins not aligned on D. purpureum
-      (25%)</td><td><a href="/[% species %]/downloads?file=unmatched.ddb.gz">[zip file]</a></td></tr>
-
-      <tr class="row2"><td>ESTs aligned to genome (57%)</td><td><a
-      href="/[% species %]/downloads?file=aligned_ests.fa.gz">[zip file]</a></td></tr>
-
-      <tr class="row2"><td>ESTs not aligned to genome (43%)</td><td><a
-      href="/[% species %]/downloads?file=unaligned_ests.fa.gz">[zip file]</a></td></tr>
-
-</table>
-<br/>
-</td></tr></table>
 
 
