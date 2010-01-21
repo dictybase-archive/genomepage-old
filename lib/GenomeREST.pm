@@ -107,8 +107,8 @@ sub startup {
     );
 
     #organisms
-    $bridge2->route('/organism')
-        ->to( controller => 'organism', action => 'index', format => 'json' );
+    #$bridge2->route('/organism')
+    #    ->to( controller => 'organism', action => 'index', format => 'json' );
 
     #set up various renderer
     $self->set_renderer();
