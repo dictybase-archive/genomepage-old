@@ -1,5 +1,10 @@
 [% USE gbrowse = url("/$species/gbrowse/") %]
 
+[% 
+title = 'D. purpureum Chromosomal Information'
+%]
+
+
 [% PROCESS "page-header.tt" 
 	require = "toolbar-body"
 %]
@@ -10,7 +15,7 @@
         <div id="subnav">
             <div class="inner_container">
                 <h3>
-                    Contig Information
+                    Chromosomal Information
                 </h3>
             </div>
         </div>
@@ -19,11 +24,14 @@
                 <div class="column-center">
                     <div id="column-center-content">
                     <!-- Central Column start -->
-                        <p align="right"><a target="new" href="/[% species %]/downloads">Back to downloads</a></p>
-                        <p>Click on the contig to view GBrowse image of the region </p>
-                        <table class="download">
+                        <p align="right"><a target="new" href="/[% species %]/downloads">Back to Downloads</a></p>
+                        
+                        <h2>The D. purpureum genomic sequence is present in 838 unassembled contigs.</h2>
+                        <h3>Click on the contig name to view corresponding region in Genome Browser</h3>
+                        
+                        <table class="download">                    
                             <tr class="row1">
-                                <td>Contig name</td><td>Length</td><td>Number of genes</td>
+                                <td>Contig name</td><td>Contig length (nt)</td><td>Number of genes</td>
                             </tr>
 
                         [% FOREACH item IN data %]

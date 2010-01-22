@@ -68,8 +68,9 @@ body {
     float           :left; 
 }
 .yui-skin-sam #container-top #container-help div {
-    background      :#DFE8F6;
+    background      :#DFE1F6;
     line-height     :30px;
+    border-bottom   :1px solid;
 }
 #shadow-container .shadow {
 	background      :#cccccc;

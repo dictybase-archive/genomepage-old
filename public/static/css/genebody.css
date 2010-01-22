@@ -419,3 +419,8 @@ span.shopping_cart{
     height:14px;
     width: 23px;
 }
+iframe.dicty-blast {
+    width:100%;
+    height:750px;
+    background-color:#F7F7F7;
+}

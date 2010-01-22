@@ -48,7 +48,7 @@ loader.addModule({
     requires: [
     'genebody_css',
     'fonts-min-css',  'body-css', 'menu-css',
-    'genepage-skin', 'header-css', 'footer-css','header-skin', 'footer-skin', 'body-skin', 
+    'genepage-skin', 'header-css', 'footer-css','header-skin', 'footer-skin', 'body-skin',
     'yahoo', 'json', 'connection','treeview',
     'tabview', 'logger', 'container','datatable', 
     'event', 'element', 'animation','menu', 'selector','cookie', 
