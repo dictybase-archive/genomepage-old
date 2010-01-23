@@ -323,7 +323,7 @@
             Event.on(iframeId, 'load',
             function() {
                 var iframe = Dom.get(iframeId);
-                iframe.style.height = "700px";
+                //iframe.style.height = "700px";
                 util.hideTabLoader();
             });
             break;
