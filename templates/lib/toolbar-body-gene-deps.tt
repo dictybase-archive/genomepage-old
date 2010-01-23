@@ -28,7 +28,7 @@ var loader = new YAHOO.util.YUILoader({
     loadOptional: true,
     onSuccess: function() {
     		
-    		//var reader = new YAHOO.widget.LogReader('dicty-log');
+    		var reader = new YAHOO.widget.LogReader('dicty-log');
         var config      = [%config%];
         var panel = new YAHOO.Dicty.Panel(config[0]); 
         panel.render('container');
@@ -44,7 +44,7 @@ var loader = new YAHOO.util.YUILoader({
 loader.addModule({
     name: 'genetab',
     type: 'js',
-    fullpath: "/static/js/custom/item_v1.js",
+    fullpath: "/static/js/custom/item_v2.js",
     requires: [
     'genebody_css',
     'fonts-min-css',  'body-css', 'menu-css',
@@ -144,7 +144,7 @@ loader.addModule({
 loader.addModule({
     name: 'formatter',
     type: 'js',
-    fullpath: "/static/js/custom/formatter_v1.js"
+    fullpath: "/static/js/custom/formatter_v2.js"
 });
 
 loader.addModule({
