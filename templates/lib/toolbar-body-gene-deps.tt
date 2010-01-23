@@ -28,7 +28,7 @@ var loader = new YAHOO.util.YUILoader({
     loadOptional: true,
     onSuccess: function() {
     		
-    		var reader = new YAHOO.widget.LogReader('dicty-log');
+    		//var reader = new YAHOO.widget.LogReader('dicty-log');
         var config      = [%config%];
         var panel = new YAHOO.Dicty.Panel(config[0]); 
         panel.render('container');
