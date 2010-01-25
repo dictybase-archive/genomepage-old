@@ -11,6 +11,9 @@
 .yui-skin-sam #container-top #container-help a{
     color           :#524c81;
 }
+.yui-skin-sam #container-top #container-help div{
+    background      :#cbc8e8;
+}
 .yui-skin-sam .yuimenu .bd {
     background      :#f3f3fe; /*transparent url(/inc/js/yui/build/assets/skins/sam/sprite.png) repeat-x scroll 0 -1700px;*/
 }

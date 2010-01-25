@@ -9,12 +9,16 @@
                     <table>
                         <tr>
                             <td rowspan="2">
+<!--->
                                 [% IF link_to == "base" %]
                                     <a href = "/">
                                 [% ELSE %]
                                     <a href = "/[% species %]">
                                 [% END %]
-                             <img src="/static/images/purpureum/logo.gif"></a>
+<-->
+                             <a href = "http://dictybase.org">
+                                <img src="/static/images/purpureum/logo.gif">
+                             </a>
                             </td>
                             <td colspan="4">
                                 <div id="container-help">
