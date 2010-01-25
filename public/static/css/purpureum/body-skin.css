@@ -4,3 +4,13 @@
 #subnav h3 {
     color           :#524c81;
 }
+#main-info {
+    width : 550px;
+    padding-right : 10px;
+    float : left;
+}
+#species-image{
+    float:left;
+    font-size:10px;
+    width:140px;
+}
