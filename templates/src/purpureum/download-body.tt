@@ -50,7 +50,9 @@
                     <table class="download">
                         <col width="75%"/><col width="25%"/>
                         <tr class="row1"><td colspan="2">Chromosomal Information</td></tr>
-                        <tr class="row2"><td>Information  about 838 unassembled contigs with links to Genome Browser</td><td><a href="/[% species %]/contig">[view]</a></td></tr>
+                        <tr class="row2"><td>Information  about 838 unassembled contigs
+                        with links to Genome Browser</td><td>
+                        <a href="/[% species %]/contig/page/1">[view]</a></td></tr>
                     </table> 
                    
  
