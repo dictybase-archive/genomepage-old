@@ -1,5 +1,5 @@
-[% page_url = "$host/$species/$url_path/page" %]
-[% no_page_url = "$host/$species/$url_path" %]
+[% page_url = "/$species/$url_path/page" %]
+[% no_page_url = "/$species/$url_path" %]
 
 
 
