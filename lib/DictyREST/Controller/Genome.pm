@@ -54,25 +54,80 @@ sub contig {
     my ( $self, $c ) = @_;
     my $data;
     my $model = $self->app->model;
+    my $rs    = $model->resultset('Sequence::Feature');
 
-    my $contig_rs
-        = $model->resultset('Sequence::Feature')
-        ->search( { 'type.name' => 'supercontig' },
-        { join => 'type', rows => 100 } );
+    my $contig_rs = $rs->search(
+        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
+        {   join => [
+                'type',
+                { 'featureloc_srcfeature_ids' => { 'feature' => 'type' } }
+            ],
+            select =>
+                [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
+            as       => [ 'cfeature_id',   'cname', 'gene_count' ],
+            group_by => [ 'me.feature_id', 'me.name' ],
+            having   => \'count(feature_id) > 0',
+            order_by => { -asc => 'me.feature_id' }
+        }
+    );
 
     while ( my $contig = $contig_rs->next ) {
-        my $gene_rs
-            = $contig->search_related( 'featureloc_srcfeature_ids', {} )
-            ->search_related(
-            'feature',
-            { 'type.name' => 'gene' },
-            { join        => 'type' }
-            );
         push @$data,
-            [ $contig->name, length $contig->residues, $gene_rs->count ];
+            [
+            $contig->get_column('cname'),
+            $rs->find(
+                { feature_id => $contig->get_column('cfeature_id') },
+                {   select => { length => 'residues' },
+                    as     => 'seqlength'
+                }
+                )->get_column('seqlength'),
+            $contig->get_column('gene_count')
+            ];
     }
 
     $c->stash( 'data' => $data, header => 'Contig page' );
+    $self->render( template => $c->stash('species') . '/contig' );
+
+}
+
+sub contig_with_page {
+    my ( $self, $c ) = @_;
+    my $data;
+    my $model = $self->app->model;
+    my $rs    = $model->resultset('Sequence::Feature');
+
+    my $contig_rs = $rs->search(
+        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
+        {   join => [
+                'type',
+                { 'featureloc_srcfeature_ids' => { 'feature' => 'type' } }
+            ],
+            select =>
+                [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
+            as       => [ 'cfeature_id',   'cname', 'gene_count' ],
+            group_by => [ 'me.feature_id', 'me.name' ],
+            having   => \'count(feature_id) > 0',
+            order_by => { -asc => 'me.feature_id' }, 
+            rows => 50, 
+            page => $c->stash('page')
+        }
+    );
+
+    while ( my $contig = $contig_rs->next ) {
+        push @$data,
+            [
+            $contig->get_column('cname'),
+            $rs->find(
+                { feature_id => $contig->get_column('cfeature_id') },
+                {   select => { length => 'residues' },
+                    as     => 'seqlength'
+                }
+                )->get_column('seqlength'),
+            $contig->get_column('gene_count')
+            ];
+    }
+
+    $c->stash( 'data' => $data, header => 'Contig page' ,  pager => $contig_rs->pager);
     $self->render( template => $c->stash('species') . '/contig' );
 
 }

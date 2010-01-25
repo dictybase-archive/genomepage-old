@@ -52,33 +52,30 @@ sub startup {
 
     #goes here before it passes to any other controller
     #kind of before action
-    #my $bridge = $router->route('/:name')->to(
     my $bridge = $router->bridge->to(
         controller => 'genome',
         action     => 'check_name',
     );
 
-    $bridge->route('/:name')
-        ->to( controller => 'genome', action => 'index' );
+    $bridge->route('/:name')->to( controller => 'genome', action => 'index' );
 
     $bridge->route('/:name/downloads')->to(
         controller => 'download',
         action     => 'index',
     );
 
-	$bridge->route('/:name/downloads/fasta')->to(
+    $bridge->route('/:name/downloads/fasta')->to(
         controller => 'download',
         action     => 'fasta',
     );
 
-
-    $bridge->route('/:name/downloads/:file')->to(
-        controller => 'download',
-        action     => 'retrieve',
-    );
-
+    #write a more generic stuff
+    #like types for genome backbone
     $bridge->route('/:name/contig')
         ->to( controller => 'genome', action => 'contig' );
+
+    $bridge->route('/:name/contig/page/:page')
+        ->to( controller => 'genome', action => 'contig_with_page' );
 
     my $bridge2 = $router->bridge('/:name/gene')->to(
         controller => 'input',
@@ -106,14 +103,26 @@ sub startup {
         format     => 'json'
     );
 
-    #organisms
-    #$bridge2->route('/organism')
-    #    ->to( controller => 'organism', action => 'index', format => 'json' );
+   #organisms
+   #$bridge2->route('/organism')
+   #    ->to( controller => 'organism', action => 'index', format => 'json' );
 
     #set up various renderer
     $self->set_renderer();
 
     #$self->log->debug("done with startup");
+}
+
+sub process {
+    my ( $self, $c ) = @_;
+    my $base_url = $c->req->url->host;
+    $base_url
+        = $base_url
+        ? $c->req->url->scheme . '//' . $base_url
+        : $c->req->url->base;
+    $c->stash( host => $base_url );
+    $c->stash( base => $c->req->url->base );
+    $self->dispatch($c);
 }
 
 #set up config file usually look under conf folder
@@ -200,12 +209,13 @@ sub set_renderer {
 }
 
 sub connect_dbh {
-    my $self = shift;
-    my $opt = $self->config->param('database.opt');
+    my $self   = shift;
+    my $opt    = $self->config->param('database.opt');
     my $schema = Bio::Chado::Schema->connect(
         $self->config->param('database.dsn'),
         $self->config->param('database.user'),
-        $self->config->param('database.pass'), { $opt => 1 } 
+        $self->config->param('database.pass'),
+        { $opt => 1 }
     );
     $self->model($schema);
 }

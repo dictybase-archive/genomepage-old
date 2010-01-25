@@ -24,25 +24,47 @@ title = 'D. purpureum Chromosomal Information'
                 <div class="column-center">
                     <div id="column-center-content">
                     <!-- Central Column start -->
-                        <p align="right"><a target="new" href="/[% species %]/downloads">Back to Downloads</a></p>
+                        <p align="right"><a target="new" href="[% host %]/[% species %]/downloads">Back to Downloads</a></p>
                         
                         <h2>The D. purpureum genomic sequence is present in 838 unassembled contigs.</h2>
                         <h3>Click on the contig name to view corresponding region in Genome Browser</h3>
+
                         
                         <table class="download">                    
                             <tr class="row1">
                                 <td>Contig name</td><td>Contig length (nt)</td><td>Number of genes</td>
                             </tr>
 
-                        [% FOREACH item IN data %]
-    	                <tr class="row2">
-    		                <td> <a href="[% gbrowse(name = item.0) %]">[% item.0 %]</a> </td>
-    		                <td> [% item.1 %] </td>
-    		                <td> [% item.2 %] </td>
-			            </tr>
-		                [% END %]
-		                </table>
+                        	[% FOREACH item IN data %]
+    	                			<tr class="row2">
+    		                			<td> <a href="[% gbrowse(name = item.0) %]">[% item.0 %]</a> </td>
+    		                			<td> [% item.1 %] </td>
+    		                			<td> [% item.2 %] </td>
+			            					</tr>
+		                			[% END %]
+		                		</table>
+											
+																							
                      </div>
+
+
+							[%# template for paging %]
+												[% IF pager %]
+
+													[% PROCESS pager.tt 
+														url_path = "contig"
+													%]
+
+												[% ELSE %]
+                        	<p align="center">
+                        		<a href="[% host %]/[% species %]/contig/page/1">
+                        			View with paging 
+                        		</a>
+                        	</p>
+												[% END %]
+
+												
+
                      <div class="column-left">
                         <div id="column-left-content">
                             <!-- Left Column start -->

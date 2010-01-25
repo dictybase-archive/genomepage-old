@@ -32,6 +32,7 @@ sub check_name {
         genus        => $organism->genus
     );
 
+	$self->app->log->debug($c->req->url->path->clone->canonicalize->parts);
     return $self->validate($c);
 }
 

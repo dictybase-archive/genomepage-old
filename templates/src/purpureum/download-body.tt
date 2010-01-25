@@ -24,33 +24,35 @@
                     <table class="download">
                         <col width="75%"/><col width="25%"/>
                         <tr class="row1"><td colspan="2">Gene Information</td></tr>
-                        <tr class="row2"><td>DPU_G - JGI mapping</td><td><a href="/[% species
-                                %]/downloads?file=GeneID-JGI.txt">[tab-delimited]</a></td></tr>
+                        <tr class="row2"><td>DPU_G - JGI mapping</td><td>
+                        <a href="[% host %]/[% species %]/downloads?file=GeneID-JGI.txt">[tab-delimited]</a></td></tr>
                     </table>
                     <br/>
                     <table class="download">
                         <col width="75%"/><col width="25%"/>
                         <tr class="row1"><td colspan="2">Chromosomal Information</td></tr>
-                        <tr class="row2"><td>Information  about 838 unassembled contigs with links to Genome Browser</td><td><a href="/[% species %]/contig">[view]</a></td></tr>
+                        <tr class="row2"><td>Information  about 838 unassembled contigs
+                        with links to Genome Browser</td><td>
+                        	<a href="[% host %]/[% species %]/contig/page/1">[view]</a></td></tr>
                     </table> 
                     <br/>
                     <table class="download">
                         <col width="75%"/><col width="25%"/>
                         <tr class="row1"><td colspan="2">Sequences and Alignments</td></tr>
-                        <tr class="row2"><td>Sequences in FASTA format</td><td><a href="/[% species
-                            %]/downloads/fasta">[fasta download area]</a></td></tr>
+                        <tr class="row2"><td>Sequences in FASTA format</td><td>
+                        <a href="[% host %]/[% species %]/downloads/fasta">[fasta download area]</a></td></tr>
 
                         <tr class="row2"><td>D. discoideum proteins aligned on D. purpureum genome by TBLASTN (75%)</td><td><a
-                            href="/[% species %]/downloads?file=matched.ddb.gz">[zip file]</a></td></tr>
+                            href="[% host %]/[% species %]/downloads?file=matched.ddb.gz">[zip file]</a></td></tr>
                         
                         <tr class="row2"><td>D. discoideum proteins with no hits in D. purpureum
-                            (25%)</td><td><a href="/[% species %]/downloads?file=unmatched.ddb.gz">[zip file]</a></td></tr>
+                            (25%)</td><td><a href="[% host %]/[% speceis %]/downloads?file=unmatched.ddb.gz">[zip file]</a></td></tr>
 
                         <tr class="row2"><td>ESTs aligned to the genome by BLASTN (57%)</td><td><a
-                            href="/[% species %]/downloads?file=aligned_ests.fa.gz">[zip file]</a></td></tr>
+                            href="[% host %]/[% species %]/downloads?file=aligned_ests.fa.gz">[zip file]</a></td></tr>
 
                         <tr class="row2"><td>ESTs with no hits on the genome (43%)</td><td><a
-                            href="/[% species %]/downloads?file=unaligned_ests.fa.gz">[zip file]</a></td></tr>
+                            href="[% host %]/[% species %]/downloads?file=unaligned_ests.fa.gz">[zip file]</a></td></tr>
                     </table>
                 </div>
                 <div class="column-left">

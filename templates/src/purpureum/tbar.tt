@@ -10,19 +10,19 @@
                         <tr>
                             <td rowspan="2">
                                 [% IF link_to == "base" %]
-                                    <a href = "/">
+                                    <a href = "[% host %]">
                                 [% ELSE %]
-                                    <a href = "/[% species %]">
+                                    <a href = "[% host %]/[% species %]">
                                 [% END %]
-                             <img src="/static/images/purpureum/logo.gif"></a>
+                             <img src="[% host %]/static/images/purpureum/logo.gif"></a>
                             </td>
                             <td colspan="4">
                                 <div id="container-help">
-                                    <img src="/static/images/purpureum/help-left.gif">
+                                    <img src="[% host %]/static/images/purpureum/help-left.gif">
                                     <div>
-                                        <a href="/db/cgi-bin/dictyBaseDP/suggestion">Contact us</a>
+                                        <a href="[% host %]/db/cgi-bin/dictyBaseDP/suggestion">Contact us</a>
                                     </div>
-                                    <img src="/static/images/purpureum/help-right.gif">
+                                    <img src="[% host %]/static/images/purpureum/help-right.gif">
                                 </div>
                             </td>
                         </tr>
@@ -35,29 +35,29 @@
                                     <div class="bd">
                                         <ul class="first-of-type">
                                             <li class="yuimenubaritem first-of-type">
-                                                <a class="yuimenubaritemlabel" href="/">Genomes</a>
+                                                <a class="yuimenubaritemlabel" href="[% host %]">Genomes</a>
                                                 <div id="gbrowse" class="yuimenu">
                                                     <div class="bd">
                                                         <ul class="first-of-type">
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
+                                                                <a class="yuimenuitemlabel" href="[% host %]/discoideum">Dictyostelium discoideum</a>
                                                             </li>                                                            
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
+                                                                <a class="yuimenuitemlabel" href="[% host %]/purpureum">Dictyostelium purpureum</a>
                                                             </li>
                                                         </ul>
                                                     </div>
                                                 </div>
                                             </li>
                                             <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="/purpureum/gbrowse/">Genome Browser</a>
+                                                <a class="yuimenubaritemlabel" href="[% host %]/purpureum/gbrowse/">Genome Browser</a>
                                                 <div id="gbrowse" class="yuimenu">
                                                     <div class="bd">
                                                         <ul class="first-of-type">
                                                             <li class="yuimenuitem">
                                                                 <a
                                                                 class="yuimenuitemlabel"
-                                                                href="/purpureum/contig">List
+                                                                href="[% host %]/purpureum/contig/page/1">List
                                                                 of scaffolds</a>
                                                             </li>
                                                         </ul>
@@ -65,17 +65,17 @@
                                                 </div>
                                             </li>
                                             <li class="yuimenubaritem ">
-                                                <a class="yuimenubaritemlabel" href="/tools/blast">BLAST</a>
+                                                <a class="yuimenubaritemlabel" href="[% host %]/tools/blast">BLAST</a>
                                             </li>
                                             <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="/purpureum/downloads">Download</a>
+                                                <a class="yuimenubaritemlabel" href="[% host %]/purpureum/downloads">Download</a>
                                             </li>
                                         </ul>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <img src="/static/images/purpureum/menu-top-right.gif">
+                                <img src="[% host %]/static/images/purpureum/menu-top-right.gif">
                             </td>
                             <td style="width:100%;">
                                 <form action="/db/cgi-bin/search/search.pl">
