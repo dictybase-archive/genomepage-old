@@ -11,19 +11,29 @@
                         <div id="column-center-content">
                             <!-- Central Column start -->
                             <h2>
-                                Currently the site contains:
+                                Welcome to the <i>Dictyostelium purpureum</i> web portal !
                             </h2>
+                            <h3>This site contains</h3> 
                             <ul>
-                                <li>Supercontigs (scaffolds) assembled by the sequencing center
+                                <li>The <a href="/purpureum/contig">Genome Browser</a> that allows to visualize each contig of the genome with alignments to 
+                                    <i>D. discoideum</i> proteins (75% <i>D. discoideum</i> proteins aligned to the <i>D. purpureum</i> genome)
                                 </li>
-                                <li>EST sequences
+                                <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any sequence to search 
+                                    the D. purpureum and D. discoideum genomes
                                 </li>
-                                <li>Alignments of ESTs to supercontigs: <b>57% ESTs aligned to genome</b>
+                                <li>The <a href="/purpureum/downloads">D. purpureum Downloads page</a> containing mappings between different IDs and sequences in FASTA format</li>
+                                <li>A search function where you can search for gene IDs (e.g. DPU_GXXXXXXXXX), sequence IDs (e.g. DPUXXXXXXXXX), or JGI protein IDs () </li>
+                                
+                            </ul>
+                            The D. purpureum genome was sequenced as a collaboration between the JGI and Baylor ...
+                            <ul>
+                                <li>The genomic sequence has been assembled into 838 contigs containing XX predicted proteins
                                 </li>
-                                <li>Alignments of dictyBase primary proteins to supercontigs: <b>75% dictyBase proteins aligned to genome</b>
+                                <li>XX EST sequences, 57% of which aligned to the genome
                                 </li>
-                                <li>14097 Gene Predictions from Geneid
-                                </li>
+                                
+                                <!--<li>14097 Gene Predictions from Geneid-->
+
                                 <li style="list-style: none">
                                     <br>
                                     Start by browsing a sample <a href="/purpureum/gene/DPU_G0051088">gene page</a>
