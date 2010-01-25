@@ -3,6 +3,7 @@
 
 
 
+
 <div class="center-block">
 													<ul id="pagination-digg">
 
@@ -39,12 +40,13 @@
 												</li>
 
 												[% after = pager.current_page + 1 %]
-												[%# Like previous link this flag sets if next link will be displayed %]
+
+												[%# Like setting up previous link this flag sets if next link will be displayed %]
 												[% next_flag = 0 %]
 
 												[% IF after <= pager.last_page %]	
 													[% few_after = (after + 3) %]
-													[% IF after > (pager.last_page - 3) %]
+													[% IF after >= (pager.last_page - 3) %]
 														[% few_after = pager.last_page %]
 													[% ELSE %]
 														[% next_flag = 1 %]
