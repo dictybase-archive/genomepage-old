@@ -10,7 +10,9 @@ title = 'D. purpureum Chromosomal Information'
 %]
 
 <body class="yui-skin-sam">
-    [% PROCESS "$species/tbar.tt" %]
+    [% PROCESS "$species/tbar.tt" 
+    	label = "true"
+    %]
     <div class="wrapper threecol">
         <div id="subnav">
             <div class="inner_container">

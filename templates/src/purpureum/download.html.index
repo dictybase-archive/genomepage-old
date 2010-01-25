@@ -8,7 +8,7 @@ title       = 'D. purpureum Downloads'
 
 <body class="yui-skin-sam">
     [% PROCESS "$species/tbar.tt" 
-        label = "Genomic resource for D.purpureum"        		
+        label = "true"        		
     %]
 	<div class="wrapper threecol">
         [% PROCESS "$species/download-body.tt" %]
