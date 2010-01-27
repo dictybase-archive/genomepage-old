@@ -18,17 +18,19 @@ sub index {
     my $organism = $c->stash('organism');
     my $model    = $self->app->model;
 
-    my $est_count
-        = $model->resultset('Sequence::Feature')
-        ->count(
-        { 'type.name' => 'EST', 'organism.species' => $organism->species },
-        { join => [qw/type organism/] } );
+    my $est_count = $model->resultset('Sequence::Feature')->count(
+        {   'type.name'        => 'EST',
+            'organism.species' => $organism->species
+        },
+        { join => [ 'type', 'organism'] }
+    );
 
     my $protein_count = $model->resultset('Sequence::Feature')->count(
         {   'type.name'        => 'polypeptide',
+            'dbxref.accession' => 'JGI',
             'organism.species' => $organism->species
         },
-        { join => [qw/type organism/] }
+        { join => [ 'type', 'organism', { 'feature_dbxrefs' => 'dbxref' } ] }
     );
 
     $self->render(
