@@ -9,8 +9,11 @@
     padding-right : 10px;
     float : left;
 }
-#species-image{
+div#species-image{
     float:left;
     font-size:10px;
-    width:10%;
+    width:18%;
+}
+div#bottom-div{
+    clear:both;
 }
