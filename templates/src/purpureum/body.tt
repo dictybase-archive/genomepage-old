@@ -10,7 +10,7 @@
         <div class="column-center">
             <div id="column-center-content">
                 <!-- Central Column start -->
-                <h2> Welcome to the <i>[% genus %] [% species %]</i> web portal ! </h2>
+                <h2> Welcome to the <i>[% genus %] [% species %]</i> web portal! </h2>
                 <div id="main-info">
                     <h3> This site contains: </h3> 
                     <ul>
@@ -21,7 +21,7 @@
                         <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> 
                             where you can use any sequence to search the <i>[% abbr %]</i> and <i>D. discoideum </i>genomes
                         </li>
-                        <li>The <a href="/[% species %]/downloads">[% abbr %] Downloads page</a> containing 
+                        <li>The <i><a href="/[% species %]/downloads">[% abbr %]</i> Downloads page</a> containing 
                             mappings between different IDs and sequences in FASTA format
                         </li>
                         <li>A search function where you can search for gene IDs (e.g. 
@@ -29,9 +29,6 @@
                             (e.g. <a href="/purpureum/gene/DPU_G0071344/feature/DPU0071345">DPU0071345</a>), 
                             or JGI protein IDs (<a href="/purpureum/gene/DPU_G0075780">47329</a> ) 
                         </li>
-                    </ul>
-                    The D. purpureum genome was sequenced as a collaboration between the JGI and Baylor ... 
-                    <ul>
                         <li>The genomic sequence has been assembled into 838 contigs containing 
                             [% protein %] predicted proteins
                         </li>
@@ -41,10 +38,10 @@
                 </div>
                 <div id="species-image">
                     <img src="/static/images/[% species %]/index-img.gif">
-                    From: Jack et al. BMC Evolutionary Biology 2008 8:293
+                    From: <i><a target="new" href="http://ncbi.nlm.nih.gov/pubmed/18950497">Jack et al. 2008</a></i>
                 </div>
                 <div id="bottom-div">
-                    <h3> The [% abbr %] genome was sequenced as a collaboration
+                    <h3> The <i>[% abbr %] </i> genome was sequenced as a collaboration
                     between the <br/>Joint Genome Institute and Baylor College of
                     Medicine. Please cite: </h3>
                     Comparative genomics of the social amoebae Dictyostelium

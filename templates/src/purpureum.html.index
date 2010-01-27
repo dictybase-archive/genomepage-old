@@ -1,4 +1,4 @@
-[% title = "D.purpureum" %]
+[% title = "Dictyostelium purpureum welcome" %]
 
  [% PROCESS "page-header.tt" 
 	require = "toolbar-body"
