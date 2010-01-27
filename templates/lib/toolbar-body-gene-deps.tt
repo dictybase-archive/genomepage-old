@@ -150,7 +150,7 @@ loader.addModule({
 loader.addModule({
     name: 'dictyutil',
     type: 'js',
-    fullpath: "/static/js/custom/util_v1.js"
+    fullpath: "/static/js/custom/util_v2.js"
 });
 
 loader.addModule({
