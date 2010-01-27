@@ -13,7 +13,7 @@
                             <h2>
                                 Welcome to the <i>[% genus %] [% species %]</i> web portal !
                             </h2>
-                            <h3>This site contains</h3> 
+                            <h3>This site contains:</h3> 
                             <ul>
                                 <li>The <a href="/[% species %]/contig">Genome Browser</a> that allows to visualize each contig of the genome with alignments to 
                                     <i>D. discoideum</i> proteins (75% <i>D.
@@ -21,27 +21,46 @@
                                     [% abbr %]</i> genome)
                                 </li>
                                 <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any sequence to search 
-                                    the [% abbr %] and D. discoideum genomes
+                                    the [% abbr %] and <i>D. discoideum </i>genomes
                                 </li>
                                 <li>The <a href="/[% species %]/downloads">[% abbr %] Downloads page</a> containing mappings between different IDs and sequences in FASTA format</li>
                                 <li>A search function where you can search for gene IDs (e.g. DPU_GXXXXXXXXX), sequence IDs (e.g. DPUXXXXXXXXX), or JGI protein IDs () </li>
                                 
-                            </ul>
-                            The [% abbr %] genome was sequenced as a collaboration between the JGI and Baylor ...
-                            <ul>
                                 <li>The genomic sequence has been assembled into 838
                                 contigs containing [% protein %] predicted proteins
                                 </li>
                                 <li>[% est %] EST sequences, 57% of which aligned to the genome
                                 </li>
-                                
+                                <li>
+                                  <h3>  Start by browsing a sample <a href="/[% species
+                                  %]/gene/DPU_G0051088">Gene Page</a> </h3>
+                                </li> 
+
                                 <!--<li>14097 Gene Predictions from Geneid-->
 
-                                <li style="list-style: none">
-                                    <br>
-                                    Start by browsing a sample <a href="/[% species %]/gene/DPU_G0051088">gene page</a>
-                                </li>
-                            </ul><!-- Central Column end -->
+                                </ul>
+																<br/>
+                            		The [% abbr %] genome was sequenced as a collaboration
+                            		between the Joint Genome Institute and Baylor College of
+                            		Medicine. Please cite: <br/><br/>
+                            		Comparative genomics of the social amoebae Dictyostelium
+                            		discoideum and Dictyostelium purpureum, 
+                            		Richard Sucgang,  Alan Kuo,  Xiangjun Tian,  William
+                            		Salerno,  Anup Parikh,  Christa L. Feasley,  Eileen Dalin,
+                            		Hank Tu,  Eryong Huang,  Kerrie Barry,  Erika Lindquist,
+                            		Harris Shapiro,  David Bruce,  Jeremy Schmutz,  Petra Fey,
+                            		Pascale Gaudet,  Christophe Anjard,  Madan Babu Mohan,
+                            		Siddhartha Basu,  Yulia Bushmanova,  Hanke van der Wel,
+                            		Mariko Katoh,  Pedro M. Coutinho,  Tamao Saito,  Marek
+                            		Elias,  Pauline Schaap,  Robert R. Kay,  Bernard
+                            		Henrissat,  Ludwig Eichinger,  Francisco Rivero-Crespo,
+                            		Nicholas H. Putnam,  Christopher M. West,  William F.
+                            		Loomis,  Rex Chisholm,  Gad Shaulsky,  Joan E. Strassmann,
+                            		David C. Queller,  Adam Kuspa and Igor Grigoriev
+                            		(manuscript submitted,  2010) 
+
+
+                                                            <!-- Central Column end -->
                         </div>
                     </div>
                     <div class="column-left">
