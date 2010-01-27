@@ -16,13 +16,30 @@ use dicty::Search::Gene;
 sub index {
     my ( $self, $c ) = @_;
     my $organism = $c->stash('organism');
+    my $model    = $self->app->model;
+
+    my $est_count
+        = $model->resultset('Sequence::Feature')
+        ->count(
+        { 'type.name' => 'EST', 'organism.species' => $organism->species },
+        { join => [qw/type organism/] } );
+
+    my $protein_count = $model->resultset('Sequence::Feature')->count(
+        {   'type.name'        => 'polypeptide',
+            'organism.species' => $organism->species
+        },
+        { join => [qw/type organism/] }
+    );
+
     $self->render(
         handler     => 'index',
         template    => $organism->species,
         species     => $organism->species,
         genus       => $organism->genus,
         abbr        => $organism->abbreviation,
-        common_name => $organism->common_name
+        common_name => $organism->common_name,
+        protein     => $protein_count,
+        est         => $est_count
     );
 }
 
@@ -107,9 +124,9 @@ sub contig_with_page {
             as       => [ 'cfeature_id',   'cname', 'gene_count' ],
             group_by => [ 'me.feature_id', 'me.name' ],
             having   => \'count(feature_id) > 0',
-            order_by => { -asc => 'me.feature_id' }, 
-            rows => 50, 
-            page => $c->stash('page')
+            order_by => { -asc => 'me.feature_id' },
+            rows     => 50,
+            page     => $c->stash('page')
         }
     );
 
@@ -127,7 +144,11 @@ sub contig_with_page {
             ];
     }
 
-    $c->stash( 'data' => $data, header => 'Contig page' ,  pager => $contig_rs->pager);
+    $c->stash(
+        'data' => $data,
+        header => 'Contig page',
+        pager  => $contig_rs->pager
+    );
     $self->render( template => $c->stash('species') . '/contig' );
 
 }

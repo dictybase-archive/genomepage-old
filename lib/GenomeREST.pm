@@ -64,10 +64,10 @@ sub startup {
         action     => 'index',
     );
 
-    $bridge->route('/:name/downloads/fasta')->to(
-        controller => 'download',
-        action     => 'fasta',
-    );
+    #$bridge->route('/:name/downloads/fasta')->to(
+    #    controller => 'download',
+    #    action     => 'fasta',
+    #);
 
     #write a more generic stuff
     #like types for genome backbone
@@ -118,10 +118,11 @@ sub process {
     my $base_url = $c->req->url->host;
     $base_url
         = $base_url
-        ? $c->req->url->scheme . '//' . $base_url
+        ? $c->req->url->scheme . '://' . $base_url
         : $c->req->url->base;
     $c->stash( host => $base_url );
     $c->stash( base => $c->req->url->base );
+    $self->log->debug("got base $base_url");
     $self->dispatch($c);
 }
 
