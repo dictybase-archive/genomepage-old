@@ -11,38 +11,37 @@
                         <div id="column-center-content">
                             <!-- Central Column start -->
                             <h2>
-                                Welcome to the <i>Dictyostelium purpureum</i> web portal !
+                                Welcome to the <i>[% genus %] [% species %]</i> web portal !
                             </h2>
                             <h3>This site contains</h3> 
-                            <div id="main-info">
-                                <ul>
-                                    <li>The <a href="/purpureum/contig">Genome Browser</a> that allows to visualize each contig of the genome with alignments to 
-                                        <i>D. discoideum</i> proteins (75% <i>D. discoideum</i> proteins aligned to the <i>D. purpureum</i> genome)
-                                    </li>
-                                    <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any sequence to search 
-                                        the D. purpureum and D. discoideum genomes
-                                    </li>
-                                    <li>The <a href="/purpureum/downloads">D. purpureum Downloads page</a> containing mappings between different IDs and sequences in FASTA format</li>
-                                    <li>A search function where you can search for gene IDs (e.g. <a href="/purpureum/gene/DPU_G0068768">DPU_G0068768</a>), 
-                                        sequence IDs (e.g. <a href="/purpureum/gene/DPU_G0071344/feature/DPU0071345">DPU0071345</a>), or JGI protein IDs 
-                                        (<a href="purpureum/gene/DPU_G0075780">47329</a>) 
-                                    </li>
-                                </ul>
-                                The D. purpureum genome was sequenced as a collaboration between the JGI and Baylor ...
-                                <ul>
-                                    <li>The genomic sequence has been assembled into 838 contigs containing XX predicted proteins
-                                    </li>
-                                    <li>XX EST sequences, 57% of which aligned to the genome
-                                    </li>
+                            <ul>
+                                <li>The <a href="/[% species %]/contig">Genome Browser</a> that allows to visualize each contig of the genome with alignments to 
+                                    <i>D. discoideum</i> proteins (75% <i>D.
+                                    discoideum</i> proteins aligned to the <i>
+                                    [% abbr %]</i> genome)
+                                </li>
+                                <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any sequence to search 
+                                    the [% abbr %] and D. discoideum genomes
+                                </li>
+                                <li>The <a href="/[% species %]/downloads">[% abbr %] Downloads page</a> containing mappings between different IDs and sequences in FASTA format</li>
+                                <li>A search function where you can search for gene IDs (e.g. DPU_GXXXXXXXXX), sequence IDs (e.g. DPUXXXXXXXXX), or JGI protein IDs () </li>
                                 
-                                    <!--<li>14097 Gene Predictions from Geneid-->
+                            </ul>
+                            The [% abbr %] genome was sequenced as a collaboration between the JGI and Baylor ...
+                            <ul>
+                                <li>The genomic sequence has been assembled into 838
+                                contigs containing [% protein %] predicted proteins
+                                </li>
+                                <li>[% est %] EST sequences, 57% of which aligned to the genome
+                                </li>
+                                
+                                <!--<li>14097 Gene Predictions from Geneid-->
 
-                                </ul>
-                            </div>
-                            <div id="species-image">
-                                <img src="/static/images/purpureum/index-img.gif"/> Copyright
-                            </div>
-                            <!-- Central Column end -->
+                                <li style="list-style: none">
+                                    <br>
+                                    Start by browsing a sample <a href="/[% species %]/gene/DPU_G0051088">gene page</a>
+                                </li>
+                            </ul><!-- Central Column end -->
                         </div>
                     </div>
                     <div class="column-left">
@@ -54,7 +53,7 @@
                             </h4>
                             <div class="info wide">
                                 Just added
-                                <a href="/purpureum/">Dictiostelium Purpureum portal</a>
+                                <a href="/[% species %]">[% genus %] [% species %]portal</a>
                             </div>
 
                             <div class="warning wide">
