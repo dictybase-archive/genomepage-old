@@ -21,7 +21,7 @@
                         <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> 
                             where you can use any sequence to search the <i>[% abbr %]</i> and <i>D. discoideum </i>genomes
                         </li>
-                        <li>The <i><a href="/[% species %]/downloads">[% abbr %]</i> Downloads page</a> containing 
+                        <li>The <a href="/[% species %]/downloads"><i>[% abbr %]</i> Downloads page</a> containing 
                             mappings between different IDs and sequences in FASTA format
                         </li>
                         <li>A search function where you can search for gene IDs (e.g. 

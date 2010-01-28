@@ -18,3 +18,6 @@
     background      :#f4f9fb; /*#f4f9ff*/
 /*    background:transparent url(/inc/js/yui/build/assets/skins/sam/sprite.png) repeat-x scroll 0 -1700px;*/
 }
+.yui-skin-sam #container-top #container-help div{
+    background      :#DFE8F6;
+}

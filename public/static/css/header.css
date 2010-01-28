@@ -89,3 +89,6 @@ body {
 .yui-skin-sam .yuimenubarnav .yuimenubaritemlabel {
     color : #fff;
 }
+.yui-skin-sam .yuimenubar .yuimenubaritem-selected a{
+    text-decoration: none;
+}

@@ -86,7 +86,7 @@
                                     <div class="bd">
                                         <ul class="first-of-type">
                                             <li class="yuimenubaritem first-of-type">
-                                                <a class="yuimenubaritemlabel" href="/">Genomes</a>
+                                                <a class="yuimenubaritemlabel">Genomes</a>
                                                 <div id="genomes" class="yuimenu">
                                                     <div class="bd">
                                                         <ul class="first-of-type">

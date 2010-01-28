@@ -9,7 +9,7 @@
                     <table>
                         <tr>
                             <td rowspan="2">
-                                <a href="/"><img src="/static/images/logo_3.gif"></a>
+                                <a href="/"><img src="/static/images/logo.gif"></a>
                             </td>
                             <td colspan="4">
                                 <div id="container-help">
@@ -26,16 +26,19 @@
                                 <img src="/static/images/menu-top-left.gif">
                             </td>
                             <td> 
-															<div id="menu-top" class="yuimenubar yuimenubarnav">
+                                <div id="menu-top" class="yuimenubar yuimenubarnav">
                                     <div class="bd">
                                         <ul class="first-of-type">
                                             <li class="yuimenubaritem first-of-type">
-                                                <a class="yuimenubaritemlabel" href="/db/cgi-bin/ggb/gbrowse/">GBrowse</a>
+                                                <a class="yuimenubaritemlabel">GBrowse</a>
                                                 <div id="gbrowse" class="yuimenu">
                                                     <div class="bd">
                                                         <ul class="first-of-type">
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="purpureum/gbrowse/">Dictyostelium Purpureum</a>
+                                                                <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
+                                                            </li>                                                            
+                                                            <li class="yuimenuitem">
+                                                                <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
                                                             </li>
                                                         </ul>
                                                     </div>

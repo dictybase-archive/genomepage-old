@@ -1,6 +1,6 @@
         <div id="footer">
         <div id="container-bottom">
-            <a href="/">Home</a>
+            <a href="/discoideum">Home</a>
             Supported by NIH (NIGMS and NHGRI)
             <a href="/discoideum/db/cgi-bin/dictyBase/suggestion">Contact dictyBase</a>
         </div>

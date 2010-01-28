@@ -39,8 +39,8 @@
                                     <div class="bd">
                                         <ul class="first-of-type">
                                             <li class="yuimenubaritem first-of-type">
-                                                <a class="yuimenubaritemlabel" href="/">Genomes</a>
-                                                <div id="gbrowse" class="yuimenu">
+                                                <a class="yuimenubaritemlabel">Genomes</a>
+                                                <div id="genomes" class="yuimenu">
                                                     <div class="bd">
                                                         <ul class="first-of-type">
                                                             <li class="yuimenuitem">
@@ -54,7 +54,7 @@
                                                 </div>
                                             </li>
                                             <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="/purpureum/gbrowse/">Genome Browser</a>
+                                                <a class="yuimenubaritemlabel">Genome Browser</a>
                                                 <div id="gbrowse" class="yuimenu">
                                                     <div class="bd">
                                                         <ul class="first-of-type">
