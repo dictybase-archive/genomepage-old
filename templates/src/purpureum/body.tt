@@ -14,7 +14,7 @@
                 <div id="main-info">
                     <h3> This site contains: </h3> 
                     <ul>
-                        <li>The <a href="/[% species %]/contig">Genome Browser</a> that allows to visualize each contig of the genome with alignments to 
+                        <li>The <a href="/[% species %]/contig/page/1">Genome Browser</a> that allows to visualize each contig of the genome with alignments to 
                             <i>D. discoideum</i> proteins (75% <i>D. discoideum</i> proteins aligned to the <i>
                             [% abbr %]</i> genome)
                         </li>
