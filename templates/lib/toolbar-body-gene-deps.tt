@@ -27,8 +27,15 @@ var loader = new YAHOO.util.YUILoader({
     base: '/static/js/yui/build/',
     loadOptional: true,
     onSuccess: function() {
+        var searchInput = YAHOO.util.Dom.get('search-input');
+        YAHOO.util.Event.addFocusListener(searchInput.id, function() {
+            var initData = searchInput.value;
+            if (initData.match('use')) {
+                searchInput.value = '';
+            };
+        });
     		
-    		//var reader = new YAHOO.widget.LogReader('dicty-log');
+        //var reader = new YAHOO.widget.LogReader('dicty-log');
         var config      = [%config%];
         var panel = new YAHOO.Dicty.Panel(config[0]); 
         panel.render('container');
