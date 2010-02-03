@@ -27,7 +27,7 @@ title = 'D. purpureum Chromosomal Information'
                         <p align="right"><a target="new" href="/[% species %]/downloads">Back to Downloads</a></p>
                         
                         <h2>The D. purpureum genomic sequence is present in 838 unassembled contigs.</h2>
-                        <h3>Click on the contig name to view corresponding region in Genome Browser</h3>
+                        <h3>Click on the contig name to view corresponding region in the Genome Browser</h3>
 
                         
                         <table class="download">                    
