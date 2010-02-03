@@ -79,7 +79,7 @@
 }
 
 #dicty-excel-spinner {
-	 background-image : url(/inc/images/ajax-loader3.gif) ;
+	 background-image : url(/static/images/ajax-loader3.gif) ;
 	 background-repeat: no-repeat;
 	 float : left;
 	 width : 20%;

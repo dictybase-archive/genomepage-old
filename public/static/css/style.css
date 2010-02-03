@@ -106,7 +106,7 @@ td.sideMenu {
 }
 
 #homepage-main {
-   background-image: url('/inc/images/DictyFB.jpg');
+   background-image: url('/static/images/DictyFB.jpg');
    background-repeat: no-repeat;
    background-color:#f7f7f7;
    vertical-align:top; 

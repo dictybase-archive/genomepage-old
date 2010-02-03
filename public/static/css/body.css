@@ -145,5 +145,5 @@
     font-size:12px;
 }
 .yui-skin-sam .yui-cms-accordion .yui-cms-item.selected .actions .accordionToggleItem {
-    background:transparent url(/inc/images/sprite-toolbar.gif) no-repeat scroll 0 -30px;
+    background:transparent url(/static/images/sprite-toolbar.gif) no-repeat scroll 0 -30px;
 }
