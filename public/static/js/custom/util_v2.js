@@ -268,6 +268,7 @@ YAHOO.Dicty.Storage = function() {
 				//this one adds browser resize events
         handleResize: function() {
           	var nodes = Selector.query('div.bd');
+          	//YAHOO.log("firing resizing on browser");
           	for (i in nodes) {
         			var children = Dom.getFirstChild(nodes[i]);
         			var scrollHeight = nodes[i].scrollHeight;
@@ -277,6 +278,7 @@ YAHOO.Dicty.Storage = function() {
         			if (scrollHeight !== 0) { 
         				var cookieStatus = this.getCookieStatus(children); 
         				if (cookieStatus === 'open') { 
+        					//YAHOO.log("open cookie status for browser " + children.id + " " + nodes[i].id);
           				Dom.setStyle(nodes[i], 'height', scrollHeight);
           	 		}
           		}
@@ -296,6 +298,7 @@ YAHOO.Dicty.Storage = function() {
 
 				resizeOnTab: function(id) {
           	var tabNode = Dom.get(id);
+          	YAHOO.log("firing resizing on tab");
           	var nodes = Selector.query('div.bd', tabNode);
           	for (i in nodes) {
         			var children = Dom.getFirstChild(nodes[i]);
@@ -304,8 +307,9 @@ YAHOO.Dicty.Storage = function() {
         				scrollHeight = children.scrollHeight;
         			}
 							if (scrollHeight !== 0) { 
-        				var cookieStatus = this.getCookieStatus(nodes[i]); 
+        				var cookieStatus = this.getCookieStatus(children); 
         				if (cookieStatus === 'open') { 
+        					YAHOO.log("open cookie status for tab " + children.id + " " + nodes[i].id);
           				Dom.setStyle(nodes[i], 'height', scrollHeight);
           			}
           		}
