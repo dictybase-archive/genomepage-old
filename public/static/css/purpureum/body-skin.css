@@ -18,3 +18,9 @@ div#bottom-div{
     clear:both;
     font-size : 11px;
 }
+.yui-skin-sam .yui-navset .yui-nav a:hover,
+.yui-skin-sam .yui-navset .yui-nav a:focus {
+    /* tab selection */
+    background      :#deecfd url(/static/images/purpureum/sprite.gif) repeat-x scroll 0 -353px;
+    outline         :0;
+}
