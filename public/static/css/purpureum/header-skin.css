@@ -7,6 +7,10 @@
 #shadow-container #container-top {
 	border-bottom   :2px solid #524c81;
 }
+.yui-skin-sam #container-top #container-help{
+    width: 450px;
+    right : -10;
+}
 .yui-skin-sam #container-top #container-help a{
     color           :#524c81;
 }
