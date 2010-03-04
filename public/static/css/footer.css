@@ -1,17 +1,18 @@
 /* Footer styles */
-#container-bottom {
+.container-bottom {
 	clear:both;
 	float:left;
     display     : block;
     width       : 100%;
     text-align  : center;
+    color       : #394a6f;
     font-size   : 93%;
     line-height : 2em;
     font-weight : normal;
-    padding-top  : 3em;
+    padding-top  : 1em;
     padding-bottom:1em;
 }
-#container-bottom a{
+.container-bottom a{
     text-decoration : none;
     color       : #394a6f;
     padding     : 0 15px;

@@ -2,7 +2,6 @@
     background      :#524c81;
     font-size       :100%;
     font-weight     :bold;
-    line-height     :39px;
     border          :0px none;
 }
 #shadow-container #container-top {
@@ -13,6 +12,7 @@
 }
 .yui-skin-sam #container-top #container-help div{
     background      :#cbc8e8;
+    line-height:21px;
 }
 .yui-skin-sam .yuimenu .bd {
     background      :#f3f3fe; /*transparent url(/inc/js/yui/build/assets/skins/sam/sprite.png) repeat-x scroll 0 -1700px;*/
@@ -29,5 +29,4 @@
 }
 #descriptor {
     color           :#524c81;
-    font-size       :20px; 
 }
