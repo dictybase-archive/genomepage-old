@@ -40,8 +40,9 @@
         type: 'js',
         fullpath: "/static/js/custom/menu.js",
         requires: [
+            'menu-css', 'header-css', 'footer-css',
             'yahoo','container','event', 'menu', 'animation', 
-            'yui-css', 'fonts-min-css', 'menu-css', 'header-css', 'footer-css'
+            'yui-css', 'fonts-min-css'
         ]
     });
     loader.require('menu-custom');

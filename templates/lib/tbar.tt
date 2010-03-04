@@ -79,9 +79,13 @@
                                 <div id="container-help">
                                     <img src="/static/images/help-left.gif">
                                     <div>
-                                        <a href="/discoideum/db/cgi-bin/dictyBase/suggestion">Contact us</a>
+                                        <form action="/db/cgi-bin/search/search.pl">
+                                            <input id="search-input" name="query" type="text" size="30" value="use * as a wildcard character"> <nobr><input type="submit" name="submit" value="Search All"> <input type="submit" name="genes_only" value="Gene Names Only"></nobr>
+                                        </form>
                                     </div>
+                                    <!--
                                     <img src="/static/images/help-right.gif">
+                                    -->
                                 </div>
                             </td>
                         </tr>
@@ -145,15 +149,9 @@
                             <td>
                                 <img src="/static/images/menu-top-right.gif">
                             </td>
-                            <td style="width:100%;">
-                                <form action="/db/cgi-bin/search/search.pl">
-                                    <input id="search-input" name="query" type="text" size="30" value="use * as a wildcard character">
-                                    <nobr>
-                                        <input type="submit" name="submit" value="Search All"> 
-                                        <input type="submit" name="genes_only" value="Gene Names Only">
-                                    </nobr>
-                                </form>
-                            </td>
+                            <td id="about_help">
+                                <a href="/db/cgi-bin/dictyBase/suggestion">Contact</a> 
+                            </td>                            
                         </tr>
                     </table>
                 </div>
