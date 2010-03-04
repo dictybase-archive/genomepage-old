@@ -10,7 +10,7 @@ title       = 'D. purpureum Downloads'
     [% PROCESS "$species/tbar.tt" 
         label = "true"        		
     %]
-	<div class="wrapper threecol">
+	<div class="wrapper threecol-wide">
         [% PROCESS "$species/download-body.tt" %]
         [% PROCESS "page-footer.tt" %]
 	</div>
