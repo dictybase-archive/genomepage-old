@@ -62,7 +62,7 @@ loader.addModule({
     'event', 'element', 'animation','menu', 'selector','cookie', 
     'dom', 'button', 'button_css', 'accordion', 'yui-dispatch', 
      'dictyitem', 'menu-custom',  
-     'cart',  
+     'cart'
     ]
 });
 
@@ -137,7 +137,7 @@ loader.addModule({
 loader.addModule ({
      name: 'menu-custom',
      type: 'js',
-     fullpath: "/static/js/custom/menu.js",
+     fullpath: "/static/js/custom/menu.js"
 });
 
 loader.addModule({

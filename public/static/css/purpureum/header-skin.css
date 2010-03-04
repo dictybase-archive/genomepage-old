@@ -11,12 +11,22 @@
     width: 450px;
     right : -10;
 }
+.yui-skin-sam #container-top a{
+    text-decoration : none;
+}
 .yui-skin-sam #container-top #container-help a{
     color           :#524c81;
 }
 .yui-skin-sam #container-top #container-help div{
     background      :#cbc8e8;
     line-height:21px;
+}
+.yui-skin-sam #container-top form input {
+    font-size:11px;
+    margin-right:4px;
+}
+* html .yui-skin-sam #container-top form input {
+    margin-right:0px;
 }
 .yui-skin-sam .yuimenu .bd {
     background      :#f3f3fe; /*transparent url(/inc/js/yui/build/assets/skins/sam/sprite.png) repeat-x scroll 0 -1700px;*/
