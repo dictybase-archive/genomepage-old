@@ -88,9 +88,11 @@ body {
     text-decoration :none;
     padding         :0 5px;
 }
-.yui-skin-sam #container-top #container-help div,
+.yui-skin-sam #container-top #container-help div{
+    float           :right; 
+}
 .yui-skin-sam #container-top #container-help img {
-    float           :left; 
+    float           :right; 
 }
 .yui-skin-sam #container-top #container-help div {
     line-height     :12px;

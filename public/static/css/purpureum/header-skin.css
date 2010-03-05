@@ -14,22 +14,18 @@
     color           :#fff;
 }
 
-.yui-skin-sam #container-top #container-help{
-    width           :34em;
-    right:-7;
-}
 .yui-skin-sam #container-top #container-help a{
     color           :#524c81;
 }
 .yui-skin-sam #container-top #container-help div{
     background      :#cbc8e8;
-    line-height:21px;
 }
 .yui-skin-sam #container-top #container-help form,
 .yui-skin-sam #container-top #container-help form input, 
 .yui-skin-sam #container-top #container-help input[type="submit"]{
-    font-size:11px;
+/*    font-size:11px;
     margin : 0;
+    padding:0;*/
 }
 * html .yui-skin-sam #container-top form input {
     margin-right:0px;
