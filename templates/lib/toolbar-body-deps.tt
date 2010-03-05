@@ -1,8 +1,30 @@
+[% folder = species or "default" %]
+
+
+[% css_link(href = "/static/js/yui/build/container/assets/skins/sam/container.css") %]
+[% css_link(href = "/static/js/yui/build/menu/assets/skins/sam/menu.css") %]
+[% css_link(href = "/static/css/header.css") %]
+[% css_link(href = "/static/css/body.css") %]
+[% css_link(href = "/static/css/footer.css") %]
+
+[% css_link(href = "/static/css/$folder/header-skin.css") %]
+[% css_link(href = "/static/css/$folder/body-skin.css") %]
+[% css_link(href = "/static/css/$folder/footer-skin.css") %]
+
+[% css_link(href = "/static/js/yui/build/fonts/fonts-min.css") %]
+
+[% js_link(src = "/static/js/yui/build/yahoo-dom-event/yahoo-dom-event.js") %]
+[% js_link(src = "/static/js/yui/build/dragdrop/dragdrop-min.js") %]
+[% js_link(src = "/static/js/yui/build/animation/animation-min.js") %]
+[% js_link(src = "/static/js/yui/build/connection/connection-min.js") %]
+[% js_link(src = "/static/js/yui/build/container/container-min.js") %]
+[% js_link(src = "/static/js/yui/build/menu/menu-min.js") %]
+[% js_link(src = "/static/js/custom/menu.js") %]
+
+
+
 <script type="text/javascript">
-    var loader = new YAHOO.util.YUILoader({
-        base: '/static/js/yui/build/',
-        loadOptional: true,
-		onSuccess: function() {
+			YAHOO.util.Event.onDOMReady(function() {
             var searchInput = YAHOO.util.Dom.get('search-input');
             YAHOO.util.Event.addFocusListener(searchInput.id, function() {
                 var initData = searchInput.value;
@@ -10,73 +32,5 @@
                     searchInput.value = '';
                 };
             });
-		},
-		onFailure: function(msg, xhrobj) {
-		}
-    });
-    
-var skin_folder = "[%species%]" || 'default';
-
-    // species cpecific part of css (skin)
-    loader.addModule({
-        name: 'header-skin',
-        type: 'css',
-        fullpath: "/static/css/" + skin_folder + "/header-skin.css"
-    }); 
-    loader.addModule({
-        name: 'footer-skin',
-        type: 'css',
-        fullpath: "/static/css/" + skin_folder + "/footer-skin.css"
-    }); 
-    loader.addModule({
-        name: 'body-skin',
-        type: 'css',
-        fullpath: "/static/css/" + skin_folder + "/body-skin.css"
-    }); 
-    
-    loader.addModule({
-        name: 'header-css',
-        type: 'css',
-        fullpath: "/static/css/header.css"
-    });
-
-    loader.addModule({
-        name: 'footer-css',
-        type: 'css',
-        fullpath: "/static/css/footer.css"
-    });
-
-	loader.addModule({
-        name: 'body-css',
-        type: 'css',
-        fullpath: "/static/css/body.css"
-     });
-
-    loader.addModule({
-        name: 'menu-css',
-        type: 'css',
-        fullpath: "/static/js/yui/build/menu/assets/skins/sam/menu.css"
-    });
-
-		loader.addModule({
-        name: 'fonts-min-css',
-        type: 'css',
-        fullpath: "/static/js/yui/build/fonts/fonts-min.css"
-    });
-    
-
-    loader.addModule({
-        name: 'menu-custom',
-        type: 'js',
-        fullpath: "/static/js/custom/menu.js",
-        requires: [
-            'footer-skin',  'menu-css',  'header-css',
-            'footer-css',  'body-css',
-            'yahoo','container','event', 'menu', 'animation', 
-            'fonts-min-css', 'header-skin', 'body-skin'
-        ]
-    });
-    loader.require('menu-custom');
-    loader.insert();
-    
-</script> 
+        });
+ </script>  
