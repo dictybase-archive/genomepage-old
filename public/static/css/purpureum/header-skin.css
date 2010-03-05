@@ -7,12 +7,16 @@
 #shadow-container #container-top {
 	border-bottom   :2px solid #524c81;
 }
-.yui-skin-sam #container-top #container-help{
-    width: 450px;
-    right : -10;
-}
 .yui-skin-sam #container-top a{
     text-decoration : none;
+}
+.yui-skin-sam #container-top a.yuimenubaritemlabel{
+    color           :#fff;
+}
+
+.yui-skin-sam #container-top #container-help{
+    width           :34em;
+    right:-7;
 }
 .yui-skin-sam #container-top #container-help a{
     color           :#524c81;
@@ -21,9 +25,11 @@
     background      :#cbc8e8;
     line-height:21px;
 }
-.yui-skin-sam #container-top form input {
+.yui-skin-sam #container-top #container-help form,
+.yui-skin-sam #container-top #container-help form input, 
+.yui-skin-sam #container-top #container-help input[type="submit"]{
     font-size:11px;
-    margin-right:4px;
+    margin : 0;
 }
 * html .yui-skin-sam #container-top form input {
     margin-right:0px;
