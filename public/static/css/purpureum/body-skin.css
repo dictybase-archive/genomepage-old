@@ -24,3 +24,12 @@ div#bottom-div{
     background      :#deecfd url(/static/images/purpureum/sprite.gif) repeat-x scroll 0 -353px;
     outline         :0;
 }
+.threecol {
+	background: #f3f2ff;	/* #f3f2ff; left and right columns background colour */
+}
+.threecol .wrapper-columns {
+	background: transparent url(/static/images/purpureum/waves_bottom.gif) no-repeat scroll;
+}
+.threecol .column-right {	
+	background: transparent url(/static/images/purpureum/waves_top.gif) no-repeat scroll top left;
+}

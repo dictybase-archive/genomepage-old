@@ -7,12 +7,10 @@ title = 'Error not found'
 %]
 
 <body class="yui-skin-sam">
-	<div class="wrapper threecol">
-
     [% PROCESS "$species/tbar.tt" 
     		 label = "Genomic resource for purpureum"        		
     %]
-
+	<div class="wrapper threecol">
 		[% IF replaced %]
 			<div class="error-warning">
 			[% message %]

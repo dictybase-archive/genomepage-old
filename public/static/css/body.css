@@ -44,15 +44,11 @@
 	overflow:hidden;
 }
 /* 3 Column settings */
-.threecol {
-	background: #F4F9FB;	/* #f3f2ff; left and right columns background colour */
-}
 .threecol .wrapper-left-center {
 	right:5%;          /* width of the right column */
 }
 .threecol .wrapper-columns {
 	right:75%;          /* width of the middle column */
-	background: transparent url(/inc/images/waves_bottom.gif) no-repeat scroll;
 	background-position: 103% 100%;	
 }
 .threecol .column-center {
@@ -69,7 +65,6 @@
 .threecol .column-right {	
 	width:5%;          /* Width of right column content (column width minus padding on either side) */
 	left:80%;			/* Please make note of the brackets here: (100% - left column width) plus (center column left and right padding) plus (left column left and right padding) plus (right column left padding) */  
-	background: transparent url(/inc/images/waves_top.gif) no-repeat scroll top left;
 	height:500px;
 }
 .threecol #column-center-content {
@@ -272,7 +267,4 @@ td.warning, th.warning {
     border          :none;
 }	
 
-.yui-skin-sam .yui-cms-accordion .yui-cms-item.selected .actions .accordionToggleItem {
-    background:transparent url(/static/images/sprite-toolbar.gif) no-repeat scroll 0 -30px;
-}
 
