@@ -15,7 +15,7 @@ use Bio::Chado::Schema;
 __PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
 __PACKAGE__->attr('template_path');
 __PACKAGE__->attr( 'has_config', default => 0 );
-__PACKAGE__->attr( 'helper', default => sub { DictyREST::Helper->new() } );
+__PACKAGE__->attr( 'helper', default => sub { GenomeREST::Helper->new() } );
 __PACKAGE__->attr('downloader');
 __PACKAGE__->attr('model');
 
@@ -167,31 +167,13 @@ sub set_renderer {
     }
 
     my $tpath = $self->template_path;
-
     $self->log->debug(qq/default template path for TT $tpath/);
-
     my $mode        = $self->mode();
-    my $compile_dir = $self->home->rel_dir('tmp');
-    if ( $mode eq 'production' or $mode eq 'test' ) {
-        $compile_dir = $self->home->rel_dir('webtmp');
-    }
-    $self->log->debug(qq/default compile path for TT $compile_dir/);
-    if ( !-e $compile_dir ) {
-        $self->log->error("folder for template compilation is absent");
-    }
-
     my $tt = DictyREST::Renderer::TT->new(
         path        => $self->template_path,
-        compile_dir => $compile_dir,
-
-        #option      => {
-        #    PRE_PROCESS  => $self->config->param('genepage.header') || '',
-        #    POST_PROCESS => $self->config->param('genepage.footer') || '',
-        #},
     );
     my $index_tt = DictyREST::Renderer::Index->new(
         path        => $self->template_path,
-        compile_dir => $compile_dir,
     );
 
     my $json         = DictyREST::Renderer::JSON->new();

@@ -17,13 +17,12 @@ use File::Spec;
 __PACKAGE__->attr('path');
 __PACKAGE__->attr('template');
 __PACKAGE__->attr('option');
-__PACKAGE__->attr('compile_dir');
 
 sub new {
     my ( $class, %arg ) = @_;
     my $self = {};
     bless $self, $class;
-    foreach my $param (qw/path option compile_dir/) {
+    foreach my $param (qw/path option/) {
         $self->$param( $arg{$param} ) if defined $arg{$param};
     }
     return $self;
@@ -38,9 +37,6 @@ sub build {
     my $subdir = [ map { $_->stringify } grep { -d $_ } $dir->children ];
     my $option = $self->option || {};
     $option->{INCLUDE_PATH} = $subdir;
-    $option->{CACHE_SIZE}   = 256;
-    $option->{COMPILE_EXT}  = '.ttc';
-    $option->{COMPILE_DIR}  = $self->compile_dir;
     $self->template( Template->new($option) );
 
     return sub { $self->process(@_); };
