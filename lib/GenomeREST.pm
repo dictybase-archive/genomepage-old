@@ -5,12 +5,12 @@ use base 'Mojolicious';
 use Config::Simple;
 use Carp;
 use File::Spec::Functions;
-use DictyREST::Renderer::TT;
-use DictyREST::Renderer::Index;
-use DictyREST::Renderer::JSON;
-use DictyREST::Renderer::JSON_Generic;
-use DictyREST::Helper;
+use GenomeREST::Renderer::TT;
+use GenomeREST::Renderer::Index;
+use GenomeREST::Renderer::JSON;
+use GenomeREST::Helper;
 use Bio::Chado::Schema;
+use Homology::Chado::DataSource;
 
 __PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
 __PACKAGE__->attr('template_path');
@@ -37,12 +37,13 @@ sub startup {
     );
 
     $self->connect_dbh();
+    $self->additional_dbh();
     my $router = $self->routes();
 
     #$self->log->debug("starting up");
 
-    #reusing DictyREST controller
-    $router->namespace('DictyREST::Controller');
+    #reusing GenomeREST controller
+    $router->namespace('GenomeREST::Controller');
 
     #routing setup
     #suffix based routing for multigenome setup
@@ -168,22 +169,17 @@ sub set_renderer {
 
     my $tpath = $self->template_path;
     $self->log->debug(qq/default template path for TT $tpath/);
-    my $mode        = $self->mode();
-    my $tt = DictyREST::Renderer::TT->new(
-        path        => $self->template_path,
-    );
-    my $index_tt = DictyREST::Renderer::Index->new(
-        path        => $self->template_path,
-    );
+    my $mode = $self->mode();
+    my $tt = GenomeREST::Renderer::TT->new( path => $self->template_path, );
+    my $index_tt
+        = GenomeREST::Renderer::Index->new( path => $self->template_path, );
 
-    my $json         = DictyREST::Renderer::JSON->new();
-    my $json_generic = DictyREST::Renderer::JSON_Generic->new();
+    my $json = GenomeREST::Renderer::JSON->new();
 
     $self->renderer->add_handler(
-        tt           => $tt->build(),
-        index        => $index_tt->build(),
-        json         => $json->build(),
-        json_generic => $json_generic->build()
+        tt    => $tt->build(),
+        index => $index_tt->build(),
+        json  => $json->build(),
     );
     $self->renderer->default_handler('tt');
 }
@@ -197,7 +193,26 @@ sub connect_dbh {
         $self->config->param('database.pass'),
         { $opt => 1 }
     );
+    my $source = $schema->source('Sequence::Feature');
+    $source->add_column(
+        is_deleted => {
+            data_type     => 'boolean',
+            default_value => 'false',
+            is_nullable   => 0,
+            size          => 1
+        }
+    );
     $self->model($schema);
+
+}
+
+sub additional_dbh {
+    my $self     = shift;
+    my $homology = Homology::Chado::DataSource->instance;
+    $homology->dsn( $self->config->param('database.dsn') );
+    $homology->user( $self->config->param('database.user') );
+    $homology->password( $self->config->param('database.pass') );
+
 }
 
 1;
@@ -206,11 +221,11 @@ __END__
 
 =head1 NAME
 
-DictyREST - Web Framework
+GenomeREST - Web Framework
 
 =head1 SYNOPSIS
 
-    use base 'DictyREST';
+    use base 'GenomeREST';
 
     sub startup {
         my $self = shift;
@@ -225,11 +240,11 @@ DictyREST - Web Framework
 
 L<Mojolicous> is a web framework built upon L<Mojo>.
 
-See L<Mojo::Manual::DictyREST> for user friendly documentation.
+See L<Mojo::Manual::GenomeREST> for user friendly documentation.
 
 =head1 ATTRIBUTES
 
-L<DictyREST> inherits all attributes from L<Mojo> and implements the
+L<GenomeREST> inherits all attributes from L<Mojo> and implements the
 following new ones.
 
 =head2 C<mode>
@@ -249,12 +264,12 @@ Defaults to C<$ENV{MOJO_MODE}> or C<development>.
 =head2 C<renderer>
 
     my $renderer = $mojo->renderer;
-    $mojo        = $mojo->renderer(DictyREST::Renderer->new);
+    $mojo        = $mojo->renderer(GenomeREST::Renderer->new);
 
 =head2 C<routes>
 
     my $routes = $mojo->routes;
-    $mojo      = $mojo->routes(DictyREST::Dispatcher->new);
+    $mojo      = $mojo->routes(GenomeREST::Dispatcher->new);
 
 =head2 C<static>
 
@@ -268,14 +283,14 @@ Defaults to C<$ENV{MOJO_MODE}> or C<development>.
 
 =head1 METHODS
 
-L<DictyREST> inherits all methods from L<Mojo> and implements the following
+L<GenomeREST> inherits all methods from L<Mojo> and implements the following
 new ones.
 
 =head2 C<new>
 
-    my $mojo = DictyREST->new;
+    my $mojo = GenomeREST->new;
 
-Returns a new L<DictyREST> object.
+Returns a new L<GenomeREST> object.
 This method will call the method C<${mode}_mode> if it exists.
 (C<$mode> being the value of the attribute C<mode>).
 For example in production mode, C<production_mode> will be called.

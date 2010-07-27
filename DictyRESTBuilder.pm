@@ -102,7 +102,7 @@ sub ACTION_testcore {
 
 sub ACTION_test {
     my ( $self, @arg ) = @_;
-    $self->load_fixture();
+    $self->load_core_fixture();
     $self->SUPER::ACTION_test(@arg);
     $self->unload_fixture;
 }

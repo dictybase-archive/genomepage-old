@@ -98,7 +98,7 @@ $client->process_app( 'GenomeREST', $tx );
 is( $tx->res->code, 200, 'is a successful response for feature section' );
 like(
     $tx->res->body,
-    qr/Gene page for $name/i,
+    qr/Gene Information for $name/i,
     "is the title for $name gene page"
 );
 like(

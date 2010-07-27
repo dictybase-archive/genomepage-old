@@ -55,7 +55,7 @@ like( $tx->res->headers->content_type,
     qr/html/, "is a html content for $name gene" );
 like(
     $tx->res->body,
-    qr/Gene Page for $name/,
+    qr/Gene Information for $name/,
     "is the title for $name gene page"
 );
 
@@ -68,7 +68,7 @@ like( $tx->res->headers->content_type,
     qr/html/, "is a html content for $name gene" );
 like(
     $tx->res->body,
-    qr/Gene Page for $name/,
+    qr/Gene Information for $name/,
     "is the title for $name gene page"
 );
 
@@ -81,7 +81,6 @@ is( $tx->res->code, 200,
 like( $tx->res->headers->content_type,
     qr/json/, 'is a json content for protein' );
 like( $tx->res->body, qr/layout.+accordion/, 'has a accordion layout in protein' );
-#diag($tx->res->body);
 
 
 

@@ -24,11 +24,13 @@ my ($gene) = dicty::Search::Gene->find(
 );
 my $gene_id = $gene->primary_id;
 
-my $tx = Mojo::Transaction->new_get($base_url);
-$client->process_app( 'GenomeREST', $tx );
+my $tx;
+#my $tx = Mojo::Transaction->new_get($base_url);
+#$client->process_app( 'GenomeREST', $tx );
 
-is( $tx->res->code, 404, 'resource does not exist' );
-like( $tx->res->body, qr/File not found/i, 'is a generic error response' );
+#is( $tx->res->code, 404, 'resource does not exist' );
+#like( $tx->res->body, qr/File not found/i, 'is a generic error response' );
+#exit;
 
 #canonical url with gene name
 $tx = Mojo::Transaction->new_get("$base_url/$name");
@@ -36,7 +38,7 @@ $client->process_app( 'GenomeREST', $tx );
 is( $tx->res->code, 200, "is a successful response for $name" );
 like( $tx->res->headers->content_type,
     qr/html/, 'is a html response for gene' );
-like( $tx->res->body, qr/Gene page for $name/i,
+like( $tx->res->body, qr/Gene information for $name/i,
     'is the title for gene page' );
 like(
     $tx->res->body,
@@ -53,8 +55,6 @@ like(
     'should be an error with wrong species name'
 );
 
-
-
 #canonical url with gene id
 $tx = Mojo::Transaction->new_get("$base_url/$gene_id");
 $client->process_app( 'GenomeREST', $tx );
@@ -63,7 +63,7 @@ like( $tx->res->headers->content_type,
     qr/html/, "is a html response for $gene_id" );
 like(
     $tx->res->body,
-    qr/Gene page for $name/i,
+    qr/Gene information for $name/i,
     "is the title for $gene_id gene page"
 );
 like(
@@ -71,8 +71,6 @@ like(
     qr/Supported by NIH/i,
     'is the common footer for every gene page'
 );
-
-
 
 #canonical url with gene name and format extension
 $tx = Mojo::Transaction->new_get("$base_url/$name.html");
@@ -82,7 +80,7 @@ like( $tx->res->headers->content_type,
     qr/html/, "is a html response for $name" );
 like(
     $tx->res->body,
-    qr/Gene page for $name/i,
+    qr/Gene information for $name/i,
     "is the title for $name gene page"
 );
 like(
@@ -91,10 +89,4 @@ like(
     'is the common footer for every gene page'
 );
 
-#canonical url with gene name and json format
-#the following url is not being implemented
-#$tx = Mojo::Transaction->new_get("$base_url/$name.json");
-#$client->process_app('GenomeREST',  $tx);
-#is($tx->res->code, 200, "is a successful response for $name");
-#like($tx->res->headers->content_type,  qr/json/,  "is a json response for $name");
 

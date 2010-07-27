@@ -1,4 +1,4 @@
-package DictyREST::Helper;
+package GenomeREST::Helper;
 
 use version; our $VERSION = qv('1.0.0');
 

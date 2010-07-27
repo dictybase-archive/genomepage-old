@@ -1,4 +1,4 @@
-package DictyREST::Renderer::Index;
+package GenomeREST::Renderer::Index;
 
 use warnings;
 use strict;
@@ -68,7 +68,7 @@ __END__
 
 =head1 NAME
 
-DictyREST::Renderer::TT - [Template toolkit renderer for DictyREST application]
+GenomeREST::Renderer::TT - [Template toolkit renderer for DictyREST application]
 
 
 =head1 VERSION
