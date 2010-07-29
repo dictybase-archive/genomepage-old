@@ -18,6 +18,7 @@ my $builder = DictyRESTBuilder->new(
         'dicty::Search::Gene' => '', 
         'dicty::UI::Tabview::Config' => '', 
     	'dicty::Tests::Data' => '', 
+    	'Homology::Group' => '', 
     },
     build_requires => {
     	 'Archive::Extract' => '',

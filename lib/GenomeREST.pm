@@ -9,8 +9,10 @@ use GenomeREST::Renderer::TT;
 use GenomeREST::Renderer::Index;
 use GenomeREST::Renderer::JSON;
 use GenomeREST::Helper;
+use File::Path qw/make_path/;
 use Bio::Chado::Schema;
 use Homology::Chado::DataSource;
+use Carp::Always;
 
 __PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
 __PACKAGE__->attr('template_path');
