@@ -79,7 +79,7 @@ sub contig {
         { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
         {   join => [
                 'type',
-                { 'featureloc_srcfeature_ids' => { 'feature' => 'type' } }
+                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
             ],
             select =>
                 [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
@@ -119,7 +119,7 @@ sub contig_with_page {
         { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
         {   join => [
                 'type',
-                { 'featureloc_srcfeature_ids' => { 'feature' => 'type' } }
+                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
             ],
             select =>
                 [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
