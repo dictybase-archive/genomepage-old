@@ -110,10 +110,6 @@ sub ACTION_test {
 sub ACTION_start_daemon {
     my $self = shift;
     my $script = catfile( 'bin', 'dicty_rest' );
-    #first export mojo mode
-    if (!scalar run(command => 'export MOJO_MODE=production',  verbose => 1)) {
-    	print "unable to export mojo mode: will go in developmental mode then\n";	
-    }
     my $cmd
         = "$script daemon_prefork --daemonize --clients 250 --keepalive 60 --servers 250";
     $cmd .= '--port ' . $self->args('port') if $self->args('port');
