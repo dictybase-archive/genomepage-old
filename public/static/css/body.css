@@ -25,6 +25,7 @@
 	float           :left;
 	width           :100%;		/* width of whole page */
 	overflow        :hidden;	/* This chops off any overhanging divs */
+	background      :none repeat scroll 0 0 #F4F9FB;
 
 }
 /* common column settings */
