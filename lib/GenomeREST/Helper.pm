@@ -6,7 +6,6 @@ use version; our $VERSION = qv('1.0.0');
 use base qw/Mojo::Base/;
 use Module::Load;
 use Try::Tiny;
-use Chado::AutoDBI;
 
 # Module implementation
 #
@@ -29,11 +28,11 @@ sub is_ddb {
 sub name2id {
     my ( $self, $id ) = @_;
     load dicty::Search::Gene;
-    my  ($feat) = dicty::Search::Gene->find(
-            -name     => $id,
-            -organism => $self->species
-        );
-	return 0 if !$feat;
+    my ($feat) = dicty::Search::Gene->find(
+        -name     => $id,
+        -organism => $self->species
+    );
+    return 0 if !$feat;
     $feat->primary_id();
 }
 
@@ -59,30 +58,32 @@ sub transcript_id {
     try {
         $gene = dicty::Feature->new( -primary_id => $id );
     }
-    catch { 
-    	return 0 
+    catch {
+        return 0;
     };
     my ($trans) = @{ $gene->primary_features() };
     $trans->primary_id if $trans;
 }
 
 sub parse_url {
-	my ($self,  $path) = @_;
-	if ($path =~ /^((\/\w+)?\/gene)/) {
-		return $1;
-	}
+    my ( $self, $path ) = @_;
+    if ( $path =~ /^((\/\w+)?\/gene)/ ) {
+        return $1;
+    }
 }
 
 sub validate_species {
-	my ($self,  $name) = @_;
-    my ($organism) = Chado::Organism->search_where(
-        [   { common_name  => $name },
+    my ( $self, $name ) = @_;
+    my $model = $self->app->model;
+    my ($organism) = $model->resultset('Organism::Organism')->search(
+        -or => [
+            { common_name  => $name },
             { abbreviation => $name },
             { species      => $name },
         ]
     );
     return if !$organism;
-    $self->species($organism->species);
+    $self->species( $organism->species );
     $organism;
 }
 

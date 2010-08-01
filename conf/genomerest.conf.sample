@@ -10,6 +10,11 @@ header = page-header.tt
 footer = page-footer.tt
 error = missing
 
+[cache]
+driver = Memcached::Fast
+servers = 127.0.0.1:11211
+namespace = genomepage
+
 [tab]
 dynamic = feature
 

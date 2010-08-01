@@ -5,8 +5,6 @@ use strict;
 
 # Other modules:
 use base qw/Mojolicious::Controller/;
-use dicty::Search::Reference_feature;
-use dicty::Search::Gene;
 
 # Other modules:
 
@@ -17,21 +15,40 @@ sub index {
     my ( $self, $c ) = @_;
     my $organism = $c->stash('organism');
     my $model    = $self->app->model;
+    my $cache    = $self->app->cache;
 
-    my $est_count = $model->resultset('Sequence::Feature')->count(
-        {   'type.name'        => 'EST',
-            'organism.species' => $organism->species
-        },
-        { join => [ 'type', 'organism'] }
-    );
+    my $est_key = $organism->species . '_est';
+    my $est_key = $organism->species . '_protein';
+    my ( $est_count, $protein_count );
 
-    my $protein_count = $model->resultset('Sequence::Feature')->count(
-        {   'type.name'        => 'polypeptide',
-            'dbxref.accession' => 'JGI',
-            'organism.species' => $organism->species
-        },
-        { join => [ 'type', 'organism', { 'feature_dbxrefs' => 'dbxref' } ] }
-    );
+    if ( $cache->is_valid($est_key) ) {
+        $est_count = $cache->get($est_key);
+    }
+    else {
+        $est_count = $model->resultset('Sequence::Feature')->count(
+            {   'type.name'        => 'EST',
+                'organism.species' => $organism->species
+            },
+            { join => [ 'type', 'organism' ] }
+        );
+        $cache->set( $est_key, $est_count );
+    }
+
+    if ( $cache->is_valid($protein_key) ) {
+        $protein_count = $cache->get($protein_key);
+    }
+    else {
+        $protein_count = $model->resultset('Sequence::Feature')->count(
+            {   'type.name'        => 'polypeptide',
+                'dbxref.accession' => 'JGI',
+                'organism.species' => $organism->species
+            },
+            {   join =>
+                    [ 'type', 'organism', { 'feature_dbxrefs' => 'dbxref' } ]
+            }
+        );
+        $cache->set( $protein_key, $protein_count );
+    }
 
     $self->render(
         handler     => 'index',
@@ -47,8 +64,20 @@ sub index {
 
 sub check_name {
     my ( $self, $c ) = @_;
-    my $name     = $c->stash('name');
-    my $organism = $self->app->helper->validate_species($name);
+    my $name = $c->stash('name');
+
+    my $organism;
+    my $cache = $self->app->cache;
+
+    #try from cache
+    if ( $cache->is_valid($name) ) {
+        $organism = $cache->get($name);
+    }
+    else {
+        $organism = $self->app->helper->validate_species($name);
+        $cache->set( $name, $organism );
+    }
+
     if ( !$organism ) {
         $c->res->code(404);
         $self->render(
@@ -73,35 +102,44 @@ sub contig {
     my ( $self, $c ) = @_;
     my $data;
     my $model = $self->app->model;
+    my $cache = $self->app->cache;
     my $rs    = $model->resultset('Sequence::Feature');
 
-    my $contig_rs = $rs->search(
-        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
-        {   join => [
-                'type',
-                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
-            ],
-            select =>
-                [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
-            as       => [ 'cfeature_id',   'cname', 'gene_count' ],
-            group_by => [ 'me.feature_id', 'me.name' ],
-            having   => \'count(feature_id) > 0',
-            order_by => { -asc => 'me.feature_id' }
-        }
-    );
+    my $contig_key = $c->stash('species') . '_contig';
+    if ( $cache->is_valid($contig_key) ) {
+        $data = $cache->get($contig_key);
+    }
+    else {
+        my $contig_rs = $rs->search(
+            { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
+            {   join => [
+                    'type',
+                    { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
+                ],
+                select => [
+                    'me.feature_id', 'me.name', { count => 'feature_id' },
+                ],
+                as       => [ 'cfeature_id',   'cname', 'gene_count' ],
+                group_by => [ 'me.feature_id', 'me.name' ],
+                having   => \'count(feature_id) > 0',
+                order_by => { -asc => 'me.feature_id' }
+            }
+        );
 
-    while ( my $contig = $contig_rs->next ) {
-        push @$data,
-            [
-            $contig->get_column('cname'),
-            $rs->find(
-                { feature_id => $contig->get_column('cfeature_id') },
-                {   select => { length => 'residues' },
-                    as     => 'seqlength'
-                }
-                )->get_column('seqlength'),
-            $contig->get_column('gene_count')
-            ];
+        while ( my $contig = $contig_rs->next ) {
+            push @$data,
+                [
+                $contig->get_column('cname'),
+                $rs->find(
+                    { feature_id => $contig->get_column('cfeature_id') },
+                    {   select => { length => 'residues' },
+                        as     => 'seqlength'
+                    }
+                    )->get_column('seqlength'),
+                $contig->get_column('gene_count')
+                ];
+        }
+        $cache->set( $contig_key, $data );
     }
 
     $c->stash( 'data' => $data, header => 'Contig page' );
@@ -113,37 +151,46 @@ sub contig_with_page {
     my ( $self, $c ) = @_;
     my $data;
     my $model = $self->app->model;
+    my $cache = $self->app->cache;
     my $rs    = $model->resultset('Sequence::Feature');
 
-    my $contig_rs = $rs->search(
-        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
-        {   join => [
-                'type',
-                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
-            ],
-            select =>
-                [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
-            as       => [ 'cfeature_id',   'cname', 'gene_count' ],
-            group_by => [ 'me.feature_id', 'me.name' ],
-            having   => \'count(feature_id) > 0',
-            order_by => { -asc => 'me.feature_id' },
-            rows     => 50,
-            page     => $c->stash('page')
-        }
-    );
+    my $contig_key = $c->stash('species') . '_contig_' . $c->stash('page');
+    if ( $cache->is_valid($contig_key) ) {
+        $data = $cache->get($contig_key);
+    }
+    else {
+        my $contig_rs = $rs->search(
+            { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
+            {   join => [
+                    'type',
+                    { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
+                ],
+                select => [
+                    'me.feature_id', 'me.name', { count => 'feature_id' },
+                ],
+                as       => [ 'cfeature_id',   'cname', 'gene_count' ],
+                group_by => [ 'me.feature_id', 'me.name' ],
+                having   => \'count(feature_id) > 0',
+                order_by => { -asc => 'me.feature_id' },
+                rows     => 50,
+                page     => $c->stash('page')
+            }
+        );
 
-    while ( my $contig = $contig_rs->next ) {
-        push @$data,
-            [
-            $contig->get_column('cname'),
-            $rs->find(
-                { feature_id => $contig->get_column('cfeature_id') },
-                {   select => { length => 'residues' },
-                    as     => 'seqlength'
-                }
-                )->get_column('seqlength'),
-            $contig->get_column('gene_count')
-            ];
+        while ( my $contig = $contig_rs->next ) {
+            push @$data,
+                [
+                $contig->get_column('cname'),
+                $rs->find(
+                    { feature_id => $contig->get_column('cfeature_id') },
+                    {   select => { length => 'residues' },
+                        as     => 'seqlength'
+                    }
+                    )->get_column('seqlength'),
+                $contig->get_column('gene_count')
+                ];
+        }
+        $cache->set( $contig_key, $data );
     }
 
     $c->stash(

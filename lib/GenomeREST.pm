@@ -1,7 +1,8 @@
 package GenomeREST;
 
 use strict;
-use base 'Mojolicious';
+use Moose;
+use CHI;
 use Config::Simple;
 use Carp;
 use File::Spec::Functions;
@@ -11,13 +12,102 @@ use GenomeREST::Renderer::JSON;
 use GenomeREST::Helper;
 use Bio::Chado::Schema;
 use Homology::Chado::DataSource;
+use namespce::autoclean;
+extends 'Mojolicious';
 
-__PACKAGE__->attr( 'config', default => sub { Config::Simple->new() } );
-__PACKAGE__->attr('template_path');
-__PACKAGE__->attr( 'has_config', default => 0 );
-__PACKAGE__->attr( 'helper', default => sub { GenomeREST::Helper->new() } );
-__PACKAGE__->attr('downloader');
-__PACKAGE__->attr('model');
+
+has 'cache' => (
+    is         => 'rw',
+    isa        => 'Object',
+    lazy_build => 1
+);
+
+sub _build_cache {
+    my $self   = shift;
+    my $config = $self->config;
+    CHI->new(
+        driver     => $config->param('cache.driver'), 
+        servers    => [ $config->param('cache.servers') ],
+        namespace  => $config->param('cache.namespace'), 
+        expires_in => '6 days'
+    );
+}
+
+
+has 'config' => (
+    is       => 'rw',
+    isa       => 'Config::Simple',
+    lazy_build     => 1
+);
+
+
+sub _build_config {
+    my ( $self ) = @_;
+    my $folder = $self->home->rel_dir('conf');
+    if ( !-e $folder ) {
+        return;
+    }
+
+    #$self->log->debug(qq/got folder $folder/);
+
+#now the file name,  default which is developmental mode resolves to <name>.conf. For
+#test and production it will be <name>.test.conf and <name>.production.conf respectively.
+    my $mode   = $self->mode();
+    my $suffix = '.conf';
+    if ( $mode eq 'production' or $mode eq 'test' ) {
+        $suffix = '.' . $mode . '.conf';
+    }
+    my $app_name = lc $self->home->app_class;
+
+    my $file = catfile( $folder, $app_name . $suffix );
+    $self->log->debug(qq/got config file $file/);
+    $Config::Simple->read($file);
+}
+
+has 'template_path' => (
+    is  => 'rw',
+    isa => 'Str'
+);
+
+has 'helper' => (
+    is      => 'rw',
+    isa     => 'GenomeREST::Helper',
+    default => sub { GenomeREST::Helper->new() },
+);
+
+has 'downloader' => (
+    is  => 'rw',
+    isa => 'Str',
+);
+
+has 'model' => (
+    is         => 'rw',
+    isa        => 'Bio::Chado::Schema',
+    lazy_build => 1
+);
+
+sub _build_model {
+    my $self   = shift;
+    my $opt    = $self->config->param('database.opt');
+    my $schema = Bio::Chado::Schema->connect(
+        $self->config->param('database.dsn'),
+        $self->config->param('database.user'),
+        $self->config->param('database.pass'),
+        { $opt => 1 }
+    );
+    my $source = $schema->source('Sequence::Feature');
+    $source->add_column(
+        is_deleted => {
+            data_type     => 'boolean',
+            default_value => 'false',
+            is_nullable   => 0,
+            size          => 1
+        }
+    );
+    my $source2 = $schema->source('Organism::Organism');
+    $source2->remove_column('comment');
+    $schema;
+}
 
 # This will run once at startup
 sub startup {
@@ -26,9 +116,6 @@ sub startup {
     #default log level
     $self->log->level('debug');
 
-    #config file setup
-    $self->set_config();
-
     $self->downloader(
         MojoX::Dispatcher::Static->new(
             prefix => '/bulkfile',
@@ -36,11 +123,9 @@ sub startup {
         )
     );
 
-    $self->connect_dbh();
     $self->additional_dbh();
     my $router = $self->routes();
 
-    #$self->log->debug("starting up");
 
     #reusing GenomeREST controller
     $router->namespace('GenomeREST::Controller');
@@ -91,8 +176,11 @@ sub startup {
 
 #keeping the default to html as it is needed for feature tab
 #this is the only url that is being called without any extension and gives back html
-    $bridge2->route('/:id/:tab/:section')
-        ->to( controller => 'tab', action => 'section', format => 'html' );
+    $bridge2->route('/:id/:tab/:section')->to(
+        controller => 'tab',
+        action     => 'section',
+        format     => 'html'
+    );
 
     #only support json response
     $bridge2->route('/:id/:tab/:subid/:section')->to(
@@ -101,14 +189,8 @@ sub startup {
         format     => 'json'
     );
 
-   #organisms
-   #$bridge2->route('/organism')
-   #    ->to( controller => 'organism', action => 'index', format => 'json' );
-
     #set up various renderer
     $self->set_renderer();
-
-    #$self->log->debug("done with startup");
 }
 
 sub process {
@@ -126,34 +208,6 @@ sub process {
 
 #set up config file usually look under conf folder
 #supports similar profile as log file
-sub set_config {
-    my ( $self, $c ) = @_;
-    my $folder = $self->home->rel_dir('conf');
-    if ( !-e $folder ) {
-        return;
-    }
-
-    #$self->log->debug(qq/got folder $folder/);
-
-#now the file name,  default which is developmental mode resolves to <name>.conf. For
-#test and production it will be <name>.test.conf and <name>.production.conf respectively.
-    my $mode   = $self->mode();
-    my $suffix = '.conf';
-    if ( $mode eq 'production' or $mode eq 'test' ) {
-        $suffix = '.' . $mode . '.conf';
-    }
-    my $app_name = lc $self->home->app_class;
-
-    #opendir my $conf, $folder or confess "cannot open folder $!:$folder";
-    #my $file = catfile()
-    #closedir $conf;
-
-    my $file = catfile( $folder, $app_name . $suffix );
-    $self->log->debug(qq/got config file $file/);
-    $self->config->read($file);
-    $self->has_config(1);
-
-}
 
 sub set_renderer {
     my ($self) = @_;
@@ -162,7 +216,8 @@ sub set_renderer {
     #keep in mind this setup is separate from the Mojo's default template path
     #if something not specifically is not set it defaults to Mojo's default
     $self->template_path( $self->renderer->root );
-    if ( $self->has_config and $self->config->param('default.template_path') )
+    if (    $self->has_config
+        and $self->config->param('default.template_path') )
     {
         $self->template_path( $self->config->param('default.template_path') );
     }
@@ -184,35 +239,12 @@ sub set_renderer {
     $self->renderer->default_handler('tt');
 }
 
-sub connect_dbh {
-    my $self   = shift;
-    my $opt    = $self->config->param('database.opt');
-    my $schema = Bio::Chado::Schema->connect(
-        $self->config->param('database.dsn'),
-        $self->config->param('database.user'),
-        $self->config->param('database.pass'),
-        { $opt => 1 }
-    );
-    my $source = $schema->source('Sequence::Feature');
-    $source->add_column(
-        is_deleted => {
-            data_type     => 'boolean',
-            default_value => 'false',
-            is_nullable   => 0,
-            size          => 1
-        }
-    );
-    $self->model($schema);
-
-}
-
 sub additional_dbh {
     my $self     = shift;
     my $homology = Homology::Chado::DataSource->instance;
     $homology->dsn( $self->config->param('database.dsn') );
     $homology->user( $self->config->param('database.user') );
     $homology->password( $self->config->param('database.pass') );
-
 }
 
 1;
