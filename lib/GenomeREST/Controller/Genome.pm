@@ -17,8 +17,8 @@ sub index {
     my $model    = $self->app->model;
     my $cache    = $self->app->cache;
 
-    my $est_key = $organism->species . '_est';
-    my $est_key = $organism->species . '_protein';
+    my $est_key     = $organism->species . '_est';
+    my $protein_key = $organism->species . '_protein';
     my ( $est_count, $protein_count );
 
     if ( $cache->is_valid($est_key) ) {
@@ -150,13 +150,18 @@ sub contig {
 sub contig_with_page {
     my ( $self, $c ) = @_;
     my $data;
+    my $pager;
     my $model = $self->app->model;
     my $cache = $self->app->cache;
     my $rs    = $model->resultset('Sequence::Feature');
 
     my $contig_key = $c->stash('species') . '_contig_' . $c->stash('page');
+    my $pager_key
+        = $c->stash('species') . '_contig_' . $c->stash('page') . '_pager';
+
     if ( $cache->is_valid($contig_key) ) {
-        $data = $cache->get($contig_key);
+        $data  = $cache->get($contig_key);
+        $pager = $cache->get($pager_key);
     }
     else {
         my $contig_rs = $rs->search(
@@ -191,12 +196,13 @@ sub contig_with_page {
                 ];
         }
         $cache->set( $contig_key, $data );
+        $cache->set( $pager_key,  $contig_rs->pager );
     }
 
     $c->stash(
         'data' => $data,
         header => 'Contig page',
-        pager  => $contig_rs->pager
+        pager  => $pager
     );
     $self->render( template => $c->stash('species') . '/contig' );
 

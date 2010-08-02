@@ -12,7 +12,7 @@ use GenomeREST::Renderer::JSON;
 use GenomeREST::Helper;
 use Bio::Chado::Schema;
 use Homology::Chado::DataSource;
-use namespce::autoclean;
+use namespace::autoclean;
 extends 'Mojolicious';
 
 
