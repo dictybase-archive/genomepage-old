@@ -61,7 +61,7 @@ sub _build_config {
 
     my $file = catfile( $folder, $app_name . $suffix );
     $self->log->debug(qq/got config file $file/);
-    $Config::Simple->read($file);
+    Config::Simple->read($file);
 }
 
 has 'template_path' => (
