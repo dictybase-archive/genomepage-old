@@ -77,7 +77,7 @@ sub validate {
         }
 
         #logic for deleted feature
-        if ( $feat->is_deleted() ) {
+        if ( $feat->get_column('is_deleted') ) {
             $c->res->code(404);
             my $rs = $feat->featureprops(
                 {   'cv.name'   => 'autocreated',

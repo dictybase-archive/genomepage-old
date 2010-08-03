@@ -103,7 +103,7 @@ sub _build_model {
             data_type     => 'boolean',
             default_value => 'false',
             is_nullable   => 0,
-            size          => 1
+            size          => 1, 
         }
     );
     my $source2 = $schema->source('Organism::Organism');
