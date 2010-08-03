@@ -5,7 +5,6 @@ use strict;
 
 # Other modules:
 use base qw/Mojolicious::Controller/;
-use dicty::Feature;
 
 # Module implementation
 #
@@ -14,10 +13,11 @@ sub check_name {
     my ( $self, $c ) = @_;
     my $name     = $c->stash('name');
     my $organism = $self->app->helper->validate_species($name);
+
     if ( !$organism ) {
         $c->res->code(404);
         $self->render(
-            template => $self->app->config->param('genepage.error'),
+            template => 'missing',
             message  => "organism $name not found",
             error    => 1,
             header   => 'Error page',
@@ -25,14 +25,14 @@ sub check_name {
         return;
 
     }
-
     $c->stash(
+        organism     => $organism,
         species      => $organism->species,
         abbreviation => $organism->abbreviation,
         genus        => $organism->genus
     );
 
-	$self->app->log->debug($c->req->url->path->clone->canonicalize->parts);
+    $self->app->log->debug( $c->req->url->path->clone->canonicalize->parts );
     return $self->validate($c);
 }
 
@@ -53,50 +53,63 @@ sub validate {
         return;
     }
 
-    my $gene_feat;
+    my $key   = $gene_id . '_valid';
+    my $cache = $app->cache;
 
-    #logic for wrong ids
-    eval { $gene_feat = dicty::Feature->new( -primary_id => $gene_id ); };
-    if ($@) {
-        $c->res->code(404);
-        $self->render(
-            template => $c->stash('species') . '/'
-                . $app->config->param('genepage.error'),
-            message => "Input $gene_id not found",
-            error   => 1,
-            header  => 'Error page',
-        );
-        return;
+    if ( !$cache->is_valid($key) ) {
+        my $model = $app->model;
+        my $feat  = $model->resultset('Sequence::Feature')->search(
+            { 'dbxref.accession' => $gene_id },
+            { join               => 'dbxref', rows => 1 }
+        )->single;
 
-    }
-
-    #logic for deleted feature
-    if ( $gene_feat->is_deleted() ) {
-        $c->res->code(404);
-        if ( my $replaced = $gene_feat->replaced_by() )
-        {    #is it being replaced
-            $c->stash(
-                message =>
-                    "$gene_id has been deleted from dictyBase. It has been replaced by",
-                replaced => 1,
-                id       => $replaced,
-                header   => 'Error page',
-                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
-
-                #the ENV should be changed
-            );
-        }
-        else {
-            $c->stash(
-                deleted => 1,
-                message => "$gene_id has been deleted",
+        #logic for wrong ids
+        if ( !$feat ) {
+            $c->res->code(404);
+            $self->render(
+                template => $c->stash('species') . '/'
+                    . $app->config->param('genepage.error'),
+                message => "Input $gene_id not found",
+                error   => 1,
                 header  => 'Error page',
             );
-
+            return;
         }
-        $self->render( template => $c->stash('species') . '/'
-                . $app->config->param('genepage.error') );
-        return;
+
+        #logic for deleted feature
+        if ( $feat->is_deleted() ) {
+            $c->res->code(404);
+            my $rs = $feat->featureprops(
+                {   'cv.name'   => 'autocreated',
+                    'type.name' => 'replaced by'
+                },
+                { join => { 'type' => 'cv' } }
+            );
+            if ( $rs->count > 0 ) {    #is it being replaced
+                $c->stash(
+                    message =>
+                        "$gene_id has been deleted from dictyBase. It has been replaced by",
+                    replaced => 1,
+                    id       => join( ":", map { $_->value } $rs->all ),
+                    header   => 'Error page',
+                    url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
+
+                    #the ENV should be changed
+                );
+            }
+            else {
+                $c->stash(
+                    deleted => 1,
+                    message => "$gene_id has been deleted",
+                    header  => 'Error page',
+                );
+
+            }
+            $self->render( template => $c->stash('species') . '/'
+                    . $app->config->param('genepage.error') );
+            return;
+        }
+        $cache->set( $key, 'valid' );
     }
     $c->stash( gene_id => $gene_id );
     my $base_url = $app->helper->parse_url( $self->req->url->path );

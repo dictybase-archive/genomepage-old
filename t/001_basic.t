@@ -45,6 +45,7 @@ like(
     qr/Supported by NIH/i,
     'is the common footer for every gene page'
 );
+exit;
 
 #with non-existant species
 $tx = Mojo::Transaction->new_get($wrong_url.'/'.$gene_id);

@@ -10,11 +10,9 @@ use GenomeREST::Renderer::TT;
 use GenomeREST::Renderer::Index;
 use GenomeREST::Renderer::JSON;
 use GenomeREST::Helper;
-use Bio::Chado::Schema;
 use Homology::Chado::DataSource;
 use namespace::autoclean;
 extends 'Mojolicious';
-
 
 has 'cache' => (
     is         => 'rw',
@@ -26,23 +24,21 @@ sub _build_cache {
     my $self   = shift;
     my $config = $self->config;
     CHI->new(
-        driver     => $config->param('cache.driver'), 
+        driver     => $config->param('cache.driver'),
         servers    => [ $config->param('cache.servers') ],
-        namespace  => $config->param('cache.namespace'), 
+        namespace  => $config->param('cache.namespace'),
         expires_in => '6 days'
     );
 }
 
-
 has 'config' => (
-    is       => 'rw',
-    isa       => 'Config::Simple',
-    lazy_build     => 1
+    is         => 'rw',
+    isa        => 'Config::Simple',
+    lazy_build => 1
 );
 
-
 sub _build_config {
-    my ( $self ) = @_;
+    my ($self) = @_;
     my $folder = $self->home->rel_dir('conf');
     if ( !-e $folder ) {
         return;
@@ -61,7 +57,7 @@ sub _build_config {
 
     my $file = catfile( $folder, $app_name . $suffix );
     $self->log->debug(qq/got config file $file/);
-    Config::Simple->read($file);
+    return Config::Simple->new($file);
 }
 
 has 'template_path' => (
@@ -72,12 +68,18 @@ has 'template_path' => (
 has 'helper' => (
     is      => 'rw',
     isa     => 'GenomeREST::Helper',
-    default => sub { GenomeREST::Helper->new() },
+    default => sub {
+        my $self   = shift;
+        my $helper = GenomeREST::Helper->new();
+        $helper->app($self);
+        $helper;
+    },
+    lazy => 1
 );
 
 has 'downloader' => (
     is  => 'rw',
-    isa => 'Str',
+    isa => 'MojoX::Dispatcher::Static',
 );
 
 has 'model' => (
@@ -89,7 +91,7 @@ has 'model' => (
 sub _build_model {
     my $self   = shift;
     my $opt    = $self->config->param('database.opt');
-    my $schema = Bio::Chado::Schema->connect(
+    my $schema = MyModel->connect(
         $self->config->param('database.dsn'),
         $self->config->param('database.user'),
         $self->config->param('database.pass'),
@@ -125,7 +127,6 @@ sub startup {
 
     $self->additional_dbh();
     my $router = $self->routes();
-
 
     #reusing GenomeREST controller
     $router->namespace('GenomeREST::Controller');
@@ -246,6 +247,12 @@ sub additional_dbh {
     $homology->user( $self->config->param('database.user') );
     $homology->password( $self->config->param('database.pass') );
 }
+
+1;
+
+package MyModel;
+use base qw/Bio::Chado::Schema/;
+__PACKAGE__->load_components(qw/Serialize::Storable/);
 
 1;
 

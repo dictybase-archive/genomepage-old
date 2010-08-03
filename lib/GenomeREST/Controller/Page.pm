@@ -18,24 +18,30 @@ sub index_html {
     my ( $self, $c ) = @_;
 
     my $app     = $self->app;
+    my $cache   = $app->cache;
     my $gene_id = $c->stash('gene_id');
+    my $key     = $gene_id . '_index';
 
-    #$app->log->debug($c->url_for);
-    #$app->log->debug($c->stash('base_url'));
-
-    #database query
-    my $db = dicty::UI::Tabview::Page::Gene->new(
-        -primary_id => $gene_id,
-        -active_tab => ' gene ',
-        -base_url   => $c->stash('base_url')
-    );
+    my $result;
+    if ( $cache->is_valid($key) ) {
+        $result = $cache->get($key);
+    }
+    else {
+        #database query
+        my $db = dicty::UI::Tabview::Page::Gene->new(
+            -primary_id => $gene_id,
+            -active_tab => ' gene ',
+            -base_url   => $c->stash('base_url')
+        );
+        $result = $db->result;
+        $cache->set( $key, $result );
+    }
 
     #default rendering
-    $c->stash( $db->result() );
+    $c->stash($result);
     $self->render( template => $c->stash('species') . '/'
             . $app->config->param('genepage.template') );
 
-    #$app->log->debug( 'from html' );
 }
 
 sub index_json {

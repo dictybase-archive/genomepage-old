@@ -10,6 +10,7 @@ use Try::Tiny;
 # Module implementation
 #
 __PACKAGE__->attr( 'species', default => 'discoideum' );
+__PACKAGE__->attr('app');
 
 sub is_name {
     my ( $self, $id ) = @_;
@@ -26,14 +27,32 @@ sub is_ddb {
 }
 
 sub name2id {
-    my ( $self, $id ) = @_;
-    load dicty::Search::Gene;
-    my ($feat) = dicty::Search::Gene->find(
-        -name     => $id,
-        -organism => $self->species
-    );
+    my ( $self, $name ) = @_;
+    my $app   = $self->app;
+    my $cache = $app->cache;
+    my $key   = $name . '_to_id';
+
+    if ( $cache->is_valid($key) ) {
+        $app->log->debug("got id for $name from cache");
+        return $cache->get($key);
+    }
+
+	my $model = $app->model;
+    my $feat = $model->resultset('Sequence::Feature')->search(
+        {   'name'             => $id,
+            'organism.species' => $self->species
+        },
+        {   join     => 'organism',
+            prefetch => 'dbxref',
+            rows     => 1
+        }
+    )->single;
+
     return 0 if !$feat;
-    $feat->primary_id();
+    my $id = $feat->dbxref->accession;
+    $cache->set( $key, $id );
+    $app->log->debug("stored id for $name in cache");
+    $id;
 }
 
 sub process_id {
@@ -44,11 +63,6 @@ sub process_id {
         return 0 if !$gene_id;
     }
     return $gene_id;
-}
-
-sub is_dynamic {
-    my ( $self, $name ) = @_;
-
 }
 
 sub transcript_id {
@@ -74,6 +88,15 @@ sub parse_url {
 
 sub validate_species {
     my ( $self, $name ) = @_;
+    my $cache = $self->app->cache;
+
+	#try from cache
+    if ( $cache->is_valid($name) ) {
+        $organism = $cache->get($name);
+        $self->app->log->debug("got organism from cache");
+        return $organism;
+    }
+
     my $model = $self->app->model;
     my ($organism) = $model->resultset('Organism::Organism')->search(
         -or => [
@@ -84,6 +107,8 @@ sub validate_species {
     );
     return if !$organism;
     $self->species( $organism->species );
+    $cache->set( $name, $organism );
+    $self->app->log->debug("stored organism in cache");
     $organism;
 }
 

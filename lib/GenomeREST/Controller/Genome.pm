@@ -64,19 +64,8 @@ sub index {
 
 sub check_name {
     my ( $self, $c ) = @_;
-    my $name = $c->stash('name');
-
-    my $organism;
-    my $cache = $self->app->cache;
-
-    #try from cache
-    if ( $cache->is_valid($name) ) {
-        $organism = $cache->get($name);
-    }
-    else {
-        $organism = $self->app->helper->validate_species($name);
-        $cache->set( $name, $organism );
-    }
+    my $name     = $c->stash('name');
+    my $organism = $self->app->helper->validate_species($name);
 
     if ( !$organism ) {
         $c->res->code(404);
@@ -95,6 +84,7 @@ sub check_name {
         abbreviation => $organism->abbreviation,
         genus        => $organism->genus
     );
+
     return 1;
 }
 
@@ -108,6 +98,7 @@ sub contig {
     my $contig_key = $c->stash('species') . '_contig';
     if ( $cache->is_valid($contig_key) ) {
         $data = $cache->get($contig_key);
+        $self->app->log->debug("got all contigs from cache");
     }
     else {
         my $contig_rs = $rs->search(
@@ -140,6 +131,7 @@ sub contig {
                 ];
         }
         $cache->set( $contig_key, $data );
+        $self->app->log->debug("put all contigs in cache");
     }
 
     $c->stash( 'data' => $data, header => 'Contig page' );
@@ -162,6 +154,7 @@ sub contig_with_page {
     if ( $cache->is_valid($contig_key) ) {
         $data  = $cache->get($contig_key);
         $pager = $cache->get($pager_key);
+        $self->app->log->debug("got all paging contigs from cache");
     }
     else {
         my $contig_rs = $rs->search(
@@ -197,6 +190,7 @@ sub contig_with_page {
         }
         $cache->set( $contig_key, $data );
         $cache->set( $pager_key,  $contig_rs->pager );
+        $self->app->log->debug("putting all paging contigs in cache");
     }
 
     $c->stash(
