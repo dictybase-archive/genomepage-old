@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 # Other modules:
+use GenomeREST::Singleton::Cache;
 use base qw/Mojolicious::Controller/;
 
 # Other modules:
@@ -13,12 +14,12 @@ use base qw/Mojolicious::Controller/;
 
 sub index {
     my ( $self, $c ) = @_;
-    my $organism = $c->stash('organism');
+    my $species = $c->stash('species');
     my $model    = $self->app->model;
-    my $cache    = $self->app->cache;
+    my $cache    = GenomeREST::Singleton::Cache->cache;
 
-    my $est_key     = $organism->species . '_est';
-    my $protein_key = $organism->species . '_protein';
+    my $est_key     = $species . '_est';
+    my $protein_key = $species . '_protein';
     my ( $est_count, $protein_count );
 
     if ( $cache->is_valid($est_key) ) {
@@ -27,7 +28,7 @@ sub index {
     else {
         $est_count = $model->resultset('Sequence::Feature')->count(
             {   'type.name'        => 'EST',
-                'organism.species' => $organism->species
+                'organism.species' => $species
             },
             { join => [ 'type', 'organism' ] }
         );
@@ -41,7 +42,7 @@ sub index {
         $protein_count = $model->resultset('Sequence::Feature')->count(
             {   'type.name'        => 'polypeptide',
                 'dbxref.accession' => 'JGI',
-                'organism.species' => $organism->species
+                'organism.species' => $species
             },
             {   join =>
                     [ 'type', 'organism', { 'feature_dbxrefs' => 'dbxref' } ]
@@ -52,11 +53,11 @@ sub index {
 
     $self->render(
         handler     => 'index',
-        template    => $organism->species,
-        species     => $organism->species,
-        genus       => $organism->genus,
-        abbr        => $organism->abbreviation,
-        common_name => $organism->common_name,
+        template    => $species,
+        species     => $species,
+        genus       => $c->stash('genus'),
+        abbr        => $c->stash('abbreviation'),
+        common_name => $c->stash('common_name'),
         protein     => $protein_count,
         est         => $est_count
     );
@@ -65,7 +66,7 @@ sub index {
 sub check_name {
     my ( $self, $c ) = @_;
     my $name     = $c->stash('name');
-    my $organism = $self->app->helper->validate_species($name);
+    my $organism = $self->validate_species($name);
 
     if ( !$organism ) {
         $c->res->code(404);
@@ -79,10 +80,10 @@ sub check_name {
 
     }
     $c->stash(
-        organism     => $organism,
-        species      => $organism->species,
-        abbreviation => $organism->abbreviation,
-        genus        => $organism->genus
+        species      => $organism->{species},
+        abbreviation => $organism->{abbreviation},
+        genus        => $organism->{genus}, 
+        common_name => $organism->{common_name}
     );
 
     return 1;
@@ -92,7 +93,7 @@ sub contig {
     my ( $self, $c ) = @_;
     my $data;
     my $model = $self->app->model;
-    my $cache = $self->app->cache;
+    my $cache = GenomeREST::Singleton::Cache->cache;
     my $rs    = $model->resultset('Sequence::Feature');
 
     my $contig_key = $c->stash('species') . '_contig';
@@ -145,7 +146,6 @@ sub contig_with_page {
     my $pager;
     my $model = $self->app->model;
 
-    #my $cache = $self->app->cache;
     my $rs = $model->resultset('Sequence::Feature');
 
     #my $contig_key = $c->stash('species') . '_contig_' . $c->stash('page');
@@ -192,14 +192,13 @@ sub contig_with_page {
     #$cache->set( $contig_key, $data );
     #$cache->set( $pager_key,  $contig_rs->pager );
     #$self->app->log->debug("putting all paging contigs in cache");
-}
 
-$c->stash(
-    'data' => $data,
-    header => 'Contig page',
-    pager  => $pager
-);
-$self->render( template => $c->stash('species') . '/contig' );
+    $c->stash(
+        'data' => $data,
+        header => 'Contig page',
+        pager  => $contig_rs->pager
+    );
+    $self->render( template => $c->stash('species') . '/contig' );
 
 }
 
@@ -208,6 +207,38 @@ sub name_digit {
     my $str = $feat->name;
     $str =~ m{(\d+)$};
     $1;
+}
+
+sub validate_species {
+    my ( $self, $name ) = @_;
+    my $cache = GenomeREST::Singleton::Cache->cache();
+    my $org_hash;
+
+    #try from cache
+    if ( $cache->is_valid($name) ) {
+        $org_hash = $cache->get($name);
+        $self->app->log->debug("got organism from cache for $name");
+        return $org_hash;
+    }
+
+    my $model = $self->app->model;
+    my ($organism) = $model->resultset('Organism::Organism')->search(
+        -or => [
+            { common_name  => $name },
+            { abbreviation => $name },
+            { species      => $name },
+        ]
+    );
+    return if !$organism;
+    $org_hash = {
+        common_name  => $organism->common_name,
+        abbreviation => $organism->abbreviation,
+        species      => $organism->species,
+        genus        => $organism->genus
+    };
+    $cache->set( $name, $org_hash );
+    $self->app->log->debug("stored organism $name in cache");
+    $org_hash;
 }
 
 1;    # Magic true value required at end of module

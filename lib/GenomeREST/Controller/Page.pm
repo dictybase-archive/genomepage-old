@@ -2,10 +2,12 @@ package GenomeREST::Controller::Page;
 
 use strict;
 use warnings;
+use GenomeREST::Singleton::Cache;
 use base qw/Mojolicious::Controller/;
 use dicty::UI::Tabview::Page::Gene;
 use dicty::Factory::Tabview::Tab;
 use dicty::Factory::Tabview::Section;
+use Module::Load;
 
 sub index {
     my ( $self, $c ) = @_;
@@ -18,7 +20,7 @@ sub index_html {
     my ( $self, $c ) = @_;
 
     my $app     = $self->app;
-    my $cache   = $app->cache;
+    my $cache   = GenomeREST::Singleton::Cache->cache;
     my $gene_id = $c->stash('gene_id');
     my $key     = $gene_id . '_index';
 
@@ -49,7 +51,7 @@ sub index_html {
 sub index_json {
     my ( $self, $c ) = @_;
     my $gene_id = $c->stash('gene_id');
-    my $cache   = $self->app->cache;
+    my $cache   = GenomeREST::Singleton::Cache->cache;
     my $key     = $gene_id . '_index_json';
     my $data;
 
@@ -90,7 +92,7 @@ sub tab_html {
     if ( $app->config->param('tab.dynamic') eq $tab ) {
 
         #convert gene id to its primary DDB id
-        my $trans_id = $app->helper->transcript_id($gene_id);
+        my $trans_id = $self->transcript_id($gene_id);
         if ( !$trans_id ) {    #do some octocat based template here
             return;
         }
@@ -132,6 +134,21 @@ sub tab_json {
     $self->render( handler => 'json', data => $tabobj );
 
     #$app->log->debug( $c->res->headers->content_type );
+}
+
+
+sub transcript_id {
+    my ( $self, $id ) = @_;
+    load dicty::Feature;
+    my $gene;
+    try {
+        $gene = dicty::Feature->new( -primary_id => $id );
+    }
+    catch {
+        return 0;
+    };
+    my ($trans) = @{ $gene->primary_features() };
+    $trans->primary_id if $trans;
 }
 
 1;

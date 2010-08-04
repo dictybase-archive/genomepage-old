@@ -1,124 +1,76 @@
-package GenomeREST::Helper;
+package GenomeREST::Singleton::Cache;
+
+use strict;
 
 use version; our $VERSION = qv('1.0.0');
 
 # Other modules:
-use base qw/Mojolicious::Controller/;
-use Module::Load;
-use Try::Tiny;
+use MooseX::Singleton;
+use CHI;
+use namespace::autoclean;
 
 # Module implementation
 #
-__PACKAGE__->attr( 'species', default => 'discoideum' );
 
-sub is_name {
-    my ( $self, $id ) = @_;
-    return 0 if $id =~ /^[A-Z]+_G\d+$/;
-    return 1;
-}
+has 'config' => (
+    is        => 'rw',
+    isa       => 'Config::Simple',
+    predicate => 'has_config',
+);
 
-sub is_ddb {
-    my ( $self, $id ) = @_;
+has 'expires_in' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => '6 days'
+);
 
-    ##should get the id signature  from config file
-    return 1 if $id =~ /^[A-Z]{3}\d+$/;
-    return 0;
-}
+has 'cache' => (
+    is        => 'ro',
+    isa       => 'Object',
+    predicate => 'has_cache',
+    builder   => '_build_cache',
+);
 
-sub name2id {
-    my ( $self, $name ) = @_;
-    my $app = $self->app;
+has 'driver_name' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'Memcached::Fast'
+);
 
-    #my $cache = $app->cache;
-    #my $key   = $name . '_to_id';
+has 'server' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => '127.0.0.1:11211'
+);
 
-    #if ( $cache->is_valid($key) ) {
-    #    my $id = $cache->get($key);
-    #    $app->log->debug("got id $id for $name from cache");
-    #    return $id;
-    #}
+has 'namespace' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'genomepage'
+);
 
-    my $model = $app->model;
-    my $feat  = $model->resultset('Sequence::Feature')->search(
-        {   'name'             => $name,
-            'organism.species' => $self->species
-        },
-        {   join     => 'organism',
-            prefetch => 'dbxref',
-            rows     => 1
-        }
-    )->single;
-
-    return 0 if !$feat;
-    my $id = $feat->dbxref->accession;
-
-    #$cache->set( $key, $id );
-    #$app->log->debug("stored id $id for $name in cache");
-    $id;
-}
-
-sub process_id {
-    my ( $self, $id ) = @_;
-    my $gene_id = $id;
-    if ( $self->is_name($id) ) {
-        $gene_id = $self->name2id($id);
-        return 0 if !$gene_id;
+sub _build_cache {
+    my $class = shift;
+    if ( $class->has_config ) {
+        return CHI->new(
+            driver     => $class->config->param('cache.driver'),
+            servers    => [ $class->config->param('cache.servers') ],
+            namespace  => $class->config->param('cache.namespace'),
+            expires_in => $class->expires_in
+        );
     }
-    return $gene_id;
-}
-
-sub transcript_id {
-    my ( $self, $id ) = @_;
-    load dicty::Feature;
-    my $gene;
-    try {
-        $gene = dicty::Feature->new( -primary_id => $id );
-    }
-    catch {
-        return 0;
-    };
-    my ($trans) = @{ $gene->primary_features() };
-    $trans->primary_id if $trans;
-}
-
-sub parse_url {
-    my ( $self, $path ) = @_;
-    if ( $path =~ /^((\/\w+)?\/gene)/ ) {
-        return $1;
-    }
-}
-
-sub validate_species {
-    my ( $self, $name ) = @_;
-    my $cache = $self->app->cache;
-    my $org_hash;
-
-    #try from cache
-    if ( $cache->is_valid($name) ) {
-        $org_hash = $cache->get($name);
-        $self->app->log->debug("got organism from cache for $name");
-        return $org_hash;
-    }
-
-    my $model = $self->app->model;
-    my ($organism) = $model->resultset('Organism::Organism')->search(
-        -or => [
-            { common_name  => $name },
-            { abbreviation => $name },
-            { species      => $name },
-        ]
+    CHI->new(
+        namespace  => $class->namespace,
+        driver     => $class->driver_name, 
+        servers    => [ $class->server ],
+        expires_in => $class->expires_in
     );
-    return if !$organism;
-    $self->species( $organism->species );
-    $org_hash = {
-        common_name  => $organism->common_name,
-        abbreviation => $organism->abbreviation,
-        species      => $organism->species,
-        genus        => $organism->genus
-    };
-    $cache->set( $name, $org_hash );
-    $self->app->log->debug("stored organism $name in cache");
-    $org_hash;
+}
+
+sub init_cache {
+    my ( $class, $config ) = @_;
+    $class->config($config);
+    $class->cache();
 }
 
 1;    # Magic true value required at end of module
@@ -127,7 +79,7 @@ __END__
 
 =head1 NAME
 
-<DictyREST::Helper> - [Module providing some common methods for the entire application]
+<MODULE NAME> - [One line description of module's purpose here]
 
 
 =head1 VERSION

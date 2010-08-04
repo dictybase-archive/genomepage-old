@@ -22,8 +22,6 @@ my $cache = CHI->new(
 
 if ( $cache->is_valid($key) ) {
 	print Dumper $cache->get($key);
-    $cache->remove($key);
-    print "removed the key\n";
 }
 
 =head1 NAME

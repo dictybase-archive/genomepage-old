@@ -31,7 +31,6 @@ sub build {
 
 sub process {
     my ( $self, $renderer, $c, $output ) = @_;
-    return if $c->stash('format') ne 'json';
     my $obj = $c->stash('data');
     #$c->app->log->debug("in json renderer");
 

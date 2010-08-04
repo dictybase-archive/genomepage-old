@@ -2,6 +2,7 @@ package GenomeREST::Controller::Tab;
 
 use strict;
 use warnings;
+use GenomeREST::Singleton::Cache;
 use base qw/Mojolicious::Controller/;
 use dicty::UI::Tabview::Page::Gene;
 use dicty::Factory::Tabview::Tab;
@@ -48,7 +49,7 @@ sub section_json {
     my $app     = $self->app;
 
     my $factory;
-    if ( $app->helper->is_ddb($section) ) {
+    if ( $self->is_ddb($section) ) {
         $factory = dicty::Factory::Tabview::Tab->new(
             -tab        => $tab,
             -primary_id => $section,
@@ -65,8 +66,7 @@ sub section_json {
         );
     }
 
-    my $obj = $factory->instantiate;
-    $self->render( handler => 'json', data => $obj );
+    $self->render( handler => 'json', data => $factory->instantiate );
 }
 
 sub sub_section {
@@ -81,6 +81,14 @@ sub sub_section {
     my $obj = $factory->instantiate;
     $self->render( handler => 'json', data => $obj );
 
+}
+
+sub is_ddb {
+    my ( $self, $id ) = @_;
+
+    ##should get the id signature  from config file
+    return 1 if $id =~ /^[A-Z]{3}\d+$/;
+    return 0;
 }
 
 1;

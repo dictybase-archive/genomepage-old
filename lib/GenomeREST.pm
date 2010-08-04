@@ -2,34 +2,18 @@ package GenomeREST;
 
 use strict;
 use Moose;
-use CHI;
 use Config::Simple;
+use GenomeREST::Singleton::Cache;
 use Carp;
 use File::Spec::Functions;
 use GenomeREST::Renderer::TT;
 use GenomeREST::Renderer::Index;
 use GenomeREST::Renderer::JSON;
-use GenomeREST::Helper;
 use Homology::Chado::DataSource;
 use namespace::autoclean;
 extends 'Mojolicious';
 
-has 'cache' => (
-    is         => 'rw',
-    isa        => 'Object',
-    lazy_build => 1
-);
-
-sub _build_cache {
-    my $self   = shift;
-    my $config = $self->config;
-    CHI->new(
-        driver     => $config->param('cache.driver'),
-        servers    => [ $config->param('cache.servers') ],
-        namespace  => $config->param('cache.namespace'),
-        expires_in => '6 days'
-    );
-}
+my $instance = GenomeREST::Singleton::Cache->instance;
 
 has 'config' => (
     is         => 'rw',
@@ -65,18 +49,6 @@ has 'template_path' => (
     isa => 'Str'
 );
 
-has 'helper' => (
-    is      => 'rw',
-    isa     => 'GenomeREST::Helper',
-    default => sub {
-        my $self   = shift;
-        my $helper = GenomeREST::Helper->new();
-        $helper->app($self);
-        $helper;
-    },
-    lazy => 1
-);
-
 has 'downloader' => (
     is  => 'rw',
     isa => 'MojoX::Dispatcher::Static',
@@ -103,7 +75,7 @@ sub _build_model {
             data_type     => 'boolean',
             default_value => 'false',
             is_nullable   => 0,
-            size          => 1, 
+            size          => 1,
         }
     );
     my $source2 = $schema->source('Organism::Organism');
@@ -116,7 +88,7 @@ sub startup {
     my ($self) = @_;
 
     #default log level
-    $self->log->level('debug');
+    $self->log->level( $ENV{MOJO_DEBUG} ? $ENV{MOJO_DEBUG} : 'debug' );
 
     $self->downloader(
         MojoX::Dispatcher::Static->new(
@@ -126,6 +98,12 @@ sub startup {
     );
 
     $self->additional_dbh();
+    my $config = $self->config;
+    if ( !$instance->has_cache ) {
+        $self->log->debug("initing memcache");
+        $instance->init_cache($config);
+    }
+
     my $router = $self->routes();
 
     #reusing GenomeREST controller

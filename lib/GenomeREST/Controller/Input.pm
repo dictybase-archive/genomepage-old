@@ -4,15 +4,19 @@ use warnings;
 use strict;
 
 # Other modules:
+use GenomeREST::Singleton::Cache;
+use Data::Dumper;
 use base qw/Mojolicious::Controller/;
 
 # Module implementation
 #
 
+__PACKAGE__->attr( 'species', default => 'discoideum' );
+
 sub check_name {
     my ( $self, $c ) = @_;
     my $name     = $c->stash('name');
-    my $organism = $self->app->helper->validate_species($name);
+    my $organism = $self->validate_species($name);
 
     if ( !$organism ) {
         $c->res->code(404);
@@ -26,10 +30,10 @@ sub check_name {
 
     }
     $c->stash(
-        organism     => $organism,
-        species      => $organism->species,
-        abbreviation => $organism->abbreviation,
-        genus        => $organism->genus
+        species      => $organism->{species},
+        abbreviation => $organism->{abbreviation},
+        genus        => $organism->{genus},
+        common_name  => $organism->{common_name}
     );
 
     $self->app->log->debug( $c->req->url->path->clone->canonicalize->parts );
@@ -40,7 +44,7 @@ sub validate {
     my ( $self, $c ) = @_;
     my $id      = $c->stash('id');
     my $app     = $self->app;
-    my $gene_id = $app->helper->process_id($id);
+    my $gene_id = $self->process_id($id);
     if ( !$gene_id ) {
         $c->res->code(404);
         $self->render(
@@ -54,9 +58,9 @@ sub validate {
     }
 
     my $key   = $gene_id . '_valid';
-    my $cache = $app->cache;
+    my $memcache = GenomeREST::Singleton::Cache->cache;
 
-    if ( !$cache->is_valid($key) ) {
+    if ( !$memcache->is_valid($key) ) {
         my $model = $app->model;
         my $feat  = $model->resultset('Sequence::Feature')->search(
             { 'dbxref.accession' => $gene_id },
@@ -109,13 +113,109 @@ sub validate {
                     . $app->config->param('genepage.error') );
             return;
         }
-        $cache->set( $key, 'valid' );
+        $memcache->set( $key, 'valid' );
     }
     $c->stash( gene_id => $gene_id );
-    my $base_url = $app->helper->parse_url( $self->req->url->path );
+    my $base_url = $self->parse_url( $self->req->url->path );
     $c->stash( base_url => $base_url );
     return 1;
 
+}
+
+sub validate_species {
+    my ( $self, $name ) = @_;
+    my $memcache = GenomeREST::Singleton::Cache->cache;
+    my $org_hash;
+
+    #try from memcache
+    if ( $memcache->is_valid($name) ) {
+        $org_hash = $memcache->get($name);
+        $self->app->log->debug("got organism from memcache for $name");
+        return $org_hash;
+    }
+
+    my $model = $self->app->model;
+    my ($organism) = $model->resultset('Organism::Organism')->search(
+        -or => [
+            { common_name  => $name },
+            { abbreviation => $name },
+            { species      => $name },
+        ]
+    );
+    return if !$organism;
+    $self->species( $organism->species );
+    $org_hash = {
+        common_name  => $organism->common_name,
+        abbreviation => $organism->abbreviation,
+        species      => $organism->species,
+        genus        => $organism->genus
+    };
+    $memcache->set( $name, $org_hash );
+    $self->app->log->debug("stored organism $name in memcache");
+    $org_hash;
+}
+
+sub is_name {
+    my ( $self, $id ) = @_;
+    return 0 if $id =~ /^[A-Z]+_G\d+$/;
+    return 1;
+}
+
+sub is_ddb {
+    my ( $self, $id ) = @_;
+
+    ##should get the id signature  from config file
+    return 1 if $id =~ /^[A-Z]{3}\d+$/;
+    return 0;
+}
+
+sub name2id {
+    my ( $self, $name ) = @_;
+    my $app = $self->app;
+
+    #my $memcache = $app->cache;
+    #my $key   = $name . '_to_id';
+
+    #if ( $memcache->is_valid($key) ) {
+    #    my $id = $memcache->get($key);
+    #    $app->log->debug("got id $id for $name from memcache");
+    #    return $id;
+    #}
+
+    my $model = $app->model;
+    my $feat  = $model->resultset('Sequence::Feature')->search(
+        {   'name'             => $name,
+            'organism.species' => $self->species
+        },
+        {   join     => 'organism',
+            prefetch => 'dbxref',
+            rows     => 1
+        }
+    )->single;
+
+    return 0 if !$feat;
+    my $id = $feat->dbxref->accession;
+
+    #$memcache->set( $key, $id );
+    #$app->log->debug("stored id $id for $name in memcache");
+    $id;
+}
+
+sub process_id {
+    my ( $self, $id ) = @_;
+    my $gene_id = $id;
+    if ( $self->is_name($id) ) {
+        $gene_id = $self->name2id($id);
+        return 0 if !$gene_id;
+    }
+    return $gene_id;
+}
+
+sub parse_url {
+    my ( $self, $path ) = @_;
+    if ( $path =~ /^((\/\w+)?\/gene)/ ) {
+        return $1;
+    }
 }
 
 1;    # Magic true value required at end of module

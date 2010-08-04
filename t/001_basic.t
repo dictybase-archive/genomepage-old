@@ -46,6 +46,7 @@ like(
     'is the common footer for every gene page'
 );
 
+
 #with non-existant species
 $tx = Mojo::Transaction->new_get($wrong_url.'/'.$gene_id);
 $client->process_app( 'GenomeREST', $tx );
