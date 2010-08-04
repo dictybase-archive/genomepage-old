@@ -45,7 +45,6 @@ like(
     qr/Supported by NIH/i,
     'is the common footer for every gene page'
 );
-exit;
 
 #with non-existant species
 $tx = Mojo::Transaction->new_get($wrong_url.'/'.$gene_id);
@@ -73,6 +72,7 @@ like(
     'is the common footer for every gene page'
 );
 
+
 #canonical url with gene name and format extension
 $tx = Mojo::Transaction->new_get("$base_url/$name.html");
 $client->process_app( 'GenomeREST', $tx );
@@ -89,5 +89,3 @@ like(
     qr/Supported by NIH/i,
     'is the common footer for every gene page'
 );
-
-

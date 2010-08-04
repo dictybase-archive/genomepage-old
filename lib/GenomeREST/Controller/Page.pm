@@ -25,8 +25,10 @@ sub index_html {
     my $result;
     if ( $cache->is_valid($key) ) {
         $result = $cache->get($key);
+        $app->log->debug("got index for $gene_id from cache");
     }
     else {
+
         #database query
         my $db = dicty::UI::Tabview::Page::Gene->new(
             -primary_id => $gene_id,
@@ -47,15 +49,25 @@ sub index_html {
 sub index_json {
     my ( $self, $c ) = @_;
     my $gene_id = $c->stash('gene_id');
-    my $app     = $self->app;
+    my $cache   = $self->app->cache;
+    my $key     = $gene_id . '_index_json';
+    my $data;
 
-    #now rendering
-    my $factory = dicty::Factory::Tabview::Tab->new(
-        -tab        => 'gene',
-        -primary_id => $gene_id,
-        -base_url   => $c->stash('base_url')
-    );
-    $self->render( handler => 'json', data => $factory->instantiate );
+    if ( $cache->is_valid($key) ) {
+        $data = $cache->get($key);
+        $self->app->log->debug("got json data for $gene_id from cache");
+    }
+    else {
+        #now rendering
+        my $factory = dicty::Factory::Tabview::Tab->new(
+            -tab        => 'gene',
+            -primary_id => $gene_id,
+            -base_url   => $c->stash('base_url')
+        );
+        $data = $factory->instantiate;
+        $cache->set($key, $data);
+    }
+    $self->render( handler => 'json', data => $data );
 
     #$app->log->debug( 'from json' );
 }

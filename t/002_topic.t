@@ -37,6 +37,7 @@ like( $tx->res->headers->content_type,
 like( $tx->res->body, qr/layout.+accordion/,
     'has a accordion layout in json content' );
 
+
 #request for gene with name
 $tx = Mojo::Transaction->new_get("$base_url/$name/gene.json");
 $client->process_app( 'GenomeREST', $tx );
@@ -45,6 +46,7 @@ like( $tx->res->headers->content_type,
     qr/json/, 'is a json content for gene' );
 like( $tx->res->body, qr/layout.+accordion/,
     'has a accordion layout in json content' );
+
 
 #request for protein
 $tx = Mojo::Transaction->new_get("$base_url/$gene_id/protein");
@@ -81,6 +83,3 @@ is( $tx->res->code, 200,
 like( $tx->res->headers->content_type,
     qr/json/, 'is a json content for protein' );
 like( $tx->res->body, qr/layout.+accordion/, 'has a accordion layout in protein' );
-
-
-

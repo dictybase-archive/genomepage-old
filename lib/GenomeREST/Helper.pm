@@ -29,17 +29,18 @@ sub is_ddb {
 sub name2id {
     my ( $self, $name ) = @_;
     my $app   = $self->app;
-    my $cache = $app->cache;
-    my $key   = $name . '_to_id';
+    #my $cache = $app->cache;
+    #my $key   = $name . '_to_id';
 
-    if ( $cache->is_valid($key) ) {
-        $app->log->debug("got id for $name from cache");
-        return $cache->get($key);
-    }
+    #if ( $cache->is_valid($key) ) {
+    #    my $id = $cache->get($key);
+    #    $app->log->debug("got id $id for $name from cache");
+    #    return $id;
+    #}
 
 	my $model = $app->model;
     my $feat = $model->resultset('Sequence::Feature')->search(
-        {   'name'             => $id,
+        {   'name'             => $name,
             'organism.species' => $self->species
         },
         {   join     => 'organism',
@@ -50,8 +51,8 @@ sub name2id {
 
     return 0 if !$feat;
     my $id = $feat->dbxref->accession;
-    $cache->set( $key, $id );
-    $app->log->debug("stored id for $name in cache");
+    #$cache->set( $key, $id );
+    #$app->log->debug("stored id $id for $name in cache");
     $id;
 }
 
