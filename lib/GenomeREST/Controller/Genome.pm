@@ -144,61 +144,62 @@ sub contig_with_page {
     my $data;
     my $pager;
     my $model = $self->app->model;
-    my $cache = $self->app->cache;
-    my $rs    = $model->resultset('Sequence::Feature');
 
-    my $contig_key = $c->stash('species') . '_contig_' . $c->stash('page');
-    my $pager_key
-        = $c->stash('species') . '_contig_' . $c->stash('page') . '_pager';
+    #my $cache = $self->app->cache;
+    my $rs = $model->resultset('Sequence::Feature');
 
-    if ( $cache->is_valid($contig_key) ) {
-        $data  = $cache->get($contig_key);
-        $pager = $cache->get($pager_key);
-        $self->app->log->debug("got all paging contigs from cache");
-    }
-    else {
-        my $contig_rs = $rs->search(
-            { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
-            {   join => [
-                    'type',
-                    { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
-                ],
-                select => [
-                    'me.feature_id', 'me.name', { count => 'feature_id' },
-                ],
-                as       => [ 'cfeature_id',   'cname', 'gene_count' ],
-                group_by => [ 'me.feature_id', 'me.name' ],
-                having   => \'count(feature_id) > 0',
-                order_by => { -asc => 'me.feature_id' },
-                rows     => 50,
-                page     => $c->stash('page')
-            }
-        );
+    #my $contig_key = $c->stash('species') . '_contig_' . $c->stash('page');
+    #my $pager_key
+    #    = $c->stash('species') . '_contig_' . $c->stash('page') . '_pager';
 
-        while ( my $contig = $contig_rs->next ) {
-            push @$data,
-                [
-                $contig->get_column('cname'),
-                $rs->find(
-                    { feature_id => $contig->get_column('cfeature_id') },
-                    {   select => { length => 'residues' },
-                        as     => 'seqlength'
-                    }
-                    )->get_column('seqlength'),
-                $contig->get_column('gene_count')
-                ];
+    #if ( $cache->is_valid($contig_key) ) {
+    #    $data  = $cache->get($contig_key);
+    #    $pager = $cache->get($pager_key);
+    #    $self->app->log->debug("got all paging contigs from cache");
+    #}
+    #else {
+    my $contig_rs = $rs->search(
+        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
+        {   join => [
+                'type',
+                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
+            ],
+            select =>
+                [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
+            as       => [ 'cfeature_id',   'cname', 'gene_count' ],
+            group_by => [ 'me.feature_id', 'me.name' ],
+            having   => \'count(feature_id) > 0',
+            order_by => { -asc => 'me.feature_id' },
+            rows     => 50,
+            page     => $c->stash('page')
         }
-        $cache->set( $contig_key, $data );
-        $cache->set( $pager_key,  $contig_rs->pager );
-        $self->app->log->debug("putting all paging contigs in cache");
+    );
+
+    while ( my $contig = $contig_rs->next ) {
+        push @$data,
+            [
+            $contig->get_column('cname'),
+            $rs->find(
+                { feature_id => $contig->get_column('cfeature_id') },
+                {   select => { length => 'residues' },
+                    as     => 'seqlength'
+                }
+                )->get_column('seqlength'),
+            $contig->get_column('gene_count')
+            ];
     }
 
-    $c->stash(
-        'data' => $data,
-        header => 'Contig page',
-        pager  => $pager
-    );
-    $self->render( template => $c->stash('species') . '/contig' );
+    #$cache->set( $contig_key, $data );
+    #$cache->set( $pager_key,  $contig_rs->pager );
+    #$self->app->log->debug("putting all paging contigs in cache");
+}
+
+$c->stash(
+    'data' => $data,
+    header => 'Contig page',
+    pager  => $pager
+);
+$self->render( template => $c->stash('species') . '/contig' );
 
 }
 
