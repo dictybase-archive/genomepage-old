@@ -14,7 +14,7 @@ error = missing
 driver = Memcached::Fast
 servers = 127.0.0.1:11211
 namespace = genomepage
-expires = '6 days'
+expires_in = '6 days'
 
 [tab]
 dynamic = feature
