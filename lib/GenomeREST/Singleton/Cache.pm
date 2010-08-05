@@ -49,21 +49,29 @@ has 'namespace' => (
     default => 'genomepage'
 );
 
+has 'compress_value' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => '10_000'
+);
+
 sub _build_cache {
     my $class = shift;
     if ( $class->has_config ) {
         return CHI->new(
-            driver     => $class->config->param('cache.driver'),
-            servers    => [ $class->config->param('cache.servers') ],
-            namespace  => $class->config->param('cache.namespace'),
-            expires_in => $class->expires_in
+            driver             => $class->config->param('cache.driver'),
+            servers            => [ $class->config->param('cache.servers') ],
+            namespace          => $class->config->param('cache.namespace'),
+            expires_in         => $class->expires_in,
+            compress_threshold => $class->compress_value
         );
     }
     CHI->new(
-        namespace  => $class->namespace,
-        driver     => $class->driver_name, 
-        servers    => [ $class->server ],
-        expires_in => $class->expires_in
+        namespace          => $class->namespace,
+        driver             => $class->driver_name,
+        servers            => [ $class->server ],
+        compress_threshold => $class->compress_value,
+        expires_in         => $class->expires_in
     );
 }
 

@@ -15,8 +15,8 @@ use base qw/Mojolicious::Controller/;
 sub index {
     my ( $self, $c ) = @_;
     my $species = $c->stash('species');
-    my $model    = $self->app->model;
-    my $cache    = GenomeREST::Singleton::Cache->cache;
+    my $model   = $self->app->model;
+    my $cache   = GenomeREST::Singleton::Cache->cache;
 
     my $est_key     = $species . '_est';
     my $protein_key = $species . '_protein';
@@ -82,8 +82,8 @@ sub check_name {
     $c->stash(
         species      => $organism->{species},
         abbreviation => $organism->{abbreviation},
-        genus        => $organism->{genus}, 
-        common_name => $organism->{common_name}
+        genus        => $organism->{genus},
+        common_name  => $organism->{common_name}
     );
 
     return 1;
@@ -131,7 +131,8 @@ sub contig {
                 $contig->get_column('gene_count')
                 ];
         }
-        $cache->set( $contig_key, $data );
+        $cache->set( $contig_key, $data,
+            $self->app->config->param('cache.expires_in') );
         $self->app->log->debug("put all contigs in cache");
     }
 
@@ -236,7 +237,8 @@ sub validate_species {
         species      => $organism->species,
         genus        => $organism->genus
     };
-    $cache->set( $name, $org_hash );
+    $cache->set( $name, $org_hash,
+        $self->app->config->param('cache.expires_in') );
     $self->app->log->debug("stored organism $name in cache");
     $org_hash;
 }

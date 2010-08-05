@@ -38,7 +38,7 @@ sub index_html {
             -base_url   => $c->stash('base_url')
         );
         $result = $db->result;
-        $cache->set( $key, $result );
+        $cache->set( $key, $result,  $app->config->param('cache.expires_in') );
     }
 
     #default rendering
@@ -68,7 +68,7 @@ sub index_json {
             -base_url   => $c->stash('base_url')
         );
         $data = $factory->instantiate;
-        $cache->set( $key, $data );
+        $cache->set( $key, $data ,  $self->app->config->param('cache.expires_in'));
     }
     $self->render( handler => 'json', data => $data );
 
