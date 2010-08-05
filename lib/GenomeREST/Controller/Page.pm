@@ -60,6 +60,7 @@ sub index_json {
         $self->app->log->debug("got json data for $gene_id from cache");
     }
     else {
+
         #now rendering
         my $factory = dicty::Factory::Tabview::Tab->new(
             -tab        => 'gene',
@@ -67,7 +68,7 @@ sub index_json {
             -base_url   => $c->stash('base_url')
         );
         $data = $factory->instantiate;
-        $cache->set($key, $data);
+        $cache->set( $key, $data );
     }
     $self->render( handler => 'json', data => $data );
 
@@ -87,36 +88,46 @@ sub tab_html {
     my $tab     = $c->stash('tab');
     my $gene_id = $c->stash('gene_id');
     my $app     = $self->app;
+    my $cache   = GenomeREST::Singleton::Cache->cache;
+    my $key     = sprintf "%s_%s_%s", $gene_id, $id, $tab;
 
-    my $db;
-    if ( $app->config->param('tab.dynamic') eq $tab ) {
-
-        #convert gene id to its primary DDB id
-        my $trans_id = $self->transcript_id($gene_id);
-        if ( !$trans_id ) {    #do some octocat based template here
-            return;
-        }
-        $db = dicty::UI::Tabview::Page::Gene->new(
-            -primary_id => $gene_id,
-            -active_tab => $tab,
-            -sub_id     => $trans_id,
-            -base_url   => $c->stash('base_url'),
-        );
+    my $result;
+    if ( $cache->is_valid($key) ) {
+        $result = $cache->get($key);
+        $app->log->debug("got tab_html from cache for $gene_id");
     }
     else {
-        $db = dicty::UI::Tabview::Page::Gene->new(
-            -primary_id => $gene_id,
-            -active_tab => $tab,
-            -base_url   => $c->stash('base_url'),
-        );
+        my $db;
+        if ( $app->config->param('tab.dynamic') eq $tab ) {
+
+            #convert gene id to its primary DDB id
+            my $trans_id = $self->transcript_id($gene_id);
+            if ( !$trans_id ) {    #do some octocat based template here
+                return;
+            }
+            $db = dicty::UI::Tabview::Page::Gene->new(
+                -primary_id => $gene_id,
+                -active_tab => $tab,
+                -sub_id     => $trans_id,
+                -base_url   => $c->stash('base_url'),
+            );
+        }
+        else {
+            $db = dicty::UI::Tabview::Page::Gene->new(
+                -primary_id => $gene_id,
+                -active_tab => $tab,
+                -base_url   => $c->stash('base_url'),
+            );
+        }
+        $result = $db->result;
+        $cache->set( $key, $result );
     }
 
     #result
-    $c->stash( $db->result() );
+    $c->stash($result);
     $self->render( template => $c->stash('species') . '/'
             . $app->config->param('genepage.template') );
 
-    #$app->log->debug( $c->res->headers->content_type );
 }
 
 sub tab_json {
@@ -135,7 +146,6 @@ sub tab_json {
 
     #$app->log->debug( $c->res->headers->content_type );
 }
-
 
 sub transcript_id {
     my ( $self, $id ) = @_;
