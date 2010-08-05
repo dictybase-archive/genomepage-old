@@ -1,0 +1,135 @@
+This is ApacheBench, Version 2.0.40-dev <$Revision: 1.146 $> apache-2.0
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Copyright 2006 The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 192.168.60.50 (be patient).....done
+
+
+Server Software:        Apache/2.2.8
+Server Hostname:        192.168.60.50
+Server Port:            80
+
+Document Path:          /purpureum/gene/DPU_G0068768
+Document Length:        12255 bytes
+
+Concurrency Level:      5
+Time taken for tests:   14.552316 seconds
+Complete requests:      50
+Failed requests:        2
+   (Connect: 0, Length: 2, Exceptions: 0)
+Write errors:           0
+Non-2xx responses:      2
+Total transferred:      605442 bytes
+HTML transferred:       588520 bytes
+Requests per second:    3.44 [#/sec] (mean)
+Time per request:       1455.232 [ms] (mean)
+Time per request:       291.046 [ms] (mean, across all concurrent requests)
+Transfer rate:          40.61 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.0      0       0
+Processing:   503 1421 1361.2    774    5744
+Waiting:      503 1419 1360.7    774    5742
+Total:        503 1421 1361.2    774    5744
+
+Percentage of the requests served within a certain time (ms)
+  50%    774
+  66%   1005
+  75%   1132
+  80%   2357
+  90%   4235
+  95%   4813
+  98%   5744
+  99%   5744
+ 100%   5744 (longest request)
+This is ApacheBench, Version 2.0.40-dev <$Revision: 1.146 $> apache-2.0
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Copyright 2006 The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 192.168.60.50 (be patient).....done
+
+
+Server Software:        Apache/2.2.8
+Server Hostname:        192.168.60.50
+Server Port:            80
+
+Document Path:          /purpureum/gene/DPU_G0068768
+Document Length:        12255 bytes
+
+Concurrency Level:      10
+Time taken for tests:   19.264972 seconds
+Complete requests:      100
+Failed requests:        4
+   (Connect: 0, Length: 4, Exceptions: 0)
+Write errors:           0
+Non-2xx responses:      4
+Total transferred:      1210884 bytes
+HTML transferred:       1177040 bytes
+Requests per second:    5.19 [#/sec] (mean)
+Time per request:       1926.497 [ms] (mean)
+Time per request:       192.650 [ms] (mean, across all concurrent requests)
+Transfer rate:          61.35 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       1
+Processing:   539 1882 1240.5   1434    7513
+Waiting:      503 1866 1239.8   1427    7432
+Total:        539 1882 1240.5   1434    7513
+
+Percentage of the requests served within a certain time (ms)
+  50%   1434
+  66%   1819
+  75%   2237
+  80%   2348
+  90%   3085
+  95%   5262
+  98%   7159
+  99%   7513
+ 100%   7513 (longest request)
+This is ApacheBench, Version 2.0.40-dev <$Revision: 1.146 $> apache-2.0
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Copyright 2006 The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 192.168.60.50 (be patient).....done
+
+
+Server Software:        Apache/2.2.8
+Server Hostname:        192.168.60.50
+Server Port:            80
+
+Document Path:          /purpureum/gene/DPU_G0068768
+Document Length:        12255 bytes
+
+Concurrency Level:      15
+Time taken for tests:   27.614254 seconds
+Complete requests:      150
+Failed requests:        4
+   (Connect: 0, Length: 4, Exceptions: 0)
+Write errors:           0
+Non-2xx responses:      4
+Total transferred:      1840634 bytes
+HTML transferred:       1789790 bytes
+Requests per second:    5.43 [#/sec] (mean)
+Time per request:       2761.425 [ms] (mean)
+Time per request:       184.095 [ms] (mean, across all concurrent requests)
+Transfer rate:          65.08 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.4      0       4
+Processing:   538 2686 1727.1   2407   13547
+Waiting:      537 2673 1720.6   2370   13381
+Total:        538 2687 1727.1   2407   13547
+
+Percentage of the requests served within a certain time (ms)
+  50%   2407
+  66%   2977
+  75%   3172
+  80%   3465
+  90%   4475
+  95%   5356
+  98%   9496
+  99%   9620
+ 100%  13547 (longest request)
