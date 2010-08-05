@@ -19,11 +19,8 @@ my $builder = DictyRESTBuilder->new(
         'dicty::UI::Tabview::Config' => '', 
     	'dicty::Tests::Data' => '', 
     	'Homology::Group' => '', 
+    	'MooseX::Singleton' => '0.24'
     },
-    build_requires => {
-    	 'Archive::Extract' => '',
-    	
-		},
     add_to_cleanup => ['DictyREST-*'],
     create_readme  => 1,
 );
