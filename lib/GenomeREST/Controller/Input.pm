@@ -38,7 +38,6 @@ sub check_name {
 
     #$self->app->log->debug( $c->req->url->path->clone->canonicalize->parts );
     my $val = $self->validate($c);
-    $self->app->log->debug($c->stash('header'));
     return $val;
 }
 
@@ -59,7 +58,7 @@ sub validate {
         return;
     }
 
-    my $key   = $gene_id . '_valid';
+    my $key      = $gene_id . '_valid';
     my $memcache = GenomeREST::Singleton::Cache->cache;
 
     if ( !$memcache->is_valid($key) ) {
@@ -175,14 +174,14 @@ sub name2id {
     my ( $self, $name ) = @_;
     my $app = $self->app;
 
-    #my $memcache = $app->cache;
-    #my $key   = $name . '_to_id';
+    my $memcache = GenomeREST::Singleton::Cache->cache;
+    my $key      = $name . '_to_id';
 
-    #if ( $memcache->is_valid($key) ) {
-    #    my $id = $memcache->get($key);
-    #    $app->log->debug("got id $id for $name from memcache");
-    #    return $id;
-    #}
+    if ( $memcache->is_valid($key) ) {
+        my $id = $memcache->get($key);
+        $app->log->debug("got id $id for $name from memcache");
+        return $id;
+    }
 
     my $model = $app->model;
     my $feat  = $model->resultset('Sequence::Feature')->search(
@@ -197,9 +196,10 @@ sub name2id {
 
     return 0 if !$feat;
     my $id = $feat->dbxref->accession;
-
-    #$memcache->set( $key, $id );
-    #$app->log->debug("stored id $id for $name in memcache");
+    if ( $app->config->param('nocache.genename') ne $name ) {
+        $memcache->set( $key, $id );
+        $app->log->debug("stored id $id for $name in memcache");
+    }
     $id;
 }
 
