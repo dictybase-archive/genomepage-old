@@ -37,7 +37,6 @@ like( $tx->res->headers->content_type,
 like( $tx->res->body, qr/layout.+accordion/,
     'has a accordion layout in json content' );
 
-
 #request for gene with name
 $tx = Mojo::Transaction->new_get("$base_url/$name/gene.json");
 $client->process_app( 'GenomeREST', $tx );

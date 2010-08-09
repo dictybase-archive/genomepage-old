@@ -36,8 +36,10 @@ sub check_name {
         common_name  => $organism->{common_name}
     );
 
-    $self->app->log->debug( $c->req->url->path->clone->canonicalize->parts );
-    return $self->validate($c);
+    #$self->app->log->debug( $c->req->url->path->clone->canonicalize->parts );
+    my $val = $self->validate($c);
+    $self->app->log->debug($c->stash('header'));
+    return $val;
 }
 
 sub validate {

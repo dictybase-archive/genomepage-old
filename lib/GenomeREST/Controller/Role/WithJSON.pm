@@ -1,64 +1,23 @@
-package GenomeREST::Renderer::TT;
+package GenomeREST::Controller::Role::WithJSON;
 
-use warnings;
 use strict;
-use Carp qw/confess cluck carp/;
-
-use version; our $VERSION = qv('1.0.0');
 
 # Other modules:
-use base 'Mojo::Base';
-use Template;
-use Path::Class;
-use File::Spec;
+use Moose::Role;
+use JSON;
+use namespace::autoclean;
 
 # Module implementation
 #
-__PACKAGE__->attr('path');
-__PACKAGE__->attr('template');
-__PACKAGE__->attr('option');
 
-sub new {
-    my ( $class, %arg ) = @_;
-    my $self = {};
-    bless $self, $class;
-    foreach my $param (qw/path option/) {
-        $self->$param( $arg{$param} ) if defined $arg{$param};
-    }
-    return $self;
+sub obj2json {
+    my ( $self, $obj ) = @_;
+    $obj->init();
+    my $conf = $obj->config();
+    return JSON->new->objToJson( [ map { $_->to_json } @{ $conf->panels } ] );
 }
 
-sub build {
-    my ( $self, %arg ) = @_;
-    my $path = $arg{path} || $self->path;
-    confess "template path must be set\n" if !$path;
-
-    my $dir    = dir $path;
-    my $subdir = [ map { $_->stringify } grep { -d $_ } $dir->children ];
-    my $option = $self->option || {};
-    $option->{INCLUDE_PATH} = $subdir;
-    $self->template( Template->new($option) );
-
-    return sub { $self->process(@_); };
-}
-
-sub process {
-    my ( $self, $renderer, $c, $output ) = @_;
-    my $template = $c->stash('template');
-    $c->app->log->debug(qq/template $template/);
-
-    #the template will decide how to display the page title
-    #except the error page
-    $c->app->log->debug($c->stash('header'));
-    $c->stash( default => 1 ) if $c->stash('header') ne 'Error page';
-    my $status
-        = $self->template->process( $template, { %{ $c->stash }, c => $c },
-        $output );
-    if ( !$status ) {
-        cluck $self->template->error;
-        return 0;
-    }
-    return 1;
+sub json_response {
 }
 
 1;    # Magic true value required at end of module
@@ -67,7 +26,7 @@ __END__
 
 =head1 NAME
 
-GenomeREST::Renderer::TT - [Template toolkit renderer for DictyREST application]
+<MODULE NAME> - [One line description of module's purpose here]
 
 
 =head1 VERSION

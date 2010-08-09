@@ -1,13 +1,17 @@
 package GenomeREST::Controller::Page;
 
 use strict;
-use warnings;
+use Moose;
 use GenomeREST::Singleton::Cache;
-use base qw/Mojolicious::Controller/;
 use dicty::UI::Tabview::Page::Gene;
 use dicty::Factory::Tabview::Tab;
 use dicty::Factory::Tabview::Section;
 use Module::Load;
+use Try::Tiny;
+use namespace::autoclean;
+extends 'Mojolicious::Controller';
+
+with 'GenomeREST::Controller::Role::WithJSON';
 
 sub index {
     my ( $self, $c ) = @_;
@@ -38,7 +42,7 @@ sub index_html {
             -base_url   => $c->stash('base_url')
         );
         $result = $db->result;
-        $cache->set( $key, $result,  $app->config->param('cache.expires_in') );
+        $cache->set( $key, $result, $app->config->param('cache.expires_in') );
     }
 
     #default rendering
@@ -68,7 +72,8 @@ sub index_json {
             -base_url   => $c->stash('base_url')
         );
         $data = $factory->instantiate;
-        $cache->set( $key, $data ,  $self->app->config->param('cache.expires_in'));
+        $cache->set( $key, $data,
+            $self->app->config->param('cache.expires_in') );
     }
     $self->render( handler => 'json', data => $data );
 
@@ -89,12 +94,12 @@ sub tab_html {
     my $gene_id = $c->stash('gene_id');
     my $app     = $self->app;
     my $cache   = GenomeREST::Singleton::Cache->cache;
-    my $key     = sprintf "%s_%s_%s", $gene_id, $id, $tab;
+    my $key     = sprintf "%s_%s_html", $gene_id, $tab;
 
     my $result;
     if ( $cache->is_valid($key) ) {
         $result = $cache->get($key);
-        $app->log->debug("got tab_html from cache for $gene_id");
+        $app->log->debug("got tab_html from cache for $gene_id with key $key");
     }
     else {
         my $db;
@@ -103,6 +108,7 @@ sub tab_html {
             #convert gene id to its primary DDB id
             my $trans_id = $self->transcript_id($gene_id);
             if ( !$trans_id ) {    #do some octocat based template here
+            	$app->log->error("unable to convert to transcript id for $gene_id");
                 return;
             }
             $db = dicty::UI::Tabview::Page::Gene->new(
@@ -111,6 +117,7 @@ sub tab_html {
                 -sub_id     => $trans_id,
                 -base_url   => $c->stash('base_url'),
             );
+            $app->log->debug("going through $trans_id");
         }
         else {
             $db = dicty::UI::Tabview::Page::Gene->new(
@@ -121,6 +128,7 @@ sub tab_html {
         }
         $result = $db->result;
         $cache->set( $key, $result );
+        $app->log->debug("storing tab_html for $gene_id with key $key");
     }
 
     #result
@@ -136,15 +144,28 @@ sub tab_json {
     my $tab     = $c->stash('tab');
     my $gene_id = $c->stash('gene_id');
 
-    my $factory = dicty::Factory::Tabview::Tab->new(
-        -tab        => $tab,
-        -primary_id => $gene_id,
-        -base_url   => $c->stash('base_url')
-    );
-    my $tabobj = $factory->instantiate;
-    $self->render( handler => 'json', data => $tabobj );
+    my $app   = $self->app;
+    my $cache = GenomeREST::Singleton::Cache->cache;
+    my $key   = sprintf "%s_%s_json", $gene_id, $tab;
 
-    #$app->log->debug( $c->res->headers->content_type );
+    my $json;
+    if ( $cache->is_valid($key) ) {
+        $json = $cache->get($key);
+        $app->log->debug("got tab_json from cache for $gene_id");
+    }
+    else {
+        my $factory = dicty::Factory::Tabview::Tab->new(
+            -tab        => $tab,
+            -primary_id => $gene_id,
+            -base_url   => $c->stash('base_url')
+        );
+        my $tabobj = $factory->instantiate;
+        $json = $self->obj2json($tabobj);
+        $cache->set( $key, $json );
+        $app->log->debug("store tab_json in cache for $gene_id");
+    }
+
+    $self->render(text => $json,  format => 'json');
 }
 
 sub transcript_id {
@@ -155,6 +176,7 @@ sub transcript_id {
         $gene = dicty::Feature->new( -primary_id => $id );
     }
     catch {
+    	$self->app->log->debug($_);
         return 0;
     };
     my ($trans) = @{ $gene->primary_features() };
