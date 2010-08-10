@@ -18,6 +18,10 @@ BEGIN { $ENV{ORACLE_HOME} = '/usr/local/instantclient_10_2';
 	$ENV{MOJO_MODE} = 'production';
     $ENV{LD_LIBRARY_PATH} = '/usr/local/instantclient_10_2';
     $ENV{TNS_ADMIN} = '/usr/local/instantclient_10_2';
+	$ENV{'ORACLE_SID'} = 'dictybase';
+	$ENV{'ORACLE_HOME'} = '/usr/local/instantclient_10_2';
+	$ENV{'UID'} = 'DPUR_CGM_DDB/DPUR_CGM_DDB@DICTYBASE';
+	$ENV{'CHADO_UID'} = 'DPUR_CHADO/DPUR_CHADO@DICTYBASE';
 };
 
 

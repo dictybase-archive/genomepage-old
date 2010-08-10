@@ -172,18 +172,19 @@ sub startup {
     $self->set_renderer();
 }
 
-sub process {
-    my ( $self, $c ) = @_;
-    my $base_url = $c->req->url->host;
-    $base_url
-        = $base_url
-        ? $c->req->url->scheme . '://' . $base_url
-        : $c->req->url->base;
-    $c->stash( host => $base_url );
-    $c->stash( base => $c->req->url->base );
-    $self->log->debug("got base $base_url");
-    $self->dispatch($c);
-}
+
+#sub process {
+#    my ( $self, $c ) = @_;
+#    my $base_url = $c->req->url->host;
+#    $base_url
+#        = $base_url
+#        ? $c->req->url->scheme . '://' . $base_url
+#        : $c->req->url->base;
+#    $c->stash( host => $base_url );
+#    $c->stash( base => $c->req->url->base );
+#    $self->log->debug("got base $base_url");
+#    $self->dispatch($c);
+#}
 
 #set up config file usually look under conf folder
 #supports similar profile as log file
