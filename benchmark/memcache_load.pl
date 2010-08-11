@@ -24,7 +24,7 @@ my $logger   = setup_file_logger('cache_preload.log');
 my $gene_rs
     = $schema->resultset('Sequence::Feature')
     ->search( { 'type.name' => 'gene' },
-    { join => [qw/type/], prefetch => 'dbxref', rows => 6000 } );
+    { join => [qw/type/], prefetch => 'dbxref' } );
 
 my @sub_urls = map { '/gene/' . $_ }
     ( 'info.json', 'genomic_info.json', 'product.json', 'links.json' );
@@ -33,8 +33,9 @@ my $gene_count = $gene_rs->count;
 $logger->info("going to preload $gene_count gene");
 print "going to preload $gene_count gene\n";
 
-my $success = 0;
+my $success    = 0;
 my $count_done = 0;
+my $error      = 0;
 
 while ( my $row = $gene_rs->next ) {
     my $id = $row->dbxref->accession;
@@ -54,6 +55,8 @@ while ( my $row = $gene_rs->next ) {
     my $res = $agent->get($url);
     if ( $res->is_error ) {
         warn $res->code, "\t", $res->message, "\tfailed:$id\n";
+        $logger->error($url);
+        $error++;
     }
     else {
         $logger->info("preloaded $url");
@@ -64,6 +67,8 @@ while ( my $row = $gene_rs->next ) {
     $res = $agent->get($url2);
     if ( $res->is_error ) {
         warn $res->code, "\t", $res->message, "\tfailed: $url2\n";
+        $logger->error($url2);
+        $error++;
     }
     else {
         $logger->info("preloaded $url2");
@@ -75,6 +80,8 @@ while ( my $row = $gene_rs->next ) {
         $res = $agent->get($sub_url);
         if ( $res->is_error ) {
             warn $res->code, "\t", $res->message, "\tfailed: $sub_url\n";
+            $logger->error($sub_url);
+            $error++;
         }
         else {
             $success++;
@@ -94,6 +101,8 @@ while ( my $row = $gene_rs->next ) {
         $res = $agent->get($pro_url);
         if ( $res->is_error ) {
             warn $res->code, "\t", $res->message, "\tfailed: $pro_url\n";
+            $logger->error($pro_url);
+            $error++;
         }
         else {
             $success++;
@@ -111,7 +120,8 @@ while ( my $row = $gene_rs->next ) {
         $res = $agent->get($furl);
         if ( $res->is_error ) {
             warn $res->code, "\t", $res->message, "\tfailed: $furl\n";
-            next;
+            $logger->error($furl);
+            $error++;
         }
         else {
             $success++;
@@ -119,12 +129,15 @@ while ( my $row = $gene_rs->next ) {
         }
     }
     $count_done++;
-    if ($count_done % 2) {
-    	print '[ ', Time::Piece->new->cdate , ' ] ',  "Done with $count_done entires\n";
+    if ( ( $count_done % 500 ) == 0 ) {
+        print '[ ', Time::Piece->new->cdate, ' ] ',
+            "Done with $count_done entires\n";
     }
 }
 print $success, "\n";
-$logger->info("preloaded $success indexes");
+print "error: $error\n";
+$logger->info("preloaded $success entries");
+$logger->error("failed in $error entries");
 
 sub setup_file_logger {
     my $file     = shift;
