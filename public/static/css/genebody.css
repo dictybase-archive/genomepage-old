@@ -14,16 +14,12 @@
 .yui-skin-sam .yui-dt .yui-dt-last {
     border-style: none;
 } 
-
-.yui-skin-sam .go_annotation th, .yui-skin-sam .go_annotation th a,
-.yui-skin-sam .phenotypes th, .yui-skin-sam .phenotypes th a,
-.yui-skin-sam .references th, .yui-skin-sam .references th a  {
+.yui-skin-sam .general th, .yui-skin-sam .general th a  {
     color           :#fff;
     font-size       :100%;
     font-weight     :bold;
     text-decoration :none;
-    vertical-align  :bottom;
-    background      :#7183b1;    
+    vertical-align  :bottom;  
 }
 /* go tables */
 td.yui-dt-col-ann{
