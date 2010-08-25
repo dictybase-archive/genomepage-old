@@ -35,3 +35,5 @@
     /* not-active tabs settings */
     background      : #dfe1f6;
 }
+.yui-skin-sam .general th, .yui-skin-sam .general th a  {
+    background      :#524c81;    

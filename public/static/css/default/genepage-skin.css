@@ -33,3 +33,6 @@
 .yui-skin-sam .yui-navset .yui-navset-top .yui-nav a {
     /* not-active tabs settings */
     background      : #DFE8F6;
+.yui-skin-sam .general th, .yui-skin-sam .general th a  {
+    background      :#7183b1;    
+}
