@@ -36,6 +36,7 @@ body {
 }
 .yui-skin-sam #container-top #menu-top{
     width           :400px;
+    height          :30px;
 }
 .yui-skin-sam .yuimenubaritem .yuimenubaritemlabel{
     border          :0px none;
