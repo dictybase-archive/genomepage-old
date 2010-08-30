@@ -27,7 +27,7 @@
                         <tr><td>DPU_G - JGI mapping</td><td>
                         <a href="/[% species %]/downloads?file=GeneID-JGI.txt">[tab-delimited]</a></td></tr>
                         <tr><td>Ortholog information <i>(Aug 25, 2010)</i><br></td>
-                        <td><a href="/db/cgi-bin/dictyBase/download/download.pl?area=general&amp;ID=ortholog_information.txt">[tab delimited]</a>
+                        <td><a href="/[% species %]/downloads?file=ortholog_information.txt">[tab delimited]</a>
                         </td></tr>
                     </table>
                     <br/>
