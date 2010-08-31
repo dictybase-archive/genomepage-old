@@ -1,0 +1,21 @@
+#Ignore conf files
+*.conf
+
+#however exclude the sample conf
+!*.sample*
+
+#exclude various folder
+log
+cache
+
+#Perl's build specific stuff
+Build
+_blib
+blib
+_build
+MANIFEST
+MYMETA*
+META
+
+#exclude Build.PL
+!Build.PL
