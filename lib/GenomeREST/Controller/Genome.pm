@@ -13,8 +13,8 @@ use base qw/Mojolicious::Controller/;
 #
 
 sub index {
-    my ( $self, $c ) = @_;
-    my $species = $c->stash('species');
+    my ( $self ) = @_;
+    my $species = $self->stash('species');
     my $model   = $self->app->model;
     my $cache   = GenomeREST::Singleton::Cache->cache;
 
@@ -55,9 +55,9 @@ sub index {
         handler     => 'index',
         template    => $species,
         species     => $species,
-        genus       => $c->stash('genus'),
-        abbr        => $c->stash('abbreviation'),
-        common_name => $c->stash('common_name'),
+        genus       => $self->stash('genus'),
+        abbr        => $self->stash('abbreviation'),
+        common_name => $self->stash('common_name'),
         protein     => $protein_count,
         est         => $est_count
     );
@@ -65,11 +65,11 @@ sub index {
 
 sub check_name {
     my ( $self, $c ) = @_;
-    my $name     = $c->stash('name');
+    my $name     = $self->stash('name');
     my $organism = $self->validate_species($name);
 
     if ( !$organism ) {
-        $c->res->code(404);
+        $self->res->code(404);
         $self->render(
             template => 'missing',
             message  => "organism $name not found",
@@ -79,7 +79,7 @@ sub check_name {
         return;
 
     }
-    $c->stash(
+    $self->stash(
         species      => $organism->{species},
         abbreviation => $organism->{abbreviation},
         genus        => $organism->{genus},
@@ -96,7 +96,7 @@ sub contig {
     my $cache = GenomeREST::Singleton::Cache->cache;
     my $rs    = $model->resultset('Sequence::Feature');
 
-    my $contig_key = $c->stash('species') . '_contig';
+    my $contig_key = $self->stash('species') . '_contig';
     if ( $cache->is_valid($contig_key) ) {
         $data = $cache->get($contig_key);
         $self->app->log->debug("got all contigs from cache");
@@ -136,8 +136,8 @@ sub contig {
         $self->app->log->debug("put all contigs in cache");
     }
 
-    $c->stash( 'data' => $data, header => 'Contig page' );
-    $self->render( template => $c->stash('species') . '/contig' );
+    $self->stash( 'data' => $data, header => 'Contig page' );
+    $self->render( template => $self->stash('species') . '/contig' );
 
 }
 
@@ -149,9 +149,9 @@ sub contig_with_page {
 
     my $rs = $model->resultset('Sequence::Feature');
 
-    #my $contig_key = $c->stash('species') . '_contig_' . $c->stash('page');
-    #my $pager_key
-    #    = $c->stash('species') . '_contig_' . $c->stash('page') . '_pager';
+    my $contig_key = $c->stash('species') . '_contig_' . $c->stash('page');
+    my $pager_key
+        = $c->stash('species') . '_contig_' . $c->stash('page') . '_pager';
 
     #if ( $cache->is_valid($contig_key) ) {
     #    $data  = $cache->get($contig_key);
@@ -172,7 +172,7 @@ sub contig_with_page {
             having   => \'count(feature_id) > 0',
             order_by => { -asc => 'me.feature_id' },
             rows     => 50,
-            page     => $c->stash('page')
+            page     => $self->stash('page')
         }
     );
 
@@ -194,12 +194,12 @@ sub contig_with_page {
     #$cache->set( $pager_key,  $contig_rs->pager );
     #$self->app->log->debug("putting all paging contigs in cache");
 
-    $c->stash(
+    $self->stash(
         'data' => $data,
         header => 'Contig page',
         pager  => $contig_rs->pager
     );
-    $self->render( template => $c->stash('species') . '/contig' );
+    $self->render( template => $self->stash('species') . '/contig' );
 
 }
 

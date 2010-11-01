@@ -14,18 +14,18 @@ extends 'Mojolicious::Controller';
 with 'GenomeREST::Controller::Role::WithJSON';
 
 sub index {
-    my ( $self, $c ) = @_;
-    my $method = 'index_' . $c->stash('format');
-    $self->$method($c);
+    my ($self) = @_;
+    my $method = 'index_' . $self->stash('format');
+    $self->$method;
 
 }
 
 sub index_html {
-    my ( $self, $c ) = @_;
+    my ($self) = @_;
 
     my $app     = $self->app;
     my $cache   = GenomeREST::Singleton::Cache->cache;
-    my $gene_id = $c->stash('gene_id');
+    my $gene_id = $self->stash('gene_id');
     my $key     = $gene_id . '_index';
 
     my $result;
@@ -39,22 +39,22 @@ sub index_html {
         my $db = dicty::UI::Tabview::Page::Gene->new(
             -primary_id => $gene_id,
             -active_tab => ' gene ',
-            -base_url   => $c->stash('base_url')
+            -base_url   => $self->stash('base_url')
         );
         $result = $db->result;
         $cache->set( $key, $result, $app->config->param('cache.expires_in') );
     }
 
     #default rendering
-    $c->stash($result);
-    $self->render( template => $c->stash('species') . '/'
+    $self->stash($result);
+    $self->render( template => $self->stash('species') . '/'
             . $app->config->param('genepage.template') );
 
 }
 
 sub index_json {
-    my ( $self, $c ) = @_;
-    my $gene_id = $c->stash('gene_id');
+    my ($self)  = @_;
+    my $gene_id = $self->stash('gene_id');
     my $cache   = GenomeREST::Singleton::Cache->cache;
     my $key     = $gene_id . '_index_json';
     my $data;
@@ -69,7 +69,7 @@ sub index_json {
         my $factory = dicty::Factory::Tabview::Tab->new(
             -tab        => 'gene',
             -primary_id => $gene_id,
-            -base_url   => $c->stash('base_url')
+            -base_url   => $self->stash('base_url')
         );
         $data = $factory->instantiate;
         $cache->set( $key, $data,
@@ -82,24 +82,25 @@ sub index_json {
 
 sub tab {
     my ( $self, $c ) = @_;
-    my $method = 'tab_' . $c->stash('format');
+    my $method = 'tab_' . $self->stash('format');
     $self->$method($c);
 
 }
 
 sub tab_html {
-    my ( $self, $c ) = @_;
-    my $id      = $c->stash('id');
-    my $tab     = $c->stash('tab');
-    my $gene_id = $c->stash('gene_id');
+    my ($self)  = @_;
+    my $id      = $self->stash('id');
+    my $tab     = $self->stash('tab');
+    my $gene_id = $self->stash('gene_id');
     my $app     = $self->app;
     my $cache   = GenomeREST::Singleton::Cache->cache;
-    my $key     = sprintf "%s_%s_html", $gene_id, $tab;
+    my $key = sprintf "%s_%s_html", $gene_id, $tab;
 
     my $result;
     if ( $cache->is_valid($key) ) {
         $result = $cache->get($key);
-        $app->log->debug("got tab_html from cache for $gene_id with key $key");
+        $app->log->debug(
+            "got tab_html from cache for $gene_id with key $key");
     }
     else {
         my $db;
@@ -108,14 +109,15 @@ sub tab_html {
             #convert gene id to its primary DDB id
             my $trans_id = $self->transcript_id($gene_id);
             if ( !$trans_id ) {    #do some octocat based template here
-            	$app->log->error("unable to convert to transcript id for $gene_id");
+                $app->log->error(
+                    "unable to convert to transcript id for $gene_id");
                 return;
             }
             $db = dicty::UI::Tabview::Page::Gene->new(
                 -primary_id => $gene_id,
                 -active_tab => $tab,
                 -sub_id     => $trans_id,
-                -base_url   => $c->stash('base_url'),
+                -base_url   => $self->stash('base_url'),
             );
             $app->log->debug("going through $trans_id");
         }
@@ -123,7 +125,7 @@ sub tab_html {
             $db = dicty::UI::Tabview::Page::Gene->new(
                 -primary_id => $gene_id,
                 -active_tab => $tab,
-                -base_url   => $c->stash('base_url'),
+                -base_url   => $self->stash('base_url'),
             );
         }
         $result = $db->result;
@@ -132,17 +134,17 @@ sub tab_html {
     }
 
     #result
-    $c->stash($result);
-    $self->render( template => $c->stash('species') . '/'
+    $self->stash($result);
+    $self->render( template => $self->stash('species') . '/'
             . $app->config->param('genepage.template') );
 
 }
 
 sub tab_json {
-    my ( $self, $c ) = @_;
-    my $id      = $c->stash('id');
-    my $tab     = $c->stash('tab');
-    my $gene_id = $c->stash('gene_id');
+    my ($self)  = @_;
+    my $id      = $self->stash('id');
+    my $tab     = $self->stash('tab');
+    my $gene_id = $self->stash('gene_id');
 
     my $app   = $self->app;
     my $cache = GenomeREST::Singleton::Cache->cache;
@@ -157,7 +159,7 @@ sub tab_json {
         my $factory = dicty::Factory::Tabview::Tab->new(
             -tab        => $tab,
             -primary_id => $gene_id,
-            -base_url   => $c->stash('base_url')
+            -base_url   => $self->stash('base_url')
         );
         my $tabobj = $factory->instantiate;
         $json = $self->obj2json($tabobj);
@@ -165,7 +167,7 @@ sub tab_json {
         $app->log->debug("store tab_json in cache for $gene_id");
     }
 
-    $self->render(text => $json,  format => 'json');
+    $self->render( text => $json, format => 'json' );
 }
 
 sub transcript_id {
@@ -176,7 +178,7 @@ sub transcript_id {
         $gene = dicty::Feature->new( -primary_id => $id );
     }
     catch {
-    	$self->app->log->debug($_);
+        $self->app->log->debug($_);
         return 0;
     };
     my ($trans) = @{ $gene->primary_features() };

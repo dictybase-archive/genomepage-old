@@ -19,9 +19,9 @@ __PACKAGE__->attr('template');
 __PACKAGE__->attr('option');
 
 sub new {
-    my ( $class, %arg ) = @_;
+    my ( $selflass, %arg ) = @_;
     my $self = {};
-    bless $self, $class;
+    bless $self, $selflass;
     foreach my $param (qw/path option/) {
         $self->$param( $arg{$param} ) if defined $arg{$param};
     }
@@ -43,16 +43,17 @@ sub build {
 }
 
 sub process {
-    my ( $self, $renderer, $c, $output ) = @_;
-    my $template = $c->stash('template');
-    $c->app->log->debug(qq/template $template/);
+    my ( $self, $renderer, $context, $output ) = @_;
+    
+    my $template = $context->stash('template');
+    $context->app->log->debug(qq/template $template/);
 
     #the template will decide how to display the page title
     #except the error page
-    $c->app->log->debug($c->stash('header'));
-    $c->stash( default => 1 ) if $c->stash('header') ne 'Error page';
+    $context->app->log->debug($context->stash('header'));
+    $context->stash( default => 1 ) if $context->stash('header') && $context->stash('header') ne 'Error page';
     my $status
-        = $self->template->process( $template, { %{ $c->stash }, c => $c },
+        = $self->template->process( $template, { %{ $context->stash }, c => $context },
         $output );
     if ( !$status ) {
         cluck $self->template->error;

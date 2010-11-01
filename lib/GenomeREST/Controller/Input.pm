@@ -6,30 +6,30 @@ use strict;
 # Other modules:
 use GenomeREST::Singleton::Cache;
 use Data::Dumper;
-use base qw/Mojolicious::Controller/;
+use base 'Mojolicious::Controller';
 
 # Module implementation
 #
 
-__PACKAGE__->attr( 'species', default => 'discoideum' );
+__PACKAGE__->attr( 'species' );
 
 sub check_name {
-    my ( $self, $c ) = @_;
-    my $name     = $c->stash('name');
+    my ( $self ) = @_;
+    my $name     = $self->stash('name');
     my $organism = $self->validate_species($name);
 
     if ( !$organism ) {
-        $c->res->code(404);
         $self->render(
             template => 'missing',
             message  => "organism $name not found",
             error    => 1,
             header   => 'Error page',
+            status => 404
         );
         return;
 
     }
-    $c->stash(
+    $self->stash(
         species      => $organism->{species},
         abbreviation => $organism->{abbreviation},
         genus        => $organism->{genus},
@@ -37,23 +37,23 @@ sub check_name {
     );
 
     #$self->app->log->debug( $c->req->url->path->clone->canonicalize->parts );
-    my $val = $self->validate($c);
+    my $val = $self->validate();
     return $val;
 }
 
 sub validate {
-    my ( $self, $c ) = @_;
-    my $id      = $c->stash('id');
+    my ( $self ) = @_;
+    my $id      = $self->stash('id');
     my $app     = $self->app;
     my $gene_id = $self->process_id($id);
     if ( !$gene_id ) {
-        $c->res->code(404);
         $self->render(
-            template => $c->stash('species') . '/'
+            template => $self->stash('species') . '/'
                 . $app->config->param('genepage.error'),
             message => "Input $id not found",
             error   => 1,
             header  => 'Error page',
+            status => 404
         );
         return;
     }
@@ -70,20 +70,19 @@ sub validate {
 
         #logic for wrong ids
         if ( !$feat ) {
-            $c->res->code(404);
             $self->render(
-                template => $c->stash('species') . '/'
+                template => $self->stash('species') . '/'
                     . $app->config->param('genepage.error'),
                 message => "Input $gene_id not found",
                 error   => 1,
                 header  => 'Error page',
+                status => 404
             );
             return;
         }
 
         #logic for deleted feature
         if ( $feat->get_column('is_deleted') ) {
-            $c->res->code(404);
             my $rs = $feat->featureprops(
                 {   'cv.name'   => 'autocreated',
                     'type.name' => 'replaced by'
@@ -91,36 +90,36 @@ sub validate {
                 { join => { 'type' => 'cv' } }
             );
             if ( $rs->count > 0 ) {    #is it being replaced
-                $c->stash(
+                $self->stash(
                     message =>
                         "$gene_id has been deleted from dictyBase. It has been replaced by",
                     replaced => 1,
                     id       => join( ":", map { $_->value } $rs->all ),
                     header   => 'Error page',
                     url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
-
+                    status => 404
                     #the ENV should be changed
                 );
             }
             else {
-                $c->stash(
+                $self->stash(
                     deleted => 1,
                     message => "$gene_id has been deleted",
-                    header  => 'Error page',
+                    header  => 'Error page',            
+                    status => 404
                 );
 
             }
-            $self->render( template => $c->stash('species') . '/'
+            $self->render( template => $self->stash('species') . '/'
                     . $app->config->param('genepage.error') );
             return;
         }
         $memcache->set( $key, 'valid' );
     }
-    $c->stash( gene_id => $gene_id );
+    $self->stash( gene_id => $gene_id );
     my $base_url = $self->parse_url( $self->req->url->path );
-    $c->stash( base_url => $base_url );
+    $self->stash( base_url => $base_url );
     return 1;
-
 }
 
 sub validate_species {
