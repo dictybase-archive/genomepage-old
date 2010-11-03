@@ -1,0 +1,107 @@
+.dicty-header {
+	background-color :#DFE8F6; 
+	font-family:arial,sans-serif;
+	width: 95%;
+	margin : 20 auto;
+	/* padding-left :80px; */
+	text-align  : center;
+	font-size: 197%;
+	font-weight: 500;
+	padding-top: 8px;
+	padding-bottom: 6px;
+}
+
+.dicty-content {
+    width: 95%;
+	margin : 20 auto;
+}
+.dicty-hint {
+	 font-size: 131%;
+	 font-family: Verdana;
+	 font-weight: bold;
+}
+
+.yui-gb {
+	 margin-bottom:10px;
+}
+
+
+/*
+.search-toolbar{
+    padding: 0px 5px 10px 10px; 
+    position: absolute;
+}
+
+
+#dicty-refresh {
+	 position: absolute;
+	 top: 2%;
+	 right: 20%;
+}
+
+#dicty-from-option {
+	 position: absolute;
+	 left: 20%;
+}
+
+#dicty-to-option {
+	 position: absolute;
+	 left: 40%;
+}*/
+
+
+#id-submit-button, #id-clear-button {
+    margin   : 0px;
+    vertical-align:super/top/text-top/middle/bottom/text-bottom/length/%;;
+}
+
+.dicty-left-content {
+  /*  padding: 0px 5px 0px 10px;*/ 
+	overflow :auto;
+	vertical-align: top;
+}
+
+.dicty-result-content {
+    padding: 0px 5px 0px 10px; 
+}
+
+#dicty-right-content {
+	 border :1px solid; 
+	 padding :10px;
+	 background-color :#DFE8F6;
+	 text-align: left;
+}
+
+.dicty-bottom-content {
+	 /*border :1px solid;*/ 
+	 margin: 3px;
+	 padding: 1px;
+}
+
+#dicty-excel-spinner {
+	 background-image : url(/static/images/ajax-loader3.gif) ;
+	 background-repeat: no-repeat;
+	 float : left;
+	 width : 20%;
+	 height: 20%;
+	 min-height: 20px;
+	 min-width: 20px;
+}
+
+
+#dicty-space {
+	 word-spacing :2em;
+	 font-size :130%;
+}
+
+#dicty-output {
+	 width: 30%;
+	 border: 2px ridge;
+	 padding-left :40px;
+}
+
+.dicty-gap {
+	 margin :40px;
+}
+
+

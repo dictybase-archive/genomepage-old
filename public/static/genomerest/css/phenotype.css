@@ -1,0 +1,95 @@
+/*
+// CSS for the Phenotype tool
+*/
+   div#ontology{
+      border: 1px solid gray;
+      padding: 2px 2px 2px 2px;
+      float: left;
+      width: 950;      
+   }
+
+
+   div#terminfo {     
+     width: 375;
+     height: 100%;
+     float: right;
+   }
+
+   /* div returned from ajax record retreival */
+   div#terminfo table {
+     border: 1px solid gray;
+     width: 100%;
+     font-size: 12px;
+     background-color: lightgoldenrodyellow;
+     height: 100%;
+   }
+   div#terminfo td.label {
+     font-weight: bold;
+   }
+   div#terminfo td.data {
+     width: 60%;    
+   }
+   
+   div#terminfo th.grey_header {
+	background-color: #808080;
+	font-family: Verdana; 	
+	font-size: 14px;        
+   }
+   
+div#datatable{
+      border: 1px solid gray;
+      width: 950;
+      padding: 0;
+   }
+
+div#results{
+      border: 1px solid gray;
+      width: 950;
+      padding: 0;
+   }
+
+table.data {     
+     width: 100%;
+     font-size: 14px;     
+     height: 100%;
+     border: 1px solid gray;
+     padding: 0;
+   }
+
+input { 
+border: 1px solid gray;
+}
+
+TEXTAREA { 
+border: 1px solid gray;
+}
+
+div#hidden {
+visibility : hidden;
+}
+
+table.phenotype {
+	border-width: 1px;	
+	border-style: solid;	
+	border-collapse: collapse;	
+	width: 100%;
+	border-color: gray;
+}
+
+table.phenotype th {
+	border-width: 1px;
+	padding: 3px;
+	border-style: solid;
+	border-color: white;
+	background-color: #808080;
+	font-family: Verdana; 	
+	font-size: 14px;
+}
+
+table.phenotype td {
+	border-width: 1px;
+	padding: 3px;
+	border-style: solid;	
+	border-color: gray;
+	font-size: 12px;
+}
