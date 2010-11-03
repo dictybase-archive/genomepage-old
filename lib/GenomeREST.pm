@@ -3,21 +3,29 @@ package GenomeREST;
 use strict;
 use Moose;
 use Config::Simple;
-use GenomeREST::Singleton::Cache;
+#use GenomeREST::Singleton::Cache;
 use Carp;
 use File::Spec::Functions;
-use GenomeREST::Renderer::TT;
-use GenomeREST::Renderer::Index;
-use GenomeREST::Renderer::JSON;
 use Homology::Chado::DataSource;
 use namespace::autoclean;
 extends 'Mojolicious';
 
-my $instance = GenomeREST::Singleton::Cache->instance;
+#my $instance = GenomeREST::Singleton::Cache->instance;
 
 has 'config' => (
     is         => 'rw',
     isa        => 'Config::Simple',
+    lazy_build => 1
+);
+
+has 'dispatcher' => (
+    is  => 'rw',
+    isa => 'MojoX::Dispatcher::Static',
+);
+
+has 'model' => (
+    is         => 'rw',
+    isa        => 'Bio::Chado::Schema',
     lazy_build => 1
 );
 
@@ -43,22 +51,6 @@ sub _build_config {
     $self->log->debug(qq/got config file $file/);
     return Config::Simple->new($file);
 }
-
-has 'template_path' => (
-    is  => 'rw',
-    isa => 'Str'
-);
-
-has 'downloader' => (
-    is  => 'rw',
-    isa => 'MojoX::Dispatcher::Static',
-);
-
-has 'model' => (
-    is         => 'rw',
-    isa        => 'Bio::Chado::Schema',
-    lazy_build => 1
-);
 
 sub _build_model {
     my $self   = shift;
@@ -90,7 +82,7 @@ sub startup {
     #default log level
     $self->log->level( $ENV{MOJO_DEBUG} ? $ENV{MOJO_DEBUG} : 'debug' );
 
-    $self->downloader(
+    $self->dispatcher(
         MojoX::Dispatcher::Static->new(
             prefix => '/bulkfile',
             root   => $self->config->param('download')
@@ -98,125 +90,70 @@ sub startup {
     );
 
     $self->additional_dbh();
-    my $config = $self->config;
-    if ( !$instance->has_cache ) {
-        $self->log->debug("initing memcache");
-        $instance->init_cache($config);
-    }
+
+#    my $config = $self->config;
+#    if ( !$instance->has_cache ) {
+#        $self->log->debug("initing memcache");
+#        $instance->init_cache($config);
+#    }
 
     my $router = $self->routes();
 
-    #reusing GenomeREST controller
+    # reusing GenomeREST controller
     $router->namespace('GenomeREST::Controller');
 
-    #routing setup
-    #suffix based routing for multigenome setup
-
-    #goes here before it passes to any other controller
-    #kind of before action
-    my $bridge = $router->bridge->to(
+    # routing setup
+    # suffix based routing for multigenome setup
+    # goes here before it passes to any other controller
+   
+    my $species_bridge = $router->bridge(':name')->to(
         controller => 'genome',
-        action     => 'check_name',
+        action     => 'validate',
     );
 
-    $bridge->route('/:name')->to( controller => 'genome', action => 'index' );
+    $species_bridge->route('')->to( controller => 'genome', action => 'index' );
 
-    $bridge->route('/:name/downloads')->to(
+    $species_bridge->route('downloads')->to(
         controller => 'download',
         action     => 'index',
     );
 
-    #$bridge->route('/:name/downloads/fasta')->to(
-    #    controller => 'download',
-    #    action     => 'fasta',
-    #);
-
-    #write a more generic stuff
-    #like types for genome backbone
-    $bridge->route('/:name/contig')
+    # write a more generic stuff like types for genome backbone
+    $species_bridge->route('contig')
         ->to( controller => 'genome', action => 'contig' );
 
-    $bridge->route('/:name/contig/page/:page')
+    $species_bridge->route('contig/page/:page')
         ->to( controller => 'genome', action => 'contig_with_page' );
-
-    my $bridge2 = $router->bridge('/:name/gene')->to(
+        
+    my $gene_brige = $species_bridge->bridge('gene/:id')->to(
         controller => 'input',
-        action     => 'check_name'
+        action     => 'validate'
     );
-
-    #support both json and html
-    #default is html
-    $bridge2->route('/:id')
-        ->to( controller => 'page', action => 'index', format => 'html' );
-
-    #default is html
-    $bridge2->route('/:id/:tab')
-        ->to( controller => 'page', action => 'tab', format => 'html' );
-
-#keeping the default to html as it is needed for feature tab
-#this is the only url that is being called without any extension and gives back html
-    $bridge2->route('/:id/:tab/:section')->to(
-        controller => 'tab',
-        action     => 'section',
-        format     => 'html'
+    
+    # support both json and html, default is html
+    $gene_brige->route('')->to(
+        controller => 'page', action => 'index', format => 'html'
     );
-
-    #only support json response
-    $bridge2->route('/:id/:tab/:subid/:section')->to(
-        controller => 'tab',
-        action     => 'sub_section',
-        format     => 'json'
+    
+    # default is html
+    $gene_brige->route(':tab')->to(
+        controller => 'page', action => 'tab', format => 'html'
     );
-
-    #set up various renderer
-    $self->set_renderer();
-}
-
-
-#sub process {
-#    my ( $self, $c ) = @_;
-#    my $base_url = $c->req->url->host;
-#    $base_url
-#        = $base_url
-#        ? $c->req->url->scheme . '://' . $base_url
-#        : $c->req->url->base;
-#    $c->stash( host => $base_url );
-#    $c->stash( base => $c->req->url->base );
-#    $self->log->debug("got base $base_url");
-#    $self->dispatch($c);
-#}
-
-#set up config file usually look under conf folder
-#supports similar profile as log file
-
-sub set_renderer {
-    my ($self) = @_;
-
-    #try to set the default template path for TT
-    #keep in mind this setup is separate from the Mojo's default template path
-    #if something not specifically is not set it defaults to Mojo's default
-    $self->template_path( $self->renderer->root );
-    if (    $self->has_config
-        and $self->config->param('default.template_path') )
-    {
-        $self->template_path( $self->config->param('default.template_path') );
-    }
-
-    my $tpath = $self->template_path;
-    $self->log->debug(qq/default template path for TT $tpath/);
-    my $mode = $self->mode();
-    my $tt = GenomeREST::Renderer::TT->new( path => $self->template_path, );
-    my $index_tt
-        = GenomeREST::Renderer::Index->new( path => $self->template_path, );
-
-    my $json = GenomeREST::Renderer::JSON->new();
-
-    $self->renderer->add_handler(
-        tt    => $tt->build(),
-        index => $index_tt->build(),
-        json  => $json->build(),
+    
+    $gene_brige->route(':tab/:section')->to(
+        controller => 'tab', action => 'section', format => 'html'
     );
-    $self->renderer->default_handler('tt');
+    
+    # keeping the default to html as it is needed for feature tab
+    # this is the only url that is being called without any extension and gives back html
+    
+
+#    # only support json response
+#    $bridge2->route('/:id/:tab/:subid/:section')->to(
+#        controller => 'tab',
+#        action     => 'sub_section',
+#        format     => 'json'
+#    );
 }
 
 sub additional_dbh {

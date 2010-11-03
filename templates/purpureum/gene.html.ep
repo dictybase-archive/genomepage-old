@@ -1,0 +1,181 @@
+% layout 'default', title => 'Gene Summary for '. stash 'header';
+
+<script type="text/javascript">
+
+// disabing ESC 
+function addEvent(el,ev,func){
+    if(el.addEventListener) el.addEventListener(ev,func,null);
+    else if(el.attachEvent) el.attachEvent('on'+ev,func);
+    else el['on'+ev]=func;		
+
+}
+addEvent(document,'keypress',catchEscape);
+        
+function catchEscape(e){
+    e= (window.event)? window.event: e;
+    if(e.keyCode==27){ // you could have a switch here for more keys
+        //do what you want here
+        var browserName=navigator.appName; 
+        if (browserName=="Microsoft Internet Explorer")
+            e.returnValue = false;
+        else
+            e.preventDefault();
+    }
+    return true; // ignore the default 'escape' 
+};
+
+var loader = new YAHOO.util.YUILoader({
+    base: '/static/genomerest/js/yui/build/',
+    loadOptional: true,
+    onSuccess: function() {
+    	//var reader = new YAHOO.widget.LogReader('dicty-log');
+        var config      = <%== stash('config') %>;
+        var panel = new YAHOO.Dicty.Panel(config[0]); 
+        panel.render('container');
+        var util = panel.util;
+        YAHOO.util.Event.on(window,  'resize', util.handleResize,  util,  true  );
+        
+    },
+    onFailure: function(msg, xhrobj) {
+        alert("Loader sucked, everything failed");
+    }
+});
+
+var customPath = '/static/genomerest/js/custom/';
+var cssPath = '/static/genomerest/css/';
+
+loader.addModule({
+    name: 'genetab',
+    type: 'js',
+    fullpath: customPath + 'item.js',
+    requires: [
+        'tabview', 'cookie', 'datatable', 'dictyitem', 'gene_css', 'gene_skin_css'
+/*    
+    'yahoo', 'json', 'connection','treeview',
+    'tabview', 'logger', 'container','datatable',
+    'event', 'element', 'animation','selector',
+    'dom', 'button', 'button_css', 'accordion', 'yui-dispatch', 
+    'accordion_css', 'dictyitem', 'yui_css', 'skin_css', 'cart'
+*/
+    ]
+});
+
+loader.addModule({
+    name: 'dictyutil',
+    type: 'js',
+    fullpath:  customPath + 'util.js'
+});
+
+loader.addModule({
+    name: 'formatter',
+    type: 'js',
+    fullpath:  customPath + 'formatter.js'
+});
+
+loader.addModule({
+    name: 'dictydispatch',
+    type: 'js',
+    fullpath:  customPath + 'dispatcher.js'
+});
+
+loader.addModule({
+    name: 'dictyitem',
+    type: 'js',
+    fullpath:  customPath + 'panel.js',
+    requires: [ 'dictyutil', 'formatter', 'dictydispatch' ]	
+});
+
+loader.addModule({
+    name: 'gene_css',
+    type: 'css',
+    fullpath: cssPath + 'gene.css'
+});
+
+loader.addModule({
+    name: 'gene_skin_css',
+    type: 'css',
+    fullpath: cssPath + "<%== stash('species') %>/" + 'gene-skin.css'
+});
+
+
+/*
+loader.addModule({
+    name: 'yui_css',
+    type: 'css',
+    fullpath: "/static/genomerest/css/yui.css"
+});
+
+loader.addModule({
+    name: 'skin_css',
+    type: 'css',
+    fullpath: "/static/genomerest/css/[%species%].css"
+});
+
+loader.addModule({
+    name: 'button_css',
+    type: 'css',
+    fullpath: "/static/genomerest/js/yui/build/button/assets/skins/sam/button.css"
+});
+
+loader.addModule({
+    name: 'bubbling',
+    type: 'js',
+    fullpath: "/static/genomerest/js/yui/plugins/bubbling/bubbling-min.js"
+});
+
+loader.addModule({
+    name: 'yui-dispatch',
+    type: 'js',
+    fullpath: "/static/genomerest/js/yui/plugins/dispatcher/dispatcher-min.js"
+});
+
+loader.addModule({
+    name: 'container_css',
+    type: 'css',
+    fullpath: "/static/genomerest/js/yui/build/container/assets/skins/sam/container.css"
+});
+
+loader.addModule({
+    name: 'accordion',
+    type: 'js',
+    fullpath: "/static/genomerest/js/yui/plugins/accordion/accordion-min.js",
+    requires: ['bubbling', 'container_css']
+});
+
+loader.addModule({
+    name: 'accordion_css',
+    type: 'css',
+    fullpath: "/static/genomerest/js/yui/plugins/accordion/assets/accordion.css"
+});
+
+loader.addModule({
+    name: 'tooltips',
+    type: 'js',
+    fullpath: "/static/genomerest/js/yui/plugins/tooltips/tooltips-min.js",
+    requires: ['bubbling']
+});
+
+loader.addModule({
+    name: 'cart',
+    type: 'js',
+    fullpath: "/static/genomerest/js/nopcart.js",
+    requires: ['language']
+});
+
+loader.addModule({
+    name: 'language',
+    type: 'js',
+    fullpath: "/static/genomerest/js/language-en.js"
+});
+
+*/
+loader.require('genetab');
+loader.insert();
+</script>
+
+<div class="page_header">Gene Information for <%= stash 'header' %></div> 
+<div style="padding-left:10px; padding-right:10px;">
+    <div id="container"></div>
+</div>
+<div id='dicty-log'></div>
+

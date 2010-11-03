@@ -1,0 +1,15 @@
+% layout 'default';
+
+<% if (stash 'replaced') { %>
+    <div class="error-warning">
+        <%= stash 'message' %>
+		<% foreach my $value (stash 'id') { %>
+		    <% my $url = stash 'url'; %>
+                <a href="<%=  url("$url/$value") %>"><%= $value %></a>
+		<% } %>
+<% } else { %>
+	<div class="error-warning">
+		<%= stash 'message' %>
+	</div>
+<% } %>
+

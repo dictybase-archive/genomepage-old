@@ -5,41 +5,12 @@ use strict;
 
 # Other modules:
 use GenomeREST::Singleton::Cache;
-use Data::Dumper;
 use base 'Mojolicious::Controller';
 
 # Module implementation
 #
 
 __PACKAGE__->attr( 'species' );
-
-sub check_name {
-    my ( $self ) = @_;
-    my $name     = $self->stash('name');
-    my $organism = $self->validate_species($name);
-
-    if ( !$organism ) {
-        $self->render(
-            template => 'missing',
-            message  => "organism $name not found",
-            error    => 1,
-            header   => 'Error page',
-            status => 404
-        );
-        return;
-
-    }
-    $self->stash(
-        species      => $organism->{species},
-        abbreviation => $organism->{abbreviation},
-        genus        => $organism->{genus},
-        common_name  => $organism->{common_name}
-    );
-
-    #$self->app->log->debug( $c->req->url->path->clone->canonicalize->parts );
-    my $val = $self->validate();
-    return $val;
-}
 
 sub validate {
     my ( $self ) = @_;
@@ -59,9 +30,9 @@ sub validate {
     }
 
     my $key      = $gene_id . '_valid';
-    my $memcache = GenomeREST::Singleton::Cache->cache;
+#    my $memcache = GenomeREST::Singleton::Cache->cache;
 
-    if ( !$memcache->is_valid($key) ) {
+#    if ( !$memcache->is_valid($key) ) {
         my $model = $app->model;
         my $feat  = $model->resultset('Sequence::Feature')->search(
             { 'dbxref.accession' => $gene_id },
@@ -114,45 +85,12 @@ sub validate {
                     . $app->config->param('genepage.error') );
             return;
         }
-        $memcache->set( $key, 'valid' );
-    }
+#        $memcache->set( $key, 'valid' );
+# }
     $self->stash( gene_id => $gene_id );
     my $base_url = $self->parse_url( $self->req->url->path );
     $self->stash( base_url => $base_url );
     return 1;
-}
-
-sub validate_species {
-    my ( $self, $name ) = @_;
-    my $memcache = GenomeREST::Singleton::Cache->cache;
-    my $org_hash;
-
-    #try from memcache
-    if ( $memcache->is_valid($name) ) {
-        $org_hash = $memcache->get($name);
-        $self->app->log->debug("got organism from memcache for $name");
-        return $org_hash;
-    }
-
-    my $model = $self->app->model;
-    my ($organism) = $model->resultset('Organism::Organism')->search(
-        -or => [
-            { common_name  => $name },
-            { abbreviation => $name },
-            { species      => $name },
-        ]
-    );
-    return if !$organism;
-    $self->species( $organism->species );
-    $org_hash = {
-        common_name  => $organism->common_name,
-        abbreviation => $organism->abbreviation,
-        species      => $organism->species,
-        genus        => $organism->genus
-    };
-    $memcache->set( $name, $org_hash );
-    $self->app->log->debug("stored organism $name in memcache");
-    $org_hash;
 }
 
 sub is_name {
@@ -173,14 +111,14 @@ sub name2id {
     my ( $self, $name ) = @_;
     my $app = $self->app;
 
-    my $memcache = GenomeREST::Singleton::Cache->cache;
+#    my $memcache = GenomeREST::Singleton::Cache->cache;
     my $key      = $name . '_to_id';
 
-    if ( $memcache->is_valid($key) ) {
-        my $id = $memcache->get($key);
-        $app->log->debug("got id $id for $name from memcache");
-        return $id;
-    }
+#    if ( $memcache->is_valid($key) ) {
+#        my $id = $memcache->get($key);
+#        $app->log->debug("got id $id for $name from memcache");
+#        return $id;
+#    }
 
     my $model = $app->model;
     my $feat  = $model->resultset('Sequence::Feature')->search(
@@ -195,10 +133,10 @@ sub name2id {
 
     return 0 if !$feat;
     my $id = $feat->dbxref->accession;
-    if ( $app->config->param('nocache.genename') ne $name ) {
-        $memcache->set( $key, $id );
-        $app->log->debug("stored id $id for $name in memcache");
-    }
+#    if ( $app->config->param('nocache.genename') ne $name ) {
+#        $memcache->set( $key, $id );
+#        $app->log->debug("stored id $id for $name in memcache");
+#    }
     $id;
 }
 
