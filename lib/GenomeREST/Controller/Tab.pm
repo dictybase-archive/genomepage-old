@@ -54,7 +54,6 @@ sub section_html {
         #    }
         $self->stash($result);
         $self->render( template => $self->stash('species') . '/gene' );
-
     }
 }
 
@@ -129,10 +128,11 @@ sub sub_section {
         -base_url   => $self->stash('base_url')
     );
     my $obj = $factory->instantiate;
+    $json   = $self->obj2json($obj);
 
     #        $cache->set( $key, $json );
     #    }
-    $self->render( json => $obj );
+    $self->render( text => $json, format => 'json' );
 
 }
 

@@ -1,5 +1,0 @@
-<div class="page_header">Gene Information for [% header %]</div> 
-<div style="padding-left:10px; padding-right:10px;">
-    <div id="container"></div>
-</div>
-<div id='dicty-log'></div>

@@ -5,22 +5,17 @@
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         
         <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/fonts/fonts-min.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/logger/assets/skins/sam/logger.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/button/assets/skins/sam/button.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/button/assets/skins/sam/skin.css">
         <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/container/assets/skins/sam/container.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/menu/assets/skins/sam/menu.css">
         <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/menu/assets/skins/sam/menu.css">
         
         <link rel="stylesheet" type="text/css" href="/static/genomerest/css/header.css">       
         <link rel="stylesheet" type="text/css" href="/static/genomerest/css/body.css">
         <link rel="stylesheet" type="text/css" href="/static/genomerest/css/footer.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/gene.css">
         
         <% my $path = stash('species') || 'default'; %>
         <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/header-skin.css">       
         <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/body-skin.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/gene-skin.css">
+        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/footer-skin.css">
         
         <script type="text/javascript" src="/static/genomerest/js/yui/build/yahoo/yahoo.js"></script>
         <script type="text/javascript" src="/static/genomerest/js/yui/build/yuiloader/yuiloader-min.js"></script>
@@ -31,7 +26,6 @@
         <script type="text/javascript" src="/static/genomerest/js/yui/build/menu/menu-min.js"></script>
         <script type="text/javascript" src="/static/genomerest/js/yui/build/animation/animation.js"></script>
         <script type="text/javascript" src="/static/genomerest/js/yui/build/element/element-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/logger/logger-min.js"></script>
         <script type="text/javascript" src="/static/genomerest/js/yui/build/connection/connection-min.js"></script>
         <script type="text/javascript" src="/static/genomerest/js/yui/build/json/json-min.js"></script>
         
@@ -40,7 +34,10 @@
         <title><%= stash 'title' %></title>
     </head>
     <body class="yui-skin-sam">
-    <%= $self->render_partial(template => $path.'/toolbar') %>
-    <%= $self->render_inner %>
-    <%= $self->render_partial(template => 'footer') %>
+        <%= $self->render_partial(template => $path.'/toolbar') %>
+        <div id="container">
+            <%= $self->render_inner %>
+        <div id="container">
+        <%= $self->render_partial(template => 'footer') %>
+    </body>
 </html>

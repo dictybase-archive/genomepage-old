@@ -143,17 +143,13 @@ sub startup {
     $gene_brige->route(':tab/:section')->to(
         controller => 'tab', action => 'section', format => 'html'
     );
-    
-    # keeping the default to html as it is needed for feature tab
-    # this is the only url that is being called without any extension and gives back html
-    
 
-#    # only support json response
-#    $bridge2->route('/:id/:tab/:subid/:section')->to(
-#        controller => 'tab',
-#        action     => 'sub_section',
-#        format     => 'json'
-#    );
+    # only support json response
+    $gene_brige->route(':tab/:subid/:section')->to(
+        controller => 'tab',
+        action     => 'sub_section',
+        format     => 'json'
+    );
 }
 
 sub additional_dbh {

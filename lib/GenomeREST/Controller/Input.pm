@@ -19,8 +19,7 @@ sub validate {
     my $gene_id = $self->process_id($id);
     if ( !$gene_id ) {
         $self->render(
-            template => $self->stash('species') . '/'
-                . $app->config->param('genepage.error'),
+            template => 'missing',
             message => "Input $id not found",
             error   => 1,
             header  => 'Error page',
@@ -81,8 +80,7 @@ sub validate {
                 );
 
             }
-            $self->render( template => $self->stash('species') . '/'
-                    . $app->config->param('genepage.error') );
+            $self->render( template => 'missing' );
             return;
         }
 #        $memcache->set( $key, 'valid' );
@@ -123,14 +121,13 @@ sub name2id {
     my $model = $app->model;
     my $feat  = $model->resultset('Sequence::Feature')->search(
         {   'name'             => $name,
-            'organism.species' => $self->species
+            'organism.species' => $self->stash('species')
         },
         {   join     => 'organism',
             prefetch => 'dbxref',
             rows     => 1
         }
     )->single;
-
     return 0 if !$feat;
     my $id = $feat->dbxref->accession;
 #    if ( $app->config->param('nocache.genename') ne $name ) {

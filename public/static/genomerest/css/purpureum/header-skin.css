@@ -38,7 +38,7 @@
 /*    background:transparent url(/inc/js/yui/build/assets/skins/sam/sprite.png) repeat-x scroll 0 -1700px;*/
 }
 .yui-skin-sam .yuimenubar .yuimenubaritem-selected {
-    background: transparent url(/static/images/purpureum/sprite.gif) repeat-x scroll 0 -303px;
+    background: transparent url(../../purpureum/sprite.gif) repeat-x scroll 0 -303px;
 }
 .yui-skin-sam .yuimenubar .yuimenubaritem-selected a{
     color           :#524c81;

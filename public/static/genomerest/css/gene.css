@@ -150,7 +150,7 @@ yui-history-iframe {
 }
 
 ul.yui-nav li span.accordionHelpItem {
-    background  :transparent url(/static/genomerest/images/sprite-toolbar.gif) no-repeat scroll -1px -46px;
+    background  :transparent url(../images/sprite-toolbar.gif) no-repeat scroll -1px -46px;
     border: 1px solid #999;
     display:block;
     height:12px;
@@ -171,16 +171,16 @@ ul.yui-nav li span.accordionHelpItem {
 }
 
 .accordionTopItem {
-    background  :transparent url(/static/genomerest/images/sprite-toolbar.gif) no-repeat scroll 0 0px;
+    background  :transparent url(../images/sprite-toolbar.gif) no-repeat scroll 0 0px;
 }
 .accordionHelpItem {
-    background  :transparent url(/static/genomerest/images/sprite-toolbar.gif) no-repeat scroll 0 -45px;
+    background  :transparent url(../images/sprite-toolbar.gif) no-repeat scroll 0 -45px;
 }
 .yui-skin-sam .yui-cms-accordion .yui-cms-item .actions .accordionToggleItem {
-    background  :transparent url(/static/genomerest/images/sprite-toolbar.gif) no-repeat scroll 0 -15px;
+    background  :transparent url(../images/sprite-toolbar.gif) no-repeat scroll 0 -15px;
 }
 .yui-skin-sam .yui-cms-accordion .yui-cms-item.selected .actions .accordionToggleItem {
-    background:transparent url(/static/genomerest/images/sprite-toolbar.gif) no-repeat scroll 0 -30px;
+    background:transparent url(../images/sprite-toolbar.gif) no-repeat scroll 0 -30px;
 }
 
 .yui-skin-sam .yui-navset .yui-content,
@@ -313,13 +313,13 @@ ul.yui-nav li span.accordionHelpItem {
 }
 
 div#dicty-domain-div {
-	 background-image: url("/static/genomerest/images/ajax-loader2.gif");
+	 background-image: url(../images/ajax-loader2.gif);
 	 background-repeat: no-repeat;
 	 background-position: 50% 50%;
 }
 
 div.dicty-gbrowse-div {
-	 background-image: url("/static/genomerest/images/ajax-loader2.gif");
+	 background-image: url(../images/ajax-loader2.gif);
 	 background-repeat: no-repeat;
 	 background-position: 50% 50%;
 	 width: 500px;
@@ -327,7 +327,7 @@ div.dicty-gbrowse-div {
 }
 
 span.dicty-section-loader { 
-	 background-image: url("/static/genomerest/images/ajax-loader.gif");
+	 background-image: url(../images/ajax-loader.gif);
 	 background-repeat: no-repeat;
 	 background-position: 10% 60%;
 	 width: 20%;
@@ -343,7 +343,7 @@ span.dicty-section-text {
 }
 
 div.dicty-loader { 
-	 background-image: url("/static/genomerest/images/ajax-loader2.gif");
+	 background-image: url(../images/ajax-loader2.gif);
 	 background-repeat: no-repeat;
 	 background-position: 40% 50%;
 	 height: 150px;
@@ -351,7 +351,7 @@ div.dicty-loader {
 }
 
 .yui-skin-sam .yui-cms-accordion .yui-cms-item .dicty-content-loader { 
-	 background-image: url("/static/genomerest/images/ajax-loader5.gif");
+	 background-image: url(../images/ajax-loader5.gif);
 	 background-repeat: no-repeat ;
 	 background-position: 50% 50%;
 }
@@ -386,7 +386,7 @@ img.dicty-gbrowse-image {
 #yui-cms-loading #yui-cms-float {
     text-align: center;
     font-size: 80%;
-    background-image: url("/static/genomerest/images/ajax-loader2.gif");
+    background-image: url(../images/ajax-loader2.gif);
     background-repeat:no-repeat;
     background-position: top;
     padding-top: 20px;
@@ -398,20 +398,20 @@ img.dicty-gbrowse-image {
 }
 a.add_to_cart, a.add_to_cart:link, a.add_to_cart:visited, a.add_to_cart:hover {
     display:block;
-    background  :transparent url(/static/genomerest/images/sprite_shopping_cart.gif) no-repeat scroll 0 -87px;
+    background  :transparent url(../images/sprite_shopping_cart.gif) no-repeat scroll 0 -87px;
     height:14px;
     width: 23px;
     text-decoration: none;
 }
 span.cart_not_available{
     display:block;
-    background  :transparent url(/static/genomerest/images/sprite_shopping_cart.gif) no-repeat scroll 0 -120px;
+    background  :transparent url(../images/sprite_shopping_cart.gif) no-repeat scroll 0 -120px;
     height:14px;
     width: 23px;
 }
 span.shopping_cart{
     display:block;
-    background  :transparent url(/static/genomerest/images/sprite_shopping_cart.gif) no-repeat scroll 0 -102px;
+    background  :transparent url(../sprite_shopping_cart.gif) no-repeat scroll 0 -102px;
     height:14px;
     width: 23px;
 }

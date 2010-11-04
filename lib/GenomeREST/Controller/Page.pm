@@ -141,8 +141,7 @@ sub tab_html {
 
     #result
     $self->stash($result);
-    $self->render( template => $self->stash('species') . '/'
-            . $app->config->param('genepage.template') );
+    $self->render( template => $self->stash('species') . '/gene');
 
 }
 

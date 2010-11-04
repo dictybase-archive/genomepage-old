@@ -72,6 +72,6 @@ $t->get_ok("$base_url/$gene_id/feature")
 #explicit request for feature tab
 $t->get_ok("$base_url/$gene_id/feature/$transcript_id")
     ->status_is( 200, 'successful.json response for feature section' )
-    ->content_type_like( qr/html/, 'is a html content for protein sequence' );
+    ->content_type_like( qr/html/, 'is a html content for protein sequence' )
     ->content_like(qr/Gene information for $name/i, "title for $gene_id gene page")
     ->content_like(qr/Supported by NIH/i, 'common footer for every gene page');
