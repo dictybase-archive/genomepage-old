@@ -24,7 +24,7 @@
                     </tr>
                     <% foreach my $item (@$dataset) { %>
                         <tr class="row2">
-                            <td><a href="/$species/gbrowse/?name=<%= @$item[0] %>:1..30000"><%= @$item[0] %></a></td>
+                            <td><a href="/<%= $species %>/gbrowse/?name=<%= @$item[0] %>:1..30000"><%= @$item[0] %></a></td>
 	                		<td><%= @$item[1] %></td>
 	                		<td><%= @$item[2] %></td>
 	            		</tr>

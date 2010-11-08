@@ -1,0 +1,27 @@
+release-2-19 
+    * Fixed incompatibilities with Mojolicious 0.999936
+    * Rewrote tests with Test::Mojo
+    * Moved fcgi scripts to script folder
+    * Moved static content (images, css, js) from public/static to public/static/genomerest
+    * Removed duplicated code for verifying species from GenomeREST::Controller::Input. 
+      Rerouted matching route to go through the same species validation bridge as 
+      GenomeREST::Controller::Genome prior to id validation.
+    * Moved templates to epl from TT. 
+      Page layouts are located in 'templates/layouts' folder and are shared between all pages 
+      (layout renders footer and header based on species provided and loads all js/css needed). 
+      Gene page has its own layout because of different order of components required 
+      (removed YUI loader for the time being). 
+      Removed custom renderers required before for TT templates: 
+      - GenomeREST::Renderer::Index
+      - GenomeREST::Renderer::JSON 
+      - GenomeREST::Renderer::JSON_Generic
+      - GenomeREST::Renderer::TT 
+    * Removed not used anymore GenomeREST::Helper
+    
+      
+     
+      
+      
+    
+      
+    

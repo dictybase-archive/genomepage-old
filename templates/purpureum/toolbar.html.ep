@@ -8,7 +8,7 @@
             <div class="shadow">
                 <div id="container-top">
                     <div id="descriptor">
-                        <!--    <b>An Online Informatics Resource for .....</b> -->
+                        <b>Dictyostelium purpureum</b>
                     </div>
                     <table>
                         <tr>
@@ -55,19 +55,7 @@
                                                     <div class="bd">
                                                         <ul class="first-of-type">
                                                             <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_1:1..30000">scaffold_1</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_2:1..30000">scaffold_2</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_3:1..30000">scaffold_4</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_4:1..30000">scaffold_4</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum/downloads/contig_information.html">more..</a>
+                                                                <a class="yuimenuitemlabel" href="/<%= $species %>/contig/page/1">List of scaffolds</a>
                                                             </li>
                                                         </ul>
                                                     </div>
@@ -94,5 +82,15 @@
                 </div>
             </div>
         </div>
+<script>
+
+var searchInput = YAHOO.util.Dom.get('search-input');
+YAHOO.util.Event.addFocusListener(searchInput.id, function() {
+    var initData = searchInput.value;
+    if (initData.match('use')) {
+        searchInput.value = '';
+    };
+});
+</script>
     </body>
 </html>

@@ -13,7 +13,9 @@
 .yui-skin-sam #container-top a.yuimenubaritemlabel{
     color           :#fff;
 }
-
+.yui-skin-sam #container-top #menu-top {
+    width:400px;
+}
 .yui-skin-sam #container-top #container-help a{
     color           :#524c81;
 }
@@ -38,7 +40,7 @@
 /*    background:transparent url(/inc/js/yui/build/assets/skins/sam/sprite.png) repeat-x scroll 0 -1700px;*/
 }
 .yui-skin-sam .yuimenubar .yuimenubaritem-selected {
-    background: transparent url(../../purpureum/sprite.gif) repeat-x scroll 0 -303px;
+    background: transparent url(../../images/purpureum/sprite.gif) repeat-x scroll 0 -303px;
 }
 .yui-skin-sam .yuimenubar .yuimenubaritem-selected a{
     color           :#524c81;
