@@ -20,7 +20,7 @@ has 'config' => (
 
 has 'dispatcher' => (
     is  => 'rw',
-    isa => 'MojoX::Dispatcher::Static',
+    isa => 'Mojolicious::Static',
 );
 
 has 'model' => (
@@ -81,9 +81,8 @@ sub startup {
 
     #default log level
     $self->log->level( $ENV{MOJO_DEBUG} ? $ENV{MOJO_DEBUG} : 'debug' );
-
     $self->dispatcher(
-        MojoX::Dispatcher::Static->new(
+        Mojolicious::Static->new(
             prefix => '/bulkfile',
             root   => $self->config->param('download')
         )
