@@ -27,7 +27,9 @@ my ($gene) = dicty::Search::Gene->find(
 );
 my $gene_id = $gene->primary_id;
 
-$t->get_ok("/$species")->content_type_like( qr/html/, "html response for $species" );
+$t->get_ok("/$species")
+    ->status_is( 200, "successful response for $species" )
+    ->content_type_like( qr/html/, "html response for $species" );
 
 $t->get_ok("$base_url/$name")
     ->status_is( 200, "successful response for $name" )
