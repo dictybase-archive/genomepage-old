@@ -1,4 +1,4 @@
-package DictyRESTBuilder;
+package GenomeREST::Builder;
 use File::Spec::Functions;
 use Carp;
 use Archive::Extract;
@@ -6,9 +6,6 @@ use File::Path;
 use Path::Class;
 use Try::Tiny;
 use TAP::Harness;
-use IPC::Cmd qw/run/;
-use File::Spec::Functions;
-use Data::Dumper;
 use base qw/Module::Build/;
 
 sub load_core_fixture {
@@ -105,47 +102,6 @@ sub ACTION_test {
     $self->load_core_fixture();
     $self->SUPER::ACTION_test(@arg);
     $self->unload_fixture;
-}
-
-sub ACTION_start_daemon {
-    my $self = shift;
-    my $script = catfile( 'bin', 'dicty_rest' );
-    my $cmd
-        = "$script daemon_prefork --daemonize --clients 250 --keepalive 60 --servers 250";
-    $cmd .= '--port ' . $self->args('port') if $self->args('port');
-    if ( scalar run( command => $cmd, verbose => 1 ) ) {
-        print "started the prefork daemon\n";
-    }
-    else {
-        warn "daemon did not start\n";
-    }
-}
-
-sub ACTION_stop_daemon {
-    my $self = shift;
-    my $buffer;
-    my $cmd
-        = 'ps -f `pgrep dicty_rest` | awk \'{if ($3 == 1) { print $2 }}\'';
-
-	## -- bunch of if else loop follows
-    if ( scalar run( command => $cmd, verbose => 1, buffer => \$buffer ) ) {
-        if ($buffer) {
-            chomp $buffer;
-            if ( scalar run( command => "kill -TERM $buffer", verbose => 1 ) )
-            {
-                print "prefork daemon stopped\n";
-            }
-            else {
-                print "unable to stop prefork daemon\n";
-            }
-        }
-        else {
-            print "daemon not running\n";
-        }
-    }
-    else {
-        print "issue with running command\n";
-    }
 }
 
 1;
