@@ -2,59 +2,31 @@ package GenomeREST::Controller::Genome;
 
 use warnings;
 use strict;
-
-# Other modules:
-use GenomeREST::Singleton::Cache;
-use base qw/Mojolicious::Controller/;
-
-# Other modules:
-
-# Module implementation
-#
+use base 'Mojolicious::Controller';
 
 sub index {
     my ($self)  = @_;
-    my $species = $self->stash( 'species');
-    my $model   = $self->app->model;
-#    my $cache   = GenomeREST::Singleton::Cache->cache;
+    my $species = $self->stash('species');
+    my $model   = $self->app->modware->handler;
 
-    my $est_key     = $species . '_est';
-    my $protein_key = $species . '_protein';
-    my ( $est_count, $protein_count );
+    my $est_count = $model->resultset('Sequence::Feature')->count(
+        {   'type.name'        => 'EST',
+            'organism.species' => $species
+        },
+        { join => [ 'type', 'organism' ] }
+    );
 
-#    if ( $cache->is_valid($est_key) ) {
-#        $est_count = $cache->get($est_key);
-#    }
-#    else {
-        $est_count = $model->resultset('Sequence::Feature')->count(
-            {   'type.name'        => 'EST',
-                'organism.species' => $species
-            },
-            { join => [ 'type', 'organism' ] }
-        );
-#        $cache->set( $est_key, $est_count );
-#    }
-
-#    if ( $cache->is_valid($protein_key) ) {
-#        $protein_count = $cache->get($protein_key);
-#    }
-#    else {
-        $protein_count = $model->resultset('Sequence::Feature')->count(
-            {   'type.name'        => 'polypeptide',
-                'dbxref.accession' => 'JGI',
-                'organism.species' => $species
-            },
-            {   join =>
-                    [ 'type', 'organism', { 'feature_dbxrefs' => 'dbxref' } ]
-            }
-        );
-#        $cache->set( $protein_key, $protein_count );
-#    }
-
+    my $protein_count = $model->resultset('Sequence::Feature')->count(
+        {   'type.name'        => 'polypeptide',
+            'dbxref.accession' => 'JGI',
+            'organism.species' => $species
+        },
+        { join => [ 'type', 'organism', { 'feature_dbxrefs' => 'dbxref' } ] }
+    );
     $self->render(
-        template    => $species.'/index',
-        protein     => $protein_count,
-        est         => $est_count
+        template => $species . '/index',
+        protein  => $protein_count,
+        est      => $est_count
     );
 }
 
@@ -85,72 +57,54 @@ sub validate {
 sub contig {
     my ( $self, $c ) = @_;
     my $data;
-    my $model = $self->app->model;
-#    my $cache = GenomeREST::Singleton::Cache->cache;
+    my $model = $self->app->modware->handler;
     my $rs    = $model->resultset('Sequence::Feature');
 
-#    my $contig_key = $self->stash('species') . '_contig';
-#    if ( $cache->is_valid($contig_key) ) {
-#        $data = $cache->get($contig_key);
-#        $self->app->log->debug("got all contigs from cache");
-#    }
-#    else {
-        my $contig_rs = $rs->search(
-            { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
-            {   join => [
-                    'type',
-                    { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
-                ],
-                select => [
-                    'me.feature_id', 'me.name', { count => 'feature_id' },
-                ],
-                as       => [ 'cfeature_id',   'cname', 'gene_count' ],
-                group_by => [ 'me.feature_id', 'me.name' ],
-                having   => \'count(feature_id) > 0',
-                order_by => { -asc => 'me.feature_id' }
-            }
-        );
-
-        while ( my $contig = $contig_rs->next ) {
-            push @$data,
-                [
-                $contig->get_column('cname'),
-                $rs->find(
-                    { feature_id => $contig->get_column('cfeature_id') },
-                    {   select => { length => 'residues' },
-                        as     => 'seqlength'
-                    }
-                    )->get_column('seqlength'),
-                $contig->get_column('gene_count')
-                ];
+    my $contig_rs = $rs->search(
+        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
+        {   join => [
+                'type',
+                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
+            ],
+            select =>
+                [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
+            as       => [ 'cfeature_id',   'cname', 'gene_count' ],
+            group_by => [ 'me.feature_id', 'me.name' ],
+            having   => \'count(feature_id) > 0',
+            order_by => { -asc => 'me.feature_id' }
         }
-#        $cache->set( $contig_key, $data,
-#            $self->app->config->param('cache.expires_in') );
-#        $self->app->log->debug("put all contigs in cache");
-#    }
-
-    $self->stash('dataset' => $data);
+    );
+    while ( my $contig = $contig_rs->next ) {
+        push @$data,
+            [
+            $contig->get_column('cname'),
+            $rs->find(
+                { feature_id => $contig->get_column('cfeature_id') },
+                {   select => { length => 'residues' },
+                    as     => 'seqlength'
+                }
+                )->get_column('seqlength'),
+            $contig->get_column('gene_count')
+            ];
+    }
+    $self->stash( 'dataset' => $data );
     $self->render( template => $self->stash('species') . '/contig' );
 }
 
 sub contig_with_page {
-    my ( $self ) = @_;
+    my ($self) = @_;
     my $data;
     my $pager;
-    my $model = $self->app->model;
+    my $model = $self->app->modware->handler;
 
     my $rs = $model->resultset('Sequence::Feature');
 
-    my $contig_key = $self->stash('species') . '_contig_' . $self->stash('page');
     my $pager_key =
-        $self->stash('species') . '_contig_' . $self->stash('page') . '_pager';
+          $self->stash('species')
+        . '_contig_'
+        . $self->stash('page')
+        . '_pager';
 
-    #if ( $cache->is_valid($contig_key) ) {
-    #    $data  = $cache->get($contig_key);
-    #    $pager = $cache->get($pager_key);
-    #    $self->app->log->debug("got all paging contigs from cache");
-    #}
-    #else {
     my $contig_rs = $rs->search(
         { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
         {   join => [
@@ -182,57 +136,34 @@ sub contig_with_page {
             ];
     }
 
-    #$cache->set( $contig_key, $data );
-    #$cache->set( $pager_key,  $contig_rs->pager );
-    #$self->app->log->debug("putting all paging contigs in cache");
-
     $self->stash(
-        dataset => $data,
-        pager  => $contig_rs->pager,
+        dataset  => $data,
+        pager    => $contig_rs->pager,
         url_path => 'contig'
     );
     $self->render( template => $self->stash('species') . '/contig' );
-
-}
-
-sub name_digit {
-    my ( $self, $feat ) = @_;
-    my $str = $feat->name;
-    $str =~ m{(\d+)$};
-    $1;
 }
 
 sub validate_species {
     my ( $self, $name ) = @_;
-#    my $cache = GenomeREST::Singleton::Cache->cache();
     my $org_hash;
-
-    #    #try from cache
-    #    if ( $cache->is_valid($name) ) {
-    #        $org_hash = $cache->get($name);
-    #        $self->app->log->debug("got organism from cache for $name");
-    #        return $org_hash;
-    #    }
-
-    my $model = $self->app->model;
+    my $model = $self->app->modware->handler;
     my ($organism) = $model->resultset('Organism::Organism')->search(
-        -or => [
-            { common_name  => $name },
-            { abbreviation => $name },
-            { species      => $name },
-        ]
+        {   -or => [
+                { common_name  => $name },
+                { abbreviation => $name },
+                { species      => $name },
+            ]
+        }
     );
     return if !$organism;
-    
+
     $org_hash = {
         common_name  => $organism->common_name,
         abbreviation => $organism->abbreviation,
         species      => $organism->species,
         genus        => $organism->genus
     };
-#    $cache->set( $name, $org_hash,
-#        $self->app->config->param('cache.expires_in') );
-#    $self->app->log->debug("stored organism $name in cache");
     $org_hash;
 }
 

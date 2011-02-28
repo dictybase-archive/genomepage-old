@@ -1,14 +1,8 @@
-package GenomeREST::Controller::Input;
+package GenomeREST::Controller::Gene;
 
 use warnings;
 use strict;
-
-# Other modules:
-use GenomeREST::Singleton::Cache;
 use base 'Mojolicious::Controller';
-
-# Module implementation
-#
 
 __PACKAGE__->attr( 'species' );
 
@@ -16,7 +10,8 @@ sub validate {
     my ( $self ) = @_;
     my $id      = $self->stash('id');
     my $app     = $self->app;
-    my $gene_id = $self->process_id($id);
+    my $gene_id = $self->is_name($id) ? $self->name2id($id) : $id;
+    
     if ( !$gene_id ) {
         $self->render(
             template => 'missing',
@@ -28,81 +23,59 @@ sub validate {
         return;
     }
 
-    my $key      = $gene_id . '_valid';
-#    my $memcache = GenomeREST::Singleton::Cache->cache;
+    my $model = $self->app->modware->handler;
+    my $feat  = $model->resultset('Sequence::Feature')->search(
+        { 'dbxref.accession' => $gene_id },
+        { join               => 'dbxref', rows => 1 }
+    )->single;
 
-#    if ( !$memcache->is_valid($key) ) {
-        my $model = $app->model;
-        my $feat  = $model->resultset('Sequence::Feature')->search(
-            { 'dbxref.accession' => $gene_id },
-            { join               => 'dbxref', rows => 1 }
-        )->single;
+    #logic for wrong ids
+    if ( !$feat ) {
+        $self->render(
+            template => $self->stash('species') . '/'
+                . $app->config->{genepage}->{error},
+            message => "Input $gene_id not found",
+            error   => 1,
+            header  => 'Error page',
+            status => 404
+        );
+        return;
+    }
 
-        #logic for wrong ids
-        if ( !$feat ) {
-            $self->render(
-                template => $self->stash('species') . '/'
-                    . $app->config->param('genepage.error'),
-                message => "Input $gene_id not found",
-                error   => 1,
-                header  => 'Error page',
+    #logic for deleted feature
+    if ( $feat->get_column('is_deleted') ) {
+        my $rs = $feat->featureprops(
+            {   'cv.name'   => 'autocreated',
+                'type.name' => 'replaced by'
+            },
+            { join => { 'type' => 'cv' } }
+        );
+        if ( $rs->count > 0 ) {    #is it being replaced
+            $self->stash(
+                message =>
+                    "$gene_id has been deleted from dictyBase. It has been replaced by",
+                replaced => 1,
+                id       => join( ":", map { $_->value } $rs->all ),
+                header   => 'Error page',
+                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
+                status => 404
+                #the ENV should be changed
+            );
+        }
+        else {
+            $self->stash(
+                deleted => 1,
+                message => "$gene_id has been deleted",
+                header  => 'Error page',            
                 status => 404
             );
-            return;
-        }
 
-        #logic for deleted feature
-        if ( $feat->get_column('is_deleted') ) {
-            my $rs = $feat->featureprops(
-                {   'cv.name'   => 'autocreated',
-                    'type.name' => 'replaced by'
-                },
-                { join => { 'type' => 'cv' } }
-            );
-            if ( $rs->count > 0 ) {    #is it being replaced
-                $self->stash(
-                    message =>
-                        "$gene_id has been deleted from dictyBase. It has been replaced by",
-                    replaced => 1,
-                    id       => join( ":", map { $_->value } $rs->all ),
-                    header   => 'Error page',
-                    url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
-                    status => 404
-                    #the ENV should be changed
-                );
-            }
-            else {
-                $self->stash(
-                    deleted => 1,
-                    message => "$gene_id has been deleted",
-                    header  => 'Error page',            
-                    status => 404
-                );
-
-            }
-            $self->render( template => 'missing' );
-            return;
         }
-#        $memcache->set( $key, 'valid' );
-# }
+        $self->render( template => 'missing' );
+        return;
+    }
     $self->stash( gene_id => $gene_id );
-    my $base_url = $self->parse_url( $self->req->url->path );
-    $self->stash( base_url => $base_url );
     return 1;
-}
-
-sub is_name {
-    my ( $self, $id ) = @_;
-    return 0 if $id =~ /^[A-Z]+_G\d+$/;
-    return 1;
-}
-
-sub is_ddb {
-    my ( $self, $id ) = @_;
-
-    ##should get the id signature  from config file
-    return 1 if $id =~ /^[A-Z]{3}\d+$/;
-    return 0;
 }
 
 sub name2id {
@@ -118,7 +91,7 @@ sub name2id {
 #        return $id;
 #    }
 
-    my $model = $app->model;
+    my $model = $self->app->modware->handler;
     my $feat  = $model->resultset('Sequence::Feature')->search(
         {   'name'             => $name,
             'organism.species' => $self->stash('species')
@@ -147,12 +120,6 @@ sub process_id {
     return $gene_id;
 }
 
-sub parse_url {
-    my ( $self, $path ) = @_;
-    if ( $path =~ /^((\/\w+)?\/gene)/ ) {
-        return $1;
-    }
-}
 
 1;    # Magic true value required at end of module
 

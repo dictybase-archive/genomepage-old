@@ -14,9 +14,14 @@ use base qw/Mojolicious::Controller/;
 #
 sub index {
     my ( $self ) = @_;
+    my $dispatcher = Mojolicious::Static->new(
+        prefix => '/bulkfile',
+        root   => $self->config->param('download')
+    );
+    
     if ( $self->req->param('file') ) {
         my $file = $self->stash('species') . '/' . $self->req->param('file');
-        $self->app->dispatcher->serve( $self, $file );
+        $dispatcher->serve( $self, $file );
         $self->redirect_to($self->url_for);
     }
     $self->render(
