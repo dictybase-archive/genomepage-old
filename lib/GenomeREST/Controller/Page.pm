@@ -3,6 +3,7 @@ package GenomeREST::Controller::Page;
 use strict;
 use dicty::UI::Tabview::Page::Gene;
 use dicty::Factory::Tabview::Tab;
+use dicty::Factory::Tabview::Section;
 use Module::Load;
 use Try::Tiny;
 use base 'Mojolicious::Controller';
