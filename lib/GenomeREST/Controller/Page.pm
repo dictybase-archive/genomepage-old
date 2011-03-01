@@ -112,6 +112,7 @@ sub transcript_id {
 sub section {
     my ($self) = @_;
     $self->render_format;
+    
 }
 
 sub section_html {
