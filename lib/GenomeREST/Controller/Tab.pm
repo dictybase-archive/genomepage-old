@@ -7,8 +7,7 @@ use base 'Mojolicious::Controller';
 
 sub section {
     my ($self) = @_;
-    my $method = 'section_' . $self->stash('format');
-    $self->$method();
+    $self->render_format;
 }
 
 sub section_html {
@@ -17,17 +16,16 @@ sub section_html {
     my $tab     = $self->stash('tab');
     my $section = $self->stash('section');
     my $gene_id = $self->stash('gene_id');
-    my $app     = $self->app;
 
-    if ( $app->config->{tab}->{dynamic} eq $tab ) {
+    if ( $self->app->config->{tab}->{dynamic} eq $tab ) {
         my $db = dicty::UI::Tabview::Page::Gene->new(
             -primary_id => $gene_id,
             -active_tab => $tab,
-            -base_url   => $self->url_for('gene')
-            -sub_id     => $section,
+            -base_url   => $self->base_url,
+            -sub_id => $section,
         );
 
-        $self->stash($db->result);
+        $self->stash( $db->result );
         $self->render( template => $self->stash('species') . '/gene' );
     }
 }
@@ -44,41 +42,35 @@ sub section_json {
         $factory = dicty::Factory::Tabview::Tab->new(
             -tab        => $tab,
             -primary_id => $section,
-            -base_url   => $self->url_for('gene')
+            -base_url   => $self->base_url
         );
     }
     else {
         $factory = dicty::Factory::Tabview::Section->new(
-            -base_url   => $self->url_for('gene'),
+            -base_url   => $self->base_url,
             -primary_id => $gene_id,
             -tab        => $tab,
             -section    => $section,
         );
     }
-    my $obj = $factory->instantiate;
-    $obj->init;
-    my $conf = $obj->config;
-    $self->render_json( [ map { $_->to_json } @{ $conf->panels } ] );
+    $self->render_json( $self->panel_to_json($factory) );
 }
 
 sub sub_section {
     my ($self)  = @_;
+    
     my $tab     = $self->stash('tab');
     my $section = $self->stash('section');
     my $gene_id = $self->stash('gene_id');
     my $subid   = $self->stash('subid');
 
-    my $json;
     my $factory = dicty::Factory::Tabview::Section->new(
         -primary_id => $subid,
         -section    => $section,
         -tab        => $tab,
         -base_url   => $self->stash('base_url')
     );
-    my $obj = $factory->instantiate;
-    $obj->init();
-    my $conf = $obj->config();
-    $self->render_json( [ map { $_->to_json } @{ $conf->panels } ] );
+    $self->render_json( $self->panel_to_json($factory) );
 }
 
 1;

@@ -2,16 +2,8 @@ package GenomeREST::Controller::Download;
 
 use warnings;
 use strict;
+use base 'Mojolicious::Controller';
 
-use version; our $VERSION = qv('1.0.0');
-
-# Other modules:
-
-# Other modules:
-use base qw/Mojolicious::Controller/;
-
-# Module implementation
-#
 sub index {
     my ( $self ) = @_;
     my $dispatcher = Mojolicious::Static->new(

@@ -37,13 +37,14 @@ sub startup {
     ## all that goes under..
     $species->route('/')->to('controller-genome#index');
     $species->route('/contig')->to('controller-genome#contig');
-    $species->route('/contig/page/:page')->to('controller-genome#contig_with_page');
+    $species->route('/contig/page/:page')
+        ->to('controller-genome#contig_with_page');
     $species->route('/downloads')->to('controller-download#index');
 
     ## second brige for gene id/name validation
     my $gene = $species->bridge('/gene/:id')->to('controller-gene#validate');
 
-    $gene->route('/')->to( 'controller-page#index', format => 'html' );
+    $gene->route('/')->name('gene')->to( 'controller-page#index', format => 'html' );
     $gene->route('/:tab')->to('controller-page#tab');
     $gene->route('/:tab/:section')->to('controller-tab#section');
     $gene->route('/:tab/:subid/:section')->to('controller-tab#sub_section');
@@ -56,11 +57,26 @@ sub startup {
         if !$datasource->has_user;
     $datasource->password( $self->config->{database}->{password} )
         if !$datasource->has_password;
-        
+
     ## couple of helpers to use here and there
-    $self->helper( is_ddb  => sub { $_[1] =~ m{^[A-Z]+_G\d+$} });
-    $self->helper( is_name => sub { $_[1] =~ m{^[A-Z]{3}\d+$} });
-    
+    $self->helper( is_name => sub { $_[1] !~ m{^[A-Z]+_G\d+$} } );
+    $self->helper( is_ddb => sub { $_[1] =~ m{^[A-Z]{3}\d+$} } );
+    $self->helper( base_url => sub { 
+        my $c = shift;
+        $c->req->url->path =~ m{^((\/\w+)?\/gene)} ? $1 : ''
+    });
+    $self->helper( render_format => sub {
+        my $c = shift;
+        my $format = $c->stash('format') || 'html';
+        my $method = $c->stash('action') . '_' . $format;
+        $c->$method;
+    });
+    $self->helper( panel_to_json => sub {
+        my $obj = $_[1]->instantiate;
+        $obj->init();
+        my $conf = $obj->config();
+        [ map { $_->to_json } @{ $conf->panels } ];
+    })
 }
 
 1;

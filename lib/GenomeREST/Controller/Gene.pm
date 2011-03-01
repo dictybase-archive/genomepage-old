@@ -4,8 +4,6 @@ use warnings;
 use strict;
 use base 'Mojolicious::Controller';
 
-__PACKAGE__->attr( 'species' );
-
 sub validate {
     my ( $self ) = @_;
     my $id      = $self->stash('id');
@@ -80,46 +78,20 @@ sub validate {
 
 sub name2id {
     my ( $self, $name ) = @_;
-    my $app = $self->app;
-
-#    my $memcache = GenomeREST::Singleton::Cache->cache;
-    my $key      = $name . '_to_id';
-
-#    if ( $memcache->is_valid($key) ) {
-#        my $id = $memcache->get($key);
-#        $app->log->debug("got id $id for $name from memcache");
-#        return $id;
-#    }
 
     my $model = $self->app->modware->handler;
-    my $feat  = $model->resultset('Sequence::Feature')->search(
+    my $rs    = $model->resultset('Sequence::Feature')->search(
         {   'name'             => $name,
             'organism.species' => $self->stash('species')
         },
         {   join     => 'organism',
             prefetch => 'dbxref',
-            rows     => 1
+            cache    => 1
         }
-    )->single;
-    return 0 if !$feat;
-    my $id = $feat->dbxref->accession;
-#    if ( $app->config->param('nocache.genename') ne $name ) {
-#        $memcache->set( $key, $id );
-#        $app->log->debug("stored id $id for $name in memcache");
-#    }
-    $id;
+    );
+    return 0 if $rs->count == 0;
+    $rs->first->dbxref->accession;
 }
-
-sub process_id {
-    my ( $self, $id ) = @_;
-    my $gene_id = $id;
-    if ( $self->is_name($id) ) {
-        $gene_id = $self->name2id($id);
-        return 0 if !$gene_id;
-    }
-    return $gene_id;
-}
-
 
 1;    # Magic true value required at end of module
 

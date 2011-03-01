@@ -30,30 +30,6 @@ sub index {
     );
 }
 
-sub validate {
-    my ($self)   = @_;
-    my $name     = $self->stash('name');
-    my $organism = $self->validate_species($name);
-
-    if ( !$organism ) {
-        $self->render(
-            template => 'missing',
-            message  => "organism $name not found",
-            error    => 1,
-            header   => 'Error page',
-            title    => 'Error not found',
-        );
-        return;
-    }
-    $self->stash(
-        species      => $organism->{species},
-        abbreviation => $organism->{abbreviation},
-        genus        => $organism->{genus},
-        common_name  => $organism->{common_name}
-    );
-    1;
-}
-
 sub contig {
     my ( $self, $c ) = @_;
     my $data;
@@ -94,16 +70,9 @@ sub contig {
 sub contig_with_page {
     my ($self) = @_;
     my $data;
-    my $pager;
     my $model = $self->app->modware->handler;
 
     my $rs = $model->resultset('Sequence::Feature');
-
-    my $pager_key =
-          $self->stash('species')
-        . '_contig_'
-        . $self->stash('page')
-        . '_pager';
 
     my $contig_rs = $rs->search(
         { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
@@ -144,10 +113,10 @@ sub contig_with_page {
     $self->render( template => $self->stash('species') . '/contig' );
 }
 
-sub validate_species {
-    my ( $self, $name ) = @_;
-    my $org_hash;
-    my $model = $self->app->modware->handler;
+sub validate {
+    my ($self)     = @_;
+    my $name       = $self->stash('name');
+    my $model      = $self->app->modware->handler;
     my ($organism) = $model->resultset('Organism::Organism')->search(
         {   -or => [
                 { common_name  => $name },
@@ -156,15 +125,24 @@ sub validate_species {
             ]
         }
     );
-    return if !$organism;
 
-    $org_hash = {
-        common_name  => $organism->common_name,
-        abbreviation => $organism->abbreviation,
+    if ( !$organism ) {
+        $self->render(
+            template => 'missing',
+            message  => "organism $name not found",
+            error    => 1,
+            header   => 'Error page',
+            title    => 'Error not found',
+        );
+        return;
+    }
+    $self->stash(
         species      => $organism->species,
-        genus        => $organism->genus
-    };
-    $org_hash;
+        abbreviation => $organism->abbreviation,
+        genus => $organism->genus,
+        common_name => $organism->common_name,
+    );
+    1;
 }
 
 1;    # Magic true value required at end of module

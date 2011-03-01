@@ -10,24 +10,19 @@ use base 'Mojolicious::Controller';
 
 sub index {
     my ($self) = @_;
-    my $method = 'index_' . $self->stash('format');
-    $self->$method;
+    $self->render_format;
 }
 
 sub index_html {
     my ($self) = @_;
-
-    my $app = $self->app;
     my $gene_id = $self->stash('gene_id');
-
-    #database query
     my $db = dicty::UI::Tabview::Page::Gene->new(
         -primary_id => $gene_id,
         -active_tab => ' gene ',
-        -base_url   => $self->stash('base_url')
+        -base_url   => $self->base_url
     );
 
-    $self->stash($db->result);
+    $self->stash( $db->result );
     $self->render( template => $self->stash('species') . '/gene' );
 }
 
@@ -38,19 +33,14 @@ sub index_json {
     my $factory = dicty::Factory::Tabview::Tab->new(
         -tab        => 'gene',
         -primary_id => $gene_id,
-        -base_url   => $self->url_for('gene')
+        -base_url   => $self->base_url
     );
-    
-    my $obj = $factory->instantiate;
-    $obj->init;
-    my $conf = $obj->config;
-    $self->render_json( [ map { $_->to_json } @{ $conf->panels } ] );
+    $self->render_json( $self->panel_to_json($factory) );
 }
 
 sub tab {
     my ($self) = @_;
-    my $method = 'tab_' . $self->stash('format');
-    $self->$method();
+    $self->render_format;
 }
 
 sub tab_html {
@@ -61,6 +51,7 @@ sub tab_html {
 
     my $db;
     if ( $app->config->{tab}->{dynamic} eq $tab ) {
+
         #convert gene id to its primary DDB id
         my $trans_id = $self->transcript_id($gene_id);
         if ( !$trans_id ) {    #do some octocat based template here
@@ -72,7 +63,7 @@ sub tab_html {
             -primary_id => $gene_id,
             -active_tab => $tab,
             -sub_id     => $trans_id,
-            -base_url   => $self->url_for('gene')
+            -base_url   => $self->base_url
         );
         $app->log->debug("going through $trans_id");
     }
@@ -80,32 +71,27 @@ sub tab_html {
         $db = dicty::UI::Tabview::Page::Gene->new(
             -primary_id => $gene_id,
             -active_tab => $tab,
-            -base_url   => $self->url_for('gene')
+            -base_url   => $self->base_url
         );
     }
 
-    $self->stash($db->result);
-    $self->render( template => $self->stash('species') . '/gene');
+    $self->stash( $db->result );
+    $self->render( template => $self->stash('species') . '/gene' );
 
 }
 
 sub tab_json {
-    my ($self)  = @_;
+    my ($self) = @_;
 
     my $tab     = $self->stash('tab');
     my $gene_id = $self->stash('gene_id');
-    my $app = $self->app;
 
     my $factory = dicty::Factory::Tabview::Tab->new(
         -tab        => $tab,
         -primary_id => $gene_id,
-        -base_url   => $self->url_for('gene')
+        -base_url   => $self->base_url
     );
-    
-    my $obj = $factory->instantiate;
-    $obj->init;
-    my $conf = $obj->config;
-    $self->render_json( [ map { $_->to_json } @{ $conf->panels } ] );
+    $self->render_json( $self->panel_to_json($factory) );
 }
 
 sub transcript_id {
