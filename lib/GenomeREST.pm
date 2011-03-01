@@ -46,8 +46,8 @@ sub startup {
 
     $gene->route('/')->name('gene')->to( 'controller-page#index', format => 'html' );
     $gene->route('/:tab')->to('controller-page#tab');
-    $gene->route('/:tab/:section')->to('controller-tab#section');
-    $gene->route('/:tab/:subid/:section')->to('controller-tab#sub_section');
+    $gene->route('/:tab/:section')->to('controller-page#section');
+    $gene->route('/:tab/:subid/:section')->to('controller-page#section');
 
     ## init database connection
     my $datasource = Homology::Chado::DataSource->instance;

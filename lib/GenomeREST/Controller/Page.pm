@@ -140,7 +140,8 @@ sub section_json {
     my $tab     = $self->stash('tab');
     my $section = $self->stash('section');
     my $gene_id = $self->stash('gene_id');
-
+    my $subid   = $self->stash('subid');
+    
     my $factory;
     if ( $self->is_ddb($section) ) {
         $factory = dicty::Factory::Tabview::Tab->new(
@@ -149,31 +150,14 @@ sub section_json {
             -base_url   => $self->base_url
         );
     }
-    else {
+    if ( $subid || !$self->is_ddb($section)) {
         $factory = dicty::Factory::Tabview::Section->new(
             -base_url   => $self->base_url,
-            -primary_id => $gene_id,
+            -primary_id => $subid || $gene_id,
             -tab        => $tab,
             -section    => $section,
         );
     }
-    $self->render_json( $self->panel_to_json($factory) );
-}
-
-sub sub_section {
-    my ($self)  = @_;
-    
-    my $tab     = $self->stash('tab');
-    my $section = $self->stash('section');
-    my $gene_id = $self->stash('gene_id');
-    my $subid   = $self->stash('subid');
-
-    my $factory = dicty::Factory::Tabview::Section->new(
-        -primary_id => $subid,
-        -section    => $section,
-        -tab        => $tab,
-        -base_url   => $self->stash('base_url')
-    );
     $self->render_json( $self->panel_to_json($factory) );
 }
 

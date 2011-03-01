@@ -47,13 +47,13 @@ $t->get_ok("$base_url/$gene_id/gene/product.json")
     ->content_like(qr/layout.+row/, 'has a row layout in product');
 
 #request for section info under protein topic
-$t->get_ok("$base_url/$gene_id/protein/$transcript_id/info")
+$t->get_ok("$base_url/$gene_id/protein/$transcript_id/info.json")
     ->status_is( 200, 'successful response for protein info section' )
     ->content_type_like( qr/json/, 'is a json content for protein info' )
     ->content_like(qr/layout.+row/, 'has a row layout in protein info');
 
 #request for section sequence under protein topic
-$t->get_ok("$base_url/$gene_id/protein/$transcript_id/sequence")
+$t->get_ok("$base_url/$gene_id/protein/$transcript_id/sequence.json")
     ->status_is( 200, 'successful response for protein sequence section' )
     ->content_type_like( qr/json/, 'is a json content for protein sequence' )
     ->content_like(qr/layout.+row/, 'has a row layout in protein sequence');
