@@ -11,6 +11,8 @@ sub startup {
     $self->plugin('yml_config');
     $self->plugin('modware-oracle');
     $self->plugin('asset_tag_helpers');
+    $self->plugin('GenomeREST::Plugin::Validate::Organism');
+    $self->plugin('GenomeREST::Plugin::Validate::Gene');
     
     if ( defined $self->config->{cache} ) {
         ## -- add the new cache plugin
