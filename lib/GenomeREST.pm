@@ -11,7 +11,7 @@ sub startup {
     $self->plugin('yml_config');
     $self->plugin('modware-oracle');
     $self->plugin('asset_tag_helpers');
-
+    
     if ( defined $self->config->{cache} ) {
         ## -- add the new cache plugin
         $self->plugin(
@@ -39,15 +39,15 @@ sub startup {
     $species->route('/contig')->to('controller-genome#contig');
     $species->route('/contig/page/:page')
         ->to('controller-genome#contig_with_page');
-    $species->route('/downloads')->to('controller-download#index');
+    $species->route('/downloads')->to('controller-genome#download');
 
     ## second brige for gene id/name validation
     my $gene = $species->bridge('/gene/:id')->to('controller-gene#validate');
 
-    $gene->route('/')->name('gene')->to( 'controller-page#index', format => 'html' );
-    $gene->route('/:tab')->to('controller-page#tab');
-    $gene->route('/:tab/:section')->to('controller-page#section');
-    $gene->route('/:tab/:subid/:section')->to('controller-page#section');
+    $gene->route('/')->name('gene')->to( 'controller-gene#index', format => 'html' );
+    $gene->route('/:tab')->to('controller-gene#tab');
+    $gene->route('/:tab/:section')->to('controller-gene#section');
+    $gene->route('/:tab/:subid/:section')->to('controller-gene#section');
 
     ## init database connection
     my $datasource = Homology::Chado::DataSource->instance;
@@ -59,7 +59,6 @@ sub startup {
         if !$datasource->has_password;
 
     ## couple of helpers to use here and there
-    $self->helper( is_name => sub { $_[1] !~ m{^[A-Z]+_G\d+$} } );
     $self->helper( is_ddb => sub { $_[1] =~ m{^[A-Z]{3}\d+$} } );
     $self->helper( base_url => sub { 
         my $c = shift;

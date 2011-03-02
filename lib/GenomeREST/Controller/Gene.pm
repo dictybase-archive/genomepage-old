@@ -1,306 +1,203 @@
 package GenomeREST::Controller::Gene;
 
-use warnings;
 use strict;
+use dicty::UI::Tabview::Page::Gene;
+use dicty::Factory::Tabview::Tab;
+use dicty::Factory::Tabview::Section;
+use Module::Load;
+use Try::Tiny;
 use base 'Mojolicious::Controller';
+
+sub index {
+    my ($self) = @_;
+    $self->render_format;
+}
+
+sub index_html {
+    my ($self) = @_;
+    my $gene_id = $self->stash('gene_id');
+    my $db = dicty::UI::Tabview::Page::Gene->new(
+        -primary_id => $gene_id,
+        -active_tab => ' gene ',
+        -base_url   => $self->base_url
+    );
+
+    $self->stash( $db->result );
+    $self->render( template => $self->stash('species') . '/gene' );
+}
+
+sub index_json {
+    my ($self) = @_;
+    my $gene_id = $self->stash('gene_id');
+
+    my $factory = dicty::Factory::Tabview::Tab->new(
+        -tab        => 'gene',
+        -primary_id => $gene_id,
+        -base_url   => $self->base_url
+    );
+    $self->render_json( $self->panel_to_json($factory) );
+}
+
+sub tab {
+    my ($self) = @_;
+    $self->render_format;
+}
+
+sub tab_html {
+    my ($self)  = @_;
+    my $tab     = $self->stash('tab');
+    my $gene_id = $self->stash('gene_id');
+    my $app     = $self->app;
+
+    my $db;
+    if ( $app->config->{tab}->{dynamic} eq $tab ) {
+
+        #convert gene id to its primary DDB id
+        my $trans_id = $self->transcript_id($gene_id);
+        if ( !$trans_id ) {    #do some octocat based template here
+            $app->log->error(
+                "unable to convert to transcript id for $gene_id");
+            return;
+        }
+        $db = dicty::UI::Tabview::Page::Gene->new(
+            -primary_id => $gene_id,
+            -active_tab => $tab,
+            -sub_id     => $trans_id,
+            -base_url   => $self->base_url
+        );
+        $app->log->debug("going through $trans_id");
+    }
+    else {
+        $db = dicty::UI::Tabview::Page::Gene->new(
+            -primary_id => $gene_id,
+            -active_tab => $tab,
+            -base_url   => $self->base_url
+        );
+    }
+
+    $self->stash( $db->result );
+    $self->render( template => $self->stash('species') . '/gene' );
+
+}
+
+sub tab_json {
+    my ($self) = @_;
+
+    my $tab     = $self->stash('tab');
+    my $gene_id = $self->stash('gene_id');
+
+    my $factory = dicty::Factory::Tabview::Tab->new(
+        -tab        => $tab,
+        -primary_id => $gene_id,
+        -base_url   => $self->base_url
+    );
+    $self->render_json( $self->panel_to_json($factory) );
+}
+
+sub transcript_id {
+    my ( $self, $id ) = @_;
+    load dicty::Feature;
+    my $gene;
+    try {
+        $gene = dicty::Feature->new( -primary_id => $id );
+    }
+    catch {
+        $self->app->log->debug($_);
+        return 0;
+    };
+    my ($trans) = @{ $gene->primary_features() };
+    $trans->primary_id if $trans;
+}
+
+sub section {
+    my ($self) = @_;
+    $self->render_format;
+}
+
+sub section_html {
+    my ($self) = @_;
+
+    my $tab     = $self->stash('tab');
+    my $section = $self->stash('section');
+    my $gene_id = $self->stash('gene_id');
+
+    if ( $self->app->config->{tab}->{dynamic} eq $tab ) {
+        my $db = dicty::UI::Tabview::Page::Gene->new(
+            -primary_id => $gene_id,
+            -active_tab => $tab,
+            -base_url   => $self->base_url,
+            -sub_id => $section,
+        );
+
+        $self->stash( $db->result );
+        $self->render( template => $self->stash('species') . '/gene' );
+    }
+}
+
+sub section_json {
+    my ($self) = @_;
+
+    my $tab     = $self->stash('tab');
+    my $section = $self->stash('section');
+    my $gene_id = $self->stash('gene_id');
+    my $subid   = $self->stash('subid');
+    
+    my $factory;
+    if ( $self->is_ddb($section) ) {
+        $factory = dicty::Factory::Tabview::Tab->new(
+            -tab        => $tab,
+            -primary_id => $section,
+            -base_url   => $self->base_url
+        );
+    }
+    if ( $subid || !$self->is_ddb($section)) {
+        $factory = dicty::Factory::Tabview::Section->new(
+            -base_url   => $self->base_url,
+            -primary_id => $subid || $gene_id,
+            -tab        => $tab,
+            -section    => $section,
+        );
+    }
+    $self->render_json( $self->panel_to_json($factory) );
+}
 
 sub validate {
     my ( $self ) = @_;
     my $id      = $self->stash('id');
-    my $app     = $self->app;
-    my $gene_id = $self->is_name($id) ? $self->name2id($id) : $id;
     
-    if ( !$gene_id ) {
+    if ( !$self->check_gene($id) ) {
         $self->render(
             template => 'missing',
-            message => "Input $id not found",
+            message => "Gene $id not found",
             error   => 1,
             header  => 'Error page',
             status => 404
         );
         return;
     }
+    $self->stash(
+        message =>  "$id has been deleted from dictyBase. It has been replaced by",
+        replaced => 1,
+        id       => join( ":", $self->stash('replaced') ),
+        header   => 'Error page',
+        url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
+        status => 404
+            #the ENV should be changed
+    ) if $self->stash('replaced');
+    $self->stash(
+        deleted => 1,
+        message => "$id has been deleted",
+        header  => 'Error page',            
+        status => 404
+    ) if $self->stash('deleted');
 
-    my $model = $self->app->modware->handler;
-    my $feat  = $model->resultset('Sequence::Feature')->search(
-        { 'dbxref.accession' => $gene_id },
-        { join               => 'dbxref', rows => 1 }
-    )->single;
-
-    #logic for wrong ids
-    if ( !$feat ) {
-        $self->render(
-            template => $self->stash('species') . '/'
-                . $app->config->{genepage}->{error},
-            message => "Input $gene_id not found",
-            error   => 1,
-            header  => 'Error page',
-            status => 404
-        );
-        return;
-    }
-
-    #logic for deleted feature
-    if ( $feat->get_column('is_deleted') ) {
-        my $rs = $feat->featureprops(
-            {   'cv.name'   => 'autocreated',
-                'type.name' => 'replaced by'
-            },
-            { join => { 'type' => 'cv' } }
-        );
-        if ( $rs->count > 0 ) {    #is it being replaced
-            $self->stash(
-                message =>
-                    "$gene_id has been deleted from dictyBase. It has been replaced by",
-                replaced => 1,
-                id       => join( ":", map { $_->value } $rs->all ),
-                header   => 'Error page',
-                url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
-                status => 404
-                #the ENV should be changed
-            );
-        }
-        else {
-            $self->stash(
-                deleted => 1,
-                message => "$gene_id has been deleted",
-                header  => 'Error page',            
-                status => 404
-            );
-
-        }
-        $self->render( template => 'missing' );
-        return;
-    }
-    $self->stash( gene_id => $gene_id );
+    if ($self->stash('replaced') || $self->stash('deleted')){
+        $self->render( template => 'missing' ) ;
+        return
+    };
     return 1;
 }
 
-sub name2id {
-    my ( $self, $name ) = @_;
 
-    my $model = $self->app->modware->handler;
-    my $rs    = $model->resultset('Sequence::Feature')->search(
-        {   'name'             => $name,
-            'organism.species' => $self->stash('species')
-        },
-        {   join     => 'organism',
-            prefetch => 'dbxref',
-            cache    => 1
-        }
-    );
-    return 0 if $rs->count == 0;
-    $rs->first->dbxref->accession;
-}
-
-1;    # Magic true value required at end of module
-
-__END__
-
-=head1 NAME
-
-<MODULE NAME> - [One line description of module's purpose here]
-
-
-=head1 VERSION
-
-This document describes <MODULE NAME> version 0.0.1
-
-
-=head1 SYNOPSIS
-
-use <MODULE NAME>;
-
-=for author to fill in:
-Brief code example(s) here showing commonest usage(s).
-This section will be as far as many users bother reading
-so make it as educational and exeplary as possible.
-
-
-=head1 DESCRIPTION
-
-=for author to fill in:
-Write a full description of the module and its features here.
-Use subsections (=head2, =head3) as appropriate.
-
-
-=head1 INTERFACE 
-
-=for author to fill in:
-Write a separate section listing the public components of the modules
-interface. These normally consist of either subroutines that may be
-exported, or methods that may be called on objects belonging to the
-classes provided by the module.
-
-=head2 <METHOD NAME>
-
-=over
-
-=item B<Use:> <Usage>
-
-[Detail text here]
-
-=item B<Functions:> [What id does]
-
-[Details if neccessary]
-
-=item B<Return:> [Return type of value]
-
-[Details]
-
-=item B<Args:> [Arguments passed]
-
-[Details]
-
-=back
-
-=head2 <METHOD NAME>
-
-=over
-
-=item B<Use:> <Usage>
-
-[Detail text here]
-
-=item B<Functions:> [What id does]
-
-[Details if neccessary]
-
-=item B<Return:> [Return type of value]
-
-[Details]
-
-=item B<Args:> [Arguments passed]
-
-[Details]
-
-=back
-
-
-=head1 DIAGNOSTICS
-
-=for author to fill in:
-List every single error and warning message that the module can
-generate (even the ones that will "never happen"), with a full
-explanation of each problem, one or more likely causes, and any
-suggested remedies.
-
-=over
-
-=item C<< Error message here, perhaps with %s placeholders >>
-
-[Description of error here]
-
-=item C<< Another error message here >>
-
-[Description of error here]
-
-[Et cetera, et cetera]
-
-=back
-
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-=for author to fill in:
-A full explanation of any configuration system(s) used by the
-module, including the names and locations of any configuration
-files, and the meaning of any environment variables or properties
-that can be set. These descriptions must also include details of any
-configuration language used.
-
-<MODULE NAME> requires no configuration files or environment variables.
-
-
-=head1 DEPENDENCIES
-
-=for author to fill in:
-A list of all the other modules that this module relies upon,
-  including any restrictions on versions, and an indication whether
-  the module is part of the standard Perl distribution, part of the
-  module's distribution, or must be installed separately. ]
-
-  None.
-
-
-  =head1 INCOMPATIBILITIES
-
-  =for author to fill in:
-  A list of any modules that this module cannot be used in conjunction
-  with. This may be due to name conflicts in the interface, or
-  competition for system or program resources, or due to internal
-  limitations of Perl (for example, many modules that use source code
-		  filters are mutually incompatible).
-
-  None reported.
-
-
-  =head1 BUGS AND LIMITATIONS
-
-  =for author to fill in:
-  A list of known problems with the module, together with some
-  indication Whether they are likely to be fixed in an upcoming
-  release. Also a list of restrictions on the features the module
-  does provide: data types that cannot be handled, performance issues
-  and the circumstances in which they may arise, practical
-  limitations on the size of data sets, special cases that are not
-  (yet) handled, etc.
-
-  No bugs have been reported.Please report any bugs or feature requests to
-  dictybase@northwestern.edu
-
-
-
-  =head1 TODO
-
-  =over
-
-  =item *
-
-  [Write stuff here]
-
-  =item *
-
-  [Write stuff here]
-
-  =back
-
-
-  =head1 AUTHOR
-
-  I<Siddhartha Basu>  B<siddhartha-basu@northwestern.edu>
-
-
-  =head1 LICENCE AND COPYRIGHT
-
-  Copyright (c) B<2003>, Siddhartha Basu C<<siddhartha-basu@northwestern.edu>>. All rights reserved.
-
-  This module is free software; you can redistribute it and/or
-  modify it under the same terms as Perl itself. See L<perlartistic>.
-
-
-  =head1 DISCLAIMER OF WARRANTY
-
-  BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-  FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
-  OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-  PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
-  EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
-  ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
-  YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
-  NECESSARY SERVICING, REPAIR, OR CORRECTION.
-
-  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-  WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
-  REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
-  LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
-  OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
-  THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
-		  RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
-		  FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
-  SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
-  SUCH DAMAGES.
-
-
+1;
 

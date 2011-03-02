@@ -113,20 +113,25 @@ sub contig_with_page {
     $self->render( template => $self->stash('species') . '/contig' );
 }
 
-sub validate {
-    my ($self)     = @_;
-    my $name       = $self->stash('name');
-    my $model      = $self->app->modware->handler;
-    my ($organism) = $model->resultset('Organism::Organism')->search(
-        {   -or => [
-                { common_name  => $name },
-                { abbreviation => $name },
-                { species      => $name },
-            ]
-        }
+sub download {
+    my ($self) = @_;
+    my $dispatcher = Mojolicious::Static->new(
+        prefix => '/bulkfile',
+        root   => $self->config->param('download')
     );
 
-    if ( !$organism ) {
+    if ( $self->req->param('file') ) {
+        my $file = $self->stash('species') . '/' . $self->req->param('file');
+        $dispatcher->serve( $self, $file );
+        $self->redirect_to( $self->url_for );
+    }
+    $self->render( template => $self->stash('species') . '/download' );
+}
+
+sub validate {
+    my ($self) = @_;
+    my $name = $self->stash('name');
+    if ( !$self->check_organism($name) ) {
         $self->render(
             template => 'missing',
             message  => "organism $name not found",
@@ -136,12 +141,6 @@ sub validate {
         );
         return;
     }
-    $self->stash(
-        species      => $organism->species,
-        abbreviation => $organism->abbreviation,
-        genus => $organism->genus,
-        common_name => $organism->common_name,
-    );
     1;
 }
 
