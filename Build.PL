@@ -17,7 +17,6 @@ my $builder = GenomeREST::Builder->new(
         'FCGI::Engine'                => '0.16',
         'Homology::Group'             => '',
         'Modware'                     => '0.001',
-        'dicty::Feature'              => '',
         'Mojolicious::Plugin::Bundle' => '0.001',
         'Mojolicious::Plugin::Cache'  => '0.0011',
         'dicty::Tests::Data'          => '',

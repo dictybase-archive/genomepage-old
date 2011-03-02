@@ -13,6 +13,7 @@ sub startup {
     $self->plugin('asset_tag_helpers');
     $self->plugin('GenomeREST::Plugin::Validate::Organism');
     $self->plugin('GenomeREST::Plugin::Validate::Gene');
+    $self->plugin('GenomeREST::Plugin::DefaultHelpers');
     
     if ( defined $self->config->{cache} ) {
         ## -- add the new cache plugin
@@ -60,24 +61,6 @@ sub startup {
     $datasource->password( $self->config->{database}->{password} )
         if !$datasource->has_password;
 
-    ## couple of helpers to use here and there
-    $self->helper( is_ddb => sub { $_[1] =~ m{^[A-Z]{3}\d+$} } );
-    $self->helper( base_url => sub { 
-        my $c = shift;
-        $c->req->url->path =~ m{^((\/\w+)?\/gene)} ? $1 : ''
-    });
-    $self->helper( render_format => sub {
-        my $c = shift;
-        my $format = $c->stash('format') || 'html';
-        my $method = $c->stash('action') . '_' . $format;
-        $c->$method;
-    });
-    $self->helper( panel_to_json => sub {
-        my $obj = $_[1]->instantiate;
-        $obj->init();
-        my $conf = $obj->config();
-        [ map { $_->to_json } @{ $conf->panels } ];
-    })
 }
 
 1;
