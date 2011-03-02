@@ -53,7 +53,7 @@ sub tab_html {
     if ( $app->config->{tab}->{dynamic} eq $tab ) {
 
         #convert gene id to its primary DDB id
-        my $trans_id = $self->transcript_id($gene_id);
+        my ($trans_id) = @{$self->stash('transcripts')};
         if ( !$trans_id ) {    #do some octocat based template here
             $app->log->error(
                 "unable to convert to transcript id for $gene_id");
@@ -92,21 +92,6 @@ sub tab_json {
         -base_url   => $self->base_url
     );
     $self->render_json( $self->panel_to_json($factory) );
-}
-
-sub transcript_id {
-    my ( $self, $id ) = @_;
-    load dicty::Feature;
-    my $gene;
-    try {
-        $gene = dicty::Feature->new( -primary_id => $id );
-    }
-    catch {
-        $self->app->log->debug($_);
-        return 0;
-    };
-    my ($trans) = @{ $gene->primary_features() };
-    $trans->primary_id if $trans;
 }
 
 sub section {

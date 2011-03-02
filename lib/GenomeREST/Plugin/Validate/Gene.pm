@@ -27,17 +27,52 @@ sub register {
 
             return if !$feat;
 
-            my $rs = $feat->featureprops(
+            ## check if gene have been replacd
+            my $fp_rs = $feat->featureprops(
                 {   'cv.name'   => 'autocreated',
                     'type.name' => 'replaced by'
                 },
                 { join => { 'type' => 'cv' } }
             );
-            my @replaced = map { $_->value } $rs->all;
+            my @replaced = map { $_->value } $fp_rs->all;
+
+            ## get transcripts ids
+            my $tr_rs = $feat->search_related(
+                'feature_relationship_objects',
+                { 'type.name' => 'part_of' },
+                { join        => 'type' }
+                )->search_related(
+                'subject',
+                {   'type_2.name' =>
+                        [ -or => { -like => '%RNA' }, 'pseudogene' ],
+                    'dbxref.accession' => [
+                        'Sequencing Center',
+                        'JGI',
+                        { -like => '%RNA%' },
+                        { -like => '%Curator%' },
+                        { -like => '%Soderbom%' },                    ]
+                },
+                {   join     => [ 'type', { 'feature_dbxrefs' => 'dbxref' } ],
+                    prefetch => 'dbxref',
+                    select   => [
+                        'dbxref_2.accession', 'dbxref.accession'
+                    ],
+                    as    => [qw/id source/],
+                    cache => 1
+                }
+                );
+
+            my @curated =
+                grep { $_->get_column('source') eq 'dictyBase Curator' }
+                $tr_rs->all;
+            my @transcripts = @curated ? @curated : $tr_rs->all;
 
             $c->stash( replaced => \@replaced ) if @replaced;
             $c->stash( deleted => 1 ) if $feat->get_column('is_deleted');
             $c->stash( gene_id => $feat->dbxref->accession );
+            $c->stash(
+                transcripts => [ map { $_->get_column('id') } @transcripts ]
+            );
             1;
         }
     );
