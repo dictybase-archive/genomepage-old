@@ -2,69 +2,38 @@
 % my $page_url  = $path .'/page';
 % my $before    = $pager->current_page - 1;
 % my $after     = $pager->current_page + 1;
-% my $next_flag = 0;
+% my $start_range = $before > 4 ? $before - 3 : 1;
+% my $end_range = $after > ($pager->last_page - 4 ) ? $pager->last_page : $after + 3;
 
 <div class="center-block">
-    <ul id="pagination-digg">
-        <% if ($pager->first_page < $pager->current_page - 4) { %>
-        	<li class="previous">
-				<a href="<%= $page_url %>/<%= $pager->first_page %>">First</a>
-			</li>
-		<% } %>
-
-		<% #Logic to display four more page links before the current page  %>
-		
-		<% if ($before >= $pager->first_page) { 
-		    my $few_before = $before - 3;
-		    if ($before < $pager->first_page + 3) {
-		        $few_before = $pager->first_page;
-		    }
-	        else {
-		%>	     
-                <li>
-                    <a href="<%= $page_url %>/<%= $few_before - 1 %>"><< Previous</a>
-				</li>
-	    <% } %>    
-        <% # Create the page links after decided on range %>
-            <% foreach my $i ($few_before .. $before) { %>
-                <li>	
-                    <a href="<%= $page_url %>/<%= $i %>"><%= $i %></a>
-                </li>
-			<% } %>
-		<% } %>
+  <ul id="pagination-digg">
+    <% if ($pager->first_page != $pager->current_page) { %>
+      <li class="previous">
+        <a href="<%= $page_url %>/<%= $pager->first_page %>">&lt;&lt; First</a>
+        <a href="<%= $page_url %>/<%= $before %>"> &lt; Previous</a>
+      </li>
+    <% } %>
+    
+    <% foreach my $i ($start_range .. $before) { %>
+      <li>	
+        <a href="<%= $page_url %>/<%= $i %>"><%= $i %></a>
+      </li>
+    <% } %>
 		<li class="active">	
 			<%= $pager->current_page %>
 		</li>
 
-		<% # Like setting up previous link this flag sets if next link will be displayed %>
-
-		<% if ($after <= $pager->last_page) { 
-            my $few_after = $after + 3;
-			
-			if ($after >= ($pager->last_page - 3)) {
-				$few_after = $pager->last_page;
-			}
-		    else {
-				$next_flag = 1;
-			}
-
-			foreach my $i ($after .. $few_after) {
-		%>
-                <li>	
-                    <a href="<%= $page_url %>/<%= $i %>"><%= $i %></a>
-                </li>
-			<% } %>
-            <% if ($next_flag) { %>
-				<li>	
-				    <a href="<%= $page_url %>/<%= $few_after + 1 %>">Next >></a>
-				</li>
-            <% } %>
-        <% } %>
-        <% if ( $pager->current_page + 4 < $pager->last_page) { %>
-			<li class="next">	
-				<a href="<%= $page_url %>/<%= $pager->last_page %>">Last</a>
-			</li>
-        <% } %>
+    <% foreach my $i ($after .. $end_range) { %>
+      <li>	
+        <a href="<%= $page_url %>/<%= $i %>"><%= $i %></a>
+      </li>
+    <% } %>
+    <% if ($pager->last_page != $pager->current_page) { %>
+      <li class="previous">
+        <a href="<%= $page_url %>/<%= $after %>">Next &gt;</a>
+        <a href="<%= $page_url %>/<%= $pager->last_page %>">Last &gt;&gt;</a>
+      </li>
+    <% } %>
 		<li class="next">	
 			<a href="<%= $path %>">View all</a>
 		</li>		
