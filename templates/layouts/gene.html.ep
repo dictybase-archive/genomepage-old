@@ -1,61 +1,49 @@
+<% 
+my $path       = stash('species') || 'default';
+my $yui_root   = '/javascripts/yui/build';
+my @yui_assets = ( 'logger', 'button', 'container', 'menu', );
+my @app_assets = (
+    'header', 'body', 'footer', 'gene',
+    $path . '/header-skin',
+    $path . '/body-skin',
+    $path . '/footer-skin',
+    $path . '/gene-skin'
+);
+my @yui_js_min = (
+    'yahoo',     'yuiloader',  'container', 'menu',
+    'animation', 'element',    'logger',    'connection',
+    'json',      'tabview',    'treeview',  'selector',
+    'cookie',    'datasource', 'datatable',
+);
+my @yui_js      = ('yahoo-dom-event');
+my @yui_plugins = ( 'bubbling', 'accordion', 'dispatcher' );
+my @app_js      = (
+    'custom/util',       'custom/formatter',
+    'custom/dispatcher', 'custom/panel',
+    'custom/item',       'menu',
+    'language-en',       'nopcart'
+);
+%>
+
 <!doctype html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-        
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/fonts/fonts-min.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/logger/assets/skins/sam/logger.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/button/assets/skins/sam/button.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/assets/skins/sam/skin.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/container/assets/skins/sam/container.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/menu/assets/skins/sam/menu.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/plugins/accordion/assets/accordion.css">
-        
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/header.css">       
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/body.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/footer.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/gene.css">
-        
-        <% my $path = stash('species') || 'default'; %>
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/header-skin.css">       
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/body-skin.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/footer-skin.css">        
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/gene-skin.css">
-        
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/yahoo/yahoo.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/yuiloader/yuiloader-min.js"></script>
-        
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+
+        <link type="text/css" rel="stylesheet" href="<%= stylesheet_path $yui_root.'/fonts/fonts-min' %>"/>
+        <link type="text/css" rel="stylesheet" href="<%= stylesheet_path $yui_root.'/assets/skins/sam/skin' %>"/>
+        <link type="text/css" rel="stylesheet" href="<%= stylesheet_path '/javascripts/yui/plugins/accordion/assets/accordion' %>"/>
+      
+        <% foreach my $asset (@yui_assets) { %>
+           <link type="text/css" rel="stylesheet" href="<%= stylesheet_path $yui_root.'/'.$asset.'/assets/skins/sam/'.$asset %>"/>
+        <% } %>
     
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/container/container-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/menu/menu-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/animation/animation.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/element/element-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/logger/logger-min.js"></script>
-        
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/json/json-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/connection/connection-min.js"></script>        
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/tabview/tabview-min.js"></script>     
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/treeview/treeview-min.js"></script>   
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/selector/selector-min.js"></script> 
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/cookie/cookie-min.js"></script> 
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/datasource/datasource-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/datatable/datatable-min.js"></script>
-        
-        <script type="text/javascript" src="/static/genomerest/js/yui/plugins/bubbling/bubbling-min.js"></script> 
-        <script type="text/javascript" src="/static/genomerest/js/yui/plugins/accordion/accordion-min.js"></script> 
-        <script type="text/javascript" src="/static/genomerest/js/yui/plugins/dispatcher/dispatcher-min.js"></script> 
-        
-        <script type="text/javascript" src="/static/genomerest/js/custom/util.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/custom/formatter.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/custom/dispatcher.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/custom/panel.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/custom/item.js"></script>
-            
-        <script type="text/javascript" src="/static/genomerest/js/menu.js"></script>   
-        <script type="text/javascript" src="/static/genomerest/js/language-en.js"></script> 
-        <script type="text/javascript" src="/static/genomerest/js/nopcart.js"></script> 
+        <%= stylesheet_link_tag $_ foreach @app_assets %>
+        <%= javascript_include_tag "yui/build/$_/$_" foreach @yui_js %>
+        <%= javascript_include_tag "yui/build/$_/$_\-min" foreach @yui_js_min %>
+        <%= javascript_include_tag "yui/plugins/$_/$_\-min" foreach @yui_plugins %>
+        <%= javascript_include_tag $_ foreach @app_js  %>
 
         <title><%= stash 'title' %></title>
     </head>
