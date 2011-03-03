@@ -14,16 +14,15 @@ sub index {
 }
 
 sub index_html {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $gene_id = $self->stash('gene_id');
-    my $db = dicty::UI::Tabview::Page::Gene->new(
+    my $db      = dicty::UI::Tabview::Page::Gene->new(
         -primary_id => $gene_id,
         -active_tab => ' gene ',
         -base_url   => $self->base_url
     );
 
     $self->stash( $db->result );
-    $self->render( template => $self->stash('species') . '/gene' );
 }
 
 sub index_json {
@@ -53,7 +52,7 @@ sub tab_html {
     if ( $app->config->{tab}->{dynamic} eq $tab ) {
 
         #convert gene id to its primary DDB id
-        my ($trans_id) = @{$self->stash('transcripts')};
+        my ($trans_id) = @{ $self->stash('transcripts') };
         if ( !$trans_id ) {    #do some octocat based template here
             $app->log->error(
                 "unable to convert to transcript id for $gene_id");
@@ -111,7 +110,7 @@ sub section_html {
             -primary_id => $gene_id,
             -active_tab => $tab,
             -base_url   => $self->base_url,
-            -sub_id => $section,
+            -sub_id     => $section,
         );
 
         $self->stash( $db->result );
@@ -126,7 +125,7 @@ sub section_json {
     my $section = $self->stash('section');
     my $gene_id = $self->stash('gene_id');
     my $subid   = $self->stash('subid');
-    
+
     my $factory;
     if ( $self->is_ddb($section) ) {
         $factory = dicty::Factory::Tabview::Tab->new(
@@ -135,7 +134,7 @@ sub section_json {
             -base_url   => $self->base_url
         );
     }
-    if ( $subid || !$self->is_ddb($section)) {
+    if ( $subid || !$self->is_ddb($section) ) {
         $factory = dicty::Factory::Tabview::Section->new(
             -base_url   => $self->base_url,
             -primary_id => $subid || $gene_id,
@@ -147,42 +146,16 @@ sub section_json {
 }
 
 sub validate {
-    my ( $self ) = @_;
-    my $id      = $self->stash('id');
-    
-    if ( !$self->check_gene($id) ) {
-        $self->render(
-            template => 'missing',
-            message => "Gene $id not found",
-            error   => 1,
-            header  => 'Error page',
-            status => 404
-        );
-        return;
-    }
-    $self->stash(
-        message =>  "$id has been deleted from dictyBase. It has been replaced by",
-        replaced => 1,
-        id       => join( ":", $self->stash('replaced') ),
-        header   => 'Error page',
-        url      => 'http://' . $ENV{WEB_URL_ROOT} . '/gene',
-        status => 404
-            #the ENV should be changed
-    ) if $self->stash('replaced');
-    $self->stash(
-        deleted => 1,
-        message => "$id has been deleted",
-        header  => 'Error page',            
-        status => 404
-    ) if $self->stash('deleted');
+    my ($self) = @_;
+    my $id = $self->stash('id');
 
-    if ($self->stash('replaced') || $self->stash('deleted')){
-        $self->render( template => 'missing' ) ;
-        return
-    };
+    if (  !$self->check_gene($id)
+        || $self->stash('replaced')
+        || $self->stash('deleted') ) {
+        $self->res->code(404);
+        $self->render('gene/not_found');
+    }
     return 1;
 }
 
-
 1;
-

@@ -1,0 +1,21 @@
+% layout 'default';
+
+<div class="warning">
+  <p>
+    <% if (stash 'replaced') { %>
+      <b><%= $id %></b> has been replaced by 
+    	<% foreach my $value (@{ stash 'replaced'}) { %>
+    		<a href="<%=  url_for . $value %>"><%= $value %></a>
+    	<% } %>
+    <% } elsif (stash 'deleted') { %>
+  	  <b><%= $id %></b> has been deleted from dictyBase.
+    <% } else { %>
+      <b><%= $id %></b> not found in the database
+			<ul>
+				<li>This probably is an invalid id. Try with a different one.</li>
+				<li>You probably coming here from an out of date link.</li>
+				<li>If problem persist,  email us at dictybase@northwestern.edu</li>
+			</ul>
+    <% } %>
+  </p>
+</div>
