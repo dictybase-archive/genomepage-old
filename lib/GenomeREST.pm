@@ -33,24 +33,25 @@ sub startup {
 
     ## routing setup
     my $router = $self->routes();
+    my $base = $router->namespace();
+    $router->namespace( $base . '::Controller' );
 
     ## first brige: validate organism (species)
-    my $species = $router->bridge('/:name')->to('controller-genome#validate');
+    my $species = $router->bridge('/:name')->to('genome#validate');
 
     ## all that goes under..
-    $species->route('/')->to('controller-genome#index');
-    $species->route('/contig')->to('controller-genome#contig');
-    $species->route('/contig/page/:page')
-        ->to('controller-genome#contig_with_page');
-    $species->route('/downloads')->to('controller-genome#download');
+    $species->route('/')->to('genome#index');
+    $species->route('/contig')->to('genome#contig');
+    $species->route('/contig/page/:page')->to('genome#contig_with_page');
+    $species->route('/downloads')->to('genome#download');
 
     ## second brige for gene id/name validation
-    my $gene = $species->bridge('/gene/:id')->to('controller-gene#validate');
+    my $gene = $species->bridge('/gene/:id')->to('gene#validate');
 
-    $gene->route('/')->name('gene')->to( 'controller-gene#index', format => 'html' );
-    $gene->route('/:tab')->to('controller-gene#tab');
-    $gene->route('/:tab/:section')->to('controller-gene#section');
-    $gene->route('/:tab/:subid/:section')->to('controller-gene#section');
+    $gene->route('/')->name('gene')->to( 'gene#index', format => 'html' );
+    $gene->route('/:tab')->to('gene#tab');
+    $gene->route('/:tab/:section')->to('gene#section');
+    $gene->route('/:tab/:subid/:section')->to('gene#section');
 
     ## init database connection
     my $datasource = Homology::Chado::DataSource->instance;
@@ -60,7 +61,6 @@ sub startup {
         if !$datasource->has_user;
     $datasource->password( $self->config->{database}->{password} )
         if !$datasource->has_password;
-
 }
 
 1;
