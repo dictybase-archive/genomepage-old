@@ -80,9 +80,7 @@ sub contig_with_page {
                 'type',
                 { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
             ],
-            select =>
-                [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
-            as       => [ 'cfeature_id',   'cname', 'gene_count' ],
+            select => [ 'me.feature_id', 'me.name', { count => 'feature_id', -as => 'gene_count' }, ],
             group_by => [ 'me.feature_id', 'me.name' ],
             having   => \'count(feature_id) > 0',
             order_by => { -asc => 'me.feature_id' },
@@ -94,9 +92,9 @@ sub contig_with_page {
     while ( my $contig = $contig_rs->next ) {
         push @$data,
             [
-            $contig->get_column('cname'),
+            $contig->name,
             $rs->find(
-                { feature_id => $contig->get_column('cfeature_id') },
+                { feature_id => $contig->feature_id },
                 {   select => { length => 'residues' },
                     as     => 'seqlength'
                 }
@@ -117,7 +115,7 @@ sub download {
     my ($self) = @_;
     my $dispatcher = Mojolicious::Static->new(
         prefix => '/bulkfile',
-        root   => $self->config->param('download')
+        root   => $self->app->config->{download}
     );
 
     if ( $self->req->param('file') ) {
@@ -132,13 +130,7 @@ sub validate {
     my ($self) = @_;
     my $name = $self->stash('name');
     if ( !$self->check_organism($name) ) {
-        $self->render(
-            template => 'missing',
-            message  => "organism $name not found",
-            error    => 1,
-            header   => 'Error page',
-            title    => 'Error not found',
-        );
+        $self->render_not_found;    
         return;
     }
     1;
