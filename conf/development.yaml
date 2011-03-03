@@ -10,7 +10,7 @@ database:
  password: DPUR_CHADO
  opt: LongTruncOk
  
-relative_url_root: '/gene'
+relative_url_root: '/assets'
 
 #cache:
 #    driver: File
