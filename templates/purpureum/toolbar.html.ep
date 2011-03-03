@@ -1,87 +1,90 @@
 % my $path = $species || 'default';
 <html>
-    <head>
-        <title></title>
-    </head>
-    <body>
-        <div id="shadow-container">
-            <div class="shadow">
-                <div id="container-top">
-                    <div id="descriptor">
-                        <b>Dictyostelium purpureum</b>
-                    </div>
-                    <table>
-                        <tr>
-                            <td rowspan="2">
-                                <a href="/discoideum"><img src="/static/genomerest/images/<%= $path %>/logo.gif"></a>
-                            </td>
-                            <td colspan="4">
-                                <div id="container-help">
-                                    <img src="/static/genomerest/images/<%= $path %>/help-left.gif">
-                                    <div>
-                                        <form action="/db/cgi-bin/search/search.pl">
-                                            <input id="search-input" name="query" type="text" size="30" value="use * as a wildcard character"> <nobr><input type="submit" name="submit" value="Search All"></nobr>
-                                        </form>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="menu">
-                            <td>
-                                <img src="/static/genomerest/images/<%= $path %>/menu-top-left.gif">
-                            </td>
-                            <td>
-                                <div id="menu-top" class="yuimenubar yuimenubarnav">
-                                    <div class="bd">
-                                        <ul class="first-of-type">
-                                            <li class="yuimenubaritem first-of-type">
-                                                <a class="yuimenubaritemlabel">Genomes</a>
-                                                <div id="genomes" class="yuimenu">
-                                                    <div class="bd">
-                                                        <ul class="first-of-type">
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="/<%= $species %>/gbrowse/">Genome Browser</a>
-                                                <div id="gbrowse" class="yuimenu">
-                                                    <div class="bd">
-                                                        <ul class="first-of-type">
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/<%= $species %>/contig/page/1">List of scaffolds</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="/tools/blast">BLAST</a>
-                                            </li>
-                                            <li class="yuimenubaritem">
-                                                <a class="yuimenubaritemlabel" href="/<%= $species %>/downloads">Download</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <img src="/static/genomerest/images/<%= $path %>/menu-top-right.gif">
-                            </td>
-                            <td id="about_help">
-                                <a href="/db/cgi-bin/dictyBase/suggestion">Contact</a>
-                            </td>
-                        </tr>
-                    </table>
+  <head>
+    <title></title>
+  </head>
+  <body>
+    <div id="shadow-container">
+      <div class="shadow">
+        <div id="container-top">
+          <div id="descriptor">
+            <b>Dictyostelium purpureum</b>
+          </div>
+          <table>
+            <tr>
+              <td rowspan="2">
+                <a href="/discoideum"><%= image_tag "$path/logo.gif" %></a>
+              </td>
+              <td colspan="4">
+                <div id="container-help">
+                  <%= image_tag "$path/help-left.gif" %>
+                  <div>
+                    <form action="/db/cgi-bin/search/search.pl">
+                      <input id="search-input" name="query" type="text" size="30" value="use * as a wildcard character"> 
+                      <nobr>
+                      <input type="submit" name="submit" value="Search All">
+                      </nobr>
+                    </form>
+                  </div>
                 </div>
-            </div>
+              </td>
+            </tr>
+            <tr class="menu">
+              <td>
+                <%= image_tag "$path/menu-top-left.gif" %>
+              </td>
+              <td>
+                <div id="menu-top" class="yuimenubar yuimenubarnav">
+                  <div class="bd">
+                    <ul class="first-of-type">
+                      <li class="yuimenubaritem first-of-type">
+                        <a class="yuimenubaritemlabel">Genomes</a>
+                        <div id="genomes" class="yuimenu">
+                          <div class="bd">
+                            <ul class="first-of-type">
+                              <li class="yuimenuitem">
+                                <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
+                              </li>
+                              <li class="yuimenuitem">
+                                <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="yuimenubaritem">
+                        <a class="yuimenubaritemlabel" href="/<%= $species %>/gbrowse/">Genome Browser</a>
+                        <div id="gbrowse" class="yuimenu">
+                          <div class="bd">
+                            <ul class="first-of-type">
+                              <li class="yuimenuitem">
+                                <a class="yuimenuitemlabel" href="/<%= $species %>/contig/page/1">List of scaffolds</a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="yuimenubaritem">
+                        <a class="yuimenubaritemlabel" href="/tools/blast">BLAST</a>
+                      </li>
+                      <li class="yuimenubaritem">
+                        <a class="yuimenubaritemlabel" href="/<%= $species %>/downloads">Download</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <%= image_tag "$path/menu-top-right.gif" %>
+              </td>
+              <td id="about_help">
+                <a href="/db/cgi-bin/dictyBase/suggestion">Contact</a>
+              </td>
+            </tr>
+          </table>
         </div>
+      </div>
+    </div>
 <script>
 
 var searchInput = YAHOO.util.Dom.get('search-input');
@@ -92,5 +95,4 @@ YAHOO.util.Event.addFocusListener(searchInput.id, function() {
     };
 });
 </script>
-    </body>
-</html>
+

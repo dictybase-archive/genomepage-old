@@ -1,8 +1,13 @@
-<!doctype html><html>
-    <head><title>Not Found</title></head>
-    <body>
-        The page you were requesting
-        "<%= $self->req->url->path || '/' %>"
-        could not be found.
-    </body>
-</html>
+% layout 'default', title => 'Page not found' ;
+
+<div class="warning">
+	<p> Page <%= url_for %> not found </p>
+  <p> What you can try: </p>
+  <ul>
+    <li> Retype the address </li>
+    <li> Go back to the previous page </li>
+    <li> Go to <a href="http://dictybase.org">dictyBase</a> and look for 
+          information </li>
+    <li> E-mail us at dictybase@northwestern.edu to report the error </li>
+	</ul>
+</div>						

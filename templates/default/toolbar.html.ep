@@ -8,9 +8,7 @@
             <table>
                 <tr>
                     <td rowspan="2">
-                        <a href = "/discoideum">
-                            <img src="/static/genomerest/images/<%= $path %>/logo.gif">
-                        </a>
+                        <a href = "/discoideum"><%= image_tag "$path/logo.gif" %></a>
                     </td>
                     <!--
                     <td colspan="4">
@@ -26,9 +24,7 @@
                     -->
                 </tr>
                 <tr class="menu">
-                    <td>
-                        <img src="/static/genomerest/images/<%= $path %>/menu-top-left.gif">
-                    </td>
+                    <td><%= image_tag "$path/menu-top-left.gif" %></td>
                     <td>
                         <div id="menu-top" class="yuimenubar yuimenubarnav">
                             <div class="bd">
@@ -82,9 +78,7 @@
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <img src="/static/genomerest/images/<%= $path %>/menu-top-right.gif">
-                    </td>
+                    <td><%= image_tag "$path/menu-top-right.gif" %></td>
                     <td id="about_help">
                         <a href="/db/cgi-bin/dictyBase/suggestion">Contact</a> 
                     </td>                            

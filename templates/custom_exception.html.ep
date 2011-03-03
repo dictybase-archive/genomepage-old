@@ -1,0 +1,15 @@
+% layout 'default', title => 'Error page' ;
+
+<div class="error">
+	<p> There was a problem serving the page </p>
+  <ul>
+    <li> Try refreshing the page, the problem might be temporary </li>
+    <li> Check if the url is correct </li>
+    <li> The site might be down for maintenace </li>
+    <li> We have been notified about the problem and will do our best to make sure it doesn't happen again </li>
+    <li> Please come back after a while,  the problem might be solved </li>
+    <li> And of course please feel free to e-mail us at dictybase@northwestern.edu </li>
+	</ul>
+</div>						
+
+

@@ -1,43 +1,56 @@
-<!doctype html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="icon" href="/favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-        
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/fonts/fonts-min.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/container/assets/skins/sam/container.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/js/yui/build/menu/assets/skins/sam/menu.css">
-        
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/header.css">       
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/body.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/footer.css">
-        
-        <% my $path = stash('species') || 'default'; %>
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/header-skin.css">       
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/body-skin.css">
-        <link rel="stylesheet" type="text/css" href="/static/genomerest/css/<%= $path %>/footer-skin.css">
-        
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/yahoo/yahoo.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/yuiloader/yuiloader-min.js"></script>
-        
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-    
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/container/container-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/menu/menu-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/animation/animation.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/element/element-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/connection/connection-min.js"></script>
-        <script type="text/javascript" src="/static/genomerest/js/yui/build/json/json-min.js"></script>
-        
-        <script type="text/javascript" src="/static/genomerest/js/menu.js"></script>   
+<% my $path = stash('species') || 'default';
+   my $yui_root   = '/javascripts/yui/build';
+   my @yui_assets = ('container', 'menu');
+   my @app_assets = ('header', 'body', 'footer', $path.'/header-skin', $path.'/body-skin', $path.'/footer-skin' );
+   my @yui_js_min = ('yahoo', 'yuiloader', 'container', 'menu', 'animation', 'element', 'connection', 'json' );
+   my @yui_js     = ('yahoo-dom-event');
+   my @app_js     = ('menu');
+%>
 
-        <title><%= stash 'title' %></title>
-    </head>
-    <body class="yui-skin-sam">
-        <%= $self->render_partial(template => $path.'/toolbar') %>
-        <div id="container">
-            <%= $self->render_inner %>
-        <div id="container">
-        <%= $self->render_partial(template => 'footer') %>
-    </body>
+<!doctype html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link type="text/css" rel="stylesheet" href="<%= stylesheet_path $yui_root.'/fonts/fonts-min' %>"/>
+      
+    <% foreach my $asset (@yui_assets) { %>
+       <link type="text/css" rel="stylesheet" href="<%= stylesheet_path $yui_root.'/'.$asset.'/assets/skins/sam/'.$asset %>"/>
+    <% } %>
+
+    <%= stylesheet_link_tag $_ foreach @app_assets %>
+    <%= javascript_include_tag "yui/build/$_/$_" foreach @yui_js %>
+    <%= javascript_include_tag "yui/build/$_/$_\-min" foreach @yui_js_min %>
+    <%= javascript_include_tag 'menu' %>
+    
+    <title><%= stash 'title' %></title>
+  </head>
+  <body class="yui-skin-sam">
+    <%= $self->render_partial(template => $path.'/toolbar') %>
+    <div id="container">
+      <div class="wrapper <%= (stash 'wrapper') || 'threecol-wide' %>">
+        <div id="subnav">
+          <div class="inner_container"><%= stash 'subtitle' %></div>
+        </div>
+        <div class="wrapper-left-center">
+          <div class="wrapper-columns">
+            <div class="column-center">
+              <div id="column-center-content">
+                <%= $self->render_inner %>
+              </div>
+    				</div>
+    				<div class="column-left">
+    				  <div id="column-left-content"><%= stash 'left_column' %></div>
+    				</div>
+    				<div class="column-right"><%= stash 'left_column' %></div>
+    		  </div>
+        </div>
+      </div>
+    </div>
+    <%= $self->render_partial(template => 'footer') %>
+  	% if ($self->app->mode eq 'production') {
+  		 %= include 'google'
+  	% }
+  </body>
 </html>
