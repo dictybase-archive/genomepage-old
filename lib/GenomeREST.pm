@@ -49,10 +49,16 @@ sub startup {
     my $gene = $species->bridge('/gene/:id')->to('gene#validate');
 
     $gene->route('/')->name('gene')->to( 'gene#index', format => 'html' );
+
+    my $test = $gene->route('/test')->to('genepage#index');
+    $gene->route('/test/summary')->to('genepage-summary#index', format => 'json');
+    $gene->route('/test/protein')->to('genepage-protein#index', format => 'json');
+    $gene->route('/test/summary/:action')->to('genepage-summary', format => 'json');
+    
     $gene->route('/:tab')->to('gene#tab');
     $gene->route('/:tab/:section')->to('gene#section');
     $gene->route('/:tab/:subid/:section')->to('gene#section');
-
+    
     ## init database connection
     my $datasource = Homology::Chado::DataSource->instance;
     $datasource->dsn( $self->config->{database}->{dsn} )
