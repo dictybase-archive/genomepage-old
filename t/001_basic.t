@@ -39,9 +39,9 @@ $t->get_ok("$base_url/$name")
 
 #with non-existant species
 $t->get_ok($wrong_url . '/' . $gene_id )
-    ->status_is( 200, "is a successful response for $name" )
+    ->status_is( 404, "is a error response for $wrong_url/$gene_id" )
     ->content_type_like( qr/html/, 'is a html response for gene' )
-    ->content_like(qr/organism $wrong_species/,'should be an error with wrong species name');
+    ->content_like(qr/not found/,'error with wrong species name');
 
 #canonical url with gene id
 $t->get_ok("$base_url/$gene_id")

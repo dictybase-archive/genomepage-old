@@ -13,7 +13,7 @@ sub register {
             my $feat = $model->resultset('Sequence::Feature')->search(
                 {   -and => [
                         -or => [
-                            'UPPER(name)'      => uc $id,
+                            'UPPER(me.name)'      => uc $id,
                             'dbxref.accession' => $id
                         ],
                         'organism.species' => $c->stash('species'),
