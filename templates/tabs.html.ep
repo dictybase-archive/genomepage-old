@@ -1,0 +1,30 @@
+% my $path = $species || 'default';
+% my $div_id = 'container-' . stash('caller');
+
+<div id="<%= $div_id %>" class="yui-navset">
+  <% if (stash 'params') { %>
+    <ul class="yui-nav">
+      <% foreach my $tab (@{ stash 'params' }) { %>
+        <%== $tab->{active} ? '<li class="selected">' : '<li>'%>
+          <a href="<%='#' . $tab->{name} %>">
+            <em>
+              <%= $tab->{label} %>
+              <span name="<%= "/help/$path/" . $tab->{name} %>" class="accordionHelpItem" title="Click on me to get a hint">&nbsp;</span>
+            </em>
+          </a>
+        </li>
+      <% } %>
+    </ul>
+    <div class="yui-content">
+      <% foreach my $tab (@{ stash 'params' }) { %>
+        <div class="<%= $tab->{active} ? '' : 'hidden' %>">
+          <%== $tab->{content} if $tab->{content} %>
+        </div>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  var myTabs = new YAHOO.widget.TabView("<%= $div_id %>");
+</script>

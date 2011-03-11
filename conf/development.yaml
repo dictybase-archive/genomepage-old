@@ -10,6 +10,9 @@ database:
  password: DPUR_CHADO
  opt: LongTruncOk
  
+
+relative_url_root: '/assets'
+
 #cache:
 #    driver: File
 #    root_dir: '/home/ubuntu/dictyBase/Apps/dictygene/cache'

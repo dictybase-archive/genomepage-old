@@ -1,0 +1,19 @@
+% my $path = $species || 'default';
+% my $div_id = 'container-' . stash('caller');
+<div class="yui-cms-accordion multiple fade slow fixIE">
+  <% if (stash 'params') { %>
+    <% foreach my $section (@{ stash 'params' }) { %>
+      <div id="yui-gen4" class="yui-cms-item yui-panel selected">
+        <div class="actions">
+          <a href="#" title="Collapse Section" class="accordionToggleItem"></a> <a href="#" title="Top" class="accordionTopItem"></a><a href="/help/purpureum/gene/info" title="Click on me to get a hint" class="accordionHelpItem"></a>
+        </div>
+        <div class="content_table_header">
+          <span class="dicty-section-text"><%= $section->{label} %></span><span style="opacity: 0;" id="gene_23_info-4791" class="dicty-section-loader"></span>
+        </div>
+        <div style="" class="bd">
+          <%== $section->{content} if $section->{content} %>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+</div>
