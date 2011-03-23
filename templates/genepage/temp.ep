@@ -1,0 +1,328 @@
+<!--
+  <div class="yui-navset yui-navset-top">
+    <ul class="yui-nav">
+      <li title="active" class="selected">
+        <a href="/purpureum/gene/DPU_G0068768">
+          <em>Gene Summary
+            <span name="/help/purpureum/gene" class="accordionHelpItem" title="Click on me to get a hint">&nbsp;</span>
+          </em>
+        </a>
+      </li>
+      <li>
+        <a href="/purpureum/gene/DPU_G0068768/protein/DPU0068769">
+          <em>Protein Information
+            <span name="/help/purpureum/protein" class="accordionHelpItem" title="Click on me to get a hint">&nbsp;</span>
+          </em>
+        </a>
+      </li>
+      <li>
+        <a href="/purpureum/gene/DPU_G0068768/blast">
+          <em>BLAST
+            <span name="/help/purpureum/blast" class="accordionHelpItem" title="Click on me to get a hint">&nbsp;</span>
+          </em>
+        </a>
+      </li>
+    </ul>
+    <div class="yui-content">
+      <div>
+        <div style="opacity: 1;" class="content_tab" id="gene_23">
+          <div class="yui-cms-accordion multiple fade slow fixIE">
+            <div id="yui-gen4" class="yui-cms-item yui-panel selected">
+              <div class="actions">
+                <a href="#" title="Collapse Section" class="accordionToggleItem"></a> <a href="#" title="Top" class="accordionTopItem"></a> <a href="/help/purpureum/gene/info" title="Click on me to get a hint" class="accordionHelpItem"></a>
+              </div>
+              <div class="content_table_header">
+                <span class="dicty-section-text">General Information</span><span style="opacity: 0;" id="gene_23_info-4791" class="dicty-section-loader"></span>
+              </div>
+              <div style="" class="bd">
+                <div id="gene_23_info">
+                  <div id="data-table">
+                    <table class="content_table" width="100%">
+                      <tbody id="content-tbody-241">
+                        <tr id="content-table-row-16061">
+                          <td id="content-table-col-162542" class="content_table_title">
+                            Gene Name
+                          </td>
+                          <td id="content-table-col-191376" class="content_table_data">
+                            <i>DPU_G0068768</i>
+                          </td>
+                        </tr>
+                        <tr id="content-table-row-17941">
+                          <td id="content-table-col-75776" class="content_table_title">
+                            Gene ID
+                          </td>
+                          <td id="content-table-col-49016" class="content_table_data">
+                            DPU_G0068768
+                          </td>
+                        </tr>
+                        <tr id="content-table-row-3799">
+                          <td id="content-table-col-10561" class="content_table_title">
+                            Community Annotations
+                          </td>
+                          <td id="content-table-col-5896" class="content_table_data">
+                            <a href="http://wiki.dictybase.org/dictywiki/index.php/DPU_G0068768?action=edit" class="outer_link">Add an annotation for DPU_G0068768</a><wbr>&nbsp;&nbsp;&nbsp;<a href="http://wiki.dictybase.org/dictywiki/index.php/Community_Annotations" class="outer_link">Community Annotations Help</a><wbr>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="yui-gen6" class="yui-cms-item yui-panel selected">
+              <div class="actions">
+                <a href="#" title="Collapse Section" class="accordionToggleItem"></a> <a href="#" title="Top" class="accordionTopItem"></a> <a href="/help/purpureum/gene/genomic_info" title="Click on me to get a hint" class="accordionHelpItem"></a>
+              </div>
+              <div class="content_table_header">
+                <span class="dicty-section-text">Genomic Information</span><span style="opacity: 0;" id="gene_23_genomic_info-5229" class="dicty-section-loader"></span>
+              </div>
+              <div style="height: 298px;" class="bd">
+                <div id="gene_23_genomic_info">
+                  <div id="data-table">
+                    <table class="content_table" width="100%">
+                      <tbody id="content-tbody-1778">
+                        <tr id="content-table-row-17648">
+                          <td id="content-table-col-50501" class="content_table_title">
+                            Location
+                          </td>
+                          <td id="content-table-col-74306" class="content_table_data">
+                            Supercontig <b>scaffold_48</b> coordinates <b>59804</b> to <b>61242</b>, <b>Watson</b> strand
+                          </td>
+                        </tr>
+                        <tr id="content-table-row-13536">
+                          <td id="content-table-col-159042" class="content_table_title">
+                            Genomic Map
+                          </td>
+                          <td id="content-table-col-110984" class="content_table_data">
+                            [Click on the map to browse the genome from this location]<br>
+                            <p style="visibility: hidden;" id="319_image_blink">
+                              Loading Image, please wait ........
+                            </p>
+                            <div style="height: 186px; visibility: hidden;" class="dicty-gbrowse-div" id="1358_div">
+                              <a href="/db/cgi-bin/ggb/gbrowse/purpureum?name=scaffold_48:59661..61385" class="outer_link" style=""><img src="http://192.168.60.50/db/cgi-bin/ggb/gbrowse_img/purpureum?name=scaffold_48:59661..61385&amp;width=500&amp;type=Gene+Gene_Model+tRNA+ncRNA&amp;keystyle=between&amp;abs=1" style="opacity: 1; visibility: visible; height: 186px;" class="dicty-gbrowse-image" id="319_image" border="1" name="319_image"></a>
+                            </div><wbr>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="yui-gen7" class="yui-cms-item yui-panel selected">
+              <div class="actions">
+                <a href="#" title="Collapse Section" class="accordionToggleItem"></a> <a href="#" title="Top" class="accordionTopItem"></a> <a href="/help/purpureum/gene/product" title="Click on me to get a hint" class="accordionHelpItem"></a>
+              </div>
+              <div class="content_table_header">
+                <span class="dicty-section-text">Gene Product Information</span><span style="opacity: 0;" id="gene_23_product-1427" class="dicty-section-loader"></span>
+              </div>
+              <div style="" class="bd">
+                <div id="gene_23_product">
+                  <div id="data-table">
+                    <table class="content_table" width="100%">
+                      <tbody id="content-tbody-8470">
+                        <tr id="content-table-row-7949">
+                          <td id="content-table-col-133680" class="content_table_title">
+                            Protein Coding Gene
+                          </td>
+                          <td id="content-table-col-138281" class="content_table_data">
+                            <a href="/purpureum/gene/DPU_G0068768/feature/DPU0068769" class="tab_link" style="">DPU0068769</a><wbr>
+                          </td>
+                          <td rowspan="5" id="content-table-col-48741" class="content_table_second_title">
+                            Genomic Coordinates
+                          </td>
+                          <td rowspan="5" id="content-table-col-10550" class="content_table_data">
+                            <div class="table-controllers">
+                              <div class="table-paginator" id="dicty-126-paginator"></div>
+                            </div>
+                            <div style="clear: both;" class="yui_table null yui-dt" id="963-table">
+                              <div style="display: none;" class="yui-dt-mask"></div>
+                              <table summary="">
+                                <colgroup>
+                                  <col>
+                                  <col>
+                                  <col>
+                                </colgroup>
+                                <thead>
+                                  <tr class="yui-dt-first yui-dt-last">
+                                    <th class="yui-dt0-col-name yui-dt-col-name yui-dt-sortable yui-dt-first" colspan="1" rowspan="1" id="yui-dt0-th-name">
+                                      <div class="yui-dt-liner" id="yui-dt0-th-name-liner">
+                                        <span class="yui-dt-label"><a href="yui-dt0-href-name" title="Click to sort ascending" class="yui-dt-sortable">Exon</a></span>
+                                      </div>
+                                    </th>
+                                    <th class="yui-dt0-col-local yui-dt-col-local yui-dt-sortable" colspan="1" rowspan="1" id="yui-dt0-th-local">
+                                      <div class="yui-dt-liner" id="yui-dt0-th-local-liner">
+                                        <span class="yui-dt-label"><a href="yui-dt0-href-local" title="Click to sort ascending" class="yui-dt-sortable">Local coords.</a></span>
+                                      </div>
+                                    </th>
+                                    <th class="yui-dt0-col-chrom yui-dt-col-chrom yui-dt-sortable yui-dt-last" colspan="1" rowspan="1" id="yui-dt0-th-chrom">
+                                      <div class="yui-dt-liner" id="yui-dt0-th-chrom-liner">
+                                        <span class="yui-dt-label"><a href="yui-dt0-href-chrom" title="Click to sort ascending" class="yui-dt-sortable">Chrom. coords.</a></span>
+                                      </div>
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody style="display: none;" class="yui-dt-message">
+                                  <tr class="yui-dt-first yui-dt-last">
+                                    <td class="yui-dt-loading" colspan="3">
+                                      <div class="yui-dt-liner">
+                                        Loading...
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                                <tbody style="" class="yui-dt-data" tabindex="0">
+                                  <tr class="yui-dt-first yui-dt-even" id="yui-rec0" style="">
+                                    <td class="yui-dt0-col-name yui-dt-col-name yui-dt-sortable yui-dt-first" headers="yui-dt0-th-name">
+                                      <div class="yui-dt-liner">
+                                        1
+                                      </div>
+                                    </td>
+                                    <td class="yui-dt0-col-local yui-dt-col-local yui-dt-sortable" headers="yui-dt0-th-local">
+                                      <div class="yui-dt-liner">
+                                        1 - 42
+                                      </div>
+                                    </td>
+                                    <td class="yui-dt0-col-chrom yui-dt-col-chrom yui-dt-sortable yui-dt-last" headers="yui-dt0-th-chrom">
+                                      <div class="yui-dt-liner">
+                                        59804 - 59845
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  <tr class="yui-dt-last yui-dt-odd" id="yui-rec1" style="">
+                                    <td class="yui-dt0-col-name yui-dt-col-name yui-dt-sortable yui-dt-first" headers="yui-dt0-th-name">
+                                      <div class="yui-dt-liner">
+                                        2
+                                      </div>
+                                    </td>
+                                    <td class="yui-dt0-col-local yui-dt-col-local yui-dt-sortable" headers="yui-dt0-th-local">
+                                      <div class="yui-dt-liner">
+                                        303 - 1439
+                                      </div>
+                                    </td>
+                                    <td class="yui-dt0-col-chrom yui-dt-col-chrom yui-dt-sortable yui-dt-last" headers="yui-dt0-th-chrom">
+                                      <div class="yui-dt-liner">
+                                        60106 - 61242
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr id="content-table-row-5832">
+                          <td id="content-table-col-154973" class="content_table_title">
+                            Protein Length
+                          </td>
+                          <td id="content-table-col-95737" class="content_table_data">
+                            392 aa
+                          </td>
+                        </tr>
+                        <tr id="content-table-row-9214">
+                          <td id="content-table-col-81097" class="content_table_title">
+                            Protein Molecular Weight
+                          </td>
+                          <td id="content-table-col-20395" class="content_table_data">
+                            44,411.1 Da
+                          </td>
+                        </tr>
+                        <tr id="content-table-row-9631">
+                          <td id="content-table-col-177953" class="content_table_title">
+                            More Protein Data
+                          </td>
+                          <td id="content-table-col-62791" class="content_table_data">
+                            <a href="/purpureum/gene/DPU_G0068768/protein/DPU0068769" class="tab_link" style="">Protein sequence, domains and much more...</a><wbr>
+                          </td>
+                        </tr>
+                        <tr id="content-table-row-6050">
+                          <td id="content-table-col-196617" class="content_table_title">
+                            Sequence
+                          </td>
+                          <td id="content-table-col-45507" class="content_table_data">
+                            <div class="sequence_selector">
+                              <select id="0.5635374679939117_select">
+                                <option value="Protein">
+                                  Protein
+                                </option>
+                                <option value="DNA coding sequence">
+                                  DNA coding sequence
+                                </option>
+                                <option value="Genomic DNA">
+                                  Genomic DNA
+                                </option>
+                              </select>&nbsp;&nbsp;<input id="1041_button" class="outer_link" value="Get Fasta" name="/db/cgi-bin/dictyBaseDP/yui/get_fasta.pl?decor=1&amp;primary_id=DPU0068769" type="button"><input id="1463_button" class="tab_link" value="BLAST" name="/purpureum/gene/DPU_G0068768/blast?&amp;primary_id=DPU0068769" type="button">
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="yui-gen8" class="yui-cms-item yui-panel selected">
+              <div class="actions">
+                <a href="#" title="Collapse Section" class="accordionToggleItem"></a> <a href="#" title="Top" class="accordionTopItem"></a> <a href="/help/purpureum/gene/sequences" title="Click on me to get a hint" class="accordionHelpItem"></a>
+              </div>
+              <div class="content_table_header">
+                <span class="dicty-section-text">Associated Sequences</span><span style="opacity: 0;" id="gene_23_sequences-460" class="dicty-section-loader"></span>
+              </div>
+              <div style="" class="bd">
+                <div id="gene_23_sequences">
+                  <div id="data-table">
+                    <table class="content_table" width="100%">
+                      <tbody id="content-tbody-1071">
+                        <tr id="content-table-row-17983">
+                          <td id="content-table-col-179477" class="content_table_title">
+                            ESTs
+                          </td>
+                          <td id="content-table-col-134928" class="content_table_data">
+                            <a href="/db/cgi-bin/feature_page.pl?primary_id=DPU0030895" class="outer_link">DPU0030895</a><wbr>&nbsp;&nbsp;&nbsp;<a href="/db/cgi-bin/feature_page.pl?primary_id=DPU0032355" class="outer_link">DPU0032355</a><wbr>&nbsp;&nbsp;&nbsp;<a href="/db/cgi-bin/feature_page.pl?primary_id=DPU0023195" class="outer_link">DPU0023195</a><wbr>&nbsp;&nbsp;&nbsp;<a href="/db/cgi-bin/feature_page.pl?primary_id=DPU0032439" class="outer_link">DPU0032439</a><wbr>&nbsp;&nbsp;&nbsp;<a href="/db/cgi-bin/feature_page.pl?primary_id=DPU0031591" class="outer_link">DPU0031591</a><wbr>&nbsp;&nbsp;&nbsp;<a href="/db/cgi-bin/feature_page.pl?primary_id=DPU0032356" class="outer_link">DPU0032356</a><wbr>&nbsp;&nbsp;&nbsp;<a href="/db/cgi-bin/more_est.pl?feature_id=1158408&amp;gene_name=DPU_G0068768" class="outer_link">more..</a><wbr>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="yui-gen5" class="yui-cms-item yui-panel selected">
+              <div class="actions">
+                <a href="#" title="Collapse Section" class="accordionToggleItem"></a> <a href="#" title="Top" class="accordionTopItem"></a> <a href="/help/purpureum/gene/links" title="Click on me to get a hint" class="accordionHelpItem"></a>
+              </div>
+              <div class="content_table_header">
+                <span class="dicty-section-text">Links</span><span style="opacity: 0;" id="gene_23_links-5033" class="dicty-section-loader"></span>
+              </div>
+              <div style="" class="bd">
+                <div id="gene_23_links">
+                  <div id="data-table">
+                    <table class="content_table" width="100%">
+                      <tbody id="content-tbody-2099">
+                        <tr id="content-table-row-3281">
+                          <td id="content-table-col-145009" class="content_table_title">
+                            External Resources
+                          </td>
+                          <td id="content-table-col-60730" class="content_table_data">
+                            <a href="http://genome.jgi-psf.org/cgi-bin/dispGeneModel?db=Dicpu1&amp;id=46175" class="outer_link">JGI: 46175</a><wbr>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="yui-hidden">
+        <div class="content_tab dicty-loader" id="protein_70"></div>
+      </div>
+      <div class="yui-hidden">
+        <div class="content_tab dicty-loader" id="blast_1935"></div>
+      </div>
+    </div>
+  </div>
+-->
+  

@@ -5,25 +5,26 @@ use base 'Mojolicious::Controller';
 
 sub index {
     my ($self) = @_;
+    my $id     = $self->stash('gene_id');
     my $json = [
-        {   "layout" => "accordion",
-            "items"  => [
-                {   "source" => "\/purpureum\/gene\/DPU_G0068768\/protein\/DPU0068769\/info.json",
-                    "label"  => [ { "text" => "General Information" } ],
-                    "key"    => "info"
-                },
-                {   "source" => "\/purpureum\/gene\/DPU_G0068768\/protein\/DPU0068769\/sequence.json",
-                    "label"  => [ { "text" => "Protein Sequence" } ],
-                    "key"    => "sequence"
-                }
-            ]
-        }
+        {
+            "name"   => "info",
+            "source" => "/purpureum/gene/$id/test/protein/info",
+            "label"  => "General Information"
+        },
+        {
+            "name"   => "sequence",
+            "source" => "/purpureum/gene/$id/test/protein/sequence",
+            "label"  => "Protein Sequence"
+        },
     ];
-    $self->render_json($json);
+    $self->render_json($json) if ( $self->stash('format') eq 'json' );
+    $self->stash( params => $json );
 }
 
 sub info {
     my ($self) = @_;
+    $self->render_text('placeholder');
     my $json = [
         {   "layout" => "row",
             "items"  => [
@@ -134,7 +135,12 @@ sub info {
             ]
         }
     ];
-    $self->render_json($json);
+#    $self->render_json($json);
+}
+
+sub sequence {
+    my ($self) = @_;
+    $self->render_text('placeholder');
 }
 
 1;

@@ -1,30 +1,38 @@
 % my $path = $species || 'default';
-% my $div_id = 'container-' . stash('caller');
+% my $rand = int(rand(100000));
+% my $div_id = 'container-' . $rand;
 
 <div id="<%= $div_id %>" class="yui-navset">
-  <% if (stash 'params') { %>
+  % if (stash 'params') {
     <ul class="yui-nav">
-      <% foreach my $tab (@{ stash 'params' }) { %>
-        <%== $tab->{active} ? '<li class="selected">' : '<li>'%>
-          <a href="<%='#' . $tab->{name} %>">
-            <em>
-              <%= $tab->{label} %>
-              <span name="<%= "/help/$path/" . $tab->{name} %>" class="accordionHelpItem" title="Click on me to get a hint">&nbsp;</span>
-            </em>
-          </a>
-        </li>
-      <% } %>
+    % foreach my $chunk (@{ stash 'params' }) {
+      %== $chunk->{active} ? '<li class="selected">' : '<li>'
+      <a href="<%='#' . $chunk->{name} %>">
+        <em>
+          %= $chunk->{label}
+          <span name="<%= "/help/$path/" . $chunk->{name} %>" class="accordionHelpItem" title="Click on me to get a hint">&nbsp;</span>
+        </em>
+      </a>
+      </li>
+    % }
     </ul>
     <div class="yui-content">
-      <% foreach my $tab (@{ stash 'params' }) { %>
-        <div class="<%= $tab->{active} ? '' : 'hidden' %>">
-          <%== $tab->{content} if $tab->{content} %>
+      % foreach my $chunk (@{ stash 'params' }) { 
+        % my $id = 'tab-'. $rand;
+        
+        <div class="<%= $chunk->{active} ? '' : 'yui-hidden' %>" id="<%= $id %>">
+          % if ($chunk->{content}) {
+            %== $chunk->{content} 
+          % }
+          % elsif ($chunk->{source}) {
+            %== $self->render_partial( template => 'ajaxcontent', url => $chunk->{source}, id => $id);
+          % }
         </div>
-      <% } %>
+      % }
     </div>
-  <% } %>
+  % }
 </div>
 
-<script>
+<script type="text/javascript">
   var myTabs = new YAHOO.widget.TabView("<%= $div_id %>");
 </script>

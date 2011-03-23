@@ -1,0 +1,50 @@
+<% 
+my $path       = stash('species') || 'default';
+my $yui_root   = '/javascripts/yui/build';
+my @yui_assets = ( 'logger', 'button', 'container', 'menu', );
+my @app_assets = (
+    'header', 'body', 'footer', 'gene',
+    $path . '/header-skin',
+    $path . '/body-skin',
+    $path . '/footer-skin',
+    $path . '/gene-skin'
+);
+my @yui_js_min = (
+    'yahoo',     'yuiloader',  'container', 'menu',
+    'animation', 'element',    'logger',    'connection',
+    'json',      'tabview',    'treeview',  'selector',
+    'cookie',    'datasource', 'datatable',
+);
+my @yui_js      = ('yahoo-dom-event');
+my @yui_plugins = ( 'bubbling', 'accordion', 'dispatcher' );
+my @app_js      = ( 'menu' );
+%>
+
+<!doctype html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+        <link type="text/css" rel="stylesheet" href="<%= stylesheet_path $yui_root.'/fonts/fonts-min' %>"/>
+        <link type="text/css" rel="stylesheet" href="<%= stylesheet_path $yui_root.'/assets/skins/sam/skin' %>"/>
+        <link type="text/css" rel="stylesheet" href="<%= stylesheet_path '/javascripts/yui/plugins/accordion/assets/accordion' %>"/>
+      
+        <% foreach my $asset (@yui_assets) { %>
+           <link type="text/css" rel="stylesheet" href="<%= stylesheet_path $yui_root.'/'.$asset.'/assets/skins/sam/'.$asset %>"/>
+        <% } %>
+    
+        <%= stylesheet_link_tag $_ foreach @app_assets %>
+        <%= javascript_include_tag "yui/build/$_/$_" foreach @yui_js %>
+        <%= javascript_include_tag "yui/build/$_/$_\-min" foreach @yui_js_min %>
+        <%= javascript_include_tag "yui/plugins/$_/$_\-min" foreach @yui_plugins %>
+        <%= javascript_include_tag $_ foreach @app_js  %>
+
+        <title><%= stash 'title' %></title>
+    </head>
+    <body class="yui-skin-sam">
+    <%= $self->render_partial(template => $path.'/toolbar') %>
+    <%= $self->render_inner %>
+    <%= $self->render_partial(template => 'footer') %>
+    </body>
+</html>

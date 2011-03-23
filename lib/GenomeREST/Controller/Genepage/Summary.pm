@@ -5,131 +5,100 @@ use base 'Mojolicious::Controller';
 
 sub index {
     my ($self) = @_;
-    my $json = [
-        {
-            "name" => "info",
-            "source" => {
-                "controller" => "genepage-summary",
-                "action" => "info",
-                "url" => "/purpureum/gene/DPU_G0068768/test/summary/info",
-            },
-            "label" => "General Information"      
-        }    
+    my $id     = $self->stash('gene_id');
+    my $json   = [
+        {   "name"   => "info",
+            "source" => "/purpureum/gene/$id/test/summary/info",
+            "label"  => "General Information"
+        },
+        {   "name"   => "genomic_info",
+            "source" => "/purpureum/gene/$id/test/summary/genomic_info",
+            "label"  => "Genomic Information"
+        },
+        {   "name"   => "product",
+            "source" => "/purpureum/gene/$id/test/summary/product",
+            "label"  => "Gene Product Information"
+        }
     ];
-    if ($self->stash('format') eq 'json'){
-        $self->render_json($json);
-        $self->rendered;
-    };
-    for ( my $i = 0; $i < @$json; $i++ ) {
-        my $source = @$json->[$i]->{source};
-        
-#        @$json->[$i]->{content} = $self->render_partial( 
-#            controller => $source->{controller}, 
-#            action => $source->{action}
-#        );
-
-        @$json->[$i]->{content} = $self->client->get($source)->res->body;
-
-#        $self->client->get( $self->req->url->base . $source->{url} => sub {
-#            @$json->[$i]->{contentt} = shift->res->body;
-#        })->start;
-    }
-    use Data::Dumper;
-    $self->app->log->debug( Dumper $json );
+    $self->render_json($json) if ( $self->stash('format') eq 'json' );
     $self->stash( params => $json );
-    $self->render('genepage/summary/index');
 }
 
 sub info {
     my ($self) = @_;
-    my $json = [
-        {   "layout" => "row",
-            "items" => [
-                {   "content" => [
-                        {   "layout" => "column",
-                            "items" => [
-                                {   "content" => [
-                                        {   "layout" => "json",
-                                            "items"
-                                                => [ { "text" => "Gene Name" } ]
-                                        }
-                                    ],
-                                    "type" => "content_table_title"
-                                },
-                                {   "content" => [
-                                        {   "layout" => "json",
-                                            "items" => [
-                                                {   "text" => "<i>DPU_G0068768<\/i>"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {   "content" => [
-                        {   "layout" => "column",
-                            "items" => [
-                                {   "content" => [
-                                        {   "layout" => "json",
-                                            "items"
-                                                => [ { "text" => "Gene ID" } ]
-                                        }
-                                    ],
-                                    "type" => "content_table_title"
-                                },
-                                {   "content" => [
-                                        {   "layout" => "json",
-                                            "items" => [
-                                                { "text" => "DPU_G0068768" }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {   "content" => [
-                        {   "layout" => "column",
-                            "items" => [
-                                {   "content" => [
-                                        {   "layout" => "json",
-                                            "items" => [
-                                                {   "text" => "Community Annotations"
-                                                }
-                                            ]
-                                        }
-                                    ],
-                                    "type" => "content_table_title"
-                                },
-                                {   "content" => [
-                                        {   "layout" => "json",
-                                            "items" => [
-                                                {   "caption" => "Add an annotation for DPU_G0068768",
-                                                    "url" => "http:\/\/wiki.dictybase.org\/dictywiki\/index.php\/DPU_G0068768?action=edit",
-                                                    "type" => "outer"
-                                                },
-                                                {   "caption" => "Community Annotations Help",
-                                                    "url" => "http:\/\/wiki.dictybase.org\/dictywiki\/index.php\/Community_Annotations",
-                                                    "type" => "outer"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
+    my $id     = $self->stash('gene_id');
+    my $json   = [
+        {   "label"   => "Gene Name",
+            "content" => "<i>$id</i>"
+        },
+        {   "label"   => "Gene ID",
+            "content" => "$id"
+        },
+        {   "label"   => "Community Annotations",
+            "content" => qq{
+                <a class="outer_link" href="http://wiki.dictybase.org/dictywiki/index.php/$id?action=edit">Add an annotation for $id</a>
+                <a class="outer_link" href="http://wiki.dictybase.org/dictywiki/Community_Annotations">Community Annotations Help</a>   
+            }
         }
     ];
-    if ($self->stash('format') eq 'json'){
-        $self->render_json($json);
-    }
+    $self->render_json($json) if ( $self->stash('format') eq 'json' );
+    $self->stash( params => $json );
+}
+
+sub genomic_info {
+    my ($self) = @_;
+    my $id     = $self->stash('gene_id');
+    my $json   = [
+        {   "label" => "Location",
+            "content" =>
+                "Supercontig <b>scaffold_48</b> coordinates <b>59804</b> to <b>61242</b>, <b>Watson</b> strand"
+        },
+        {   "label"   => "Genomic Map",
+            "content" => qq{
+                [Click on the map to browse the genome from this location]<br>
+                <a href="/db/cgi-bin/ggb/gbrowse/purpureum?name=scaffold_48:59661..61385">
+                    <img src="/db/cgi-bin/ggb/gbrowse_img/purpureum?name=scaffold_48:59661..61385&width=500&type=Gene+Gene_Model+tRNA+ncRNA&keystyle=between&abs=1">
+                </a>
+            }
+        }
+    ];
+    $self->render_json($json) if ( $self->stash('format') eq 'json' );
+    $self->stash( params => $json );
+}
+
+sub product {
+    my ($self) = @_;
+    my $id     = $self->stash('gene_id');
+    my $json   = [
+        {   "label"   => "Protein Coding Gene",
+            "content" => "DPU0068769",
+        },
+        {   "label"   => "Genomic Coordinates",
+            "content" => [
+                {   "local"  => '1 - 42',
+                    "global" => "59804 - 59845"
+                },
+                {   "local"  => "303 - 1439",
+                    "global" => "60106 - 61242"
+                }
+            ],
+        },
+        {   "label"   => "Protein Length",
+            "content" => "392 aa",
+        },
+        {   "label"   => "Protein Molecular Weight",
+            "content" => "44,411.1 Da",
+        },
+        {   "label" => "More Protein Data",
+            "content" =>
+                '<a href="/purpureum/gene/DPU_G0068768/protein/DPU0068769" class="tab_link" style="">Protein sequence, domains and much more...</a>',
+        },
+        {   "label"   => "Sequence",
+            "content" => [ 'Protein', 'DNA coding sequence', 'Genomic DNA' ],
+        }
+    ];
+    $self->render_json($json) if ( $self->stash('format') eq 'json' );
+    $self->stash( params => $json );
 }
 
 1;

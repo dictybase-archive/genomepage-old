@@ -1,1 +1,1 @@
-<%= dumper $params %>
+<%= $self->render_partial('content-table') %>

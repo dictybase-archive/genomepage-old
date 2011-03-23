@@ -54,7 +54,8 @@ sub startup {
     $gene->route('/test/summary')->to('genepage-summary#index');
     $gene->route('/test/protein')->to('genepage-protein#index');
     $gene->route('/test/summary/:action')->to('genepage-summary');
-    
+    $gene->route('/test/protein/:action')->to('genepage-protein');
+        
     $gene->route('/:tab')->to('gene#tab');
     $gene->route('/:tab/:section')->to('gene#section');
     $gene->route('/:tab/:subid/:section')->to('gene#section');
@@ -68,7 +69,6 @@ sub startup {
     $datasource->password( $self->config->{database}->{password} )
         if !$datasource->has_password;
 }
-
 
 1;
 

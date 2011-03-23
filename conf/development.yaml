@@ -13,9 +13,56 @@ database:
 
 relative_url_root: '/assets'
 
-#cache:
-#    driver: File
-#    root_dir: '/home/ubuntu/dictyBase/Apps/dictygene/cache'
-#    depth: 8
-#    namespace: dictygene
-#    expires_in: '7 days'
+page :
+   content :
+      - name   : summary
+        active : true
+        content: 
+           - name    : info
+             content :
+                - name : name
+                - name : name_description
+                - name : synonyms
+                - name : id
+                - name : product
+                - name : protein_synonyms
+                - name : description
+                - name : community_annotations
+           - name    : genomic_info
+             content :
+                - name : location
+                - name : map
+                - name : notes
+           - name    : product
+             content : 
+                - name : model
+                - name : product_length
+                - name : product_weight
+                - name : sequences
+                - name : genomic_coordinates
+            - name    : associated_sequences
+              content :
+                - name : genbank_genomic_fragments
+                - name : genbank_mrna
+                - name : ests
+            - name    : promoters
+              content : 
+                 - name : promoters
+            - name    : go
+              content : 
+                 - name : molecular_function
+                 - name : biological_process
+                 - name : cellular_component
+            - name : strains
+            - name : links
+              content : 
+                 - name : expression
+                 - name : colleagues
+                 - name : dbxrefs
+            - name : summary
+              content : 
+                 - name : curation_notes
+                 - name : curation_status
+            - name : references
+      - name   : protein
+      - name   : blast

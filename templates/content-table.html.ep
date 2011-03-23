@@ -1,0 +1,15 @@
+% my $path = $species || 'default';
+<table class="content_table" width="100%">
+  % if (stash 'params') {
+    % foreach my $chunk (@{ stash 'params' }) {
+      <tr>
+        <td class="content_table_title">
+          %= $chunk->{label}
+        </td>
+        <td class="content_table_data">
+          %== $chunk->{content}
+        </td>
+      </tr>
+    % } 
+  % }
+</div>

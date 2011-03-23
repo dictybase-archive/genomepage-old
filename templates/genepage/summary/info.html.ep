@@ -1,1 +1,1 @@
-<b>Info</b>
+<%= $self->render_partial('content-table') %>
