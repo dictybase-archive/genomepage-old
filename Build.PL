@@ -2,9 +2,9 @@
 use strict;
 use warnings;
 use lib 'lib';
-use GenomeREST::Builder;
+use Modware::Build;
 
-my $builder = GenomeREST::Builder->new(
+my $builder = Modware::Build->new(
     module_name  => 'GenomeREST',
     license      => 'perl',
     dist_author  => 'Siddhartha Basu <siddhartha-basu@northwestern.edu>',
