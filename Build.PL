@@ -26,6 +26,7 @@ my $builder = Modware::Build->new(
     configure_requires => {
         'Try::Tiny'    => '0.09',
         'TAP::Harness' => '3.22',
+        'Module::Build::Chado' => '0.0011'
     },
     add_to_cleanup => ['GenomeREST-*'],
     create_readme  => 1,
