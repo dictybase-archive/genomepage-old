@@ -9,12 +9,12 @@ sub index {
     my $json = [
         {
             "name"   => "info",
-            "source" => "/purpureum/gene/$id/test/protein/info",
+            "source" => "/purpureum/gene/$id/protein/info",
             "label"  => "General Information"
         },
         {
             "name"   => "sequence",
-            "source" => "/purpureum/gene/$id/test/protein/sequence",
+            "source" => "/purpureum/gene/$id/protein/sequence",
             "label"  => "Protein Sequence"
         },
     ];

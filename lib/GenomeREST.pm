@@ -3,6 +3,7 @@ package GenomeREST;
 use strict;
 use Homology::Chado::DataSource;
 use base 'Mojolicious';
+use GenomeREST::DummyGene;
 
 # This will run once at startup
 sub startup {
@@ -14,7 +15,8 @@ sub startup {
     $self->plugin('GenomeREST::Plugin::Validate::Organism');
     $self->plugin('GenomeREST::Plugin::Validate::Gene');
     $self->plugin('GenomeREST::Plugin::DefaultHelpers');
-    
+    $self->plugin('GenomeREST::Plugin::RouteRescue');
+
     if ( defined $self->config->{cache} ) {
         ## -- add the new cache plugin
         $self->plugin(
@@ -33,7 +35,7 @@ sub startup {
 
     ## routing setup
     my $router = $self->routes();
-    my $base = $router->namespace();
+    my $base   = $router->namespace();
     $router->namespace( $base . '::Controller' );
 
     ## first brige: validate organism (species)
@@ -48,18 +50,31 @@ sub startup {
     ## second brige for gene id/name validation
     my $gene = $species->bridge('/gene/:id')->to('gene#validate');
 
-    $gene->route('/')->name('gene')->to( 'gene#index', format => 'html' );
+    $gene->route('/')->to('genepage#index');
 
-    my $test = $gene->route('/test')->to('genepage#index');
-    $gene->route('/test/summary')->to('genepage-summary#index');
-    $gene->route('/test/protein')->to('genepage-protein#index');
-    $gene->route('/test/summary/:action')->to('genepage-summary');
-    $gene->route('/test/protein/:action')->to('genepage-protein');
-        
-    $gene->route('/:tab')->to('gene#tab');
-    $gene->route('/:tab/:section')->to('gene#section');
-    $gene->route('/:tab/:subid/:section')->to('gene#section');
+    ## they killed Kenney again
+    my $resources_hash = $self->get_resources( $self->config->{page} );
+    $resources_hash = $self->assign_controllers($resources_hash);
+
+    foreach my $resource ( keys %$resources_hash ) {
+        my $root       = 'genepage';
+        my $controller = $resources_hash->{$resource}->{controller};
+        my $action     = $resources_hash->{$resource}->{action};
+
+        $root .= '-' . $controller if $controller;
+        $root .= '#' . $action     if $action;
+
+        $self->app->log->debug( $resource . ' => ' . $root );
+        $gene->route($resource)->to($root, resource => $resource );
+    }
     
+    $self->defaults( 'resources' => $resources_hash );
+
+   #    $gene->route('/')->name('gene')->to( 'gene#index', format => 'html' );
+   #    $gene->route('/:tab')->to('gene#tab');
+   #    $gene->route('/:tab/:section')->to('gene#section');
+   #    $gene->route('/:tab/:subid/:section')->to('gene#section');
+
     ## init database connection
     my $datasource = Homology::Chado::DataSource->instance;
     $datasource->dsn( $self->config->{database}->{dsn} )
@@ -68,6 +83,8 @@ sub startup {
         if !$datasource->has_user;
     $datasource->password( $self->config->{database}->{password} )
         if !$datasource->has_password;
+        
+    $self->helper( gene => sub { GenomeREST::DummyGene->new() })
 }
 
 1;

@@ -8,15 +8,15 @@ sub index {
     my $id     = $self->stash('gene_id');
     my $json   = [
         {   "name"   => "info",
-            "source" => "/purpureum/gene/$id/test/summary/info",
+            "source" => "/purpureum/gene/$id/summary/info",
             "label"  => "General Information"
         },
         {   "name"   => "genomic_info",
-            "source" => "/purpureum/gene/$id/test/summary/genomic_info",
+            "source" => "/purpureum/gene/$id/summary/genomic_info",
             "label"  => "Genomic Information"
         },
         {   "name"   => "product",
-            "source" => "/purpureum/gene/$id/test/summary/product",
+            "source" => "/purpureum/gene/$id/summary/product",
             "label"  => "Gene Product Information"
         }
     ];
