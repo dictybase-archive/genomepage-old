@@ -1,5 +1,6 @@
 #Ignore conf files
 *.conf
+*.yaml
 
 #Ignore yaml
 *.yaml
