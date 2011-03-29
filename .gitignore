@@ -5,8 +5,8 @@
 *.yaml
 
 #however exclude the sample conf
-!sample.yaml
 !fcg_conf.yaml
+!*.sample*
 
 #exclude various folder
 log
