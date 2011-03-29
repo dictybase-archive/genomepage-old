@@ -23,3 +23,5 @@ META
 
 #exclude Build.PL
 !Build.PL
+
+!lib/GenomeREST/Build

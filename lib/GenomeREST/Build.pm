@@ -1,30 +1,17 @@
-package GenomeREST::Builder;
+package GenomeREST::Build;
 use File::Spec::Functions;
 use Carp;
 use Try::Tiny;
 use DBI;
 use Class::MOP;
-use Storable qw/dclone/;
 use base qw/Module::Build::Chado/;
 
 
-__PACKAGE__->property('legacy_ddl' ,  default => sub {
-	return catfile(__PACKAGE__->current->base_dir,  'share',  'ddl',
-	'multigenome_legacy.oracle');	
-});
-
-__PACKAGE__->property('ddl' ,  default => sub {
-	return catfile(__PACKAGE__->current->base_dir,  'share',  'ddl',
-	'multigenome_chado.oracle');	
-});
-
-__PACKAGE__->property('user' => 'TEST_CHADO');
-__PACKAGE__->property('password' => 'TEST_CHADO');
-
-__PACKAGE__->property('legacy_dsn' => 'dbi:Oracle:host=192.168.60.10;sid=dictybase');
-__PACKAGE__->property('legacy_user' => 'TEST_LEGACY');
-__PACKAGE__->property('legacy_password' => 'TEST_LEGACY');
-__PACKAGE__->property('_legacy_handler');
+__PACKAGE__->add_property('legacy_ddl' );
+__PACKAGE__->add_property('legacy_dsn');
+__PACKAGE__->add_property('legacy_user');
+__PACKAGE__->add_property('legacy_password');
+__PACKAGE__->add_property('_legacy_handler');
 
 
 sub legacy_setup {
@@ -39,7 +26,8 @@ sub legacy_setup {
 
 	my $db_class = 'Module::Build::Chado::' . ucfirst lc $driver;
     Class::MOP::load_class($db_class);
-    my $legacy = $db_class->new( module_builder => $self );
+    my $legacy = $db_class->new(loader => 'GenomeREST::Build::Role::SGD');
+    $legacy->module_build($self);
     for my $attr (qw/ddl dsn user password/) {
     	my $api = 'legacy_'.$attr;
     	$legacy->$attr($self->$api);
@@ -66,7 +54,6 @@ sub ACTION_deploy_schema {
     $self->SUPER::ACTION_deploy_schema(@_);
     $self->depends_on('deploy_legacy_schema');
 }
-
 
 sub ACTION_load_fixture {
 	my ($self) = @_;
@@ -96,7 +83,6 @@ sub ACTION_prune_fixture {
     $self->config( 'is_legacy_fixture_loaded',   0 );
     $self->config( 'is_legacy_fixture_unloaded', 1 );
 }
-
 
 sub ACTION_drop_schema {
     my ($self) = @_;
