@@ -13,7 +13,7 @@ my $builder = GenomeREST::Build->new(
     dist_version => '1.4.0',
     requires     => {
         'Mojolicious'                 => '0.999938',
-        'YAML::XS'               => '0.32',
+        'YAML::XS'                    => '0.32',
         'Plack'                       => '0.9941',
         'Module::Versions'            => '0.02',
         'FCGI::Engine'                => '0.16',
@@ -34,45 +34,31 @@ my $builder = GenomeREST::Build->new(
     create_readme  => 1,
 );
 
-my ( $conf, $file );
-
 ## -- default is to use test.yaml from conf folder of the application
-if ( !$builder->dsn ) {
-    $file = catfile( $builder->base_dir, 'conf', 'test.yaml' );
-    die "test.yaml config file not found in $file !!!! Please create one\n"
-        if !-e $file;
+my $file = catfile( $builder->base_dir, 'conf', 'test.yaml' );
+die "test.yaml config file not found in $file !!!! Please create one\n"
+    if !-e $file;
 
-    $conf = LoadFile($file);
-    die "no database section found!! Please create one\n"
-        if not defined $conf->{database};
+my $conf = LoadFile($file);
+die "no database section found!! Please create one\n"
+    if not defined $conf->{database};
 
-    my $db_conf = $conf->{database};
-    $builder->dsn( $db_conf->{dsn} );
-    $builder->user( $db_conf->{user} );
-    $builder->password( $db_conf->{password} );
-}
+my $db_conf = $conf->{database};
+$builder->dsn( $db_conf->{dsn} );
+$builder->user( $db_conf->{user} );
+$builder->password( $db_conf->{password} );
 
 $builder->ddl(
     catfile( $builder->base_dir, 'share', 'ddl', 'multigenome_chado.oracle' )
 ) if !$builder->ddl;
 
-if ( !$builder->legacy_dsn ) {
-    if ( !$file ) {
-        $file = catfile( $builder->base_dir, 'conf', 'test.yaml' );
-        die
-            "test.yaml config file not found in $file !!!! Please create one\n"
-            if !-e $file;
-    }
+die "no legacy database section found!! Please create one\n"
+    if not defined $conf->{legacy_database};
 
-    $conf = $conf ? $conf : LoadFile($file);
-    die "no legacy database section found!! Please create one\n"
-        if not defined $conf->{legacy_database};
-
-    my $ldb_conf = $conf->{legacy_database};
-    $builder->legacy_dsn( $ldb_conf->{legacy_dsn} );
-    $builder->legacy_user( $ldb_conf->{legacy_user} );
-    $builder->legacy_password( $ldb_conf->{legacy_password} );
-}
+my $ldb_conf = $conf->{legacy_database};
+$builder->legacy_dsn( $ldb_conf->{legacy_dsn} );
+$builder->legacy_user( $ldb_conf->{legacy_user} );
+$builder->legacy_password( $ldb_conf->{legacy_password} );
 
 $builder->legacy_ddl(
     catfile( $builder->base_dir, 'share', 'ddl', 'multigenome_legacy.chado' )
