@@ -28,10 +28,13 @@ my $tr = SQL::Translator->new(
         db_password => $pass
     },
     to => 'Oracle',
+    quote_table_names => 0, 
+    quote_field_names => 0
 );
 
 $tr->parser( \&ora_parse );
 my $output = $tr->translate or die $tr->error;
+$output =~ s/\'SYSDATE\'/SYSDATE/mg;
 my $file = IO::File->new( $file_name, 'w' ) or die "cannot open file:$!";
 $file->print($output);
 $file->close;

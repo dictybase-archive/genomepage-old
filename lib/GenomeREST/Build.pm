@@ -25,11 +25,14 @@ sub legacy_setup {
     my $db_class = 'Module::Build::Chado::' . ucfirst lc $driver;
     Class::MOP::load_class($db_class);
     my $legacy = $db_class->new( loader => 'GenomeREST::Build::Role::SGD' );
-    $legacy->module_build($self);
+    $legacy->module_builder($self);
     for my $attr (qw/ddl dsn user password/) {
         my $api = 'legacy_' . $attr;
         $legacy->$attr( $self->$api );
     }
+    $legacy->superuser($self->legacy_user);
+    $legacy->superpassword($self->legacy_password);
+
     $self->_legacy_handler($legacy);
     $self->config( 'legacy_setup_done', 1 );
     print "done with legacy setup\n" if $self->args('test_debug');
@@ -38,7 +41,7 @@ sub legacy_setup {
 
 sub ACTION_deploy_legacy_schema {
     my ($self) = @_;
-    $self->setup_legacy;
+    $self->legacy_setup;
     $self->config( 'is_legacy_db_created', 1 );
     if ( !$self->config('is_legacy_schema_loaded') ) {
         $self->_legacy_handler->deploy_schema;
@@ -85,7 +88,7 @@ sub ACTION_prune_fixture {
 sub ACTION_drop_schema {
     my ($self) = @_;
     $self->SUPER::ACTION_drop_schema(@_);
-    $self->depends_on('legacy_setup');
+    $self->legacy_setup;
     $self->_legacy_handler->drop_schema;
     $self->config_data( 'is_legacy_schema_loaded' => 0 );
 }
