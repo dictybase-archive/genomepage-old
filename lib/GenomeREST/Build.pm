@@ -14,9 +14,9 @@ __PACKAGE__->add_property('_legacy_handler');
 
 sub legacy_setup {
     my ($self) = @_;
-    print "running legacy setup\n" if $self->args('test_debug');
+    print "running legacy setup\n" if $self->test_debug;
 
-    return if $self->config('legacy_setup_done');
+    return if $self->feature('legacy_setup_done');
 
     my ( $scheme, $driver, $attr_str, $attr_hash, $driver_dsn )
         = DBI->parse_dsn( $self->legacy_dsn )
@@ -34,19 +34,19 @@ sub legacy_setup {
     $legacy->superpassword($self->legacy_password);
 
     $self->_legacy_handler($legacy);
-    $self->config( 'legacy_setup_done', 1 );
-    print "done with legacy setup\n" if $self->args('test_debug');
+    $self->feature( 'legacy_setup_done' => 1 );
+    print "done with legacy setup\n" if $self->test_debug;
 
 }
 
 sub ACTION_deploy_legacy_schema {
     my ($self) = @_;
     $self->legacy_setup;
-    $self->config( 'is_legacy_db_created', 1 );
-    if ( !$self->config('is_legacy_schema_loaded') ) {
+    $self->feature( 'is_legacy_db_created' => 1 );
+    if ( !$self->feature('is_legacy_schema_loaded') ) {
         $self->_legacy_handler->deploy_schema;
-        $self->config('is_legacy_schema_loaded');
-        print "loaded legacy schema\n" if $self->args('test_debug');
+        $self->feature('is_legacy_schema_loaded' => 1);
+        print "loaded legacy schema\n" if $self->test_debug;
     }
 }
 
@@ -81,8 +81,8 @@ sub ACTION_prune_fixture {
     $self->SUPER::ACTION_prune_fixture(@_);
     $self->depends_on('legacy_setup');
     $self->_legacy_handler->prune_fixture;
-    $self->config( 'is_legacy_fixture_loaded',   0 );
-    $self->config( 'is_legacy_fixture_unloaded', 1 );
+    $self->feature( 'is_legacy_fixture_loaded' =>  1 );
+    $self->feature( 'is_legacy_fixture_unloaded' => 1 );
 }
 
 sub ACTION_drop_schema {
@@ -90,7 +90,7 @@ sub ACTION_drop_schema {
     $self->SUPER::ACTION_drop_schema(@_);
     $self->legacy_setup;
     $self->_legacy_handler->drop_schema;
-    $self->config_data( 'is_legacy_schema_loaded' => 0 );
+    $self->feature( 'is_legacy_schema_loaded' => 0 );
 }
 
 sub ACTION_show_properties {
