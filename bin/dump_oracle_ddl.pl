@@ -25,16 +25,19 @@ my $tr = SQL::Translator->new(
     parser_args => {
         dsn         => $dsn,
         db_user     => $user,
-        db_password => $pass
+        db_password => $pass,
+        skip_view   => 1,
+        skip_tables => [qw/chado_logs/]
     },
-    to => 'Oracle',
-    quote_table_names => 0, 
-    quote_field_names => 0
+    to                => 'Oracle',
+    quote_table_names => 0,
+    quote_field_names => 0,
 );
 
 $tr->parser( \&ora_parse );
 my $output = $tr->translate or die $tr->error;
-$output =~ s/\'SYSDATE\'/SYSDATE/mg;
+$output =~ s/\'SYSDATE\s*\'/SYSDATE/mg;
+$output =~ s/\'\'//mg;
 my $file = IO::File->new( $file_name, 'w' ) or die "cannot open file:$!";
 $file->print($output);
 $file->close;
@@ -95,10 +98,12 @@ sub ora_parse {
          where ucol.constraint_name = ? order by position asc"
     );
 
-    my $csth = $dbh->prepare(
-        "select delete_rule from user_constraints where constraint_name = ?");
-
-    my $vsth = $dbh->prepare("select view_name,  text from user_views");
+    if ( defined $args->{skip_tables} ) {
+        for my $name ( @{ $args->{skip_tables} } ) {
+            $schema->drop_table( uc $_, cascade => 1 )
+                if $schema->get_table($name);
+        }
+    }
 
     for my $table ( $schema->get_tables ) {
         my ($when_clause)
@@ -135,7 +140,7 @@ sub ora_parse {
             }
         }
 
-		# -- unique constraints
+        # -- unique constraints
         my ($ucons)
             = $dbh->selectrow_array( $uth, '', ( $table->name, $db_user ) );
         if ($ucons) {
@@ -151,23 +156,31 @@ sub ora_parse {
         }
 
         # -- foreign key constraints for adding on delete actions
+        my $csth
+            = $dbh->prepare(
+            "select delete_rule from user_constraints where constraint_name = ? and delete_rule != 'NO ACTION'"
+            );
+
         for my $fconst ( $table->fkey_constraints ) {
             my ($del_rule)
                 = $dbh->selectrow_array( $csth, '', ( uc $fconst->name ) );
-            $fconst->on_delete($del_rule);
+            $fconst->on_delete($del_rule) if defined $del_rule;
         }
     }
 
-	# -- now the views
-    $vsth->execute;
-    while ( my ( $name, $sql ) = $vsth->fetchrow_array ) {
-    	$sql =~ s/\s*$//;
-        $schema->add_view(
-            SQL::Translator::Schema::View->new(
-                name => $name,
-                sql  => $sql
-            )
-        );
+    # -- now the views
+    if ( !$args->{skip_view} ) {
+        my $vsth = $dbh->prepare("select view_name,  text from user_views");
+        $vsth->execute;
+        while ( my ( $name, $sql ) = $vsth->fetchrow_array ) {
+            $sql =~ s/\s*$//;
+            $schema->add_view(
+                SQL::Translator::Schema::View->new(
+                    name => $name,
+                    sql  => $sql
+                )
+            );
+        }
     }
 
     $dbh->disconnect;
