@@ -12,13 +12,13 @@ use namespace::autoclean;
 #
 requires 'dbh_withcommit';
 
-has 'schema' => (
+has 'legacy_schema' => (
     is         => 'rw',
     isa        => 'MOD::SGD',
     lazy_build => 1,
 );
 
-sub _build_schema {
+sub _build_legacy_schema {
     my ($self) = @_;
     MOD::SGD->connect( sub { $self->dbh_withcommit } );
 }

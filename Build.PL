@@ -63,7 +63,7 @@ $builder->legacy_password( $ldb_conf->{legacy_password} );
 $builder->legacy_ddl(
     catfile( $builder->base_dir, 'share', 'ddl', 'multigenome_legacy.oracle' )
 ) if !$builder->legacy_ddl;
-
+$builder->data_foler(catdir($builder->base_dir,  'share', 'data'));
 $builder->create_build_script();
 
 1;

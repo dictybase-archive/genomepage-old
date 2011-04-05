@@ -10,13 +10,14 @@ __PACKAGE__->add_property('legacy_ddl');
 __PACKAGE__->add_property('legacy_dsn');
 __PACKAGE__->add_property('legacy_user');
 __PACKAGE__->add_property('legacy_password');
+__PACKAGE__->add_property('data_folder');
 __PACKAGE__->add_property('_legacy_handler');
 
 sub legacy_setup {
     my ($self) = @_;
     print "running legacy setup\n" if $self->test_debug;
 
-    return if $self->feature('legacy_setup_done');
+    return if $self->config('legacy_setup_done');
 
     my ( $scheme, $driver, $attr_str, $attr_hash, $driver_dsn )
         = DBI->parse_dsn( $self->legacy_dsn )
@@ -34,7 +35,7 @@ sub legacy_setup {
     $legacy->superpassword($self->legacy_password);
 
     $self->_legacy_handler($legacy);
-    $self->feature( 'legacy_setup_done' => 1 );
+    $self->config( 'legacy_setup_done' ,  1 );
     print "done with legacy setup\n" if $self->test_debug;
 
 }
@@ -73,15 +74,17 @@ sub ACTION_unload_fixture {
     ## -- unload anything additional
 
     ## -- unload legacy fixture
-    $self->depends_on('legacy_setup');
+    $self->legacy_setup;
+    $self->feature( 'is_legacy_fixture_loaded' =>  0 );
+    $self->feature( 'is_legacy_fixture_unloaded' => 1 );
 }
 
 sub ACTION_prune_fixture {
     my ($self) = @_;
     $self->SUPER::ACTION_prune_fixture(@_);
-    $self->depends_on('legacy_setup');
+    $self->legacy_setup;
     $self->_legacy_handler->prune_fixture;
-    $self->feature( 'is_legacy_fixture_loaded' =>  1 );
+    $self->feature( 'is_legacy_fixture_loaded' =>  0 );
     $self->feature( 'is_legacy_fixture_unloaded' => 1 );
 }
 
