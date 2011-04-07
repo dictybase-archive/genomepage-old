@@ -10,6 +10,15 @@ use namespace::autoclean;
 #
 requires 'schema';
 
+has 'legacy_schema' => (
+    is      => 'ro',
+    isa     => 'MOD::SGD',
+    default => sub {
+        my ($self) = shift;
+        return $self->module_builder->_legacy_handler->legacy_schema;
+    }
+);
+
 has 'fake_chr_feature_id' => (
     is      => 'ro',
     isa     => 'Int',
@@ -158,7 +167,7 @@ sub load_chromosome {
         sub {
             return $schema->resultset('Sequence::Feature')->create(
                 {   uniquename  => $uniq_name,
-                    name        => 'Fake',
+                    name        => $self->seqobj->display_id,
                     residues    => $seqobj->seq,
                     seqlen      => $seqobj->length,
                     organism_id => $self->organism_id_from_seqobj,
@@ -193,7 +202,6 @@ sub load_contig {
     for my $feat (@contigs) {
         my $uniqname = $self->generate_uniquename;
         my $hash     = {
-            name        => 'Fake_contig_' . $uniquename,
             uniquename  => $uniquename,
             organism_id => $self->organism_id_from_seqobj,
             type_id     => $self->find_or_create_cvterm_id(
@@ -214,15 +222,20 @@ sub load_contig {
         };
 
         if ( $feat->has_tag('ID') ) {
+            my $name = [ $feat->get_tag_values('ID') ]->[0];
             $hash->{feature_dbxrefs} = [
                 {   dbxref => {
-                        accession => [ $feat->get_tag_values('ID') ]->[0],
+                        accession => $name,
                         db_id     => $self->find_or_create_db_id(
                             $self->feature_source
                         );
                     }
                 }
             ];
+            $hash->{name} = $name;
+        }
+        else {
+            $hash->{name} = 'Fake_contig_' . $uniquename,;
         }
         push @$create_array, $hash;
     }
@@ -308,6 +321,7 @@ sub load_transcript {
             featureloc_features => [
                 {   fmin          => $feat->start - 1,
                     fmax          => $feat->end,
+                    strand        => $feat->strand,
                     srcfeature_id => $self->fake_chr_feature_id
                 }
             ],
@@ -335,7 +349,7 @@ sub load_transcript {
                 return $schema->resultset('Sequence::Feature')->create($hash);
             }
         );
-        $self->_load_gene($trans_feat, $feat);
+        $self->_load_gene( $trans_feat, $feat );
         $self->_load_exons( $trans_feat, $feat );
     }
 }
@@ -343,12 +357,14 @@ sub load_transcript {
 sub _create_transcript_xrefs {
     my ( $self, $feat, $hash ) = @_;
     if ( $feat->has_tag('ID') ) {
+    	my $name = [ $feat->get_tag_values('ID') ]->[0];
         push @{ $hash->{feature_dbxrefs} }, {
             dbxref => {
-                accession => [ $feat->get_tag_values('ID') ]->[0],
+                accession => $name;
                 db_id => $self->find_or_create_db_id( $self->feature_source );
             }
         };
+        $hash->{name} = $name;
     }
 
     if ( $feat->has_tag('db_xref') ) {
@@ -360,7 +376,7 @@ sub _create_transcript_xrefs {
                     accession => $id,
                     db_id     => $db
                 }
-                };
+             };
         }
     }
 
@@ -439,8 +455,8 @@ sub _load_exons {
 
     my $create_array;
     for my $subfeat (@subloc) {
-        my $uniqname = $self->generate_uniquename;
-        my $hash     = {
+        my $uniquename = $self->generate_uniquename;
+        my $hash       = {
             name        => 'Fake_exon_' . $uniquename,
             uniquename  => $uniquename,
             organism_id => $self->organism_id_from_seqobj,
@@ -481,6 +497,67 @@ sub _load_exons {
         push @$create_array, $hash;
     }
     $self->_create_bulk_features($create_array);
+}
+
+sub _load_gene {
+    my ( $self, $chado_feat, $bio_feat ) = @_;
+
+    my $gene_name  = [ $bio_feat->get_tag_values('gene_name') ]->[0];
+    my $uniquename = $self->generate_uniquename('DDB_G');
+
+    my $create_hash = {
+        name        => $gene_name,
+        uniquename  => $uniquename,
+        organism_id => $self->organism_id_from_seqobj,
+        type_id     => $self->find_or_create_cvterm_id(
+            cv     => 'sequence',
+            cvterm => 'gene'
+        ),
+        dbxref => {
+            accession => $uniquename,
+            db_id => $self->find_or_create_db_id( $self->dicty_db_namespace )
+        },
+        featureloc_features => [
+            {   fmin          => $bio_feat->start - 1,
+                fmax          => $bio_feat->end,
+                strand        => $bio_feat->strand,
+                srcfeature_id => $self->fake_chr_feature_id
+            }
+        ],
+        feature_relationship_objects => [
+            {   subject_id => $chado_feat->feature_id,
+                type_id    => $self->find_or_create_cvterm_id(
+                    cv     => 'relationship',
+                    cvterm => 'part_of'
+                )
+            }
+        ]
+    };
+
+    my $gene_feat = $self->schema->txn_do(
+        sub {
+            return $self->schema->resultset('Sequence::Feature')
+                ->create($hash);
+        }
+    );
+
+    ## -- gene product
+    my $legacy_schema = $self->legacy_schema;
+    if ( $bio_feat->has_tag('gene_product') ) {
+        for my $prod ( $bio_feat->get_tag_values('gene_product') ) {
+            $legacy_schema->txn_do(
+                sub {
+                    my $row = $legacy_schema->resultset('GeneProduct')
+                        ->create( { gene_product => $prod } );
+                    $legacy_schema->resultset('LocusGp')->create(
+                        {   locus_no        => $gene_feat->feature_id,
+                            gene_product_no => $row->gene_product_no
+                        }
+                    );
+                }
+            );
+        }
+    }
 }
 
 sub _create_bulk_features {
