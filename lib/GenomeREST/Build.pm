@@ -10,8 +10,8 @@ __PACKAGE__->add_property('legacy_ddl');
 __PACKAGE__->add_property('legacy_dsn');
 __PACKAGE__->add_property('legacy_user');
 __PACKAGE__->add_property('legacy_password');
-__PACKAGE__->add_property('data_folder');
 __PACKAGE__->add_property('_legacy_handler');
+__PACKAGE__->add_property('feature_fixture');
 
 sub legacy_setup {
     my ($self) = @_;
@@ -26,16 +26,17 @@ sub legacy_setup {
     my $db_class = 'Module::Build::Chado::' . ucfirst lc $driver;
     Class::MOP::load_class($db_class);
     my $legacy = $db_class->new( loader => 'GenomeREST::Build::Role::SGD' );
+    $legacy->add_extra_loader('GenomeREST::Build::Role::Dicty');
     $legacy->module_builder($self);
     for my $attr (qw/ddl dsn user password/) {
         my $api = 'legacy_' . $attr;
         $legacy->$attr( $self->$api );
     }
-    $legacy->superuser($self->legacy_user);
-    $legacy->superpassword($self->legacy_password);
+    $legacy->superuser( $self->legacy_user );
+    $legacy->superpassword( $self->legacy_password );
 
     $self->_legacy_handler($legacy);
-    $self->config( 'legacy_setup_done' ,  1 );
+    $self->config( 'legacy_setup_done', 1 );
     print "done with legacy setup\n" if $self->test_debug;
 
 }
@@ -46,7 +47,7 @@ sub ACTION_deploy_legacy_schema {
     $self->feature( 'is_legacy_db_created' => 1 );
     if ( !$self->feature('is_legacy_schema_loaded') ) {
         $self->_legacy_handler->deploy_schema;
-        $self->feature('is_legacy_schema_loaded' => 1);
+        $self->feature( 'is_legacy_schema_loaded' => 1 );
         print "loaded legacy schema\n" if $self->test_debug;
     }
 }
@@ -62,7 +63,16 @@ sub ACTION_load_fixture {
     $self->depends_on('deploy_schema');
     $self->SUPER::ACTION_load_fixture(@_);
 
-    ## -- now load additional data
+    if ( !$self->feature('legacy_fixture_loaded') ) {
+        my $handler = $self->_legacy_handler;
+        ## -- now load fixtures for dicty chado
+        $handler->load_chromosome;
+        $handler->load_gap;
+        $handler->load_contig
+            ;    #this involves loading of genes,  exons and proteins as well
+        $handler->load_transcript;
+        $self->feature( 'is_legacy_fixture_loaded' => 1 );
+    }
 
     ## -- then load fixtures for legacy schema
 }
@@ -75,8 +85,7 @@ sub ACTION_unload_fixture {
 
     ## -- unload legacy fixture
     $self->legacy_setup;
-    $self->feature( 'is_legacy_fixture_loaded' =>  0 );
-    $self->feature( 'is_legacy_fixture_unloaded' => 1 );
+    $self->feature( 'is_legacy_fixture_loaded'   => 0 );
 }
 
 sub ACTION_prune_fixture {
@@ -84,8 +93,7 @@ sub ACTION_prune_fixture {
     $self->SUPER::ACTION_prune_fixture(@_);
     $self->legacy_setup;
     $self->_legacy_handler->prune_fixture;
-    $self->feature( 'is_legacy_fixture_loaded' =>  0 );
-    $self->feature( 'is_legacy_fixture_unloaded' => 1 );
+    $self->feature( 'is_legacy_fixture_loaded'   => 0 );
 }
 
 sub ACTION_drop_schema {

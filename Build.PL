@@ -32,6 +32,10 @@ my $builder = GenomeREST::Build->new(
     },
     add_to_cleanup => ['GenomeREST-*'],
     create_readme  => 1,
+    get_options    => {
+        data_folder => { type => ':s' },
+        ddl_folder  => { type => ':s' }
+    }
 );
 
 ## -- default is to use test.yaml from conf folder of the application
@@ -42,28 +46,34 @@ die "test.yaml config file not found in $file !!!! Please create one\n"
 my $conf = LoadFile($file);
 die "no database section found!! Please create one\n"
     if not defined $conf->{database};
-
 my $db_conf = $conf->{database};
 $builder->dsn( $db_conf->{dsn} );
 $builder->user( $db_conf->{user} );
 $builder->password( $db_conf->{password} );
 
-$builder->ddl(
-    catfile( $builder->base_dir, 'share', 'ddl', 'multigenome_chado.oracle' )
-) if !$builder->ddl;
-
 die "no legacy database section found!! Please create one\n"
     if not defined $conf->{legacy_database};
-
 my $ldb_conf = $conf->{legacy_database};
 $builder->legacy_dsn( $ldb_conf->{legacy_dsn} );
 $builder->legacy_user( $ldb_conf->{legacy_user} );
 $builder->legacy_password( $ldb_conf->{legacy_password} );
 
+$builder->args(
+    'data_folder' => catdir( $builder->base_dir, 'share', 'data' ) )
+    if !$builder->args('data_folder');
+$builder->args(
+    'ddl_folder' => catfile( $builder->base_dir, 'share', 'ddl' ) )
+    if !$builder->args('ddl_folder');
+
+$builder->feature_fixture(
+    catfile( $builder->args('data_folder'), 'fake_chr.gb' ) )
+    if !$builder->feature_fixture;
+$builder->ddl(
+    catfile( $builder->args('ddl_folder'), 'multigenome_chado.oracle' ) )
+    if !$builder->ddl;
 $builder->legacy_ddl(
-    catfile( $builder->base_dir, 'share', 'ddl', 'multigenome_legacy.oracle' )
-) if !$builder->legacy_ddl;
-$builder->data_foler(catdir($builder->base_dir,  'share', 'data'));
+    catfile( $builder->args('ddl_folder'), 'multigenome_legacy.oracle' ) )
+    if !$builder->legacy_ddl;
 $builder->create_build_script();
 
 1;

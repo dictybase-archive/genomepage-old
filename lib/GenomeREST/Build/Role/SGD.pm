@@ -10,6 +10,8 @@ use namespace::autoclean;
 
 # Module implementation
 #
+with 'Module::Build::Chado::Role::HelperWithBcs';
+
 requires 'dbh_withcommit';
 
 has 'legacy_schema' => (

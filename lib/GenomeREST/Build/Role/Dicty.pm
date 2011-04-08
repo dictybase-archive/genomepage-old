@@ -8,14 +8,13 @@ use namespace::autoclean;
 
 # Module implementation
 #
-requires 'schema';
-
-has 'legacy_schema' => (
+has 'schema' => (
     is      => 'ro',
-    isa     => 'MOD::SGD',
+    isa     => 'Bio::Chado::Schema',
+    lazy    => 1,
     default => sub {
         my ($self) = shift;
-        return $self->module_builder->_legacy_handler->legacy_schema;
+        return $self->module_builder->_handler->schema;
     }
 );
 
@@ -52,7 +51,7 @@ has '_organism_rows' => (
     is      => 'rw',
     isa     => 'HashRef[Bio::Chado::Schema::Organism::Organism]',
     traits  => [qw/Hash/],
-    handler => {
+    handles => {
         'get_organism_row'   => 'get',
         'set_organism_row'   => 'set',
         'exist_organism_row' => 'defined'
@@ -63,9 +62,9 @@ has '_organism_rows' => (
 
 sub _build_organism_rows {
     my ($self) = @_;
-    my $rs = $self->schema->resulset('Organism::Organism')->search( {} );
+    my $rs = $self->schema->resultset('Organism::Organism')->search( {} );
     my $hash = {};
-    while ( $row = $rs->next ) {
+    while ( my $row = $rs->next ) {
         $hash->{ $row->genus . $row->species } = $row;
     }
     return $hash;
@@ -78,7 +77,7 @@ sub find_or_create_organism_id {
         species => { isa => 'Str' }
     );
     my $str = $genus . $species;
-    if ( $self->has_organism_row($str) ) {
+    if ( $self->exist_organism_row($str) ) {
         return $self->get_organism_row($str)->organism_id;
     }
 
@@ -100,8 +99,8 @@ sub organism_id_from_seqobj {
     my ($self) = @_;
     my $seqobj = $self->seqobj;
     my $org_id = $self->find_or_create_organism_id(
-        genus   => $seqobj->genus,
-        species => $seqobj->species
+        genus   => $seqobj->species->genus,
+        species => $seqobj->species->species
     );
 
 }
@@ -127,8 +126,7 @@ has 'seqobj' => (
     default => sub {
         my ($self) = @_;
         my $seqio = Bio::SeqIO->new(
-            -file =>
-                catfile( $self->module_builder->data_folder, 'fake_chr.gb' ),
+            -file   => $self->module_builder->feature_fixture,
             -format => 'genbank'
         );
         return $seqio->next_seq;
@@ -149,7 +147,7 @@ sub generate_uniquename {
     $seq_name = 'SQ_' . uc $seq_name;
 
     my $nextval = $schema->storage->dbh->selectcol_arrayref(
-        "SELECT $seq_no.NEXTVAL FROM DUAL")->[0];
+        "SELECT $seq_name.NEXTVAL FROM DUAL")->[0];
 
     return $id_prefix . sprintf( "%07d", $nextval );
 }
@@ -168,8 +166,8 @@ sub load_chromosome {
             return $schema->resultset('Sequence::Feature')->create(
                 {   uniquename  => $uniq_name,
                     name        => $self->seqobj->display_id,
-                    residues    => $seqobj->seq,
-                    seqlen      => $seqobj->length,
+                    residues    => $self->seqobj->seq,
+                    seqlen      => $self->seqobj->length,
                     organism_id => $self->organism_id_from_seqobj,
                     type_id     => $cvterm_id,
                     dbxref      => {
@@ -200,8 +198,9 @@ sub load_contig {
         $self->seqobj->get_SeqFeatures();
 
     for my $feat (@contigs) {
-        my $uniqname = $self->generate_uniquename;
-        my $hash     = {
+        my $uniquename = $self->generate_uniquename;
+        my $hash       = {
+            name        => 'Fake_contig_' . $uniquename,
             uniquename  => $uniquename,
             organism_id => $self->organism_id_from_seqobj,
             type_id     => $self->find_or_create_cvterm_id(
@@ -228,14 +227,11 @@ sub load_contig {
                         accession => $name,
                         db_id     => $self->find_or_create_db_id(
                             $self->feature_source
-                        );
+                        )
                     }
                 }
             ];
             $hash->{name} = $name;
-        }
-        else {
-            $hash->{name} = 'Fake_contig_' . $uniquename,;
         }
         push @$create_array, $hash;
     }
@@ -252,9 +248,9 @@ sub load_gap {
         $self->seqobj->get_SeqFeatures();
 
     for my $i ( 0 .. $#gaps ) {
-        my $feat     = $gaps[$i];
-        my $uniqname = $self->generate_uniquename;
-        my $hash     = {
+        my $feat       = $gaps[$i];
+        my $uniquename = $self->generate_uniquename;
+        my $hash       = {
             name        => 'Fake_gap_' . $uniquename,
             uniquename  => $uniquename,
             organism_id => $self->organism_id_from_seqobj,
@@ -299,7 +295,7 @@ sub load_transcript {
 
     for my $i ( 0 .. $#transcripts ) {
         my $feat        = $transcripts[$i];
-        my $uniqname    = $self->generate_uniquename;
+        my $uniquename  = $self->generate_uniquename;
         my $feat_source = [ $feat->get_tag_values('source') ]->[0];
         if ( $self->dicty_db_namespace ne 'dictyBase' ) {
             $feat_source =~ s/dictyBase/$self->dicty_db_namespace/g;
@@ -337,10 +333,10 @@ sub load_transcript {
         };
 
         ## -- few more feature dbxrefs
-        $self->_create_transcript_xrefs( $feat, $hash );
+        $self->_add_transcript_xrefs( $feat, $hash );
 
         ## -- feature properties
-        $self->_create_transcript_props( $feat, $hash );
+        $self->_add_transcript_props( $feat, $hash );
 
         ## -- now create the transcript feature
         my $schema     = $self->schema;
@@ -354,16 +350,17 @@ sub load_transcript {
     }
 }
 
-sub _create_transcript_xrefs {
+sub _add_transcript_xrefs {
     my ( $self, $feat, $hash ) = @_;
     if ( $feat->has_tag('ID') ) {
-    	my $name = [ $feat->get_tag_values('ID') ]->[0];
-        push @{ $hash->{feature_dbxrefs} }, {
+        my $name = [ $feat->get_tag_values('ID') ]->[0];
+        push @{ $hash->{feature_dbxrefs} },
+            {
             dbxref => {
-                accession => $name;
-                db_id => $self->find_or_create_db_id( $self->feature_source );
+                accession => $name,
+                db_id => $self->find_or_create_db_id( $self->feature_source )
             }
-        };
+            };
         $hash->{name} = $name;
     }
 
@@ -376,13 +373,13 @@ sub _create_transcript_xrefs {
                     accession => $id,
                     db_id     => $db
                 }
-             };
+                };
         }
     }
 
 }
 
-sub _create_transcript_props {
+sub _add_transcript_props {
     my ( $self, $feat, $hash ) = @_;
     my $rank              = 0;
     my $translation_start = 1;
@@ -537,7 +534,7 @@ sub _load_gene {
     my $gene_feat = $self->schema->txn_do(
         sub {
             return $self->schema->resultset('Sequence::Feature')
-                ->create($hash);
+                ->create($create_hash);
         }
     );
 
