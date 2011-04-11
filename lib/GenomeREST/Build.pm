@@ -12,6 +12,12 @@ __PACKAGE__->add_property('legacy_user');
 __PACKAGE__->add_property('legacy_password');
 __PACKAGE__->add_property('_legacy_handler');
 __PACKAGE__->add_property('feature_fixture');
+__PACKAGE__->add_property('dbname',  check => sub {
+	my ($self) = @_;
+	return 1 if defined $_;
+	$self->property_error("dbname is not set");
+	return 0;
+});
 
 sub legacy_setup {
     my ($self) = @_;
@@ -28,6 +34,7 @@ sub legacy_setup {
     my $legacy = $db_class->new( loader => 'GenomeREST::Build::Role::SGD' );
     $legacy->add_extra_loader('GenomeREST::Build::Role::Dicty');
     $legacy->module_builder($self);
+    $legacy->db_namespace($self->dbname);
     for my $attr (qw/ddl dsn user password/) {
         my $api = 'legacy_' . $attr;
         $legacy->$attr( $self->$api );
@@ -72,6 +79,7 @@ sub ACTION_load_fixture {
             ;    #this involves loading of genes,  exons and proteins as well
         $handler->load_transcript;
         $self->feature( 'is_legacy_fixture_loaded' => 1 );
+        print "loaded legacy fixtures\n" if $self->test_debug;
     }
 
     ## -- then load fixtures for legacy schema
@@ -101,6 +109,7 @@ sub ACTION_drop_schema {
     $self->SUPER::ACTION_drop_schema(@_);
     $self->legacy_setup;
     $self->_legacy_handler->drop_schema;
+    $self->feature( 'is_legacy_fixture_loaded'   => 0 );
     $self->feature( 'is_legacy_schema_loaded' => 0 );
 }
 

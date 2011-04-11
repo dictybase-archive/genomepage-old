@@ -4,6 +4,7 @@ package GenomeREST::Build::Role::Dicty;
 use Moose::Role;
 use Bio::SeqIO;
 use MooseX::Params::Validate;
+use Carp::Always;
 use namespace::autoclean;
 
 # Module implementation
@@ -25,7 +26,7 @@ has 'fake_chr_feature_id' => (
     default => sub {
         my ($self) = @_;
         return $self->schema->resultset('Sequence::Feature')
-            ->find( { name => 'Fake' } )->feature_id;
+            ->find( { name => $self->seqobj->display_id } )->feature_id;
     }
 );
 
@@ -34,15 +35,17 @@ has 'dicty_db_namespace' => (
     isa     => 'Maybe[Str]',
     default => sub {
         my ($self) = @_;
-        return 'DB:' . $self->db_namespace
-            if $self->has_db_namespace;
-    }
+        $self->has_db_namespace
+            ? return 'DB:' . $self->db_namespace
+            : return 'DB:dictyBase';
+    },
+    lazy => 1
 );
 
 has 'db_namespace' => (
     is        => 'rw',
-    isa       => 'Str',
-    predicate => 'has_db_namespace'
+    isa       => 'Maybe[Str]',
+    predicate => 'has_db_namespace',
 );
 
 has 'feature_source' => ( is => 'rw', isa => 'Str', default => 'GFF_source' );
@@ -53,7 +56,7 @@ has '_organism_rows' => (
     traits  => [qw/Hash/],
     handles => {
         'get_organism_row'   => 'get',
-        'set_organism_row'   => 'set',
+        'add_organism_row'   => 'set',
         'exist_organism_row' => 'defined'
     },
     builder => '_build_organism_rows',
@@ -62,7 +65,11 @@ has '_organism_rows' => (
 
 sub _build_organism_rows {
     my ($self) = @_;
-    my $rs = $self->schema->resultset('Organism::Organism')->search( {} );
+    my $rs
+        = $self->schema->resultset('Organism::Organism')
+        ->search( {},
+        { select => [qw/genus species common_name organism_id/] } );
+
     my $hash = {};
     while ( my $row = $rs->next ) {
         $hash->{ $row->genus . $row->species } = $row;
@@ -143,7 +150,7 @@ sub generate_uniquename {
     my ($column)  = $rs_source->primary_columns;
     my $seq_name  = $rs_source->column_info($column)->{sequence};
 
-    $seq_name =~ s/\_seq//;
+    $seq_name =~ s{\_seq$}{}i;
     $seq_name = 'SQ_' . uc $seq_name;
 
     my $nextval = $schema->storage->dbh->selectcol_arrayref(
@@ -371,7 +378,7 @@ sub _add_transcript_xrefs {
                 {
                 dbxref => {
                     accession => $id,
-                    db_id     => $db
+                    db_id     => $self->find_or_create_db_id($db)
                 }
                 };
         }
@@ -542,10 +549,14 @@ sub _load_gene {
     my $legacy_schema = $self->legacy_schema;
     if ( $bio_feat->has_tag('gene_product') ) {
         for my $prod ( $bio_feat->get_tag_values('gene_product') ) {
+            my $row = $legacy_schema->txn_do(
+                sub {
+                    return $legacy_schema->resultset('GeneProduct')
+                        ->create( { gene_product => $prod } );
+                }
+            );
             $legacy_schema->txn_do(
                 sub {
-                    my $row = $legacy_schema->resultset('GeneProduct')
-                        ->create( { gene_product => $prod } );
                     $legacy_schema->resultset('LocusGp')->create(
                         {   locus_no        => $gene_feat->feature_id,
                             gene_product_no => $row->gene_product_no
@@ -553,6 +564,7 @@ sub _load_gene {
                     );
                 }
             );
+
         }
     }
 }

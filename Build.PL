@@ -74,6 +74,8 @@ $builder->ddl(
 $builder->legacy_ddl(
     catfile( $builder->args('ddl_folder'), 'multigenome_legacy.oracle' ) )
     if !$builder->legacy_ddl;
+$builder->dbname('dictyBaseDP') if !$builder->dbname;
+
 $builder->create_build_script();
 
 1;
