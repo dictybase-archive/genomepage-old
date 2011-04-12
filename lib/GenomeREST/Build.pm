@@ -104,6 +104,17 @@ sub ACTION_prune_fixture {
     $self->feature( 'is_legacy_fixture_loaded'   => 0 );
 }
 
+sub ACTION_test {
+    my ($self) = @_;
+    my $existing_mode = $ENV{MOJO_MODE} ? $ENV{MOJO_MODE}: undef;
+    my $existing_log = $ENV{MOJO_LOG_LEVEL} ? $ENV{MOJO_LOG_LEVEL}: undef;
+    $ENV{MOJO_MODE} = 'test';
+    $ENV{MOJO_LOG_LEVEL} = 'error';
+    $self->SUPER::ACTION_test(@_);
+    $ENV{MOJO_MODE} = $existing_mode;
+    $ENV{MOJO_LOG_LEVEL} = $existing_log;
+}
+
 sub ACTION_drop_schema {
     my ($self) = @_;
     $self->SUPER::ACTION_drop_schema(@_);
