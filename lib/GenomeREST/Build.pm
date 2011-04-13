@@ -12,12 +12,15 @@ __PACKAGE__->add_property('legacy_user');
 __PACKAGE__->add_property('legacy_password');
 __PACKAGE__->add_property('_legacy_handler');
 __PACKAGE__->add_property('feature_fixture');
-__PACKAGE__->add_property('dbname',  check => sub {
-	my ($self) = @_;
-	return 1 if defined $_;
-	$self->property_error("dbname is not set");
-	return 0;
-});
+__PACKAGE__->add_property(
+    'dbname',
+    check => sub {
+        my ($self) = @_;
+        return 1 if defined $_;
+        $self->property_error("dbname is not set");
+        return 0;
+    }
+);
 
 sub legacy_setup {
     my ($self) = @_;
@@ -34,7 +37,7 @@ sub legacy_setup {
     my $legacy = $db_class->new( loader => 'GenomeREST::Build::Role::SGD' );
     $legacy->add_extra_loader('GenomeREST::Build::Role::Dicty');
     $legacy->module_builder($self);
-    $legacy->db_namespace($self->dbname);
+    $legacy->db_namespace( $self->dbname );
     for my $attr (qw/ddl dsn user password/) {
         my $api = 'legacy_' . $attr;
         $legacy->$attr( $self->$api );
@@ -93,7 +96,7 @@ sub ACTION_unload_fixture {
 
     ## -- unload legacy fixture
     $self->legacy_setup;
-    $self->feature( 'is_legacy_fixture_loaded'   => 0 );
+    $self->feature( 'is_legacy_fixture_loaded' => 0 );
 }
 
 sub ACTION_prune_fixture {
@@ -101,18 +104,18 @@ sub ACTION_prune_fixture {
     $self->SUPER::ACTION_prune_fixture(@_);
     $self->legacy_setup;
     $self->_legacy_handler->prune_fixture;
-    $self->feature( 'is_legacy_fixture_loaded'   => 0 );
+    $self->feature( 'is_legacy_fixture_loaded' => 0 );
 }
 
 sub ACTION_test {
     my ($self) = @_;
-    my $existing_mode = $ENV{MOJO_MODE} ? $ENV{MOJO_MODE}: undef;
-    my $existing_log = $ENV{MOJO_LOG_LEVEL} ? $ENV{MOJO_LOG_LEVEL}: undef;
-    $ENV{MOJO_MODE} = 'test';
+    my $existing_mode = $ENV{MOJO_MODE}      ? $ENV{MOJO_MODE}      : undef;
+    my $existing_log  = $ENV{MOJO_LOG_LEVEL} ? $ENV{MOJO_LOG_LEVEL} : undef;
+    $ENV{MOJO_MODE}      = 'test';
     $ENV{MOJO_LOG_LEVEL} = 'error';
     $self->SUPER::ACTION_test(@_);
-    $ENV{MOJO_MODE} = $existing_mode;
-    $ENV{MOJO_LOG_LEVEL} = $existing_log;
+    $ENV{MOJO_MODE}      = $existing_mode;
+    $ENV{MOJO_LOG_LEVEL} = $existing_log if $existing_log;
 }
 
 sub ACTION_drop_schema {
@@ -120,8 +123,8 @@ sub ACTION_drop_schema {
     $self->SUPER::ACTION_drop_schema(@_);
     $self->legacy_setup;
     $self->_legacy_handler->drop_schema;
-    $self->feature( 'is_legacy_fixture_loaded'   => 0 );
-    $self->feature( 'is_legacy_schema_loaded' => 0 );
+    $self->feature( 'is_legacy_fixture_loaded' => 0 );
+    $self->feature( 'is_legacy_schema_loaded'  => 0 );
 }
 
 sub ACTION_show_properties {
@@ -133,6 +136,23 @@ sub ACTION_show_properties {
     {
         print $prop, " => ", $self->$prop, "\n" if $self->$prop;
     }
+}
+
+sub fixture {
+    my ($self) = @_;
+    Class::MOP::load_class('GenomeREST::Build::Fixture');
+    return GenomeREST::Build::Fixture->new(
+        chado_handler  => $self->_handler,
+        legacy_handler => $self->_legacy_handler
+    );
+
+}
+
+sub all_organisms {
+	my ($self) = @_;
+	$self->ACTION_setup;
+	$self->legacy_setup;
+	return $self->_legacy_handler->all_organism_rows;
 }
 
 1;

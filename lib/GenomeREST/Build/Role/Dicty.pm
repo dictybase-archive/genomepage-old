@@ -57,7 +57,8 @@ has '_organism_rows' => (
     handles => {
         'get_organism_row'   => 'get',
         'add_organism_row'   => 'set',
-        'exist_organism_row' => 'defined'
+        'exist_organism_row' => 'defined',
+        'all_organism_rows'  => 'values'
     },
     builder => '_build_organism_rows',
     lazy    => 1

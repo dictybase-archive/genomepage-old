@@ -1,4 +1,4 @@
-% layout 'default', title => 'Genomic resource for D.purpureum' ;
+% layout 'default', title => 'Genomic resource for ' . stash('abbreviation') ;
 
 <div class="wrapper threecol">
     <div id="subnav">

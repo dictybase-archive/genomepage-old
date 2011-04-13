@@ -67,50 +67,6 @@ sub contig {
     $self->render( template => $self->stash('species') . '/contig' );
 }
 
-sub contig_with_page {
-    my ($self) = @_;
-    my $data;
-    my $model = $self->app->modware->handler;
-
-    my $rs = $model->resultset('Sequence::Feature');
-
-    my $contig_rs = $rs->search(
-        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
-        {   join => [
-                'type',
-                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
-            ],
-            select => [ 'me.feature_id', 'me.name', { count => 'feature_id', -as => 'gene_count' }, ],
-            group_by => [ 'me.feature_id', 'me.name' ],
-            having   => \'count(feature_id) > 0',
-            order_by => { -asc => 'me.feature_id' },
-            rows     => 50,
-            page     => $self->stash('page')
-        }
-    );
-
-    while ( my $contig = $contig_rs->next ) {
-        push @$data,
-            [
-            $contig->name,
-            $rs->find(
-                { feature_id => $contig->feature_id },
-                {   select => { length => 'residues' },
-                    as     => 'seqlength'
-                }
-                )->get_column('seqlength'),
-            $contig->get_column('gene_count')
-            ];
-    }
-
-    $self->stash(
-        dataset  => $data,
-        pager    => $contig_rs->pager,
-        url_path => 'contig'
-    );
-    $self->render( template => $self->stash('species') . '/contig' );
-}
-
 sub download {
     my ($self) = @_;
     my $dispatcher = Mojolicious::Static->new(
