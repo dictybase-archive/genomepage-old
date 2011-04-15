@@ -81,6 +81,7 @@ sub ACTION_load_fixture {
         $handler->load_contig
             ;    #this involves loading of genes,  exons and proteins as well
         $handler->load_transcript;
+        $handler->create_homology_group;
         $self->feature( 'is_legacy_fixture_loaded' => 1 );
         print "loaded legacy fixtures\n" if $self->test_debug;
     }
@@ -114,7 +115,7 @@ sub ACTION_test {
     $ENV{MOJO_MODE}      = 'test';
     $ENV{MOJO_LOG_LEVEL} = 'error';
     $self->SUPER::ACTION_test(@_);
-    $ENV{MOJO_MODE}      = $existing_mode;
+    $ENV{MOJO_MODE}      = $existing_mode if $existing_mode;
     $ENV{MOJO_LOG_LEVEL} = $existing_log if $existing_log;
 }
 
