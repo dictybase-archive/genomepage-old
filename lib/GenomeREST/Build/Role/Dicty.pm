@@ -579,5 +579,68 @@ sub _create_bulk_features {
     );
 }
 
+sub create_homology_group {
+    my $self   = shift;
+    my $schema = $self->schema;
+
+    my $group_organism_id = $self->find_or_create_organism_id(
+        genus   => 'cellular',
+        species => 'organisms'
+    );
+
+    my $cvterm_rs =
+        $schema->resultset('Cv::Cvterm')
+        ->search( { 'cv.name' => 'sequence' }, { join => 'cv' } );
+
+    my $group_cvterm = $cvterm_rs->find( { 'name' => 'gene_group' } );
+    die '"gene_group" cvterm not found, cannot proceed' if !$group_cvterm;
+
+    my $member_of_cvterm = $cvterm_rs->find( { 'name' => 'member_of' } );
+    die '"member_of" cvterm not found, cannot proceed' if !$group_cvterm;
+
+    my $analysis_name = 'test_orthology';
+    my $program       = 'Inparanoid';
+    my $version       = '7.0';
+
+    my $analysis = $schema->resultset('Companalysis::Analysis')->create(
+        {   name           => $analysis_name,
+            program        => $program,
+            programversion => $version,
+        }
+    );
+    my $grouping_feature = $schema->resultset('Sequence::Feature')->create(
+        {   organism_id => $group_organism_id,
+            name        => 'test_orthology',
+            type_id     => $group_cvterm->cvterm_id,
+            is_analysis => 1,
+            uniquename  => '_' 
+                . $program . '_' 
+                . $version . '_'
+                . $analysis_name,
+            analysisfeatures => [ { analysis_id => $analysis->id } ]
+        }
+    );
+
+    my @members;
+    push @members,
+        $schema->resultset('Sequence::Feature')
+        ->search( { 'me.name' => 'test_CURATED', 'type.name' => 'gene' },
+        { join => 'type' } )->first;
+    push @members,
+        $schema->resultset('Sequence::Feature')
+        ->search( { 'me.name' => 'test_cbpD2', 'type.name' => 'gene' },
+        { join => 'type' } )->first;
+
+    foreach my $member (@members) {
+        $schema->resultset('Sequence::FeatureRelationship')
+            ->find_or_create(
+            {   subject_id => $member->feature_id,
+                object_id  => $grouping_feature->feature_id,
+                type_id    => $member_of_cvterm->cvterm_id
+            }
+            );
+    }
+}
+
 1;    # Magic true value required at end of module
 
