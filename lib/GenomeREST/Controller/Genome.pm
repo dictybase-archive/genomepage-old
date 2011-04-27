@@ -2,6 +2,8 @@ package GenomeREST::Controller::Genome;
 
 use warnings;
 use strict;
+use File::Spec::Functions;
+use Mojolicious::Static;
 use base 'Mojolicious::Controller';
 
 sub index {
@@ -80,7 +82,10 @@ sub contig_with_page {
                 'type',
                 { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
             ],
-            select => [ 'me.feature_id', 'me.name', { count => 'feature_id', -as => 'gene_count' }, ],
+            select => [
+                'me.feature_id', 'me.name',
+                { count => 'feature_id', -as => 'gene_count' },
+            ],
             group_by => [ 'me.feature_id', 'me.name' ],
             having   => \'count(feature_id) > 0',
             order_by => { -asc => 'me.feature_id' },
@@ -113,24 +118,27 @@ sub contig_with_page {
 
 sub download {
     my ($self) = @_;
-    my $dispatcher = Mojolicious::Static->new(
-        prefix => '/bulkfile',
-        root   => $self->app->config->{download}
-    );
-
-    if ( $self->req->param('file') ) {
-        my $file = $self->stash('species') . '/' . $self->req->param('file');
-        $dispatcher->serve( $self, $file );
-        $self->redirect_to( $self->url_for );
+    my $filename = $self->req->param('file');
+    if ($filename) {
+        my $dispatcher = Mojolicious::Static->new;
+        $dispatcher->root(
+            catdir( $self->app->config->{download}, $self->stash('species') )
+        );
+        $self->res->headers->content_disposition(
+            qq{'attatchment; filename="$filename"'} );
+        $dispatcher->serve( $self, $filename );
+        $self->rendered;
     }
-    $self->render( template => $self->stash('species') . '/download' );
+    else {
+        $self->render( template => $self->stash('species') . '/download' );
+    }
 }
 
 sub validate {
     my ($self) = @_;
     my $name = $self->stash('name');
     if ( !$self->check_organism($name) ) {
-        $self->render_not_found;    
+        $self->render_not_found;
         return;
     }
     1;
