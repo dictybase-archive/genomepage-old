@@ -7,11 +7,11 @@ use GenomeREST::Builder;
 my $builder = GenomeREST::Builder->new(
     module_name  => 'GenomeREST',
     license      => 'perl',
-    dist_author  => 'Siddhartha Basu <siddhartha-basu@northwestern.edu>',
-    dist_version => '1.4.0',
+    dist_author  => 'Yulia Bushmanova <y-bushmanova@northwestern.edu>',
+    dist_version => '1.4.1',
     requires     => {
-        'Mojolicious'                 => '0.999938',
-        'YAML::LibYAML'               => '0.32',
+        'Mojolicious'                 => '1.21',
+        'YAML::XS'                    => '',
         'Plack'                       => '0.9941',
         'Module::Versions'            => '0.02',
         'FCGI::Engine'                => '0.16',
