@@ -15,7 +15,12 @@
                      <%= image_tag "$path/help-left.gif" %>
                      <div>
                         <form action="/db/cgi-bin/search/search.pl">
-                           <input id="search-input" name="query" type="text" size="30" value="use * as a wildcard character"> <nobr><input type="submit" name="submit" value="Search All"> <input type="submit" name="genes_only" value="Gene Names Only"></nobr>
+                          <input id="search-input" name="query" type="text" size="30" value="use * as a wildcard character"> 
+                          <input name="organism" value="<%= stash('species') %>" style="display:none;">
+                          <nobr>
+                             <input type="submit" name="submit" value="Search All"> 
+                             <input type="submit" name="genes_only" value="Gene Names Only">
+                          </nobr>
                         </form>
                      </div>
                   </div>
@@ -83,3 +88,13 @@
       </div>
    </div>
 </div>
+<script>
+
+var searchInput = YAHOO.util.Dom.get('search-input');
+YAHOO.util.Event.addFocusListener(searchInput.id, function() {
+    var initData = searchInput.value;
+    if (initData.match('use')) {
+        searchInput.value = '';
+    };
+});
+</script>
