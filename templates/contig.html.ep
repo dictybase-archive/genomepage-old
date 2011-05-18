@@ -1,0 +1,29 @@
+% layout 'default', title => 'Contig page', subtitle => 'Chromosomal Information';
+
+<!-- Central Column start -->
+<p align="right"><a target="new" href="/<%= $species %>/downloads">Back to Downloads</a></p>
+<h2>The <%= stash('abbreviation') %> genomic sequence is present in <%= stash('count') %> unassembled contigs.</h2>
+<h3>Click on the contig name to view corresponding region in the Genome Browser</h3>
+<table class="download">                    
+  <tr>
+    <th>Contig name</th>
+    <th>Contig length (nt)</th>
+    <th>Number of genes</th>
+  </tr>
+  <% foreach my $item (@$dataset) { %>
+    <tr class="row2">
+      <td><a href="/<%= $species %>/gbrowse/?name=<%= @$item[0] %>:1..30000"><%= @$item[0] %></a></td>
+  		<td><%= @$item[1] %></td>
+  		<td><%= @$item[2] %></td>
+	  </tr>
+  <% } %>
+</table>																
+<% if (stash 'pager') { %>
+  <%= $self->render_partial(template => 'pager') %>
+<% } else { %>
+  <p align="center">
+    <a href="/<%= $species %>/contig/page/1">View with paging </a>
+  </p>
+<% } %>
+
+
