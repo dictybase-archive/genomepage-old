@@ -35,13 +35,17 @@ sub index {
 sub contig {
     my ( $self, $c ) = @_;
     my $data;
-    my $model = $self->app->modware->handler;
-    my $rs    = $model->resultset('Sequence::Feature');
+    my $species = $self->stash('species');
+    my $model   = $self->app->modware->handler;
+    my $rs      = $model->resultset('Sequence::Feature');
 
     my $contig_rs = $rs->search(
-        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
+        {   'type.name'        => 'supercontig',
+            'type_2.name'      => 'gene',
+            'organism.species' => $species
+        },
         {   join => [
-                'type',
+                'type', 'organism',
                 { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
             ],
             select =>
@@ -65,21 +69,24 @@ sub contig {
             $contig->get_column('gene_count')
             ];
     }
-    $self->stash( 'dataset' => $data );
-    $self->render( template => $self->stash('species') . '/contig' );
+    $self->stash( 'dataset' => $data, 'count' => $contig_rs->count );
+    $self->render( template => 'contig' );
 }
 
 sub contig_with_page {
     my ($self) = @_;
     my $data;
-    my $model = $self->app->modware->handler;
-
-    my $rs = $model->resultset('Sequence::Feature');
+    my $model   = $self->app->modware->handler;
+    my $species = $self->stash('species');
+    my $rs      = $model->resultset('Sequence::Feature');
 
     my $contig_rs = $rs->search(
-        { 'type.name' => 'supercontig', 'type_2.name' => 'gene' },
+        {   'type.name'        => 'supercontig',
+            'type_2.name'      => 'gene',
+            'organism.species' => $species
+        },
         {   join => [
-                'type',
+                'type', 'organism',
                 { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
             ],
             select => [
@@ -113,7 +120,7 @@ sub contig_with_page {
         pager    => $contig_rs->pager,
         url_path => 'contig'
     );
-    $self->render( template => $self->stash('species') . '/contig' );
+    $self->render( template => 'contig' );
 }
 
 sub download {
@@ -125,7 +132,7 @@ sub download {
             catdir( $self->app->config->{download}, $self->stash('species') )
         );
         $self->res->headers->content_disposition(
-            qq{'attatchment; filename="$filename"'} );
+            qq{'attatchment; filename="$filename"'});
         $dispatcher->serve( $self, $filename );
         $self->rendered;
     }
