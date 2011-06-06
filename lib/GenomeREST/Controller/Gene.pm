@@ -75,7 +75,7 @@ sub tab_html {
     }
 
     $self->stash( $db->result );
-    $self->render( template => $self->stash('species') . '/gene' );
+    $self->render( template => '/gene/index' );
 
 }
 
@@ -114,7 +114,7 @@ sub section_html {
         );
 
         $self->stash( $db->result );
-        $self->render( template => $self->stash('species') . '/gene' );
+        $self->render( template => '/gene/index' );
     }
 }
 

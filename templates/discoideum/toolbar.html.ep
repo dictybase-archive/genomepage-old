@@ -38,14 +38,20 @@
                                                 <a class="yuimenubaritemlabel">Genomes</a>
                                                 <div id="genomes" class="yuimenu">
                                                     <div class="bd">
-                                                        <ul class="first-of-type">
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
-                                                            </li>
-                                                            <li class="yuimenuitem">
-                                                                <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
-                                                            </li>
-                                                        </ul>
+                                                       <ul class="first-of-type">
+                                                          <li class="yuimenuitem">
+                                                             <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
+                                                          </li>
+                                                          <li class="yuimenuitem">
+                                                             <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
+                                                          </li>
+                                                          <li class="yuimenuitem">
+                                                             <a class="yuimenuitemlabel" href="/fasciculatum">Dictyostelium fasciculatum</a>
+                                                          </li>
+                                                          <li class="yuimenuitem">
+                                                             <a class="yuimenuitemlabel" href="/pallidum">Polysphondylium pallidum</a>
+                                                          </li>
+                                                       </ul>
                                                     </div>
                                                 </div>
                                             </li>

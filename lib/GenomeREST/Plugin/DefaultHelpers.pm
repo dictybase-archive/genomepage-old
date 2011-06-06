@@ -9,7 +9,8 @@ sub register {
     $app->helper(
         base_url => sub {
             my $c = shift;
-            $c->req->url->path =~ m{^((\/\w+)?\/gene)} ? $1 : '';
+                $c->app->log->debug($c->req->url->path);
+            $c->req->url->path =~ m{^((\/.+?)\/gene)} ? $1 : '';
         }
     );
     $app->helper(
