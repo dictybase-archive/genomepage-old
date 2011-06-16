@@ -1,4 +1,4 @@
-% layout 'default', title => 'Genomic resource for D.fasciculatum', wrapper => 'threecol' ;
+% layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
 % my $path = stash('species') || 'default';
 
 <!-- Central Column start -->
@@ -10,7 +10,7 @@
     This site contains:
   </h3>
   <ul>
-    <li>The <a href="/<%= $species %>/contig/page/1">Genome Browser</a> that allows to visualize each contig 
+    <li>The <a href="/<%= $species %>/contig/">Genome Browser</a> that allows to visualize each contig 
         of the genome.
     </li>
     <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any 
@@ -23,7 +23,7 @@
         sequence IDs (e.g. <a href="/fasciculatum/gene/DFA_G0078449/feature/DFA0078447">DFA0078447</a>), or GenBank protein IDs 
         (<a href="/fasciculatum/gene/DFA_G0078449">EGG25106</a> )
     </li>
-    <li>The genomic sequence has been assembled into 25 scaffolds conposed of 35 contigs and containing <%= $protein %> predicted proteins
+    <li>The genomic sequence has been assembled into <%= $supercontig %> scaffolds composed of <%= $contig %> contigs and containing <%= $protein %> predicted proteins
     </li>
   </ul>
 </div>

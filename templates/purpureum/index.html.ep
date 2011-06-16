@@ -1,4 +1,4 @@
-% layout 'default', title => 'Genomic resource for D.purpureum', wrapper => 'threecol' ;
+% layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
 % my $path = stash('species') || 'default';
 
 <!-- Central Column start -->
@@ -24,7 +24,7 @@
         sequence IDs (e.g. <a href="/purpureum/gene/DPU_G0071344/feature/DPU0071345">DPU0071345</a>), or JGI protein IDs 
         (<a href="/purpureum/gene/DPU_G0075780">47329</a> )
     </li>
-    <li>The genomic sequence has been assembled into 838 contigs containing <%= $protein %> predicted proteins
+    <li>The genomic sequence has been assembled into <%= $supercontig %> contigs containing <%= $protein %> predicted proteins
     </li>
     <li><%= $est %> EST sequences, 57% of which aligned to the genome
     </li><!--<li>14097 Gene Predictions from Geneid-->

@@ -6,15 +6,17 @@
 <h3>Click on the contig name to view corresponding region in the Genome Browser</h3>
 <table class="download">                    
   <tr>
-    <th>Contig name</th>
-    <th>Contig length (nt)</th>
-    <th>Number of genes</th>
+    <th width=100>Contig name</th>
+    <th width=100>Contig length (nt)</th>
+    <th width=100>Number of genes</th>
+     <th>Contig description</th>
   </tr>
   <% foreach my $item (@$dataset) { %>
     <tr class="row2">
       <td><a href="/<%= $species %>/gbrowse/?name=<%= @$item[0] %>:1..30000"><%= @$item[0] %></a></td>
   		<td><%= @$item[1] %></td>
   		<td><%= @$item[2] %></td>
+  		<td><%= @$item[3] %></td>
 	  </tr>
   <% } %>
 </table>																
