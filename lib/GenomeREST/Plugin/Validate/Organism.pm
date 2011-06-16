@@ -2,30 +2,46 @@ package GenomeREST::Plugin::Validate::Organism;
 
 use strict;
 use base qw/Mojolicious::Plugin/;
-
+use Data::Dumper;
 sub register {
     my ( $self, $app ) = @_;
     $app->helper(
         check_organism => sub {
-            my ( $c, $name ) = @_;
+            my ( $c, $species ) = @_;
             my $model = $app->modware->handler;
 
-            my ($organism) = $model->resultset('Organism::Organism')->search(
+            my $organism_rs = $model->resultset('Organism::Organism')->search(
                 {   -or => [
-                        { common_name  => $name },
-                        { abbreviation => $name },
-                        { species      => $name },
+                        { common_name  => $species },
+                        { abbreviation => $species },
+                        { species => { 'like' , $species . '%' } },
                     ]
                 }
             );
-            return if !$organism;
 
+            if (!$organism_rs->count){
+                $c->app->log->warn("no organism matching $species found in database");
+                return 0;
+            };
+            
+            my $genus_rs = $organism_rs->search(
+                {},
+                {   columns  => [qw/genus/],
+                    group_by => [qw/genus/],
+                }
+            );            
+            if ($genus_rs->count > 1){
+                $c->app->log->warn("looks like $species belongs to different organisms (genuses)");
+                return 0;                
+            };
+            my $genus = $genus_rs->single->genus;
             $c->stash(
-                species      => $organism->species,
-                abbreviation => $organism->abbreviation,
-                genus        => $organism->genus,
-                common_name  => $organism->common_name,
+                organism_rs  => $organism_rs,
+                genus        => $genus,
+                abbreviation => substr( $genus, 0, 1 ) . '.' . $species,
+#                common_name  => $organism->common_name,
             );
+            
             1;
         }
     );

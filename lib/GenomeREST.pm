@@ -37,12 +37,12 @@ sub startup {
     $router->namespace( $base . '::Controller' );
 
     ## first brige: validate organism (species)
-    my $species = $router->bridge('/:name')->to('genome#validate');
+    my $species = $router->bridge('/:species')->to('genome#validate');
 
     ## all that goes under..
     $species->route('/')->to('genome#index');
     $species->route('/contig')->to('genome#contig');
-    $species->route('/contig/page/:page')->to('genome#contig_with_page');
+    $species->route('/contig/page/:page')->to('genome#contig');
     $species->route('/downloads')->to('genome#download');
 
     ## second brige for gene id/name validation

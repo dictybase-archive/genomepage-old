@@ -8,118 +8,93 @@ use base 'Mojolicious::Controller';
 
 sub index {
     my ($self)  = @_;
-    my $species = $self->stash('species');
-    my $model   = $self->app->modware->handler;
+    my $organism_rs = $self->stash('organism_rs');
 
-    my $est_count = $model->resultset('Sequence::Feature')->count(
-        {   'type.name'        => 'EST',
-            'organism.species' => $species
+    my $features_rs = $organism_rs->search_related('features', {}, { join => 'type'});
+
+    my $est_count    = $features_rs->count( { 'type.name' => 'EST' } );
+    my $contig_count = $features_rs->count( { 'type.name' => 'contig' } );
+    my $supercontig_count =
+        $features_rs->count( { 'type.name' => 'supercontig' } );
+
+    my $protein_count = $features_rs->count(
+        {   -and => [
+                'type.name' => 'polypeptide',
+                -or         => [
+                    'dbxref.accession' => 'JGI',
+                    'dbxref.accession' => 'Sequencing Center'
+                ]
+            ]
         },
-        { join => [ 'type', 'organism' ] }
+        { join => { 'feature_dbxrefs' => 'dbxref' } }
     );
 
-    my $protein_count = $model->resultset('Sequence::Feature')->count(
-        {   'type.name'        => 'polypeptide',
-            'dbxref.accession' => 'JGI',
-            'organism.species' => $species
-        },
-        { join => [ 'type', 'organism', { 'feature_dbxrefs' => 'dbxref' } ] }
-    );
     $self->render(
-        template => $species . '/index',
-        protein  => $protein_count,
-        est      => $est_count
+        template    => $self->stash('species') . '/index',
+        protein     => $protein_count,
+        est         => $est_count,
+        contig      => $contig_count,
+        supercontig => $supercontig_count
     );
 }
 
 sub contig {
     my ( $self, $c ) = @_;
     my $data;
-    my $species = $self->stash('species');
-    my $model   = $self->app->modware->handler;
-    my $rs      = $model->resultset('Sequence::Feature');
-
-    my $contig_rs = $rs->search(
+    my $organism_rs = $self->stash('organism_rs');
+     
+    my $contig_rs = $organism_rs->search_related( 'features', 
         {   'type.name'        => 'supercontig',
             'type_2.name'      => 'gene',
-            'organism.species' => $species
         },
         {   join => [
-                'type', 'organism',
-                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
-            ],
-            select =>
-                [ 'me.feature_id', 'me.name', { count => 'feature_id' }, ],
-            as       => [ 'cfeature_id',   'cname', 'gene_count' ],
-            group_by => [ 'me.feature_id', 'me.name' ],
-            having   => \'count(feature_id) > 0',
-            order_by => { -asc => 'me.feature_id' }
-        }
-    );
-    while ( my $contig = $contig_rs->next ) {
-        push @$data,
-            [
-            $contig->get_column('cname'),
-            $rs->find(
-                { feature_id => $contig->get_column('cfeature_id') },
-                {   select => { length => 'residues' },
-                    as     => 'seqlength'
-                }
-                )->get_column('seqlength'),
-            $contig->get_column('gene_count')
-            ];
-    }
-    $self->stash( 'dataset' => $data, 'count' => $contig_rs->count );
-    $self->render( template => 'contig' );
-}
-
-sub contig_with_page {
-    my ($self) = @_;
-    my $data;
-    my $model   = $self->app->modware->handler;
-    my $species = $self->stash('species');
-    my $rs      = $model->resultset('Sequence::Feature');
-
-    my $contig_rs = $rs->search(
-        {   'type.name'        => 'supercontig',
-            'type_2.name'      => 'gene',
-            'organism.species' => $species
-        },
-        {   join => [
-                'type', 'organism',
+                'type', 
                 { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
             ],
             select => [
-                'me.feature_id', 'me.name',
+                'features.feature_id', 'features.name',
                 { count => 'feature_id', -as => 'gene_count' },
             ],
-            group_by => [ 'me.feature_id', 'me.name' ],
+            group_by => [ 'features.feature_id', 'features.name' ],
             having   => \'count(feature_id) > 0',
-            order_by => { -asc => 'me.feature_id' },
-            rows     => 50,
-            page     => $self->stash('page')
+            order_by => { -asc => 'features.feature_id' },
         }
     );
 
+    if ( $self->stash('page') ) {
+        $contig_rs = $contig_rs->search(
+            {},
+            {   rows => 50,
+                page => $self->stash('page')
+            }
+        );
+    }
+
     while ( my $contig = $contig_rs->next ) {
+        my $description = $contig->search_related(
+            'featureprops',
+            { 'type.name' => 'description' },
+            { join        => 'type' }
+        )->single->value;
         push @$data,
             [
             $contig->name,
-            $rs->find(
+            $organism_rs->search_related( 'features', 
                 { feature_id => $contig->feature_id },
                 {   select => { length => 'residues' },
                     as     => 'seqlength'
                 }
-                )->get_column('seqlength'),
-            $contig->get_column('gene_count')
+                )->single->get_column('seqlength'),
+            $contig->get_column('gene_count'),
+            $description,
             ];
     }
-
     $self->stash(
         dataset  => $data,
-        pager    => $contig_rs->pager,
+        count    => $contig_rs->count,
         url_path => 'contig'
     );
+    $self->stash( pager => $contig_rs->pager ) if $self->stash('page');
     $self->render( template => 'contig' );
 }
 
@@ -143,8 +118,8 @@ sub download {
 
 sub validate {
     my ($self) = @_;
-    my $name = $self->stash('name');
-    if ( !$self->check_organism($name) ) {
+    my $species = $self->stash('species');
+    if ( !$self->check_organism($species) ) {
         $self->render_not_found;
         return;
     }
