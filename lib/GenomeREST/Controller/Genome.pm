@@ -7,10 +7,11 @@ use Mojolicious::Static;
 use base 'Mojolicious::Controller';
 
 sub index {
-    my ($self)  = @_;
+    my ($self) = @_;
     my $organism_rs = $self->stash('organism_rs');
 
-    my $features_rs = $organism_rs->search_related('features', {}, { join => 'type'});
+    my $features_rs =
+        $organism_rs->search_related( 'features', {}, { join => 'type' } );
 
     my $est_count    = $features_rs->count( { 'type.name' => 'EST' } );
     my $contig_count = $features_rs->count( { 'type.name' => 'contig' } );
@@ -29,12 +30,24 @@ sub index {
         { join => { 'feature_dbxrefs' => 'dbxref' } }
     );
 
+    my $gene = $features_rs->search( { 'type.name' => 'gene' } )->single;
+    
+    $self->check_gene( $gene->uniquename );  ## this would populate stash with everything we need   
+
+    my $genbank_id = $features_rs->search(
+        { uniquename => $self->stash('transcripts')->[0] } )->search_related(
+        'feature_dbxrefs',
+        { 'db.name' => 'DB:Protein Accession Number' },
+        { join      => { 'dbxref' => 'db' } }
+        )->single->dbxref->accession;
+
     $self->render(
         template    => $self->stash('species') . '/index',
         protein     => $protein_count,
         est         => $est_count,
         contig      => $contig_count,
-        supercontig => $supercontig_count
+        supercontig => $supercontig_count,
+        genbank_id  => $genbank_id
     );
 }
 
@@ -42,17 +55,19 @@ sub contig {
     my ( $self, $c ) = @_;
     my $data;
     my $organism_rs = $self->stash('organism_rs');
-     
-    my $contig_rs = $organism_rs->search_related( 'features', 
-        {   'type.name'        => 'supercontig',
-            'type_2.name'      => 'gene',
+
+    my $contig_rs = $organism_rs->search_related(
+        'features',
+        {   'type.name'   => 'supercontig',
+            'type_2.name' => 'gene',
         },
         {   join => [
-                'type', 
+                'type',
                 { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
             ],
             select => [
-                'features.feature_id', 'features.name',
+                'features.feature_id',
+                'features.name',
                 { count => 'feature_id', -as => 'gene_count' },
             ],
             group_by => [ 'features.feature_id', 'features.name' ],
@@ -79,7 +94,8 @@ sub contig {
         push @$data,
             [
             $contig->name,
-            $organism_rs->search_related( 'features', 
+            $organism_rs->search_related(
+                'features',
                 { feature_id => $contig->feature_id },
                 {   select => { length => 'residues' },
                     as     => 'seqlength'

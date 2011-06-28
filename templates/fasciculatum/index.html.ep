@@ -1,32 +1,7 @@
 % layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
 % my $path = stash('species') || 'default';
+<%= $self->render_partial(template => 'layouts/index', gbrowse => 1, blast => 1, downloads => 1, search =>1 ) %>
 
-<!-- Central Column start -->
-<h2>
-  Welcome to the <i><%= $genus %> <%= $species %></i> web portal!
-</h2>
-<div id="main-info">
-  <h3>
-    This site contains:
-  </h3>
-  <ul>
-    <li>The <a href="/<%= $species %>/contig/">Genome Browser</a> that allows to visualize each contig 
-        of the genome.
-    </li>
-    <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any 
-        sequence to search the <i><%= $abbreviation %></i> and other genomes
-    </li>
-    <li>The <a href="/<%= $species %>/downloads"><i><%= $abbreviation %></i> Downloads page</a> containing mappings 
-        between different IDs and sequences in FASTA format
-    </li>
-    <li>A search function where you can search for gene IDs (e.g. <a href="/fasciculatum/gene/DFA_G0078449">DFA_G0078449</a>), 
-        sequence IDs (e.g. <a href="/fasciculatum/gene/DFA_G0078449/feature/DFA0078447">DFA0078447</a>), or GenBank protein IDs 
-        (<a href="/fasciculatum/gene/DFA_G0078449">EGG25106</a> )
-    </li>
-    <li>The genomic sequence has been assembled into <%= $supercontig %> scaffolds composed of <%= $contig %> contigs and containing <%= $protein %> predicted proteins
-    </li>
-  </ul>
-</div>
 <div id="bottom-div">
   <h3>
     The <i><%= $abbreviation %></i> genome was sequenced as a collaboration between the<br>
