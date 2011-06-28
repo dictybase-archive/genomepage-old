@@ -3,45 +3,52 @@ package GenomeREST::Plugin::Validate::Organism;
 use strict;
 use base qw/Mojolicious::Plugin/;
 use Data::Dumper;
+
 sub register {
     my ( $self, $app ) = @_;
     $app->helper(
         check_organism => sub {
             my ( $c, $species ) = @_;
-            my $model = $app->modware->handler;
+            my $model        = $app->modware->handler;
+            my $phylonode_rs = $model->resultset('Phylogeny::Phylonode');
 
-            my $organism_rs = $model->resultset('Organism::Organism')->search(
-                {   -or => [
-                        { common_name  => $species },
-                        { abbreviation => $species },
-                        { species => { 'like' , $species . '%' } },
-                    ]
+            my $nodes_rs = $phylonode_rs->search(
+                {   'label'     => { 'like', '%' . $species },
+                    'type.name' => 'species'
+                },
+                { 'join' => 'type' }
+            );
+
+            if ( $nodes_rs->count > 1 ) {
+                $c->app->log->warn(
+                    "more than one species matching $species found in database"
+                );
+                return 0;
+            }
+
+            my $taxon    = $nodes_rs->single;
+            my $genus    = $taxon->search_related('parent_phylonode')->single->label;
+            my $child_rs = $phylonode_rs->search(
+                {   left_idx => {
+                        -between => [ $taxon->left_idx, $taxon->right_idx ]
+                    }
                 }
             );
 
-            if (!$organism_rs->count){
-                $c->app->log->warn("no organism matching $species found in database");
+            my $organism_rs = $child_rs->related_resultset('phylonode_organism')->related_resultset('organism');
+
+            if ( !$organism_rs->count ) {
+                $c->app->log->warn(
+                    "no organism matching $species found in database");
                 return 0;
-            };
-            
-            my $genus_rs = $organism_rs->search(
-                {},
-                {   columns  => [qw/genus/],
-                    group_by => [qw/genus/],
-                }
-            );            
-            if ($genus_rs->count > 1){
-                $c->app->log->warn("looks like $species belongs to different organisms (genuses)");
-                return 0;                
-            };
-            my $genus = $genus_rs->single->genus;
+            }
+
             $c->stash(
                 organism_rs  => $organism_rs,
                 genus        => $genus,
                 abbreviation => substr( $genus, 0, 1 ) . '.' . $species,
-#                common_name  => $organism->common_name,
             );
-            
+
             1;
         }
     );
