@@ -1,0 +1,39 @@
+<h2>
+  Welcome to the <i><%= $genus %> <%= $species %></i> web portal!
+</h2>
+<div id="main-info">
+  <h3>
+    This site contains:
+  </h3>
+  <ul>
+   <% if ( stash('gbrowse') ) { %>
+      <li>The <a href="/<%= $species %>/contig">Genome Browser</a> that allows to visualize each contig of the genome.
+      </li>
+   <% } %>
+   <% if ( stash('blast') ) { %>
+      <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any 
+           sequence to search the <i><%= $abbreviation %></i> and other genomes
+      </li>
+   <% } %>
+   <% if ( stash('downloads') ) { %>
+      <li>The <a href="/<%= $species %>/downloads"><i><%= $abbreviation %></i> Downloads page</a> containing mappings 
+           between different IDs and sequences in FASTA format
+      </li>
+   <% } %>
+   <% if ( stash('search') ) { %>
+      <li>A search function where you can search for gene IDs (e.g. <a href="/<%= $species %>/gene/<%= $gene_id %>"><%= $gene_id %></a>), 
+        sequence IDs (e.g. <a href="/<%= $species %>/gene/<%= $gene_id %>/feature/<%= $transcripts->[0] %>"><%= $transcripts->[0] %></a>),
+        or GenBank protein IDs 
+        (<a href="/<%= $species %>/gene/<%= $gene_id %>"><%= $genbank_id %></a>)
+      </li>
+   <% } %>
+   <li>The genomic sequence has been assembled into <%= $supercontig %> scaffolds composed of <%= $contig %> 
+       contigs and containing <%= $protein %> predicted proteins
+   </li>
+   <% if ($est) { %>
+      <li><%= $est %> EST sequences</li>
+   <% } %>
+  </ul>
+</div>
+
+
