@@ -34,12 +34,13 @@ sub index {
     
     $self->check_gene( $gene->uniquename );  ## this would populate stash with everything we need   
 
-    my $genbank_id = $features_rs->search(
+    my $dbxref_rs = $features_rs->search(
         { uniquename => $self->stash('transcripts')->[0] } )->search_related(
         'feature_dbxrefs',
         { 'db.name' => 'DB:Protein Accession Number' },
         { join      => { 'dbxref' => 'db' } }
-        )->single->dbxref->accession;
+        )->single;
+    my $genbank_id = $dbxref_rs->dbxref->accession if $dbxref_rs;
 
     $self->render(
         template    => $self->stash('species') . '/index',
