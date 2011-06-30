@@ -1,3 +1,4 @@
+% my $path = stash('species') || 'default';
 <h2>
   Welcome to the <i><%= $genus %> <%= $species %></i> web portal!
 </h2>
@@ -35,5 +36,7 @@
    <% } %>
   </ul>
 </div>
-
+<div id="species-image">
+  <%= image_tag "$path/index-img.jpg" %> 
+</div>
 

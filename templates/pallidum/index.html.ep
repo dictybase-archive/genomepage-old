@@ -1,5 +1,4 @@
 % layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
-% my $path = stash('species') || 'default';
 <%= $self->render_partial(template => 'layouts/index', gbrowse => 1, blast => 1, downloads => 1, search =>1 ) %>
 
 <div id="bottom-div">
