@@ -38,19 +38,19 @@ sub startup {
 
     # -- routing
     my $top = $router->waypoint('/')->('genome#index');
-    my $species = $top->waypoint('/:species')->('genome#species_index');
+    my $organism = $top->waypoint('/:common_name')->('genome#species_index');
 
     #my $species = $router->bridge('/:species')->to('genome#validate');
 
     ## all that goes under..
-    $species->route('/contig')->to('genome#contig');
-    $species->route('/contig/page/:page')->to('genome#contig');
-    $species->route('/downloads')->to('genome#download');
+    $organism->route('/contig')->to('genome#contig');
+    $organism->route('/contig/page/:page')->to('genome#contig');
+    $organism->route('/downloads')->to('genome#download');
 
     ## second brige for gene id/name validation
     #my $gene = $species->bridge('/gene/:id')->to('gene#validate');
 
-    my $gene = $species->waypoint('/gene')->to('gene#list');
+    my $gene = $organism->waypoint('/gene')->to('gene#list');
     my $id = $gene->waypoint('/:id')->name('gene')->to('gene#index',  format => 'html');
     my $tab = $id->waypoint('/:tab')->to('gene#tab');
     $tab->route('/:section')->to('gene#section');
