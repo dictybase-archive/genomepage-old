@@ -8,15 +8,15 @@ use base 'Mojolicious';
 sub startup {
     my ($self) = @_;
 
+	
+	## -- plugin loading sections
     $self->plugin('yml_config');
     $self->plugin('modware-oracle');
     $self->plugin('asset_tag_helpers');
     $self->plugin('GenomeREST::Plugin::Validate::Organism');
     $self->plugin('GenomeREST::Plugin::Validate::Gene');
     $self->plugin('GenomeREST::Plugin::DefaultHelpers');
-    
     if ( defined $self->config->{cache} ) {
-        ## -- add the new cache plugin
         $self->plugin(
             'cache-action',
             {   actions => [qw/index tab section sub_section/],
@@ -36,22 +36,25 @@ sub startup {
     my $base = $router->namespace();
     $router->namespace( $base . '::Controller' );
 
-    ## first brige: validate organism (species)
-    my $species = $router->bridge('/:species')->to('genome#validate');
+    # -- routing
+    my $top = $router->waypoint('/')->('genome#index');
+    my $species = $top->waypoint('/:species')->('genome#species_index');
+
+    #my $species = $router->bridge('/:species')->to('genome#validate');
 
     ## all that goes under..
-    $species->route('/')->to('genome#index');
     $species->route('/contig')->to('genome#contig');
     $species->route('/contig/page/:page')->to('genome#contig');
     $species->route('/downloads')->to('genome#download');
 
     ## second brige for gene id/name validation
-    my $gene = $species->bridge('/gene/:id')->to('gene#validate');
+    #my $gene = $species->bridge('/gene/:id')->to('gene#validate');
 
-    $gene->route('/')->name('gene')->to( 'gene#index', format => 'html' );
-    $gene->route('/:tab')->to('gene#tab');
-    $gene->route('/:tab/:section')->to('gene#section');
-    $gene->route('/:tab/:subid/:section')->to('gene#section');
+    my $gene = $species->waypoint('/gene')->to('gene#list');
+    my $id = $gene->waypoint('/:id')->name('gene')->to('gene#index',  format => 'html');
+    my $tab = $id->waypoint('/:tab')->to('gene#tab');
+    $tab->route('/:section')->to('gene#section');
+    $tab->route('/:subid/:section')->to('gene#section');
 
     ## init database connection
     my $datasource = Homology::Chado::DataSource->instance;
