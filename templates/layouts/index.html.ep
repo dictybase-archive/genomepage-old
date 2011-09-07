@@ -7,34 +7,33 @@
     This site contains:
   </h3>
   <ul>
-   <% if ( stash('gbrowse') ) { %>
-      <li>The <a href="/<%= $species %>/contig">Genome Browser</a> that allows to visualize each contig of the genome.
+      <li><a href="/gbrowse/<%= $species %>">Genome Browser</a>: For displaying annotations
+      on genome.
       </li>
-   <% } %>
-   <% if ( stash('blast') ) { %>
-      <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any 
-           sequence to search the <i><%= $abbreviation %></i> and other genomes
+      <li><a href="/tools/blast">BLAST tool</a>: The new dictyBase universal dictyostelid
+      blast interface to search for similarities between <i><%= $abbreviation %></i> and other genomes
       </li>
-   <% } %>
-   <% if ( stash('downloads') ) { %>
-      <li>The <a href="/<%= $species %>/downloads"><i><%= $abbreviation %></i> Downloads page</a> containing mappings 
-           between different IDs and sequences in FASTA format
+      <li><a href="/<%= $species %>/downloads">reviation %>Download section </a>: Download
+      mapping between identifiers and genomic sequences in fasta format.
       </li>
-   <% } %>
-   <% if ( stash('search') ) { %>
-      <li>A search function where you can search for gene IDs (e.g. <a href="/<%= $species %>/gene/<%= $gene_id %>"><%= $gene_id %></a>), 
-        sequence IDs (e.g. <a href="/<%= $species %>/gene/<%= $gene_id %>/feature/<%= $transcripts->[0] %>"><%= $transcripts->[0] %></a>),
-        or GenBank protein IDs 
-        (<a href="/<%= $species %>/gene/<%= $gene_id %>"><%= $genbank_id %></a>)
-      </li>
-   <% } %>
-   <li>The genomic sequence has been assembled into <%= $supercontig %> scaffolds composed of <%= $contig %> 
-       contigs and containing <%= $protein %> predicted proteins
-   </li>
-   <% if ($est) { %>
-      <li><%= $est %> EST sequences</li>
-   <% } %>
   </ul>
+  <h3>Genome statistics: </h3>
+  <ul>
+  	<li> <%= $supercontig %> supercontigs </li>
+  	<li> <%= $contig %> contigs </li>
+  	<li> <%= $gene %> genes </li>
+  	<li> <%= $polypeptide %> proteins </li>
+  	% if (defined stash('est')) {
+  		<li> <%= $est %> ests </li>
+  	% }
+  </ul>
+  <h3> Sample entry points for browsing the <%= $abbreviation %> genome </h3>
+  <ul>
+  	<li> Genome browser </li>
+  	<li> Gene </li>
+  	<li> Transcript </li>
+  	<li> Protein </li>
+	</ul>
 </div>
 <div id="species-image">
   <%= image_tag "$path/index-img.jpg" %> 

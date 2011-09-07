@@ -8,15 +8,16 @@ use base 'GenomeREST::Controller::Validate';
 
 sub species_index {
     my ($self) = @_;
-    if (!$self->check_organism($self->stash('common_name'))) {
-    	$self->render_not_found;
-    	return;
+    if ( !$self->check_organism( $self->stash('common_name') ) ) {
+        $self->render_not_found;
+        return;
     }
 
-    my $organism_rs = $self->stash('organism_rs');
-
+    my $model = $self->app->modeware->handler;
     my $features_rs
-        = $organism_rs->search_related( 'features', {}, { join => 'type' } );
+        = $model->resultset('Organism::Organism')
+        ->search( { 'common_name' => $self->stash('common_name') } )
+        ->search_related( 'features', {}, { join => 'type' } );
 
     my $est_count    = $features_rs->count( { 'type.name' => 'EST' } );
     my $contig_count = $features_rs->count( { 'type.name' => 'contig' } );
@@ -60,7 +61,12 @@ sub species_index {
 }
 
 sub contig {
-    my ( $self, $c ) = @_;
+    my ($self) = @_;
+    if ( !$self->check_organism( $self->stash('common_name') ) ) {
+        $self->render_not_found;
+        return;
+    }
+
     my $data;
     my $organism_rs = $self->stash('organism_rs');
 
@@ -124,6 +130,11 @@ sub contig {
 
 sub download {
     my ($self) = @_;
+    if ( !$self->check_organism( $self->stash('common_name') ) ) {
+        $self->render_not_found;
+        return;
+    }
+
     my $filename = $self->req->param('file');
     if ($filename) {
         my $dispatcher = Mojolicious::Static->new;
@@ -137,14 +148,6 @@ sub download {
     }
     else {
         $self->render( template => $self->stash('species') . '/download' );
-    }
-}
-
-sub validate {
-    my ($self) = @_;
-    if ( !$self->check_organism( $self->stash('common_name') ) ) {
-        $self->render_not_found;
-        return;
     }
 }
 

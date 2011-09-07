@@ -1,13 +1,12 @@
 % layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
-<%= $self->render_partial(template => 'layouts/index', gbrowse => 1, blast => 1, downloads => 1, search =>1 ) %>
+%= include 'layouts/index' 
 
 <div id="bottom-div">
   <h3>
     The <i><%= $abbreviation %></i> genome was sequenced as a collaboration between the<br>
     Leibniz Institute for Age Research and Fritz Lipmann Institute. Please cite:
   </h3>
-  <p>
-     <b>Noegel,A.A., Felder,M., Eichinger,L., Heidel,A.J. and Platzer,M.</b>
-     Living fossils from the dawn of multicellularity.(Unpublished)
-  </p>
+	
+	%= include 'layouts/literature_citation'
+
 </div>
