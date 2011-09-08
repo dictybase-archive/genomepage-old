@@ -37,8 +37,8 @@ sub startup {
     $router->namespace( $base . '::Controller' );
 
     # -- routing
-    my $top = $router->waypoint('/')->('genome#index');
-    my $organism = $top->waypoint('/:common_name')->('genome#species_index');
+    my $top = $router->waypoint('/')->to('genome#index');
+    my $organism = $top->waypoint('/:common_name')->name('genome')->to('genome#species_index');
 
     #my $species = $router->bridge('/:species')->to('genome#validate');
 
