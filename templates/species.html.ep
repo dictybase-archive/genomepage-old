@@ -1,0 +1,11 @@
+% my $path = stash('species') || 'default';
+
+% layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
+
+%= include 'layouts/index' 
+
+<div id="bottom-div">
+	 %= include "$path/index"
+	 %= include 'layouts/literature_citation'
+
+</div>

@@ -1,49 +1,6 @@
-% layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
-% my $path = stash('species') || 'default';
-
-<!-- Central Column start -->
-<h2>
-  Welcome to the <i><%= $genus %> <%= $species %></i> web portal!
-</h2>
-<div id="main-info">
-  <h3>
-    This site contains:
-  </h3>
-  <ul>
-    <li>The <a href="/<%= $species %>/contig/page/1">Genome Browser</a> that allows to visualize each contig 
-        of the genome with alignments to <i>D. discoideum</i> proteins (75% <i>D. discoideum</i> proteins aligned 
-        to the <i><%= $abbreviation %></i> genome)
-    </li>
-    <li>The new dictyBase universal dictyostelid <a href="/tools/blast">BLAST server</a> where you can use any 
-        sequence to search the <i><%= $abbreviation %></i> and <i>D. discoideum</i> genomes
-    </li>
-    <li>The <a href="/<%= $species %>/downloads"><i><%= $abbreviation %></i> Downloads page</a> containing mappings 
-        between different IDs and sequences in FASTA format
-    </li>
-    <li>A search function where you can search for gene IDs (e.g. <a href="/purpureum/gene/DPU_G0068768">DPU_G0068768</a>), 
-        sequence IDs (e.g. <a href="/purpureum/gene/DPU_G0071344/feature/DPU0071345">DPU0071345</a>), or JGI protein IDs 
-        (<a href="/purpureum/gene/DPU_G0075780">47329</a> )
-    </li>
-    <li>The genomic sequence has been assembled into <%= $supercontig %> contigs containing <%= $protein %> predicted proteins
-    </li>
-    <li><%= $est %> EST sequences, 57% of which aligned to the genome
-    </li><!--<li>14097 Gene Predictions from Geneid-->
-  </ul>
-</div>
-<div id="species-image">
-  <%= image_tag "$path/index-img.gif" %> From: <i><a target="new" href="http://ncbi.nlm.nih.gov/pubmed/18950497">
-  Jack et al. 2008</a></i>
-</div>
-<div id="bottom-div">
-  <h3>
+ <h3>
     The <i><%= $abbreviation %></i> genome was sequenced as a collaboration between the<br>
-    Joint Genome Institute and Baylor College of Medicine. Please cite:
-  </h3>
-  <h3><a href="http://www.ncbi.nlm.nih.gov/pubmed/21356102">Comparative genomics of the social amoebae Dictyostelium discoideum and Dictyostelium purpureum.</a><br></h3>
-  <p>
-  Sucgang R, Kuo A, Tian X, Salerno W, Parikh A, Feasley CL, Dalin E, Tu H, Huang E, Barry K, Lindquist E, Shapiro H, Bruce D, Schmutz J, Salamov A, Fey P, Gaudet P, Anjard C, Babu MM, Basu S, Bushmanova Y, van der Wel H, Katoh-Kurasawa M, Dinh C, Coutinho PM, Saito T, Elias M, Schaap P, Kay RR, Henrissat B, Eichinger L, Rivero F, Putnam NH, West CM, Loomis WF, Chisholm RL, Shaulsky G, Strassmann JE, Queller DC, Kuspa A, Grigoriev IV.
-  </p>
-  Genome Biol. 2011 Feb 28;12(2):R20.</div>
-<!-- Central Column end -->
+    Joint Genome Institute and Baylor College of Medicine.
+ </h3>
 
 
