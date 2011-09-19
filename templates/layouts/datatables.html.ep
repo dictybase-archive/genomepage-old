@@ -1,0 +1,2 @@
+<%= stylesheet_link_tag $_ for ('dataTables',  'dataTables-jui',  'cupertino/jquery-ui')  %>
+<%= javascript_include_tag $_ for ('jquery',  'jquery.dataTables.min') %>

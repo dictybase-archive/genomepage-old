@@ -32,6 +32,9 @@ my @app_js = ('menu');
     <%= javascript_include_tag "yui/build/$_/$_" foreach @yui_js %>
     <%= javascript_include_tag "yui/build/$_/$_\-min" foreach @yui_js_min %>
     <%= javascript_include_tag $_ foreach @app_js  %>
+
+    <%= include stash('include_template') if defined stash('include_template') %>
+    <%= content_for stash('include_content') if defined stash('include_content') %>
     
     <title><%= stash 'title' %></title>
   </head>

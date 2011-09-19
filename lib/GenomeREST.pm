@@ -8,10 +8,16 @@ use base 'Mojolicious';
 sub startup {
     my ($self) = @_;
 
-	
-	## -- plugin loading sections
+    ## -- plugin loading sections
     $self->plugin('yml_config');
-    $self->plugin('modware-oracle');
+    $self->plugin(
+        'modware-oracle',
+        {   dsn      => $self->config->{database}->{dsn},
+            user     => $self->config->{database}->{user},
+            password => $self->config->{database}->{password},
+            attr     => { LongReadLen => 2**25 },
+        }
+    );
     $self->plugin('asset_tag_helpers');
     $self->plugin('GenomeREST::Plugin::Validate::Organism');
     $self->plugin('GenomeREST::Plugin::Validate::Gene');
@@ -33,16 +39,21 @@ sub startup {
 
     ## routing setup
     my $router = $self->routes();
-    my $base = $router->namespace();
+    my $base   = $router->namespace();
     $router->namespace( $base . '::Controller' );
 
     # -- routing
-    my $top = $router->waypoint('/')->to('genome#index');
-    my $organism = $top->waypoint('/:common_name')->name('genome')->to('genome#species_index');
+    my $top      = $router->waypoint('/')->to('genome#index');
+    my $organism = $top->waypoint('/:common_name')->name('genome')
+        ->to('genome#species_index');
 
     #my $species = $router->bridge('/:species')->to('genome#validate');
 
     ## all that goes under..
+    $organism->route('/supercontig')->name('supercontig')
+        ->to('genome#supercontig');
+    $organism->route('/supercontig/page')->name('super_pager')
+        ->to('genome#supercontig_paging');
     $organism->route('/contig')->to('genome#contig');
     $organism->route('/contig/page/:page')->to('genome#contig');
     $organism->route('/downloads')->to('genome#download');
@@ -51,7 +62,8 @@ sub startup {
     #my $gene = $species->bridge('/gene/:id')->to('gene#validate');
 
     my $gene = $organism->waypoint('/gene')->to('gene#list');
-    my $id = $gene->waypoint('/:id')->name('gene')->to('gene#index',  format => 'html');
+    my $id   = $gene->waypoint('/:id')->name('gene')
+        ->to( 'gene#index', format => 'html' );
     my $tab = $id->waypoint('/:tab')->to('gene#tab');
     $tab->route('/:section')->to('gene#section');
     $tab->route('/:subid/:section')->to('gene#section');

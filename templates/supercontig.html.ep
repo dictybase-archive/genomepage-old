@@ -1,4 +1,22 @@
-% layout 'datatable', title => 'Supercontig page';
+% layout 'default', title => 'Supercontig page',  include_content => 'datatables', include_template => 'layouts/datatables' ;
+
+<% content_for datatables => begin %>
+	<%= javascript begin %>
+    	$(document).ready(function() {
+    		$('#genome_datatable').dataTable({
+    			"bFilter": false, 
+    			"sPaginationType": "full_numbers", 
+    			"bProcessing": true, 
+    			"bServerSide": true, 
+    			"sAjaxSource": "/<%= $common_name %>/supercontig/page", 
+    			"aoColumnDefs": [
+    						{ "sClass": 'center',  "aTargets": [ 1,  2 ] }
+    			], 
+    			"bJQueryUI": true
+    		});
+    	});
+    <% end %>
+<% end %>
 
 <!-- Central Column start -->
 <table id="genome_datatable" class="display">                    

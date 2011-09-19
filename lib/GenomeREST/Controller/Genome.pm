@@ -4,60 +4,69 @@ use warnings;
 use strict;
 use File::Spec::Functions;
 use Mojolicious::Static;
-use base 'GenomeREST::Controller::Validate';
+use base 'GenomeREST::Controller';
 
 sub species_index {
     my ($self) = @_;
-    if ( !$self->check_organism( $self->stash('common_name') ) ) {
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
         $self->render_not_found;
         return;
     }
+    $self->set_organism($common_name);
 
-    my $model = $self->app->modeware->handler;
-    my $features_rs
-        = $model->resultset('Organism::Organism')
-        ->search( { 'common_name' => $self->stash('common_name') } )
-        ->search_related( 'features', {}, { join => 'type' } );
+    my $org_rs = $self->stash('organism_resultset');
+    my $feature_rs = $org_rs->search_related( 'features', {},
+        { prefetch => 'type', cache => 1 } );
 
-    my $est_count    = $features_rs->count( { 'type.name' => 'EST' } );
-    my $contig_count = $features_rs->count( { 'type.name' => 'contig' } );
-    my $supercontig_count
-        = $features_rs->count( { 'type.name' => 'supercontig' } );
+    my %stash;
+    for my $type (qw/supercontig contig gene polypeptide EST/) {
+        my $count = $feature_rs->count( { 'type.name' => $type } );
+        if ($count) {
+            $stash{$type} = $count;
+        }
+    }
 
-    my $protein_count = $features_rs->count(
-        {   -and => [
-                'type.name' => 'polypeptide',
-                -or         => [
-                    'dbxref.accession' => 'JGI',
-                    'dbxref.accession' => 'Sequencing Center'
-                ]
-            ]
-        },
-        { join => { 'feature_dbxrefs' => 'dbxref' } }
-    );
+    #-- first get a  polypeptide
+    my $poly = $feature_rs->search(
+        { 'type.name' => 'polypeptide' },
+        { 'rows'      => 1, 'prefetch' => 'dbxref' }
+    )->single;
 
-    my $gene = $features_rs->search( { 'type.name' => 'gene' } )->single;
-
-    $self->check_gene( $gene->uniquename )
-        ;    ## this would populate stash with everything we need
-
-    my $dbxref_rs
-        = $features_rs->search(
-        { uniquename => $self->stash('transcripts')->[0] } )->search_related(
-        'feature_dbxrefs',
-        { 'db.name' => 'DB:Protein Accession Number' },
-        { join      => { 'dbxref' => 'db' } }
+    ## -- now transcript and then gene
+    my $trans
+        = $poly->search_related( 'feature_relationship_subjects', {}, {} )
+        ->search_related(
+        'object',
+        { 'type.name' => 'mRNA' },
+        {   'join'     => 'type',
+            'prefetch' => 'dbxref',
+            'rows'     => 1
+        }
         )->single;
-    my $genbank_id = $dbxref_rs->dbxref->accession if $dbxref_rs;
 
-    $self->render(
-        template    => $self->stash('species') . '/index',
-        protein     => $protein_count,
-        est         => $est_count,
-        contig      => $contig_count,
-        supercontig => $supercontig_count,
-        genbank_id  => $genbank_id
-    );
+    my $gene
+        = $trans->search_related( 'feature_relationship_subjects', {}, {} )
+        ->search_related(
+        'object',
+        { 'type.name' => 'gene' },
+        {   'join'     => 'type',
+            'prefetch' => 'dbxref',
+            'rows'     => 1
+        }
+        )->single;
+
+    $stash{gene_id}        = $gene->dbxref->accession;
+    $stash{transcript_id}  = $trans->dbxref->accession;
+    $stash{polypeptide_id} = $poly->dbxref->accession;
+
+    $stash{template} = 'species';
+    $self->render(%stash);
+}
+
+sub index {
+    my ($self) = @_;
+    $self->render_text('Nothing here please move on');
 }
 
 sub contig {
@@ -126,6 +135,67 @@ sub contig {
     );
     $self->stash( pager => $contig_rs->pager ) if $self->stash('page');
     $self->render( template => 'contig' );
+}
+
+sub supercontig {
+    my ($self) = @_;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->render( template => 'supercontig' );
+}
+
+sub supercontig_paging {
+    my ($self) = @_;
+
+
+    my $model = $self->app->modware->handler;
+    $self->set_organism( $self->stash('common_name') );
+
+    my $rows           = $self->param('iDisplayLength');
+    my $page           = $self->param('iDisplayStart') / $rows + 1;
+
+    my $supercontig_rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        {   'type.name'   => 'supercontig',
+            'type_2.name' => 'gene',
+        },
+        {   join => [
+                'type', 'dbxref',
+                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
+            ],
+            select => [
+                'features.uniquename',
+                'dbxref.accession',
+                { count => 'feature_id', -as => 'gene_count' },
+            ],
+            group_by => [ 'features.uniquename', 'dbxref.accession' ],
+            having   => \'count(feature_id) > 0',
+            rows     => $rows,
+            page     => $page,
+        }
+    );
+
+    my $data;
+    while ( my $row = $supercontig_rs->next ) {
+        push @$data,
+            [
+            $row->uniquename,
+            $model->resultset('Sequence::Feature')
+                ->find( { uniquename => $row->uniquename } )->seqlen,
+            $row->get_column('gene_count')
+            ];
+    }
+    my $total = $supercontig_rs->pager->total_entries;
+    $self->render_json(
+        {   sEcho                => $self->param('sEcho'),
+            iTotalRecords        => $total,
+            iTotalDisplayRecords => $total,
+            aaData               => $data
+        }
+    );
 }
 
 sub download {
