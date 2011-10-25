@@ -147,7 +147,7 @@ sub supercontig {
     $self->render( template => 'supercontig' );
 }
 
-sub supercontig_paging {
+sub supercontig_search {
     my ($self) = @_;
 
 

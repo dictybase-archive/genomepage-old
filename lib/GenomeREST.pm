@@ -19,9 +19,6 @@ sub startup {
         }
     );
     $self->plugin('asset_tag_helpers');
-    $self->plugin('GenomeREST::Plugin::Validate::Organism');
-    $self->plugin('GenomeREST::Plugin::Validate::Gene');
-    $self->plugin('GenomeREST::Plugin::DefaultHelpers');
     if ( defined $self->config->{cache} ) {
         $self->plugin(
             'cache-action',
@@ -52,8 +49,8 @@ sub startup {
     ## all that goes under..
     $organism->route('/supercontig')->name('supercontig')
         ->to('genome#supercontig');
-    $organism->route('/supercontig/page')->name('super_pager')
-        ->to('genome#supercontig_paging');
+    $organism->route('/supercontig/search',  format => 'datatable')->name('super_pager')
+        ->to('genome#supercontig_search');
     $organism->route('/contig')->to('genome#contig');
     $organism->route('/contig/page/:page')->to('genome#contig');
     $organism->route('/downloads')->to('genome#download');

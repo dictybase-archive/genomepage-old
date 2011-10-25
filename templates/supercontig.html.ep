@@ -8,7 +8,7 @@
     			"sPaginationType": "full_numbers", 
     			"bProcessing": true, 
     			"bServerSide": true, 
-    			"sAjaxSource": "/<%= $common_name %>/supercontig/page", 
+    			"sAjaxSource": "/<%= $common_name %>/supercontig/search.datatable", 
     			"aoColumnDefs": [
     						{ "sClass": 'center',  "aTargets": [ 1,  2 ] }
     			], 
