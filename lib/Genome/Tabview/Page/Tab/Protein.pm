@@ -83,7 +83,6 @@ package Genome::Tabview::Page::Tab::Protein;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use base qw( Genome::Tabview::Page::Tab );

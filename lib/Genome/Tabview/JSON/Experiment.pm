@@ -82,7 +82,6 @@ package Genome::Tabview::JSON::Experiment;
 use strict;
 use Bio::Root::Root;
 use Genome::Tabview::JSON::Reference;
-use dicty::Genetics::Experiment;
 
 =head2 new
 

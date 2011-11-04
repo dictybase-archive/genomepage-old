@@ -8,9 +8,9 @@
     			"sPaginationType": "full_numbers", 
     			"bProcessing": true, 
     			"bServerSide": true, 
-    			"sAjaxSource": "/<%= $common_name %>/contig/search.datatable", 
+    			"sAjaxSource": "/<%= $common_name %>/gene/search.datatable", 
     			"aoColumnDefs": [
-    						{ "sClass": 'center',  "aTargets": [ 0,  1 ] }
+    						{ "sClass": 'center',  "aTargets": [ 0,  1 , 2] }
     			], 
     			"bJQueryUI": true
     		});
@@ -22,8 +22,9 @@
 <table id="genome_datatable" class="display">                    
 	<thead>
 		<tr>
+			<th> ID </th>
 			<th> Name </th>
-			<th> Length(bp) </th>
+			<th> Length(kb) </th>
 		</tr>
 	</thead>
 	<tbody>

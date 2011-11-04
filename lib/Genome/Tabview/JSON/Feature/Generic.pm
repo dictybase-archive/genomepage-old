@@ -80,8 +80,6 @@ package Genome::Tabview::JSON::Feature::Generic;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
-use dicty::MiscUtility;
 use Genome::Tabview::Config::Panel::Item::JSON::Table;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::JSON::Feature::Protein;

@@ -12,14 +12,14 @@
     use Genome::Tabview::Config;
     my $config = Genome::Tabview::Config->new();
     my $panel  = Genome::Tabview::Config::Panel->new(
-        -layout   => 'tabview',
-        -position => 'center',
+        layout   => 'tabview',
+        position => 'center',
     );
     my $gene = Genome::Tabview::Config::Panel::Item::Tab->new(
-        -key        => 'gene',
-        -label      => 'Gene Summary',
-        -active     => 'true',
-        -primary_id => $primary_id,
+        key        => 'gene',
+        label      => 'Gene Summary',
+        active     => 'true',
+        primary_id => $primary_id,
     );
     $panel->add_item($gene);
     $config->add_panel($panel);
@@ -95,28 +95,9 @@ SUCH DAMAGES.
 package Genome::Tabview::Config;
 
 use strict;
-use JSON;
-use Bio::Root::Root;
-
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Config> object.
- Returns  : Genome::Tabview::Config object 
- Args     : none
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    $self->{root}   = Bio::Root::Root->new();
-    $self->{panels} = [];
-    bless $self, $class;
-    return $self;
-}
+use namespace::autoclean;
+use Moose;
+use JSON qw/encode_json/;
 
 =head2 panels
 
@@ -128,44 +109,15 @@ sub new {
 
 =cut
 
-sub panels {
-    my ( $self, $arg ) = @_;
-    if ($arg) {
-        $self->{root}->throw("Items should be array reference")
-            if ref($arg) ne 'ARRAY';
-        foreach my $item (@$arg) {
-            $self->{root}->throw(
-                'Item should be Genome::Tabview::Config::Panel implementing object'
-            ) if ref($item) !~ m{Genome::Tabview::Config::Panel}i;
-        }
-        $self->{panels} = $arg;
+has '_panels' => (
+    is      => 'rw',
+    isa     => 'ArrayRef[Genome::Tabview::Config::Panel]',
+    traits  => [qw/Array/],
+    handles => {
+        'add_panel' => 'push',
+        'panels'    => 'elements'
     }
-    $self->{root}->throw('Config panels are not defined')
-        if not defined $self->{panels};
-    return $self->{panels};
-}
-
-=head2 add_panel
-
- Title    : add_panel
- Usage    : $config->add_panel($panel);
- Function : adds panel to the config
- Returns  : Genome::Tabview::Config::Panel object
- Args     : Genome::Tabview::Config::Panel object
-
-=cut
-
-sub add_panel {
-    my ( $self, $panel ) = @_;
-
-    $self->{root}->throw('Panel is not defined') if not defined $panel;
-    $self->{root}->throw(
-        'Item should be Genome::Tabview::Config::Panel implementing object'
-    ) if ref($panel) !~ m{Genome::Tabview::Config::Panel};
-
-    push @{ $self->{panels} }, $panel;
-    return $self;
-}
+);
 
 =head2 to_json
 
@@ -180,11 +132,13 @@ sub add_panel {
 sub to_json {
     my ( $self, @args ) = @_;
     my $config;
-    foreach my $panel ( @{ $self->panels } ) {
+    foreach my $panel ( $self->panels ) {
         push @$config, $panel->to_json;
     }
-    return objToJson($config);
+    return encode_json($config);
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

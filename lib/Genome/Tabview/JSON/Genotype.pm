@@ -80,8 +80,6 @@ package Genome::Tabview::JSON::Genotype;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Search::Strain;
-use dicty::Genetics::Genotype;
 use Genome::Tabview::JSON::Experiment;
 
 =head2 new

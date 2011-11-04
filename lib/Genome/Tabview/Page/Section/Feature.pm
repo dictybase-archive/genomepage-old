@@ -85,7 +85,6 @@ package Genome::Tabview::Page::Section::Feature;
 
 use strict;
 use Module::Find;
-use dicty::Feature;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Bio::Root::Root;

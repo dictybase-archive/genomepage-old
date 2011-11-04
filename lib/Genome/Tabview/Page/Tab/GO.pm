@@ -83,7 +83,6 @@ package Genome::Tabview::Page::Tab::GO;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::JSON::GO;

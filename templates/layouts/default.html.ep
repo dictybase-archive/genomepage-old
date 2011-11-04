@@ -1,5 +1,5 @@
 <% 
-my $path       = stash('species') || 'default';
+my $path       = stash('common_name') || 'default';
 my $yui_root   = '/javascripts/yui/build';
 my @yui_assets = ( 'container', 'menu' );
 my @app_assets = (
@@ -16,7 +16,7 @@ my @yui_js = ('yahoo-dom-event');
 my @app_js = ('menu');
 %>
 
-<!doctype html>
+<html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -39,7 +39,7 @@ my @app_js = ('menu');
     <title><%= stash 'title' %></title>
   </head>
   <body class="yui-skin-sam">
-    <%= $self->render_partial(template => $path.'/toolbar') %>
+    %= include 'layouts/toolbar'
     <div id="container">
       <div class="wrapper <%= (stash 'wrapper') || 'threecol-wide' %>">
         <div id="subnav">

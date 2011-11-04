@@ -80,13 +80,10 @@ package Genome::Tabview::JSON::Feature::Protein;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
-use dicty::MiscUtility;
 use Genome::Tabview::JSON::Feature;
-use ModConfig;
 use base qw( Genome::Tabview::JSON::Feature);
 
-my $config = ModConfig->load();
+my $config;
 
 =head2 new
 

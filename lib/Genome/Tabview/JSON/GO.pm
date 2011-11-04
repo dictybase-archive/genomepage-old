@@ -78,7 +78,6 @@ SUCH DAMAGES.
 package Genome::Tabview::JSON::GO;
 
 use strict;
-use dicty::Link;
 use Bio::Root::Root;
 use Genome::Tabview::JSON::Reference;
 use Genome::Tabview::Config::Panel::Item::JSON::Table;

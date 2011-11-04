@@ -20,45 +20,42 @@ sub species_index {
         { prefetch => 'type', cache => 1 } );
 
     my %stash;
-    for my $type (qw/supercontig contig gene polypeptide EST/) {
+    for my $type (qw/supercontig contig gene EST/) {
         my $count = $feature_rs->count( { 'type.name' => $type } );
         if ($count) {
             $stash{$type} = $count;
         }
     }
 
-    #-- first get a  polypeptide
-    my $poly = $feature_rs->search(
-        { 'type.name' => 'polypeptide' },
-        { 'rows'      => 1, 'prefetch' => 'dbxref' }
-    )->single;
+    # first get genes
+    my $gene_rs = $feature_rs->search( { 'type.name' => 'gene' } );
 
-    ## -- now transcript and then gene
-    my $trans
-        = $poly->search_related( 'feature_relationship_subjects', {}, {} )
+    #-- walk down for transcript
+    my $trans_rs
+        = $gene_rs->search_related( 'feature_relationship_objects', {}, {} )
         ->search_related(
-        'object',
-        { 'type.name' => 'mRNA' },
-        {   'join'     => 'type',
-            'prefetch' => 'dbxref',
-            'rows'     => 1
-        }
-        )->single;
+        'subject',
+        { 'type_2.name' => 'mRNA' },
+        { 'join'        => 'type' }
+        );
 
-    my $gene
-        = $trans->search_related( 'feature_relationship_subjects', {}, {} )
+    ## -- now down for polypeptide
+    my $poly_rs
+        = $trans_rs->search_related( 'feature_relationship_objects', {}, {} )
         ->search_related(
-        'object',
-        { 'type.name' => 'gene' },
-        {   'join'     => 'type',
-            'prefetch' => 'dbxref',
-            'rows'     => 1
-        }
-        )->single;
+        'subject',
+        { 'type_3.name' => 'polypeptide' },
+        { 'join'        => 'type', }
+        );
 
-    $stash{gene_id}        = $gene->dbxref->accession;
-    $stash{transcript_id}  = $trans->dbxref->accession;
-    $stash{polypeptide_id} = $poly->dbxref->accession;
+    $stash{polypeptide} = $poly_rs->count( {}, { select => 'feature_id' } );
+
+    $stash{gene_id}
+        = $gene_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
+    $stash{transcript_id}
+        = $trans_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
+    $stash{polypeptide_id}
+        = $poly_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
 
     $stash{template} = 'species';
     $self->render(%stash);
@@ -71,70 +68,45 @@ sub index {
 
 sub contig {
     my ($self) = @_;
-    if ( !$self->check_organism( $self->stash('common_name') ) ) {
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
         $self->render_not_found;
         return;
     }
+    $self->set_organism($common_name);
+    $self->render( template => 'contig' );
+}
 
-    my $data;
-    my $organism_rs = $self->stash('organism_rs');
+sub contig_search {
+    my ($self) = @_;
 
-    my $contig_rs = $organism_rs->search_related(
+    my $model = $self->app->modware->handler;
+    $self->set_organism( $self->stash('common_name') );
+
+    my $rows = $self->param('iDisplayLength');
+    my $page = $self->param('iDisplayStart') / $rows + 1;
+
+    my $contig_rs = $self->stash('organism_resultset')->search_related(
         'features',
-        {   'type.name'   => 'supercontig',
-            'type_2.name' => 'gene',
-        },
-        {   join => [
-                'type',
-                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
-            ],
-            select => [
-                'features.feature_id',
-                'features.name',
-                { count => 'feature_id', -as => 'gene_count' },
-            ],
-            group_by => [ 'features.feature_id', 'features.name' ],
-            having   => \'count(feature_id) > 0',
-            order_by => { -asc                   => 'features.feature_id' },
+        { 'type.name' => 'contig' },
+        {   join => 'type',
+            rows => $rows,
+            page => $page,
         }
     );
 
-    if ( $self->stash('page') ) {
-        $contig_rs = $contig_rs->search(
-            {},
-            {   rows => 50,
-                page => $self->stash('page')
-            }
-        );
+    my $data = [];
+    while ( my $row = $contig_rs->next ) {
+        push @$data, [ $row->uniquename, $row->seqlen ];
     }
-
-    while ( my $contig = $contig_rs->next ) {
-        my $description = $contig->search_related(
-            'featureprops',
-            { 'type.name' => 'description' },
-            { join        => 'type' }
-        )->single->value;
-        push @$data,
-            [
-            $contig->name,
-            $organism_rs->search_related(
-                'features',
-                { feature_id => $contig->feature_id },
-                {   select => { length => 'residues' },
-                    as     => 'seqlength'
-                }
-                )->single->get_column('seqlength'),
-            $contig->get_column('gene_count'),
-            $description,
-            ];
-    }
-    $self->stash(
-        dataset  => $data,
-        count    => $contig_rs->count,
-        url_path => 'contig'
+    my $total = $contig_rs->pager->total_entries;
+    $self->render_json(
+        {   sEcho                => $self->param('sEcho'),
+            iTotalRecords        => $total,
+            iTotalDisplayRecords => $total,
+            aaData               => $data
+        }
     );
-    $self->stash( pager => $contig_rs->pager ) if $self->stash('page');
-    $self->render( template => 'contig' );
 }
 
 sub supercontig {
@@ -144,18 +116,18 @@ sub supercontig {
         $self->render_not_found;
         return;
     }
+    $self->set_organism($common_name);
     $self->render( template => 'supercontig' );
 }
 
 sub supercontig_search {
     my ($self) = @_;
 
-
     my $model = $self->app->modware->handler;
     $self->set_organism( $self->stash('common_name') );
 
-    my $rows           = $self->param('iDisplayLength');
-    my $page           = $self->param('iDisplayStart') / $rows + 1;
+    my $rows = $self->param('iDisplayLength');
+    my $page = $self->param('iDisplayStart') / $rows + 1;
 
     my $supercontig_rs = $self->stash('organism_resultset')->search_related(
         'features',

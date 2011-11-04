@@ -1,4 +1,4 @@
-% my $path = stash('species') || 'default';
+% my $path = stash('common_name') || 'default';
 
 % layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
 

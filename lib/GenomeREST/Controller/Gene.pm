@@ -1,12 +1,60 @@
 package GenomeREST::Controller::Gene;
 
 use strict;
-use dicty::UI::Tabview::Page::Gene;
-use dicty::Factory::Tabview::Tab;
-use dicty::Factory::Tabview::Section;
+use Genome::Tabview::Page::Gene;
+use Genome::Factory::Tabview::Tab;
+use Genome::Factory::Tabview::Section;
 use Module::Load;
 use Try::Tiny;
-use base 'Mojolicious::Controller';
+use base 'GenomeREST::Controller';
+
+sub list {
+    my ($self) = @_;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+    $self->render( template => 'gene' );
+}
+
+sub gene_search {
+    my ($self) = @_;
+
+    my $model = $self->app->modware->handler;
+    $self->set_organism( $self->stash('common_name') );
+
+    my $rows = $self->param('iDisplayLength');
+    my $page = $self->param('iDisplayStart') / $rows + 1;
+
+    my $gene_rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'type.name' => 'gene' },
+        {   join     => 'type',
+            prefetch => [qw/dbxref featureloc_features/],
+            rows     => $rows,
+            page     => $page
+        }
+    );
+    my $data = [];
+    while ( my $row = $gene_rs->next ) {
+        my $seqlen = $row->seqlen;
+        if ( !$seqlen ) {
+            my $floc = $row->featureloc_features->first;
+            $seqlen = sprintf( "%.1f", ( $floc->fmax - $floc->fmin ) / 1000 );
+        }
+        push @$data, [ $row->dbxref->accession, $row->uniquename, $seqlen ];
+    }
+    my $total = $gene_rs->pager->total_entries;
+    $self->render_json(
+        {   sEcho                => $self->param('sEcho'),
+            iTotalRecords        => $total,
+            iTotalDisplayRecords => $total,
+            aaData               => $data
+        }
+    );
+}
 
 sub index {
     my ($self) = @_;
@@ -16,12 +64,12 @@ sub index {
 sub index_html {
     my ($self)  = @_;
     my $gene_id = $self->stash('gene_id');
-    my $db      = dicty::UI::Tabview::Page::Gene->new(
-        -primary_id => $gene_id,
-        -active_tab => ' gene ',
-        -base_url   => $self->base_url
+    my $db      = Genome::Tabview::Page::Gene->new(
+        primary_id => $gene_id,
+        base_url   => $self->url_for('current'),
+        active_tab => 'gene'
     );
-
+    $db->model($self->app->modware->handler);
     $self->stash( $db->result );
 }
 
@@ -30,9 +78,10 @@ sub index_json {
     my $gene_id = $self->stash('gene_id');
 
     my $factory = dicty::Factory::Tabview::Tab->new(
-        -tab        => 'gene',
         -primary_id => $gene_id,
-        -base_url   => $self->base_url
+        -base_url   => $self->url_for('gene'),
+        -tab        => 'gene',
+        -context    => $self
     );
     $self->render_json( $self->panel_to_json($factory) );
 }
@@ -149,9 +198,10 @@ sub validate {
     my ($self) = @_;
     my $id = $self->stash('id');
 
-    if (  !$self->check_gene($id)
+    if (   !$self->check_gene($id)
         || $self->stash('replaced')
-        || $self->stash('deleted') ) {
+        || $self->stash('deleted') )
+    {
         $self->res->code(404);
         $self->render('gene/not_found');
     }

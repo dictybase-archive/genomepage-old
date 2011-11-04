@@ -106,7 +106,6 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::BLAST;
 
 use strict;
-use dicty::Template;
 use Bio::Root::Root;
 use Bio::SearchIO::Writer::HTMLResultWriter;
 use SOAP::Lite;
@@ -115,7 +114,6 @@ use Bio::SearchIO;
 use Bio::Graphics;
 use Bio::SeqFeature::Generic;
 use File::Spec::Functions;
-use ModConfig;
 use JSON;
 
 use base qw(Genome::Tabview::Page);

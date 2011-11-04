@@ -79,15 +79,12 @@ package Genome::Tabview::JSON::Feature::Gene;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
-use dicty::Search::Feature;
-use dicty::Search::Genotype;
-use dicty::Dbtable::Insertional_mutants;
 use Genome::Tabview::JSON::Genotype;
 use Genome::Tabview::JSON::Feature::Generic;
 use Genome::Tabview::JSON::GO;
-use ModConfig;
 use base qw( Genome::Tabview::JSON::Feature);
+
+my $config;
 
 =head2 new
 
@@ -98,8 +95,6 @@ use base qw( Genome::Tabview::JSON::Feature);
  Args     : -primary_id   - gene primary id.
  
 =cut
-
-my $config = ModConfig->load();
 
 sub new {
     my ( $class, @args ) = @_;

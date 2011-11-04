@@ -81,7 +81,6 @@ package Genome::Tabview::Page::Tab::Feature::Generic;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
 use base qw( Genome::Tabview::Page::Tab::Feature );
 
 =head2 new

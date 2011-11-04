@@ -80,26 +80,10 @@ SUCH DAMAGES.
 package Genome::Tabview::Page;
 
 use strict;
-use Bio::Root::Root;
-use dicty::Feature;
+use namespace::autoclean;
+use Carp;
+use Moose;
 
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Page> object.
- Returns  : Genome::Tabview::Page object 
- Args     : none
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    $self->{root} = Bio::Root::Root->new();
-    bless $self, $class;
-    return $self;
-}
 
 =head2 config
 
@@ -111,63 +95,11 @@ sub new {
 
 =cut
 
-sub config {
-    my ( $self, $arg ) = @_;
+has 'config' => (
+	is => 'rw', 
+	isa => 'Genome::Tabview::Config'
+);
 
-    $self->{config} = $arg if defined $arg;
-    $self->{root}->throw('Page config is not defined')
-        if not defined $self->{config};
-    $self->{root}->throw(
-        'Layout should be Genome::Tabview::Config implementing object')
-        if ref( $self->{config} ) !~ m{Genome::Tabview::Config};
-
-    return $self->{config};
-}
-
-=head2 template
-
- Title    : template
- Usage    : $page->template($template);
- Function : gets/sets the page template
- Returns  : dicty::Template object
- Args     : dicty::Template object
-
-=cut
-
-sub template {
-    my ( $self, $arg ) = @_;
-
-    $self->{template} = $arg if defined $arg;
-    $self->{root}->throw('Page template is not defined')
-        if not defined $self->{template};
-    $self->{root}->throw('Template should be dicty::Template')
-        if ref( $self->{template} ) ne 'dicty::Template';
-
-    return $self->{template};
-}
-
-=head2 error_template
-
- Title    : error_template
- Usage    : $page->error_template($template);
- Function : gets/sets the page error template
- Returns  : dicty::Template object
- Args     : dicty::Template object
-
-=cut
-
-sub error_template {
-    my ( $self, $arg ) = @_;
-
-    $self->{error_template} = $arg if defined $arg;
-
-    $self->{root}->throw('Error template is not defined')
-        if not defined $self->{error_template};
-    $self->{root}->throw('Template should be dicty::Template')
-        if ref( $self->{error_template} ) ne 'dicty::Template';
-
-    return $self->{error_template};
-}
 
 =head2 primary_id
 
@@ -179,14 +111,12 @@ sub error_template {
 
 =cut
 
-sub primary_id {
-    my ( $self, $arg ) = @_;
-    $self->{primary_id} = $arg if defined $arg;
+has 'primary_id' => (
+	is => 'rw', 
+	isa => 'Str'
+);
 
-    #    $self->{root}->throw('Primary ID is not defined')
-    #        if not defined $self->{primary_id};
-    return $self->{primary_id};
-}
+
 
 =head2 validate_id
 
@@ -211,18 +141,6 @@ sub validate_id {
         return
             "There was an error processing your request. Please report this error to dictyBase: $@";
     }
-    if ( $feature->is_deleted() ) {
-        my $error_message =
-            "$primary_id has been deleted from $ENV{'SITE_NAME'}. ";
-        if ( $feature->replaced_by() ) {
-            my $replaced_id = $feature->replaced_by;
-            $error_message .= 'It has been replaced by ';
-            $error_message .=
-                "<a href=?primary_id=$replaced_id>$replaced_id</a> ";
-        }
-        return $error_message;
-    }
-    return 0;
 }
 
 =head2 feature
@@ -235,47 +153,10 @@ sub validate_id {
 
 =cut
 
-sub feature {
-    my ( $self, $arg ) = @_;
-
-    $self->{feature} = $arg if defined $arg;
-    $self->{root}->throw('Feature is not defined')
-        if not defined $self->{feature};
-    $self->{root}->throw('Feature should be dicty::Feature')
-        if ref( $self->{feature} ) !~ m{dicty::Feature}x;
-
-    return $self->{feature};
-}
-
-=head2 process
-
- Title    : process
- Usage    : my $output = $page->process();
- Function : Processes page config and returns html. Chooses the template to use 
-            based on the result of the ID validation.
- Returns  : string
- Args     : none
-
-=cut
-
-sub process {
-    my ( $self, $arg ) = @_;
-    my $params;
-    my $output;
-    my $message = $self->validate_id;
-
-    if ($message) {
-        $params->{message} = $message;
-        $output = $self->error_template->process($params);
-    }
-    else {
-        $self->init;
-        $params->{config} = $self->config->to_json;
-        $params->{header} = $self->get_header;
-        $output           = $self->template->process($params);
-    }
-    return $output;
-}
+has 'feature' => (
+	is => 'rw', 
+	isa => 'DBIx::Class::Row'
+);
 
 =head2 result
 
@@ -293,8 +174,8 @@ sub result {
     my $conf = $self->config;
     my $output = {
     	config => $conf->to_json,
-        header => $self->get_header,
-        raw => [ map { $_->to_json } @{ $conf->panels }], 
+#        header => $self->get_header,
+#        raw => [ map { $_->to_json } @{ $conf->panels }], 
 	};
 	return $output;
 }
@@ -328,5 +209,9 @@ sub get_header {
     my ($self) = @_;
     return;
 }
+
+has 'model' => ( is => 'rw',  isa => 'Bio::Chado::Schema');
+
+__PACKAGE__->meta->make_immutable;
 
 1;

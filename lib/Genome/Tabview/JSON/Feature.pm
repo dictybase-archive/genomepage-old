@@ -81,8 +81,6 @@ package Genome::Tabview::JSON::Feature;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
-use dicty::Link;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::JSON::Reference;
 

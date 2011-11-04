@@ -83,11 +83,6 @@ package Genome::Tabview::Page::Tab::Gene;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
-use dicty::Search::Feature;
-use dicty::Search::Reference;
-use dicty::Search::Genotype;
-use dicty::Dbtable::Insertional_mutants;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::Config::Panel::Item::Accordion;

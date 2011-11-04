@@ -10,14 +10,14 @@
 =head1 SYNOPSIS
 
     my $panel  = Genome::Tabview::Config::Panel->new(
-        -layout   => 'tabview',
-        -position => 'center',
+        layout   => 'tabview',
+        position => 'center',
     );
     my $gene = Genome::Tabview::Config::Panel::Item::Tab->new(
-        -key        => 'gene',
-        -label      => 'Gene Summary',
-        -active     => 'true',
-        -source     => '/db/cgi-bin/dictyBase/yui/tab.pl?&tab=go&primary_id=<GENE ID>'
+        key        => 'gene',
+        label      => 'Gene Summary',
+        active     => 'true',
+        source     => '/db/cgi-bin/dictyBase/yui/tab.pl?&tab=go&primary_id=<GENE ID>'
     );
     $panel->add_item($gene);
     
@@ -88,57 +88,8 @@ SUCH DAMAGES.
 
 package Genome::Tabview::Config::Panel::Item::Tab;
 
-use strict;
-use Bio::Root::Root;
-
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Config::Panel::Item::Tab> object.
- Returns  : Genome::Tabview::Config::Panel::Item::Tab object 
- Args     : -key        : defines tab key,
-            -label      : defines tab label to display,
-            -active     : 'true' value would result in tab being active by default,
-            -source     : required if tab content is being loaded through request to the server.
-            -type       : class to be assigned to the element
-            -content    : If defined should contain elements to display inside the tab as a
-                          reference to an array of Genome::Tabview::Config::Panel objects. 
-            -dispatch   : If tab content should go through dispatcher              
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    $self->{root} = Bio::Root::Root->new();
-
-    my $arglist = [qw/KEY LABEL ACTIVE SOURCE TYPE CONTENT HREF DISPATCH/];
-    my ( $key, $label, $active, $source, $type, $content, $href, $dispatch ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('key is not provided')   if !$key;
-    $self->{root}->throw('label is not provided') if !$label;
-    $self->{root}->throw('source or content should be provided')
-        if !( $source || $content );
-
-    if ($content) {
-        foreach my $panel (@$content) {
-            $self->{root}->throw(
-                'Content should contain Genome::Tabview::Config::Panel implementing objects'
-            ) if ref($panel) !~ m{Genome::Tabview::Config::Panel};
-        }
-    }
-    $self->key($key);
-    $self->label($label)       if $label;
-    $self->active($active)     if $active;
-    $self->source($source)     if $source;
-    $self->type($type)         if $type;
-    $self->href($href)         if $href;
-    $self->content($content)   if $content;
-    $self->dispatch($dispatch) if $dispatch;
-    return $self;
-}
+use namespace::autoclean;
+use Moose;
 
 =head2 key
 
@@ -150,12 +101,6 @@ sub new {
 
 =cut
 
-sub key {
-    my ( $self, $arg ) = @_;
-    $self->{key} = $arg if defined $arg;
-    return $self->{key};
-}
-
 =head2 label
 
  Title    : label
@@ -165,12 +110,6 @@ sub key {
  Args     : string
 
 =cut
-
-sub label {
-    my ( $self, $arg ) = @_;
-    $self->{label} = $arg if defined $arg;
-    return $self->{label};
-}
 
 =head2 active
 
@@ -182,12 +121,6 @@ sub label {
 
 =cut
 
-sub active {
-    my ( $self, $arg ) = @_;
-    $self->{active} = $arg if defined $arg;
-    return $self->{active};
-}
-
 =head2 source
 
  Title    : source
@@ -197,12 +130,6 @@ sub active {
  Args     : string
 
 =cut
-
-sub source {
-    my ( $self, $arg ) = @_;
-    $self->{source} = $arg if defined $arg;
-    return $self->{source};
-}
 
 =head2 type
 
@@ -214,12 +141,6 @@ sub source {
 
 =cut
 
-sub type {
-    my ( $self, $arg ) = @_;
-    $self->{type} = $arg if defined $arg;
-    return $self->{type};
-}
-
 =head2 href
 
  Title    : href
@@ -229,12 +150,6 @@ sub type {
  Args     : string
 
 =cut
-
-sub href {
-    my ( $self, $arg ) = @_;
-    $self->{href} = $arg if defined $arg;
-    return $self->{href};
-}
 
 =head2 dispatch
 
@@ -246,12 +161,6 @@ sub href {
 
 =cut
 
-sub dispatch {
-    my ( $self, $arg ) = @_;
-    $self->{dispatch} = $arg if defined $arg;
-    return $self->{dispatch};
-}
-
 =head2 content
 
  Title    : key
@@ -262,20 +171,14 @@ sub dispatch {
 
 =cut
 
-sub content {
-    my ( $self, $arg ) = @_;
-    if ($arg) {
-        $self->{root}->throw("Content should be array reference")
-            if ref($arg) ne 'ARRAY';
-        foreach my $panel (@$arg) {
-            $self->{root}->throw(
-                'Content should be reference to an array of Genome::Tabview::Config::Panel objects'
-            ) if ref($panel) !~ m{Genome::Tabview::Config::Panel}i;
-        }
-        $self->{content} = $arg;
-    }
-    return $self->{content};
-}
+has [qw/key label/] => ( is => 'rw', isa => 'Str', required => 1 );
+has 'source' => ( is => 'rw', isa => 'Str' );
+has 'content' => (
+    is         => 'rw',
+    isa        => 'ArrayRef[Genome::Tabview::Config::Panel]',
+    auto_deref => 1
+);
+has [qw/active type href dispatch/] => ( is => 'rw', isa => 'Str' );
 
 =head2 to_json
 
@@ -288,22 +191,22 @@ sub content {
 =cut
 
 sub to_json {
-    my ( $self, @args ) = @_;
+    my ($self) = @_;
     my $item;
-    $item->{key}      = $self->key;
-    $item->{label}    = $self->label;
-    $item->{active}   = $self->active if $self->active;
-    $item->{source}   = $self->source if $self->source;
-    $item->{type}     = $self->type if $self->type;
-    $item->{href}     = $self->href if $self->href;
-    $item->{dispatch} = $self->dispatch if $self->dispatch;
+    $item->{key}   = $self->key;
+    $item->{label} = $self->label;
+    for my $tag (qw/active source type href dispatch/) {
+        $item->{$tag} = $self->$tag if $self->$tag;
+    }
     if ( $self->content ) {
-        foreach my $panel ( @{ $self->content } ) {
+        foreach my $panel ( $self->content ) {
             push @{ $item->{content} }, $panel->to_json;
         }
     }
     return $item;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

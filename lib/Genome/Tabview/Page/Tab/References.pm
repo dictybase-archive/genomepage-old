@@ -83,8 +83,6 @@ package Genome::Tabview::Page::Tab::References;
 
 use strict;
 use Bio::Root::Root;
-use dicty::Feature;
-use dicty::Search::Reference;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::JSON::Feature::Gene;

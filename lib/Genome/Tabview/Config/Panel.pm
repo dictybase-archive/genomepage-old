@@ -90,40 +90,9 @@ SUCH DAMAGES.
 
 package Genome::Tabview::Config::Panel;
 
-use strict;
-use Bio::Root::Root;
-
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Config::Panel> object.
- Returns  : Genome::Tabview::Config::Panel object 
- Args     : -position: position of the panel inside of the parent element
-            -layout     : layout to be applied to the panel items
-            -type       : class to be assigned to each item of the panel
-            -items      : reference to the array of Genome::Tabview::Config::Panel::Item 
-                          implementing objects
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    $self->{root} = Bio::Root::Root->new();
-
-    my $arglist = [qw/LAYOUT TYPE POSITION ITEMS/];
-    my ( $layout, $type, $position, $items ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('layout is not provided') if !$layout;
-
-    $self->layout($layout);
-    $self->type($type)         if $type;
-    $self->position($position) if $position;
-    $self->items($items)       if $items;
-    return $self;
-}
+use namespace::autoclean;
+use Moose;
+use Carp;
 
 =head2 layout
 
@@ -135,14 +104,6 @@ sub new {
 
 =cut
 
-sub layout {
-    my ( $self, $arg ) = @_;
-    $self->{layout} = $arg if defined $arg;
-    $self->{root}->throw('Layout is not defined')
-        if not defined $self->{layout};
-    return $self->{layout};
-}
-
 =head2 type
 
  Title    : type
@@ -152,12 +113,6 @@ sub layout {
  Args     : string
 
 =cut
-
-sub type {
-    my ( $self, $arg ) = @_;
-    $self->{type} = $arg if defined $arg;
-    return $self->{type};
-}
 
 =head2 position
 
@@ -169,52 +124,17 @@ sub type {
 
 =cut
 
-sub position {
-    my ( $self, $arg ) = @_;
-    $self->{position} = $arg if defined $arg;
-    return $self->{position};
-}
-
-=head2 items
-
- Title    : items
- Usage    : $panel->items(\@items);
- Function : gets/sets items of the panel
- Returns  : reference to the array of Genome::Tabview::Config::Panel::Item objects
- Args     : reference to the array of Genome::Tabview::Config::Panel::Item
-            objects
-=cut
-
-sub items {
-    my ( $self, $arg ) = @_;
-    return $self->{items} if !$arg;
-    $self->{root}->throw("Items should be array reference")
-        if ref($arg) ne 'ARRAY';
-    foreach my $item (@$arg) {
-        $self->add_item($item);
+has 'layout' => ( is => 'rw', isa => 'Str', required => 1 );
+has [qw/type position/] => ( is => 'rw', isa => 'Str' );
+has '_items' => (
+    isa     => 'ArrayRef[Genome::Tabview::Config::Panel]',
+    is      => 'rw',
+    handles => {
+        'add_item'  => 'push',
+        'items'     => 'elements',
+        'has_items' => 'count'
     }
-    return $self->{items};
-}
-
-=head2 add_item
-
- Title    : add_item
- Usage    : $panel->add_item($item);
- Function : adds item to the panel
- Returns  : string
- Args     : Genome::Tabview::Config::Panel::Item implementing object
-
-=cut
-
-sub add_item {
-    my ( $self, $arg ) = @_;
-    return if !$arg;
-    $self->{root}->throw(
-        "Item should be Genome::Tabview::Config::Panel::Item implementing object"
-    ) if ref($arg) !~ 'Genome::Tabview::Config::Panel::Item';
-    push @{ $self->{items} }, $arg;
-    return;
-}
+);
 
 =head2 to_json
 
@@ -228,9 +148,10 @@ sub add_item {
 
 sub to_json {
     my ( $self, @args ) = @_;
+    croak "No items found for the panel\n" if !$self->has_items;
+
     my $items;
-    $self->{root}->throw('No items found for the panel') if !$self->items;
-    foreach my $item ( @{ $self->items } ) {
+    foreach my $item ( $self->items ) {
         push @$items, $item->to_json;
     }
     my $panel;
@@ -252,9 +173,11 @@ sub to_json {
 
 sub add_table_item {
     my ( $self, $item ) = @_;
-    push @{ $self->{items} }, $item;
-    return $self;
+    $self->add_item($item);
+    return $item;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
