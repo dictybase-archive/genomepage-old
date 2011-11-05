@@ -64,7 +64,9 @@ sub startup {
     $gene->route( '/search', format => 'datatable' )->name('gene_pager')
         ->to('gene#gene_search');
     my $id = $gene->waypoint('/:id')->name('gene')
-        ->to( 'gene#index_html', format => 'html' );
+        ->to( 'gene#index_html');
+    $gene->route('/:id',  format => 'json')->name('gene_json')
+        ->to( 'gene#index_json');
     my $tab = $id->waypoint('/:tab')->to('gene#tab');
     $tab->route('/:section')->to('gene#section');
     $tab->route('/:subid/:section')->to('gene#section');

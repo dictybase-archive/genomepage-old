@@ -85,50 +85,8 @@ SUCH DAMAGES.
 package Genome::Tabview::Config::Panel::Item::Accordion;
 
 use strict;
-use Bio::Root::Root;
-
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Config::Panel::Item::Accordion> object.
- Returns  : Genome::Tabview::Config::Panel::Item::Accordion object 
- Args     : -key        : defines accordion key,
-            -label      : defines accordion label to display,
-            -type       : class to be assigned to the element
-            -content    : If defined should contain elements to display inside the tab as a
-                          reference to an array of Genome::Tabview::Config::Panel objects.
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    $self->{root} = Bio::Root::Root->new();
-
-    my $arglist = [qw/KEY LABEL SOURCE TYPE CONTENT/];
-    my ( $key, $label, $source, $type, $content ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('key is not provided')   if !$key;
-    $self->{root}->throw('label is not provided') if !$label;
-    $self->{root}->throw('source or content should be provided')
-        if !( $source || $content );
-
-    if ($content) {
-        foreach my $panel (@$content) {
-            $self->{root}->throw(
-                'Content should contain Genome::Tabview::Config::Panel implementing objects'
-            ) if ref($panel) !~ m{Genome::Tabview::Config::Panel};
-        }
-    }
-    $self->key($key);
-    $self->label($label)     if $label;
-    $self->source($source)   if $source;
-    $self->type($type)       if $type;
-    $self->content($content) if $content;
-    return $self;
-}
+use namespace::autoclean;
+use Moose;
 
 =head2 key
 
@@ -140,12 +98,6 @@ sub new {
 
 =cut
 
-sub key {
-    my ( $self, $arg ) = @_;
-    $self->{key} = $arg if defined $arg;
-    return $self->{key};
-}
-
 =head2 label
 
  Title    : label
@@ -155,12 +107,6 @@ sub key {
  Args     : string
 
 =cut
-
-sub label {
-    my ( $self, $arg ) = @_;
-    $self->{label} = $arg if defined $arg;
-    return $self->{label};
-}
 
 =head2 source
 
@@ -172,12 +118,6 @@ sub label {
 
 =cut
 
-sub source {
-    my ( $self, $arg ) = @_;
-    $self->{source} = $arg if defined $arg;
-    return $self->{source};
-}
-
 =head2 type
 
  Title    : type
@@ -187,12 +127,6 @@ sub source {
  Args     : string
 
 =cut
-
-sub type {
-    my ( $self, $arg ) = @_;
-    $self->{type} = $arg if defined $arg;
-    return $self->{type};
-}
 
 =head2 content
 
@@ -204,22 +138,14 @@ sub type {
 
 =cut
 
-sub content {
-    my ( $self, $arg ) = @_;
 
-    if ($arg) {
-        $self->{root}->throw("Content should be array reference")
-            if ref($arg) ne 'ARRAY';
-        foreach my $panel (@$arg) {
-            my $warn =
-                'Content should be reference to an array of Genome::Tabview::Config::Panel objects';
-            $self->{root}->throw($warn)
-                if ref($panel) !~ m{Genome::Tabview::Config::Panel}i;
-        }
-        $self->{content} = $arg;
-    }
-    return $self->{content};
-}
+has [qw/key label/] => ( is => 'rw', isa => 'Str', required => 1 );
+has [qw/source type/] => ( is => 'rw', isa => 'Str' );
+has 'content' => (
+    is         => 'rw',
+    isa        => 'ArrayRef[Genome::Tabview::Config::Panel]',
+    auto_deref => 1
+);
 
 =head2 to_json
 
@@ -232,19 +158,21 @@ sub content {
 =cut
 
 sub to_json {
-    my ( $self, @args ) = @_;
+    my ( $self) = @_;
     my $item;
     $item->{key}    = $self->key;
     $item->{label}  = $self->label if $self->label;
     $item->{source} = $self->source if $self->source;
     $item->{type}   = $self->type if $self->type;
     if ( $self->content ) {
-        foreach my $panel ( @{ $self->content } ) {
+        foreach my $panel ( $self->content } ) {
             push @{ $item->{content} }, $panel->to_json;
         }
     }
     return $item;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

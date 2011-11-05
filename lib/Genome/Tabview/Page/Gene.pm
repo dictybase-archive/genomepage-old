@@ -399,7 +399,7 @@ sub tab_source {
 
     my $url = $self->base_url;
     $url .= '/' . $self->primary_id . '/' . $arg{key};
-    $url .= '/'.$arg{primary_id} if $arg{primary_id};
+    $url .= '/' . $arg{primary_id} if $arg{primary_id};
     $url .= '.json';
     return $url;
 }
@@ -420,28 +420,30 @@ sub tab_source {
 
 sub tab {
     my ( $self, %arg ) = validated_hash(
-    	\@_, 
-    	key => {isa => 'Str'}, 
-    	label => { isa => 'Str'}, 
-    	primary_id => { isa => 'Str',  optional => 1}, 
-    	active => {isa => 'Str',  optional => 1}, 
-    	href => { isa => 'Str',  optional => 1}, 
-    	source => { isa => 'Str',  optional => 1}, 
-    	dispatch => { isa => 'Str',  optional => 1}
+        \@_,
+        key        => { isa => 'Str' },
+        label      => { isa => 'Str' },
+        primary_id => { isa => 'Str', optional => 1 },
+        active     => { isa => 'Str', optional => 1 },
+        href       => { isa => 'Str', optional => 1 },
+        source     => { isa => 'Str', optional => 1 },
+        dispatch   => { isa => 'Str', optional => 1 }
     );
 
     my $active_tab = $arg{active} ? 'true' : $self->active_tab
         && $arg{key} eq $self->active_tab ? 'true' : 'false';
-    my $href = $arg{key} if !$arg{href};
+    my $href = $arg{href} ? $arg{href} : $arg{key};
 
-    my $source = $self->tab_source( key => $arg{key}, primary_id => $arg{primary_id} )
-        if !$arg{source};
+    my $source = $self->tab_source(
+        key        => $arg{key},
+        primary_id => $arg{primary_id} || $self->primary_id
+    ) if !$arg{source};
 
     my $item = Genome::Tabview::Config::Panel::Item::Tab->new(
-        key      => $arg{key},
-        label    => $arg{label},
-        active   => $active_tab,
-        href     => $href,
+        key       => $arg{key},
+        label     => $arg{label},
+        active    => $active_tab,
+        href      => $href,
         -source   => $source,
         -dispatch => $arg{dispatch}
     );

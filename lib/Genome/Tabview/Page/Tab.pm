@@ -78,108 +78,21 @@ SUCH DAMAGES.
 
 package Genome::Tabview::Page::Tab;
 
-use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Moose;
+use MooseX::Params::Validate;
+use Carp;
 use Genome::Tabview::Config::Panel::Item::JSON;
 use Genome::Tabview::Config::Panel::Item::Accordion;
 
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Tab> object.
- Returns  : Genome::Tabview::Page::Tab object 
- Args     : none
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    $self->{root} = Bio::Root::Root->new();
-    bless $self, $class;
-    return $self;
-}
-
-=head2 base_url
-
- Title    : base_url
- Usage    : $page->base_url('purpureum');
- Function : gets/sets base_url
- Returns  : string
- Args     : string
-
-=cut
-
-sub base_url {
-    my ( $self, $arg ) = @_;
-    $self->{base_url} = $arg if defined $arg;
-    return $self->{base_url};
-}
-
-sub context {
-    my ( $self, $arg ) = @_;
-    $self->{context} = $arg if defined $arg;
-    return $self->{context} if defined $self->{context};
-}
-
-=head2 tab
-
- Title    : tab
- Usage    : $tab->tab('go');
- Function : gets/sets tab
- Returns  : string
- Args     : string
-
-=cut
-
-sub tab {
-    my ( $self, $arg ) = @_;
-    $self->{tab} = $arg if defined $arg;
-    $self->{root}->throw('Tab is not defined') if not defined $self->{tab};
-    return $self->{tab};
-}
-
-=head2 config
-
- Title    : config
- Usage    : $tab->config($config);
- Function : gets/sets the tab config
- Returns  : Genome::Tabview::Config implementing object
- Args     : Genome::Tabview::Config implementing object
-
-=cut
-
-sub config {
-    my ( $self, $arg ) = @_;
-
-    $self->{config} = $arg if defined $arg;
-    $self->{root}->throw('Config is not defined')
-        if not defined $self->{config};
-    $self->{root}->throw(
-        'Config should be Genome::Tabview::Config implementing object')
-        if ref( $self->{config} ) !~ m{Genome::Tabview::Config};
-
-    return $self->{config};
-}
-
-=head2 json
-
- Title    : json
- Usage    : $self->json->link(....);
- Function : gets/sets json handler. Uses Genome::Tabview::Config::Panel::Item::JSON as default one
- Returns  : Genome::Tabview::Config::Panel::Item::JSON
- Args     : JSON handler class instance
-
-=cut
-
-sub json {
-    my ( $self, $arg ) = @_;
-    $self->{json} = $arg if $arg;
-    $self->{json} = Genome::Tabview::Config::Panel::Item::JSON->new()
-        if !$self->{json};
-    return $self->{json};
-}
+has 'tab'      => ( is => 'rw', isa => 'Str' );
+has 'base_url' => ( is => 'rw', isa => 'Str' );
+has 'context'  => ( is => 'rw', isa => 'Mojolicious::Controller' );
+has 'config'   => ( is => 'rw', isa => 'Genome::Tabview::Config' );
+has 'json' =>
+    ( is => 'rw', isa => 'Genome::Tabview::Config::Panel::Item::JSON' );
+has 'feature' => ( is => 'rw', isa => 'DBIx::Class::Row' );
+has 'model' => (is => 'rw',  isa => 'Bio::Chado::Schema,  'predicate => 'has_model');
 
 =head2 process
 
@@ -192,32 +105,10 @@ sub json {
 =cut
 
 sub process {
-    my ( $self, @args ) = @_;
+    my ($self) = @_;
     $self->init;
     my $config = $self->config;
     return $config->to_json;
-}
-
-=head2 feature
-
- Title    : feature
- Usage    : $self->feature($feature);
- Function : gets/sets feature
- Returns  : dicty::Feature implementing object
- Args     : dicty::Feature implementing object
-
-=cut
-
-sub feature {
-    my ( $self, $arg ) = @_;
-
-    $self->{feature} = $arg if defined $arg;
-    $self->{root}->throw('Feature is not defined')
-        if not defined $self->{feature};
-    $self->{root}->throw('Feature should be dicty::Feature')
-        if ref( $self->{feature} ) !~ m{dicty::Feature}x;
-
-    return $self->{feature};
 }
 
 =head2 simple_label
@@ -247,20 +138,19 @@ sub simple_label {
 
 =cut
 
-sub section_base_url {
-    my ( $self, $arg ) = @_;
-
-    $self->{section_base_url} = $arg if defined $arg;
-    if ( not defined $self->{section_base_url} ) {
-        my $base_url = $self->base_url || '';
-        my $gene =
-              $self->feature->type eq 'gene'
+has 'section_base_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $gene
+            = $self->feature->type eq 'gene'
             ? $self->feature
             : $self->feature->gene;
-        $self->{section_base_url} = $base_url. '/' .$gene->primary_id;
+        return $self->base_url . '/' . $gene->dbxref->accession;
     }
-    return $self->{section_base_url};
-}
+);
 
 =head2 section_source
 
@@ -274,19 +164,17 @@ sub section_base_url {
 =cut
 
 sub section_source {
-    my ( $self, @args ) = @_;
+    my ( $self, %arg ) = validated_hash(
+		\@_,
+		key => { isa => 'Str'}, 
+		primary_id => { isa => 'Str',  optional => 1}
+    );
 
-    my $arglist = [qw/KEY PRIMARY_ID/];
-    my ( $key, $primary_id ) = $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('section key is not provided') if !$key;
-
-    my $sub_id = $self->feature->type eq 'gene' ? '' : '/'.$primary_id;
-    return
-          $self->section_base_url . '/'
+    my $sub_id = $self->feature->type eq 'gene' ? '' : '/' . $arg{primary_id};
+    return $self->section_base_url . '/'
         . $self->tab
         . $sub_id . '/'
-        . $key
-        . '.json';
+        . $arg{key} . '.json';
 }
 
 =head2 accordion
@@ -302,23 +190,25 @@ sub section_source {
 =cut
 
 sub accordion {
-    my ( $self, @args ) = @_;
+    my ( $self, %arg ) = validated_hash(
+        \@_,
+        key        => { isa => 'Str' },
+        label      => { isa => 'Str' },
+        primary_id => { isa => 'Str', optional => 1 }
+    );
 
-    my $arglist = [qw/KEY LABEL PRIMARY_ID/];
-    my ( $key, $label, $primary_id ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('accordion key is not provided')   if !$key;
-    $self->{root}->throw('accordion label is not provided') if !$label;
-
-    $primary_id = $self->feature->primary_id if !$primary_id;
-
+    $primary_id = $self->feature->dbxref->accession if !$arg{$primary_id};
     my $item = Genome::Tabview::Config::Panel::Item::Accordion->new(
-        -key   => $key,
-        -label => $label,
-        -source =>
-            $self->section_source( -key => $key, -primary_id => $primary_id ),
+        key    => $arg{key},
+        label  => $arg{label},
+        source => $self->section_source(
+            key        => $arg{key},
+            primary_id => $primary_id
+        ),
     );
     return $item;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

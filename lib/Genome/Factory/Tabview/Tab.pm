@@ -90,130 +90,65 @@ SUCH DAMAGES.
 package Genome::Factory::Tabview::Tab;
 
 use strict;
+use namespace::autoclean;
+use Moose;
 use Module::Find;
-use Bio::Root::Root;
-
-=head2 new
-
- Title    : new
- Function : onstructor for Genome::Factory::Tabview::Tab
- Usage    : my $tab = Genome::Factory::Tabview::Tab->new( 
-                -tab => 'gene', 
-                -primary_id => $primary_id
-            );
-            or
-            my $tab = Genome::Factory::Tabview::Tab->new();
- Returns  : Genome::Factory::Tabview::Tab object.
- Args     : -tab            : name of the tab. Generally the tab name gets mapped to a 
-                              class name under the default namespace.   
-            -primary_id     : primary id of the feature
-            -base_url       : base url for the tab
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-    $self->{root} = Bio::Root::Root->new();
-
-    ## -- arguments
-    my $arglist = [qw/TAB PRIMARY_ID BASE_URL CONTEXT/];
-    my ( $tab, $primary_id, $base_url, $context )
-        = $self->{root}->_rearrange( $arglist, @args );
-    $self->default_namespace('Genome::Tabview::Page::Tab');
-    $self->tab($tab)               if $tab;
-    $self->primary_id($primary_id) if $primary_id;
-    $self->base_url($base_url)     if $base_url;
-    $self->context($context)       if $context;
-    return $self;
-}
+use Class::MOP;
+use Carp;
 
 =head2 tab
 
- Title    : tab
- Function : gets/sets implementation of dicty::UI::Tabview::GenePage::Tab
- Usage    : $factory->tab('gene');
- Returns  : string
- Args     : string
- 
+Title    : tab
+Function : gets/sets implementation of dicty::UI::Tabview::GenePage::Tab
+Usage    : $factory->tab('gene');
+Returns  : string
+Args     : string
+
 =cut
-
-sub tab {
-    my ( $self, $arg ) = @_;
-
-    $self->{tab} = $arg if defined $arg;
-    $self->{root}->throw('Tab is not defined') if not defined $self->{tab};
-
-    return $self->{tab};
-}
 
 =head2 primary_id
 
- Title    : primary_id
- Function : gets/sets primary id
- Usage    : $factory->primary_id($primary_id);
- Returns  : string
- Args     : string
- 
+Title    : primary_id
+Function : gets/sets primary id
+Usage    : $factory->primary_id($primary_id);
+Returns  : string
+Args     : string
+
 =cut
-
-sub primary_id {
-    my ( $self, $arg ) = @_;
-
-    $self->{primary_id} = $arg if defined $arg;
-    $self->{root}->throw('Primary ID is not defined')
-        if not defined $self->{primary_id};
-
-    return $self->{primary_id};
-}
 
 =head2 base_url
 
- Title    : base_url
- Usage    : $factory->base_url('purpureum');
- Function : gets/sets base_url
- Returns  : string
- Args     : string
+Title    : base_url
+Usage    : $factory->base_url('purpureum');
+Function : gets/sets base_url
+Returns  : string
+Args     : string
 
 =cut
-
-sub base_url {
-    my ( $self, $arg ) = @_;
-    $self->{base_url} = $arg if defined $arg;
-    return $self->{base_url};
-}
-
-sub context {
-    my ( $self, $arg ) = @_;
-    $self->{context} = $arg if defined $arg;
-    return $self->{context} if defined $self->{context};
-}
 
 =head2 default_namespace
 
- Title    : default_namespace
- Function : gets/sets class namespace where the factory will search for 
-            B<dicty::UI::Tabview::GenePage::Tab> implementing classes that matches the source name.
-            If not given the default namespace will be B<dicty::UI::Tabview::GenePage::Tab> which is
-            generally set during the object creation.
- Usage    : $factory->default_namespace($namespace);
-            or 
-            factory->default_namespace();
- Returns  : string
- Args     : string
- 
+Title    : default_namespace
+Function : gets/sets class namespace where the factory will search for 
+		   B<dicty::UI::Tabview::GenePage::Tab> implementing classes that matches the source name.
+		   If not given the default namespace will be B<dicty::UI::Tabview::GenePage::Tab> which is
+		   generally set during the object creation.
+Usage    : $factory->default_namespace($namespace);
+		   or 
+		   factory->default_namespace();
+Returns  : string
+Args     : string
+
 =cut
 
-sub default_namespace {
-    my ( $self, $arg ) = @_;
-
-    $self->{namespace} = $arg if defined $arg;
-
-    return $self->{namespace};
-}
+has [qw/primary_id base_url tab/] => ( is => 'rw', isa => 'Str' );
+has 'default_namespace' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'Genome::Tabview::Page::Tab',
+    lazy    => 1
+);
+has 'context' => ( is => 'rw', isa => 'Mojolicious::Controller' );
 
 =head2 instantiate
 
@@ -226,27 +161,23 @@ sub default_namespace {
 =cut
 
 sub instantiate {
-    my ( $self, @args ) = @_;
+    my ($self) = @_;
 
     my $tab        = $self->tab;
-    my $primary_id = $self->primary_id;
-    my $base_url   = $self->base_url;
-
     my @modules = grep {/::$tab$/i} findsubmod $self->default_namespace;
-
-    $self->{root}->throw( "Module matching tab $tab not found in namespace "
-            . $self->default_namespace )
+    croak "Module matching tab $tab not found in namespace ",
+        $self->default_namespace, "\n"
         if !@modules;
 
-    eval "require $modules[0]";
-    $self->{root}->throw($@) if $@;
-
+    Class::MOP->load_class($modules[0]);
     my $obj = $modules[0]
-        ->new( -primary_id => $primary_id, -base_url => $base_url );
+        ->new( primary_id => $self->primary_id, base_url => $self->base_url );
     if ( $self->context ) {
         $obj->context( $self->context ) if $obj->can('context');
     }
     return $obj;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

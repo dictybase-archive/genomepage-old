@@ -81,52 +81,39 @@ SUCH DAMAGES.
 
 package Genome::Tabview::Page::Tab::Gene;
 
-use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Moose;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::Config::Panel::Item::Accordion;
-use Genome::Tabview::Page::Tab;
 use Genome::Tabview::JSON::Feature::Gene;
-use base qw( Genome::Tabview::Page::Tab );
 use Genome::Tabview::JSON::GO;
+extends 'Genome::Tabview::Page::Tab';
 
-=head2 new
+has 'primary_id' => (
+    is       => 'rw',
+    isa      => 'Str',
+    required => 1,
+);
+has 'base_url' => ( is => 'rw', isa => 'Str' );
 
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Tab::Gene> object. 
-            Sets templates and configuration parameters for tabs to be displayed
- Usage    : my $tab = Genome::Tabview::Page::Tab::Gene->new( -primary_id => <GENE ID> );
- Returns  : Genome::Tabview::Page::Tab::Gene object with default configuration.
- Args     : Gene primary id
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID BASE_URL/];
-
-    $self->{root} = Bio::Root::Root->new();
-    my ( $primary_id, $base_url ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-
-    my $gene = dicty::Feature->new( -primary_id => $primary_id );
-    $self->{root}->throw('Provided ID does not belong to gene')
-        if $gene->type ne 'gene';
-
-    $self->feature($gene);
-    $self->tab('gene');
-    $self->base_url($base_url) if $base_url;
-
-    return $self;
-}
+before 'feature' => sub {
+    my ($self) = @_;
+    croak "Need to set the model attribute\n" if !$self->has_model;
+};
+has '+feature' => (
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $row = $self->model->resultset('Sequence::Feature')->search(
+            {   'dbxref.accession' => $self->primary_id,
+                'type.name'        => 'gene'
+            },
+            { join => [qw/dbxref gene/], 'rows' => 1 }
+        )->single;
+        croak $self->primary_id, " is not a gene\n" if !$row;
+    }
+);
 
 =head2 init
 
@@ -141,45 +128,28 @@ sub new {
 sub init {
     my ($self) = @_;
     my $config = Genome::Tabview::Config->new();
-    my $panel =
-        Genome::Tabview::Config::Panel->new( -layout => 'accordion' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'accordion' );
     my @items;
     push @items,
         $self->accordion(
-        -key   => 'info',
-        -label => $self->simple_label("General Information")
+        key   => 'info',
+        label => $self->simple_label("General Information")
         );
     push @items,
         $self->accordion(
-        -key   => 'genomic_info',
-        -label => $self->simple_label("Genomic Information"),
+        key   => 'genomic_info',
+        label => $self->simple_label("Genomic Information"),
         ) if $self->show_genomic_info;
     push @items,
         $self->accordion(
-        -key   => 'product',
-        -label => $self->simple_label("Gene Product Information"),
+        key   => 'product',
+        label => $self->simple_label("Gene Product Information"),
         ) if $self->show_product;
     push @items,
         $self->accordion(
-        -key   => 'sequences',
-        -label => $self->simple_label("Associated Sequences"),
+        key   => 'sequences',
+        label => $self->simple_label("Associated Sequences"),
         ) if $self->show_sequences;
-    push @items,
-        $self->accordion(
-        -key   => 'promoters',
-        -label => $self->simple_label(
-            "Regulatory Elements (Computationally Inferred)"),
-        ) if $self->show_promoters;
-    push @items,
-        $self->accordion(
-        -key   => 'go',
-        -label => $self->go_label,
-        ) if $self->show_go;
-    push @items,
-        $self->accordion(
-        -key   => 'phenotypes',
-        -label => $self->phenotypes_label,
-        ) if $self->show_phenotypes;
     push @items,
         $self->accordion(
         -key   => 'links',
@@ -187,19 +157,36 @@ sub init {
         ) if $self->show_links;
     push @items,
         $self->accordion(
-        -key   => 'summary',
-        -label => $self->simple_label("Summary"),
+        key   => 'summary',
+        label => $self->simple_label("Summary"),
         ) if $self->show_summary;
     push @items,
         $self->accordion(
-        -key   => 'references',
-        -label => $self->references_label,
+        key   => 'references',
+        label => $self->references_label,
         ) if $self->show_references;
 
     $panel->items( \@items );
     $config->add_panel($panel);
     $self->config($config);
-    return $self;
+
+    #    push @items,
+    #        $self->accordion(
+    #        -key   => 'promoters',
+    #        -label => $self->simple_label(
+    #            "Regulatory Elements (Computationally Inferred)"),
+    #        ) if $self->show_promoters;
+    #    push @items,
+    #        $self->accordion(
+    #        -key   => 'go',
+    #        -label => $self->go_label,
+    #        ) if $self->show_go;
+    #    push @items,
+    #        $self->accordion(
+    #        -key   => 'phenotypes',
+    #        -label => $self->phenotypes_label,
+    #        ) if $self->show_phenotypes;
+
 }
 
 =head2 show_genomic_info
@@ -216,11 +203,16 @@ sub show_genomic_info {
     my ($self) = @_;
     my $gene = $self->feature;
 
-    my ($primary_feature) = @{ $gene->primary_features() };
-    return if !$primary_feature;
+    my $primary_feat_rs = $gene->search_related(
+        'feature_relationship_objects',
+        { 'type.name' => 'part_of' },
+        { join        => 'type' }
+    )->search_related( 'subject', {}, { prefetch => 'type' } );
+
+    return if !$primary_feature_rs->count;
 
     ## --show the gbrowse map for RNA features (right now tRNA, ncRNA, mRNA) and pseudogenes
-    return $primary_feature->type() =~ m{RNA|pseudogene}ix ? 1 : 0;
+    return $primary_feature_rs->first->type() =~ m{RNA|pseudogene}ix ? 1 : 0;
 }
 
 =head2 show_product
@@ -235,12 +227,7 @@ sub show_genomic_info {
 
 sub show_product {
     my ($self) = @_;
-    my $gene = $self->feature;
-
-    my ($feature) = @{ $gene->primary_features };
-    return if !$feature;
-
-    return $feature->type() =~ m{RNA|pseudogene}ix ? 1 : 0;
+    return $self->show_genomic_info;
 }
 
 =head2 show_sequences
@@ -258,13 +245,13 @@ sub show_sequences {
     my $gene = $self->feature;
     return if !$gene->reference_feature;
 
-    my $est_count = dicty::Search::Feature->count_overlapping_feats_by_range(
+    my $est_count
+        = dicty::Search::Feature->count_overlapping_feats_by_range(
         $gene->reference_feature->name(),
         $gene->start, $gene->end, 'EST' );
     return 1 if $est_count > 0;
 
-    my @sequences =
-        grep { $_->type =~ m{databank_entry|cdna_clone}i }
+    my @sequences = grep { $_->type =~ m{databank_entry|cdna_clone}i }
         @{ $gene->features() };
     return @sequences ? 1 : 0;
 }
@@ -297,7 +284,8 @@ sub show_promoters {
 
 sub show_go {
     my ($self) = @_;
-    my $go = Genome::Tabview::JSON::GO->new( -primary_id => $self->feature->primary_id );
+    my $go = Genome::Tabview::JSON::GO->new(
+        -primary_id => $self->feature->primary_id );
     return $go->{has_annotations} ? 1 : 0;
 }
 
@@ -318,8 +306,8 @@ sub show_links {
     return 1 if $gene->get_expression_information();
     return 1 if @{ $gene->pathways() };
 
-    my $ui_gene =
-        Genome::Tabview::JSON::Feature::Gene->new( $gene->primary_id );
+    my $ui_gene
+        = Genome::Tabview::JSON::Feature::Gene->new( $gene->primary_id );
     return $ui_gene->external_links ? 1 : 0;
 }
 
@@ -371,8 +359,8 @@ sub show_phenotypes {
     my $gene = $self->feature;
     return if !@{ $gene->features };
 
-    my $count =
-        dicty::Search::Genotype->count_by_feature_id( $gene->feature_id );
+    my $count
+        = dicty::Search::Genotype->count_by_feature_id( $gene->feature_id );
     my @urls = $gene->get_insertional_mutants_urls();
     return $count || @urls || $gene->plasmids ? 1 : 0;
 }
@@ -415,7 +403,7 @@ sub references_label {
     my $gene = $self->feature;
     return if !$gene->references;
 
-    my $count = @{$gene->references};
+    my $count = @{ $gene->references };
     my $base_url = $self->base_url || '';
 
     my $references_link = $self->json->link(

@@ -127,13 +127,16 @@ use Carp;
 has 'layout' => ( is => 'rw', isa => 'Str', required => 1 );
 has [qw/type position/] => ( is => 'rw', isa => 'Str' );
 has '_items' => (
-    isa     => 'ArrayRef[Genome::Tabview::Config::Panel]',
+    isa     => 'ArrayRef',
     is      => 'rw',
+    traits => [qw/Array/], 
     handles => {
         'add_item'  => 'push',
         'items'     => 'elements',
         'has_items' => 'count'
-    }
+    },
+    lazy    => 1,
+    default => sub { [] }
 );
 
 =head2 to_json

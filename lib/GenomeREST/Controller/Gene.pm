@@ -56,34 +56,34 @@ sub gene_search {
     );
 }
 
-sub index {
-    my ($self) = @_;
-    $self->render_format;
-}
-
 sub index_html {
     my ($self)  = @_;
     my $gene_id = $self->stash('gene_id');
-    my $db      = Genome::Tabview::Page::Gene->new(
+    my $tabview      = Genome::Tabview::Page::Gene->new(
         primary_id => $gene_id,
         base_url   => $self->url_for('current'),
         active_tab => 'gene'
     );
-    $db->model($self->app->modware->handler);
-    $self->stash( $db->result );
+    $tabview->model( $self->app->modware->handler );
+    $self->stash( $tabview->result );
+    $self->render( template => 'gene/index' );
 }
 
 sub index_json {
     my ($self) = @_;
     my $gene_id = $self->stash('gene_id');
 
-    my $factory = dicty::Factory::Tabview::Tab->new(
-        -primary_id => $gene_id,
-        -base_url   => $self->url_for('gene'),
-        -tab        => 'gene',
-        -context    => $self
+    my $factory = Genome::Factory::Tabview::Tab->new(
+        primary_id => $gene_id,
+        base_url   => $self->url_for('current'),
+        tab        => 'gene',
+        context    => $self
     );
-    $self->render_json( $self->panel_to_json($factory) );
+    my $tabview = $factory->instantiate;
+    $tabview->model($self->app->modware->handler);
+    $tabview->init;
+    my $conf = $tabview->config;
+    $self->render_json( [ map { $_->to_json } $conf->panels ] );
 }
 
 sub tab {
