@@ -79,36 +79,11 @@ SUCH DAMAGES.
 
 package Genome::Tabview::JSON::Feature;
 
-use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Moose;
+use MooseX::Params::Validate;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::JSON::Reference;
-
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::JSON::Feature> object. 
- Usage    : my $page = Genome::Tabview::JSON::Feature->new( -primary_id => 'DDB0185055' );
- Returns  : Genome::Tabview::JSON::Feature object with default configuration.     
- Args     : -primary_id   - feature primary id.
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID/];
-    $self->{root} = Bio::Root::Root->new();
-    my ($primary_id) = $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-    my $feature = dicty::Feature->new( -primary_id => $primary_id );
-    $self->source_feature($feature);
-    return $self;
-}
 
 =head2 json
 
@@ -120,19 +95,16 @@ sub new {
 
 =cut
 
-sub json {
-    my ( $self, $arg ) = @_;
-    $self->{json} = $arg if $arg;
-    $self->{json} = Genome::Tabview::Config::Panel::Item::JSON->new()
-        if !$self->{json};
-    return $self->{json};
-}
+has 'json' => (
+    is      => 'rw',
+    isa     => 'Genome::Tabview::Config::Panel::Item::JSON',
+    lazy    => 1,
+    default => sub {
+        Genome::Tabview::Config::Panel::Item::JSON->new;
+    }
+);
 
-sub context {
-    my ( $self, $arg ) = @_;
-    $self->{context} = $arg if defined $arg;
-    return $self->{context} if defined $self->{context};
-}
+has 'context' => ( is => 'rw', isa => 'Mojolicious::Controller' );
 
 =head2 source_feature
 
@@ -144,54 +116,11 @@ sub context {
 
 =cut
 
-sub source_feature {
-    my ( $self, $arg ) = @_;
-    $self->{source_feature} = $arg if defined $arg;
-    $self->{root}->throw('Feature is not defined')
-        if not defined $self->{source_feature};
-    $self->{root}->throw('Feature should be dicty::Feature')
-        if ref( $self->{source_feature} ) !~ m{dicty::Feature}x;
-    return $self->{source_feature};
-}
-
-=head2 alert
-
- Title    : alert
- Function : returns alert for features on chromosome 2 repeat
- Usage    : my $alert = $feature->alert();
- Returns  : hash
- Args     : none
- 
-=cut
-
-sub alert {
-    my ($self) = @_;
-
-    return $self->{alert} if $self->{alert};
-
-    my $json      = $self->json;
-    my $feature   = $self->source_feature;
-    my $reference = $feature->reference_feature;
-
-    return if !$reference;
-    return
-        if $ENV{'SITE_NAME'} ne 'dictyBase'
-            || $reference->type ne 'chromosome'
-            || $reference->name ne '2';
-    my $first_repeat =
-        'Note that there is a second copy of this gene in the genome. The region on Chromosome 2 from bases 2249563 to 3002134 is repeated between bases 3002337 and 3755085 in strains AX3 and AX4 (but not AX2).';
-    my $second_repeat =
-        'Note that there are two copies of this gene in the genome. The region on Chromosome 2 from bases 2249563 to 3002134 is repeated between bases 3002337 and 3755085 in strains AX3 and AX4 (but not AX2). This gene is on the second repeat of the duplication.';
-
-    my $alert =
-          $feature->start > 2263132 && $feature->end < 3015703
-        ? $json->text( '<b>' . $first_repeat . '</b>' )
-        : $feature->start > 3016083 && $feature->end < 3768654
-        ? $json->text( '<b>' . $second_repeat . '</b>' )
-        : undef;
-    $self->{alert} = $alert;
-    return $alert;
-}
+has 'source_feature' => (
+    is       => 'rw',
+    isa      => 'DBIx::Class::Row',
+    required => 1
+);
 
 =head2 location
 
@@ -205,15 +134,16 @@ sub alert {
 
 sub location {
     my ($self) = @_;
-    my $feature = $self->source_feature;
-    my $strand   = $feature->strand eq '1' ? 'Watson' : 'Crick';
-    my $start    = $feature->start();
-    my $end      = $feature->end();
-    my $ref_feat = $feature->reference_feature()->name();
-    my $ref_type = $feature->reference_feature()->display_type();
+    my $floc = $self->source_feature->featureloc_features->first;
+    my $strand = $floc->strand eq '1' ? 'Watson' : 'Crick';
+    my $start  = $floc->fmin + 1;
+    my $end    = $floc->fmax;
 
-    my $str =
-        "$ref_type <b>$ref_feat</b> coordinates <b>$start</b> to <b>$end</b>, <b>$strand</b> strand";
+    my $ref_feat = $floc->srcfeature;
+    my $str
+        = $ref_feat->type . "<b>"
+        . $ref_feat->name
+        . "</b> coordinates <b>$start</b> to <b>$end</b>, <b>$strand</b> strand";
 
     return $self->json->text($str);
 }
@@ -245,7 +175,7 @@ sub name {
 
 sub primary_id {
     my ($self) = @_;
-    return $self->json->text( $self->source_feature->primary_id );
+    return $self->json->text( $self->source_feature->dbxref->accession );
 }
 
 =head2 description
@@ -258,12 +188,12 @@ sub primary_id {
  
 =cut
 
-sub description {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->description;
-    return $self->json->format_url( $feature->description );
-}
+#sub description {
+#    my ($self) = @_;
+#    my $feature = $self->source_feature;
+#    return if !$feature->description;
+#    return $self->json->format_url( $feature->description );
+#}
 
 =head2 external_link
 
@@ -274,132 +204,92 @@ sub description {
                 -ids    => [ 'O77203' ]
             );
  Returns  : hash with json representetion of a link
- Args     : -source : source of the link
-            -ids    : reference to an array of external ids
-            -type   : type of the link to be created ('tab'/'outer'). 
+ Args     : source : source of the link
+            ids    : reference to an array of external ids
+            type   : type of the link to be created ('tab'/'outer'). 
                       If not defined, 'outer' will be used as a default value;
 =cut
 
 sub external_link {
-    my ( $self, @args ) = @_;
+    my ( $self, $source, $id, $type ) = validated_list(
+        \@_,
+        source => { isa => 'Str' },
+        id     => { isa => 'Str' },
+        type   => { isa => 'Str', optional => 1, default => 'outer' }
+    );
+
     my $json = $self->json;
-
-    my $arglist = [qw/SOURCE IDS TYPE/];
-    my ( $source, $ids, $type ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('source not provided')  if !$source;
-    $self->{root}->throw('ids are not provided') if !$ids;
-    $type = 'outer' if !$type;
-
     return $json->link(
-        -url => $self->link('Entrez Nucleotide Multiple Entries')
-            ->get_links( join( ',', @$ids ) ),
-        -caption => 'Entrez Nucleotide',
-        -type    => $type
+        url     => $self->link( 'Entrez Nucleotide Multiple Entries', $id ),
+        caption => 'Entrez Nucleotide',
+        type    => $type
     ) if $source eq 'GI Number';
 
     return $json->link(
-        -url => $self->link('Entrez Protein Multiple Entries')
-            ->get_links( join( ',', @$ids ) ),
-        -caption => 'Entrez Protein',
-        -type    => $type,
-    ) if $source eq 'Protein GI Number' && @$ids > 1;
+        url     => $self->link( 'Entrez Protein Multiple Entries', $id ),
+        caption => 'Entrez Protein',
+        type    => $type,
+    ) if $source eq 'Protein GI Number';
 
     return $json->link(
-        -url => $self->link('GenBank Protein')
-            ->get_links( join( ',', @$ids ) ),
-        -caption => 'GenBank Protein',
-        -type    => $type
+        url     => $self->link( 'GenBank Protein', $id ),
+        caption => 'GenBank Protein',
+        type    => $type
     ) if $source eq 'Protein Accession Number';
 
     return $json->link(
-        -url     => $self->link('ENA')->get_links( join( ',', @$ids ) ),
-        -caption => 'ENA',
-        -type    => $type,
+        url     => $self->link( 'ENA', $id ),
+        caption => 'ENA',
+        type    => $type,
     ) if $source eq 'ENA';
 
     return $json->link(
-        -url => $self->link('UniProt')
-            ->get_links( '?query=' . join( '+or+', @$ids ) ),
-        -caption => 'UniProtKB: ' . join( '&nbsp;|&nbsp;', @$ids ),
-        -type    => $type,
+        url     => $self->link( 'UniProt', $id ),
+        caption => "UniProtKB: $id",
+        type    => $type,
         )
         if ( $source eq 'UniProt'
         or $source eq 'Swissprot'
-        or $source eq 'TrEMBL' );
+        or $source eq 'TrEMBL'
+        or $source eq 'UniProt' );
 
     return $json->link(
-        -url => $self->link('UniProt')
-            ->get_links( '?query=' . join( '+or+', @$ids ) ),
-        -caption => join( '&nbsp;|&nbsp;', @$ids ),
-        -type    => $type,
-    ) if $source eq 'UniProtKB';
-
-    return $json->link(
-        -url     => $self->link('EC Number')->get_links( join( ',', @$ids ) ),
-        -caption => 'EC: ' . join( ', ',                            @$ids ),
-        -type    => $type,
+        url     => $self->link( 'EC Number', $id ),
+        caption => "EC: $id",
+        type    => $type,
 
     ) if $source eq 'EC Number';
 
     return $json->link(
-        -url     => $self->link('STKE')->get_links( join( ',', @$ids ) ),
-        -caption => 'STKE',
-        -type    => $type,
-    ) if $source eq 'STKE';
-
-    return $json->link(
-        -url =>
-            $self->link('RefSeq:Protein')->get_links( join( ',', @$ids ) ),
-        -caption => 'RefSeq Protein',
-        -type    => $type,
+        url     => $self->link( 'RefSeq:Protein', $id ),
+        caption => 'RefSeq Protein',
+        type    => $type,
     ) if $source eq 'refseq:protein';
 
     return $json->link(
-        -url     => $self->link($source)->get_links( join( ',', @$ids ) ),
-        -caption => 'Inparanoid',
-        -type    => $type,
+        url     => $self->link( $source, $id ),
+        caption => 'Inparanoid',
+        type    => $type,
     ) if $source eq 'Inparanoid v.7.0';
 
     return $json->link(
-        -url     => $self->link('Kinase')->get_links( join( ',', @$ids ) ),
-        -caption => 'Kinase.com',
-        -type    => $type,
-    ) if $source eq 'Kinase';
-
-    return $json->link(
-        -url     => $self->link('GeneDB')->get_links( join( ',', @$ids ) ),
-        -caption => 'GeneDB',
-        -type    => $type,
-    ) if $source eq 'GeneDB';
-
-    return $json->link(
-        -url => $self->link('dictyExpress')->get_links( join( ',', @$ids ) ),
-        -caption => 'dictyExpress (microarray)',
-        -type    => $type
+        url     => $self->link( 'dictyExpress', $id ),
+        caption => 'dictyExpress (microarray)',
+        type    => $type
     ) if $source eq 'dictyExpress';
 
     return $json->link(
-        -url => $self->link('dictyExpress RNAseq')
-            ->get_links( join( ',', @$ids ) ),
-        -caption => 'dictyExpress (RNA-Seq)',
-        -type    => $type
+        url     => $self->link( 'dictyExpress RNAseq', $id ),
+        caption => 'dictyExpress (RNA-Seq)',
+        type    => $type
     ) if $source eq 'dictyExpress RNAseq';
 
     return $json->link(
-        -url     => $self->link('JGI_DPUR')->get_links( join( ',', @$ids ) ),
-        -caption => 'JGI: ' . join( '&nbsp;|&nbsp;',               @$ids ),
-        -type    => $type
+        url     => $self->link('JGI_DPUR', $id ),
+        caption => "JGI: $id" ,
+        type    => $type
     ) if $source eq 'JGI_DPUR';
 
-    return $json->link(
-        -url =>
-            $self->link('EnsemblProtists')->get_links( join( ',', @$ids ) ),
-        -caption => 'Ensembl',
-        -type    => $type
-    ) if $source eq 'EnsemblProtists';
-
-    return;
 }
 
 =head2 link
@@ -413,9 +303,11 @@ sub external_link {
 =cut
 
 sub link {
-    my ( $self, $source ) = @_;
-    $self->throw('source not provided') if !$source;
-    return dicty::Link->new( -SOURCE => $source );
+    my $self = shift;
+    my ($source) = pos_validated_list( \@_, { isa => 'Str' } );
+    my $db
+        = $self->model->resultset('General::Db')->find( { name => $source } );
+    return $db->urlprefix if $db;
 }
 
 =head2 gbrowse_window
@@ -429,14 +321,17 @@ sub link {
 
 sub gbrowse_window {
     my ( $self, $feature ) = @_;
-    my $length = $feature->end() - $feature->start;
+    my $floc   = $feature->featureloc_features->single;
+    my $start  = $floc->fmin;
+    my $end    = $floc->fmax;
+    my $length = $end - $start;
 
     my $window_ext = int( $length / 10 );
     $window_ext = $window_ext > 1000 ? 1000 : $window_ext;
 
-    my $start = $feature->start - $window_ext;
-    my $end   = $feature->end + $window_ext;
-    my $chrom = $feature->reference_feature->name();
+    my $start = $start - $window_ext;
+    my $end   = $end + $window_ext;
+    my $chrom = $floc->srcfeature->name;
 
     my $name = "$chrom:$start..$end";
     return $name;
@@ -451,17 +346,17 @@ sub gbrowse_window {
 
 =cut
 
-sub gene {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->gene;
-    return $self->{gene} if $self->{gene};
-
-    my $gene = Genome::Tabview::JSON::Feature::Gene->new(
-        -primary_id => $feature->gene->primary_id );
-    $self->{gene} = $gene;
-    return $self->{gene};
-}
+#sub gene {
+#    my ($self) = @_;
+#    my $feature = $self->source_feature;
+#    return               if !$feature->gene;
+#    return $self->{gene} if $self->{gene};
+#
+#    my $gene = Genome::Tabview::JSON::Feature::Gene->new(
+#        -primary_id => $feature->gene->primary_id );
+#    $self->{gene} = $gene;
+#    return $self->{gene};
+#}
 
 =head2 references
 
@@ -473,22 +368,28 @@ sub gene {
  
 =cut
 
-sub references {
-    my ($self) = @_;
+has '_reference_stack' => (
+    is       => 'rw',
+    isa      => 'ArrayRef',
+    traits   => [qw/Array/],
+    lazy     => 1,
+    _builder => '_build_references',
+    handles  => { 'references' => 'elements' }
+);
 
-    return if !$self->source_feature->references;
-    return $self->{references} if $self->{references};
-    my $references;
-    foreach my $reference ( sort { $b->year <=> $a->year }
-        @{ $self->source_feature->references } ) {
+sub _build_references {
+    my ($self) = @_;
+    my $pub_rs = $self->source_feature->search_related( 'feature_pubs', {},
+        { order_by => { -desc => 'pyear' } } );
+    return if !$pub_rs->count;
+
+    while ( my $row = $pub_rs->next ) {
         my $json_reference = Genome::Tabview::JSON::Reference->new(
-            -pub_id => $reference->pub_id );
+            pub_id => $row->uniquename );
         $json_reference->context( $self->context ) if $self->context;
         push @$references, $json_reference;
     }
-    $self->{references} = $references;
-    return $self->{references};
+    return $references;
 }
-
 
 1;

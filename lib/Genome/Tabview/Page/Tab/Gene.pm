@@ -109,7 +109,8 @@ has '+feature' => (
             {   'dbxref.accession' => $self->primary_id,
                 'type.name'        => 'gene'
             },
-            { join => [qw/dbxref gene/], 'rows' => 1 }
+            { join     => [qw/dbxref type/], 'rows' => 1 },
+            { prefetch => [qw/featureloc_features organism/] }
         )->single;
         croak $self->primary_id, " is not a gene\n" if !$row;
     }
@@ -242,18 +243,16 @@ sub show_product {
 
 sub show_sequences {
     my ($self) = @_;
-    my $gene = $self->feature;
-    return if !$gene->reference_feature;
-
-    my $est_count
-        = dicty::Search::Feature->count_overlapping_feats_by_range(
-        $gene->reference_feature->name(),
-        $gene->start, $gene->end, 'EST' );
-    return 1 if $est_count > 0;
-
-    my @sequences = grep { $_->type =~ m{databank_entry|cdna_clone}i }
-        @{ $gene->features() };
-    return @sequences ? 1 : 0;
+    my $gene   = $self->feature;
+    my $start  = $gene->featureloc_features->first->fmin;
+    my $end    = $gene->featureloc_features->first->fmax;
+    return $self->model->resultset('Sequence::Featureloc')->count(
+        {   'fmin'                => { '<=', $end },
+            'fmax'                => { '=>', $start },
+            'feature.organism_id' => $gene->organism_id
+        },
+        { join => 'feature' }
+    );
 }
 
 =head2 show_promoters
@@ -266,11 +265,11 @@ sub show_sequences {
  
 =cut
 
-sub show_promoters {
-    my ($self) = @_;
-    my $gene = $self->feature;
-    return @{ $gene->promoters() } ? 1 : 0;
-}
+#sub show_promoters {
+#    my ($self) = @_;
+#    my $gene = $self->feature;
+#    return @{ $gene->promoters() } ? 1 : 0;
+#}
 
 =head2 show_go
 
@@ -282,12 +281,12 @@ sub show_promoters {
  
 =cut
 
-sub show_go {
-    my ($self) = @_;
-    my $go = Genome::Tabview::JSON::GO->new(
-        -primary_id => $self->feature->primary_id );
-    return $go->{has_annotations} ? 1 : 0;
-}
+#sub show_go {
+#    my ($self) = @_;
+#    my $go = Genome::Tabview::JSON::GO->new(
+#        -primary_id => $self->feature->primary_id );
+#    return $go->{has_annotations} ? 1 : 0;
+#}
 
 =head2 show_links
 
@@ -302,12 +301,9 @@ sub show_go {
 sub show_links {
     my ($self) = @_;
     my $gene = $self->feature;
-    return 1 if @{ $gene->colleagues() };
-    return 1 if $gene->get_expression_information();
-    return 1 if @{ $gene->pathways() };
-
     my $ui_gene
-        = Genome::Tabview::JSON::Feature::Gene->new( $gene->primary_id );
+        = Genome::Tabview::JSON::Feature::Gene->new( primary_id => $gene->primary_id,
+        model => $self->model );
     return $ui_gene->external_links ? 1 : 0;
 }
 
