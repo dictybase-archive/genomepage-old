@@ -85,6 +85,38 @@ use Carp;
 use Moose;
 
 
+has 'base_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    builder => '_build_base_url'
+);
+
+sub _build_base_url {
+    my ($self) = @_;
+    croak "context attribute need to be set\n" if !$self->has_context;
+    return $self->context->url_to;
+}
+
+has 'context' => (
+    is        => 'rw',
+    isa       => 'Mojolicious::Controller',
+    predicate => 'has_context'
+);
+
+has '_slots_needed' => (
+    is         => 'rw',
+    isa        => 'ArrayRef',
+    auto_deref => 1,
+    default    => sub {
+        return [qw/model context/];
+    },
+    lazy => 1
+);
+
+has 'model' =>
+    ( is => 'rw', isa => 'Bio::Chado::Schema', predicate => 'has_model' );
+
 =head2 config
 
  Title    : config
@@ -96,10 +128,9 @@ use Moose;
 =cut
 
 has 'config' => (
-	is => 'rw', 
-	isa => 'Genome::Tabview::Config'
+    is  => 'rw',
+    isa => 'Genome::Tabview::Config'
 );
-
 
 =head2 primary_id
 
@@ -112,11 +143,9 @@ has 'config' => (
 =cut
 
 has 'primary_id' => (
-	is => 'rw', 
-	isa => 'Str'
+    is  => 'rw',
+    isa => 'Str'
 );
-
-
 
 =head2 validate_id
 
@@ -153,10 +182,21 @@ sub validate_id {
 
 =cut
 
+
 has 'feature' => (
-	is => 'rw', 
-	isa => 'DBIx::Class::Row'
+    is      => 'rw',
+    isa     => 'DBIx::Class::Row',
+    lazy    => 1,
+    builder => '_build_feature'
 );
+
+sub _build_feature {
+    my ($self) = @_;
+    return $self->model->resultset('Sequence::Feature')->search(
+        { 'dbxref.accession' => $self->primary_id },
+        { join               => 'dbxref', 'rows' => 1 }
+    )->single;
+}
 
 =head2 result
 
@@ -168,16 +208,25 @@ has 'feature' => (
 
 =cut
 
-sub result { 
-	my ($self) = @_;
+before 'result' => sub {
+    my ($self) = @_;
+    for my $name ( $self->_slots_needed ) {
+        my $api = 'has_' . $name;
+        croak "value for $name attribute need to set\n" if !$self->$api;
+    }
+};
+
+sub result {
+    my ($self) = @_;
     $self->init();
-    my $conf = $self->config;
+    my $conf   = $self->config;
     my $output = {
-    	config => $conf->to_json,
-#        header => $self->get_header,
-#        raw => [ map { $_->to_json } @{ $conf->panels }], 
-	};
-	return $output;
+        config => $conf->to_json,
+
+        #        header => $self->get_header,
+        #        raw => [ map { $_->to_json } @{ $conf->panels }],
+    };
+    return $output;
 }
 
 =head2 init
@@ -210,7 +259,12 @@ sub get_header {
     return;
 }
 
-has 'model' => ( is => 'rw',  isa => 'Bio::Chado::Schema');
+before 'feature' => sub {
+    my ($self) = @_;
+    croak "model attribute need to be set before retreiving feature\n"
+        if !$self->model;
+};
+
 
 __PACKAGE__->meta->make_immutable;
 

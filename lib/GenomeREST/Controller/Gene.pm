@@ -1,9 +1,9 @@
 package GenomeREST::Controller::Gene;
 
 use strict;
-use Genome::Tabview::Page::Gene;
-use Genome::Factory::Tabview::Tab;
-use Genome::Factory::Tabview::Section;
+#use Genome::Tabview::Page::Gene;
+#use Genome::Factory::Tabview::Tab;
+#use Genome::Factory::Tabview::Section;
 use Module::Load;
 use Try::Tiny;
 use base 'GenomeREST::Controller';
@@ -75,7 +75,6 @@ sub index_json {
 
     my $factory = Genome::Factory::Tabview::Tab->new(
         primary_id => $gene_id,
-        base_url   => $self->url_for('current'),
         tab        => 'gene',
         context    => $self
     );

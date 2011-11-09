@@ -133,60 +133,6 @@ sub wiki_links {
     return $wiki_links;
 }
 
-=head2 protein_synonyms
-
- Title    : features
- Function : returns json formatted gene protein synonyms
- Usage    : $protein_synonyms = $gene->protein_synonyms();
- Returns  : hash
- Args     : none
- 
-=cut
-
-#sub protein_synonyms {
-#    my ($self) = @_;
-#    return if !@{ $self->source_feature->protein_synonyms };
-#    my $synonyms = join( ", ", @{ $self->source_feature->protein_synonyms } );
-#    return $self->json->text($synonyms);
-#}
-
-=head2 synonyms
-
- Title    : features
- Function : returns json formatted gene synonyms
- Usage    : $synonyms = $gene->synonyms();
- Returns  : hash
- Args     : none
- 
-=cut
-
-#sub synonyms {
-#    my ($self) = @_;
-#
-#    return if !@{ $self->source_feature->synonyms };
-#    my $synonyms = '<i>'
-#        . join( ", ", @{ $self->source_feature->synonyms() } ) . '</i>';
-#    return $self->json->text($synonyms);
-#}
-
-=head2 name_description
-
- Title    : name_description
- Function : returns json formatted gene name description
- Usage    : $name_description = $gene->name_description();
- Returns  : hash
- Args     : none
- 
-=cut
-
-#sub name_description {
-#    my ($self) = @_;
-#
-#    my $gene = $self->source_feature;
-#    return if !$gene->name_description;
-#    return $self->json->text( $gene->name_description );
-#}
-
 =head2 gene_products
 
  Title    : features
@@ -289,6 +235,160 @@ sub primary_features {
     return $self->{primary_features};
 }
 
+
+=head2 ests
+
+ Title    : ests
+ Function : returns json formatted gene ests links
+ Returns  : hash
+ Args     : none
+
+=cut
+
+sub ests {
+    my ($self) = @_;
+
+    my $gene  = $self->source_feature;
+    my $start = $gene->featureloc_features->first->fmin;
+    my $end   = $gene->featureloc_features->first->fmax;
+
+    my $est_rs
+        = $self->model->resultset('Sequence::Feature')
+        ->search( { 'type.name' => 'EST' },
+        { join => 'type', prefetch => 'dbxref' } )->search_related(
+        'featureloc_features',
+        {   fmin => { '<=', $end },
+            fmax => { '>=', $start }
+        }
+        );
+    my $count = $est_rs->count;
+    return !$count;
+
+    ## -- need to fix
+    if ( $count == 6 ) {
+        my $more_link = $self->json->link(
+            caption => 'more..',
+            url     => "/db/cgi-bin/more_est.pl?feature_id="
+                . $gene->feature_id
+                . "&gene_name="
+                . $gene->name,
+            type => 'outer',
+        );
+    }
+
+    my $links;
+    foreach my $est ( $est_rs->all ) {
+        push @$links, $self->json->link(
+            caption => $est->dbxref->accession,
+            url     => $self->base_url . '/' . $est->dbxref->accession,
+            type    => 'outer',
+        );
+    }
+    push @$links, $more_link;
+
+    return $links;
+}
+
+=head2 external_links
+
+ Title    : external_links
+ Function : returns json formatted gene external links 
+ Returns  : hash
+ Args     : none
+
+=cut
+
+sub external_links {
+    my ($self) = @_;
+    my $gene = $self->source_feature;
+
+    ## -- get  transcript
+    my $trans_rs = $gene->search_related(
+        'feature_relationship_objects',
+        {   'type.name' => 'part_of',
+            'cv.name'   => 'sequence'
+        },
+        { join => [ { 'type' => 'cv' } ] }
+        )->search_related( 'subject', {} )
+        ->search_related( 'secondary_dbxrefs', {}, { prefetch => 'db' } );
+    return if !$trans_rs->count;
+
+    my $external_links;
+    foreach my $xref ( $trans_rs->all ) {
+        push @$external_links,
+            $self->external_link(
+            source => $xref->db->name,
+            id    => $xref->accession,
+            );
+
+  #        my $divider
+  #            = ( scalar @external_links ) / 2 < scalar( keys(%linkage) ) - 1
+  #            ? '&nbsp;|&nbsp;'
+  #            : undef;
+  #
+  #        if (@link) {
+  #            push @external_links, @link;
+  #            push @external_links, $self->json->text($divider) if $divider;
+  #        }
+    }
+    return $external_links;
+}
+
+=head2 gbrowse_link
+
+ Title    : gbrowse_link
+ Function : returns json formatted gbrowse link of a gene 
+ Returns  : hash
+ Args     : none
+
+=cut
+
+sub gbrowse_link {
+    my ($self)  = @_;
+    my $feature = $self->source_feature;
+    my $json    = $self->json;
+
+    my $name         = $self->gbrowse_window($feature);
+    my $track        = "Gene+Gene_Model+tRNA+ncRNA";
+    my $species      = $feature->organism->species;
+    my $gbrowse_link = $json->link(
+        caption =>
+            "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=500&type=${track}&keystyle=between&abs=1",
+        url  => "/db/cgi-bin/ggb/gbrowse/$species?name=${name}",
+        type => 'gbrowse',
+    );
+    return $gbrowse_link;
+}
+
+=head2 gene_link
+
+ Title    : gene_link
+ Function : returns link to gene page
+ Usage    : $link = $gene->gene_link();
+ Returns  : hash
+ Args     : none
+ 
+=cut
+
+sub gene_link {
+    my ($self) = @_;
+    my $gene   = $self->source_feature;
+    my $link   = $self->json->link(
+        caption => $gene->name,
+        url     => '/gene/' . $gene->dbxref->accession,
+        type    => 'outer',
+    );
+}
+
+
+sub orthologs {
+    my ($self) = @_;
+    return $self->source_feature->orthologs;
+}
+
+
+1;
+
 =head2 genbank_fragment
 
  Title    : genbank_fragment
@@ -351,58 +451,6 @@ sub primary_features {
 #}
 #
 
-=head2 ests
-
- Title    : ests
- Function : returns json formatted gene ests links
- Returns  : hash
- Args     : none
-
-=cut
-
-sub ests {
-    my ($self) = @_;
-
-    my $gene  = $self->source_feature;
-    my $start = $gene->featureloc_features->first->fmin;
-    my $end   = $gene->featureloc_features->first->fmax;
-
-    my $est_rs
-        = $self->model->resultset('Sequence::Feature')
-        ->search( { 'type.name' => 'EST' },
-        { join => 'type', prefetch => 'dbxref' } )->search_related(
-        'featureloc_features',
-        {   fmin => { '<=', $end },
-            fmax => { '>=', $start }
-        }
-        );
-    my $count = $est_rs->count;
-    return !$count;
-
-    ## -- need to fix
-    if ( $count == 6 ) {
-        my $more_link = $self->json->link(
-            caption => 'more..',
-            url     => "/db/cgi-bin/more_est.pl?feature_id="
-                . $gene->feature_id
-                . "&gene_name="
-                . $gene->name,
-            type => 'outer',
-        );
-    }
-
-    my $links;
-    foreach my $est ( $est_rs->all ) {
-        push @$links, $self->json->link(
-            caption => $est->dbxref->accession,
-            url     => $self->base_url . '/' . $est->dbxref->accession,
-            type    => 'outer',
-        );
-    }
-    push @$links, $more_link;
-
-    return $links;
-}
 
 =head2 promoters
 
@@ -630,50 +678,6 @@ sub ests {
 #    return $link;
 #}
 
-=head2 external_links
-
- Title    : external_links
- Function : returns json formatted gene external links 
- Returns  : hash
- Args     : none
-
-=cut
-
-sub external_links {
-    my ($self) = @_;
-    my $gene = $self->source_feature;
-
-    ## -- get  transcript
-    my $trans_rs = $gene->search_related(
-        'feature_relationship_objects',
-        {   'type.name' => 'part_of',
-            'cv.name'   => 'sequence'
-        },
-        { join => [ { 'type' => 'cv' } ] }
-        )->search_related( 'subject', {} )
-        ->search_related( 'secondary_dbxrefs', {}, { prefetch => 'db' } );
-    return if !$trans_rs->count;
-
-    my $external_links;
-    foreach my $xref ( $trans_rs->all ) {
-        push @$external_links,
-            $self->external_link(
-            source => $xref->db->name,
-            ids    => [ $xref->accession ],
-            );
-
-  #        my $divider
-  #            = ( scalar @external_links ) / 2 < scalar( keys(%linkage) ) - 1
-  #            ? '&nbsp;|&nbsp;'
-  #            : undef;
-  #
-  #        if (@link) {
-  #            push @external_links, @link;
-  #            push @external_links, $self->json->text($divider) if $divider;
-  #        }
-    }
-    return $external_links;
-}
 
 =head2 summary
 
@@ -848,31 +852,6 @@ sub external_links {
 #    return $self;
 #}
 
-=head2 gbrowse_link
-
- Title    : gbrowse_link
- Function : returns json formatted gbrowse link of a gene 
- Returns  : hash
- Args     : none
-
-=cut
-
-sub gbrowse_link {
-    my ($self)  = @_;
-    my $feature = $self->source_feature;
-    my $json    = $self->json;
-
-    my $name         = $self->gbrowse_window($feature);
-    my $track        = "Gene+Gene_Model+tRNA+ncRNA";
-    my $species      = $feature->organism->species;
-    my $gbrowse_link = $json->link(
-        caption =>
-            "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=500&type=${track}&keystyle=between&abs=1",
-        url  => "/db/cgi-bin/ggb/gbrowse/$species?name=${name}",
-        type => 'gbrowse',
-    );
-    return $gbrowse_link;
-}
 
 =head2 go
 
@@ -896,25 +875,6 @@ sub gbrowse_link {
 #    return $self->{go};
 #}
 
-=head2 gene_link
-
- Title    : gene_link
- Function : returns link to gene page
- Usage    : $link = $gene->gene_link();
- Returns  : hash
- Args     : none
- 
-=cut
-
-sub gene_link {
-    my ($self) = @_;
-    my $gene   = $self->source_feature;
-    my $link   = $self->json->link(
-        caption => $gene->name,
-        url     => '/gene/' . $gene->dbxref->accession,
-        type    => 'outer',
-    );
-}
 
 =head2 plasmids
 
@@ -931,10 +891,6 @@ sub gene_link {
 #    return $self->source_feature->plasmids;
 #}
 
-sub orthologs {
-    my ($self) = @_;
-    return $self->source_feature->orthologs;
-}
 
 #sub topics_by_reference {
 #    my ( $self, $reference ) = @_;
@@ -942,5 +898,60 @@ sub orthologs {
 #        $reference->source_reference );
 #}
 
-1;
+=head2 protein_synonyms
+
+ Title    : features
+ Function : returns json formatted gene protein synonyms
+ Usage    : $protein_synonyms = $gene->protein_synonyms();
+ Returns  : hash
+ Args     : none
+ 
+=cut
+
+#sub protein_synonyms {
+#    my ($self) = @_;
+#    return if !@{ $self->source_feature->protein_synonyms };
+#    my $synonyms = join( ", ", @{ $self->source_feature->protein_synonyms } );
+#    return $self->json->text($synonyms);
+#}
+
+=head2 synonyms
+
+ Title    : features
+ Function : returns json formatted gene synonyms
+ Usage    : $synonyms = $gene->synonyms();
+ Returns  : hash
+ Args     : none
+ 
+=cut
+
+#sub synonyms {
+#    my ($self) = @_;
+#
+#    return if !@{ $self->source_feature->synonyms };
+#    my $synonyms = '<i>'
+#        . join( ", ", @{ $self->source_feature->synonyms() } ) . '</i>';
+#    return $self->json->text($synonyms);
+#}
+
+=head2 name_description
+
+ Title    : name_description
+ Function : returns json formatted gene name description
+ Usage    : $name_description = $gene->name_description();
+ Returns  : hash
+ Args     : none
+ 
+=cut
+
+#sub name_description {
+#    my ($self) = @_;
+#
+#    my $gene = $self->source_feature;
+#    return if !$gene->name_description;
+#    return $self->json->text( $gene->name_description );
+#}
+
+
+
 

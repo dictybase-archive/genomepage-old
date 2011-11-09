@@ -178,30 +178,13 @@ sub primary_id {
     return $self->json->text( $self->source_feature->dbxref->accession );
 }
 
-=head2 description
-
- Title    : description
- Function : returns json formatted description for the feature
- Usage    : my $description = $feature->description(); 
- Returns  : hash  
- Args     : none
- 
-=cut
-
-#sub description {
-#    my ($self) = @_;
-#    my $feature = $self->source_feature;
-#    return if !$feature->description;
-#    return $self->json->format_url( $feature->description );
-#}
-
 =head2 external_link
 
  Title    : external_link
  Function : returns external_link for the provided id and type
  Usage    : my $link = $feature->external_link(
                 -source => 'UniProt',
-                -ids    => [ 'O77203' ]
+                -id    => 'O77203' 
             );
  Returns  : hash with json representetion of a link
  Args     : source : source of the link
@@ -285,29 +268,37 @@ sub external_link {
     ) if $source eq 'dictyExpress RNAseq';
 
     return $json->link(
-        url     => $self->link('JGI_DPUR', $id ),
-        caption => "JGI: $id" ,
+        url     => $self->link( 'JGI_DPUR', $id ),
+        caption => "JGI: $id",
         type    => $type
     ) if $source eq 'JGI_DPUR';
 
 }
 
-=head2 link
+=head2 description
 
- Title    : link
- Function : returns link object for provided source
- Returns  : dicty::Link
- Usage    : $self->link('UniProt')->get_links('O77203')
- Args     : string
-
+ Title    : description
+ Function : returns json formatted description for the feature
+ Usage    : my $description = $feature->description(); 
+ Returns  : hash  
+ Args     : none
+ 
 =cut
+
+#sub description {
+#    my ($self) = @_;
+#    my $feature = $self->source_feature;
+#    return if !$feature->description;
+#    return $self->json->format_url( $feature->description );
+#}
 
 sub link {
     my $self = shift;
-    my ($source) = pos_validated_list( \@_, { isa => 'Str' } );
+    my ( $source, $id )
+        = pos_validated_list( \@_, { isa => 'Str' }, { isa => 'Str' } );
     my $db
         = $self->model->resultset('General::Db')->find( { name => $source } );
-    return $db->urlprefix if $db;
+    return $db->urlprefix . '/' . $id if $db;
 }
 
 =head2 gbrowse_window
@@ -345,18 +336,6 @@ sub gbrowse_window {
  Args     : none
 
 =cut
-
-#sub gene {
-#    my ($self) = @_;
-#    my $feature = $self->source_feature;
-#    return               if !$feature->gene;
-#    return $self->{gene} if $self->{gene};
-#
-#    my $gene = Genome::Tabview::JSON::Feature::Gene->new(
-#        -primary_id => $feature->gene->primary_id );
-#    $self->{gene} = $gene;
-#    return $self->{gene};
-#}
 
 =head2 references
 

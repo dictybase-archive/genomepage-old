@@ -85,14 +85,57 @@ use Carp;
 use Genome::Tabview::Config::Panel::Item::JSON;
 use Genome::Tabview::Config::Panel::Item::Accordion;
 
-has 'tab'      => ( is => 'rw', isa => 'Str' );
-has 'base_url' => ( is => 'rw', isa => 'Str' );
-has 'context'  => ( is => 'rw', isa => 'Mojolicious::Controller' );
-has 'config'   => ( is => 'rw', isa => 'Genome::Tabview::Config' );
+has 'tab' => ( is => 'rw', isa => 'Str', predicate => 'has_tab' );
+
+before 'base_url' => sub {
+    my ($self) = @_;
+    croak "context attribute need to be set\n" if !$self->has_context;
+};
+
+has 'base_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    builder => '_build_base_url'
+);
+
+sub _build_base_url {
+    my ($self) = @_;
+    return $self->context->url_to;
+}
+
+has 'context' => (
+    is        => 'rw',
+    isa       => 'Mojolicious::Controller',
+    predicate => 'has_context'
+);
+has 'config' => ( is => 'rw', isa => 'Genome::Tabview::Config' );
+
 has 'json' =>
     ( is => 'rw', isa => 'Genome::Tabview::Config::Panel::Item::JSON' );
+
 has 'feature' => ( is => 'rw', isa => 'DBIx::Class::Row' );
-has 'model' => (is => 'rw',  isa => 'Bio::Chado::Schema,  'predicate => 'has_model');
+
+has 'model' =>
+    ( is => 'rw', isa => 'Bio::Chado::Schema,  ' predicate => 'has_model' );
+
+has '_slots_needed' => (
+    is         => 'rw',
+    isa        => 'ArrayRef',
+    auto_deref => 1,
+    default    => sub {
+        return [qw/tab context model/];
+    },
+    lazy => 1
+);
+
+before 'init' => sub {
+    my ($self) = @_;
+    for my $name ( $self->_slots_needed ) {
+        my $api = 'has_' . $name;
+        croak "value for $name attribute need to set\n" if !$self->$api;
+    }
+};
 
 =head2 process
 
@@ -144,11 +187,12 @@ has 'section_base_url' => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
+        my $ctx = $self->ctx;
         my $gene
             = $self->feature->type eq 'gene'
             ? $self->feature
             : $self->feature->gene;
-        return $self->base_url . '/' . $gene->dbxref->accession;
+        return $ctx->url_to( $self->base_url, $self->primary_id );
     }
 );
 
@@ -165,16 +209,17 @@ has 'section_base_url' => (
 
 sub section_source {
     my ( $self, %arg ) = validated_hash(
-		\@_,
-		key => { isa => 'Str'}, 
-		primary_id => { isa => 'Str',  optional => 1}
+        \@_,
+        key        => { isa => 'Str' },
+        primary_id => { isa => 'Str', optional => 1 }
     );
-
-    my $sub_id = $self->feature->type eq 'gene' ? '' : '/' . $arg{primary_id};
-    return $self->section_base_url . '/'
-        . $self->tab
-        . $sub_id . '/'
-        . $arg{key} . '.json';
+    my $ctx = $self->context;
+    if ( $arg{primary_id} ) {
+        return $ctx->url_to( $self->section_base_url, $self->tab,
+            $arg{primary_id}, $arg{key} . '.json' );
+    }
+    return $ctx->url_to( $self->section_base_url, $self->tab,
+        $arg{key} . '.json' );
 }
 
 =head2 accordion
@@ -197,7 +242,7 @@ sub accordion {
         primary_id => { isa => 'Str', optional => 1 }
     );
 
-    $primary_id = $self->feature->dbxref->accession if !$arg{$primary_id};
+    $primary_id = $self->primary_id if !$arg{$primary_id};
     my $item = Genome::Tabview::Config::Panel::Item::Accordion->new(
         key    => $arg{key},
         label  => $arg{label},

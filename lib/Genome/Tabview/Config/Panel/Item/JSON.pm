@@ -84,32 +84,10 @@ SUCH DAMAGES.
 package Genome::Tabview::Config::Panel::Item::JSON;
 
 use strict;
-use Bio::Root::Root;
-
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Config::Panel::Item::JSON> object.
- Returns  : Genome::Tabview::Config::Panel::Item::JSON object 
- Args     : -type    : class to be assigned to the element
-            -content : item content, this Item implementation does not have any restrictions
-                       for the content. All the elements would be formatted based on their json type flag
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    $self->{root} = Bio::Root::Root->new();
-    my $arglist = [qw/CONTENT/];
-    my ($content) = $self->{root}->_rearrange( $arglist, @args );
-
-    $self->content($content) if $content;
-    return $self;
-}
+use namespace::autoclean;
+use Carp;
+use Moose;
+use MooseX::Params::Validate;
 
 =head2 content
 
@@ -121,47 +99,45 @@ sub new {
 
 =cut
 
-sub content {
-    my ( $self, $arg ) = @_;
-    $self->{content} = $arg if defined $arg;
-    return $self->{content};
-}
+has 'content' => ( is => 'rw', isa => 'Str' );
 
 =head2 link
 
  Title    : link
  Function : Composes link json representation with defined parameters
  Usage    : my $link = $item->link( 
-                -url      => 'www.dictybase.org', 
-                -caption  => 'dictyBase Home',
-                -type     => 'outer',
+                url      => 'www.dictybase.org', 
+                caption  => 'dictyBase Home',
+                type     => 'outer',
             );
  Returns  : hash
- Args     : -url     - link url
-            -caption - link caption
-            -type    - link type ('tab' for the new tab link, 'outer' for the new window link, 
+ Args     : url     - link url
+            caption - link caption
+            type    - link type ('tab' for the new tab link, 'outer' for the new window link, 
                         'gbrowse' for the gbrowse link)
 =cut
 
 sub link {
-    my ( $self, @args ) = @_;
+    my ( $self, $url, $caption, $type, $style, $title, $name, $id )
+        = validated_list(
+        \@_,
+        url     => { isa => 'Str' },
+        type    => { isa => 'Str' },
+        caption => { isa => 'Str', optional => 1 },
+        style   => { isa => 'Str', optional => 1 },
+        title   => { isa => 'Str', optional => 1 },
+        name    => { isa => 'Str', optional => 1 },
+        id      => { isa => 'Str', optional => 1 }
+        );
 
-    ## -- allowed arguments
-    my $arglist = [qw/URL CAPTION TYPE STYLE TITLE NAME ID/];
-    my ( $url, $caption, $type, $style, $title, $name, $id ) =
-        $self->{root}->_rearrange( $arglist, @args );
-
-    $self->{root}->throw('url is not provided') if !$url;
-    $caption = $url if !$caption;
     my $json_link;
-    $json_link->{caption} = $caption;
     $json_link->{url}     = $url;
     $json_link->{type}    = $type;
+    $json_link->{caption} = $url if !$caption;
     $json_link->{style}   = $style if $style;
     $json_link->{title}   = $title if $title;
     $json_link->{id}      = $id if $id;
     $json_link->{name}    = $name if $name;
-
     return $json_link;
 }
 
@@ -176,10 +152,8 @@ sub link {
 =cut
 
 sub text {
-    my ( $self, $string ) = @_;
-
-    ## -- allowed arguments
-    $self->{root}->throw('string is not provided') if !$string;
+    my $self = shift;
+    my ($string) = pos_validated_list( \@_, { isa => 'Str' } );
     my $text = { text => $string };
     return $text;
 }
@@ -196,12 +170,13 @@ sub text {
 =cut
 
 sub selector {
-    my ( $self, @args ) = @_;
-    my $arglist = [qw/OPTIONS ACTION_LINK CLASS CAPTION/];
-    my ( $options, $action, $class, $caption ) =
-        $self->{root}->_rearrange( $arglist, @args );
-
-    $self->{root}->throw('options are not provided') if !@$options;
+    my ( $self, $options, $action, $class, $caption ) = validated_list(
+        \@_,
+        options => { isa => 'ArrayRef' },
+        action  => { isa => 'Object' },
+        class   => { isa => 'Str' },
+        caption => { isa => 'Str', optional => 1 }
+    );
 
     my $selector = {
         type           => 'selector',
@@ -224,7 +199,7 @@ sub selector {
 =cut
 
 sub to_json {
-    my ( $self, @args ) = @_;
+    my ($self) = @_;
     my $item = $self->content;
     return $item;
 }
@@ -245,11 +220,11 @@ sub format_url {
     #return $string if $string !~ m{href}ixg;
 
     # fixing links without closing tag
-    $string .= '</a>' if $string !~ m{</a>}ixg;
+    $string .= '</a>' if $string !~ m{</a>} ixg;
     $string =~ s{\n}{}g;
     my $input = $string;
     my $match_hash;
-    my @output;
+    my $output;
     my $i = 0;
 
    # Make hash of link replacements and replace actual links with "CUT" marker
@@ -257,9 +232,9 @@ sub format_url {
         my $match = $1;
         my ( $url, $caption ) = $match =~ m{href="(.+?)">(.+?)</a};
         my $link = $self->link(
-            -caption => $caption,
-            -url     => $url,
-            -type    => 'outer',
+            caption => $caption,
+            url     => $url,
+            type    => 'outer',
         );
         $string =~ s{<a.*?/a>}{CUT};
         $match_hash->{$i} = $link;
@@ -268,12 +243,14 @@ sub format_url {
 
     # Split string on "CUT" marks and merge with link objects
     my @row = split( 'CUT', $string );
-    for ( my $j = 0; $j < @row; $j++ ) {
-        push @output, $self->text( $row[$j] );
-        push @output, $match_hash->{$j} if $match_hash->{$j};
+    for my $j ( 0 .. $#row ) {
+        push @$output, $self->text( $row[$j] );
+        push @$output, $match_hash->{$j} if $match_hash->{$j};
     }
-    return \@output;
+    return $output;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

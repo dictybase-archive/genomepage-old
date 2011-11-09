@@ -80,22 +80,23 @@ package Genome::Tabview::Page::Gene;
 
 use strict;
 use namespace::autoclean;
+use Carp;
 use Moose;
 use MooseX::Params::Validate;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::Config::Panel::Item::Tab;
 
-#use Genome::Tabview::JSON::GO;
-use Carp;
-
 extends 'Genome::Tabview::Page';
 
-has 'primary_id' => ( isa => 'Str', is => 'rw', required => 1 );
-has 'sub_id'     => ( isa => 'Str',                     is => 'rw' );
-has 'base_url'   => ( isa => 'Str',                     is => 'rw' );
-has 'active_tab' => ( isa => 'Str',                     is => 'rw' );
-has 'context'    => ( isa => 'Mojolicious::Controller', is => 'rw' );
+has 'primary_id' => (
+    isa      => 'Str',
+    is       => 'rw',
+    required => 1,
+);
+has 'sub_id' => ( isa => 'Str', is => 'rw' );
+has 'active_tab' =>
+    ( isa => 'Str', is => 'rw', default => 'gene', lazy => 1 );
 
 =head2 init
 
@@ -108,19 +109,15 @@ has 'context'    => ( isa => 'Mojolicious::Controller', is => 'rw' );
 =cut
 
 sub init {
-    my ($self)     = @_;
+    my ($self) = @_;
     my $primary_id = $self->primary_id;
-    my $feature    = $self->model->resultset('Sequence::Feature')->search(
-        { 'dbxref.accession' => $primary_id },
-        { join               => 'dbxref', 'rows' => 1 }
-    )->single;
-    $self->feature($feature);
 
     ## -- page configuration
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'tabview' );
 
-    my $prepender = $self->base_url;
+    my $ctx       = $self->context;
+    my $prepender = $ctx->url_to($self->base_url, $self->primary_id);
     $panel->add_item(
         $self->tab(
             key   => 'gene',
@@ -130,34 +127,19 @@ sub init {
     );
     $panel->add_item( $self->protein_tab ) if $self->show_protein;
 
-    #    $panel->add_item(
-    #        $self->tab(
-    #            -key   => 'go',
-    #            -label => 'Gene Ontology',
-    #            -href  => "$prepender/go"
-    #        )
-    #    ) if $self->show_go;
-
     $panel->add_item(
         $self->tab(
             key   => 'orthologs',
             label => 'Orthologs',
-            href  => "$prepender/orthologs"
+            href  => $ctx->url_to( $prepender, 'orthologs' )
         )
     ) if $self->show_orthologs;
 
-    #    $panel->add_item(
-    #        $self->tab(
-    #            -key   => 'phenotypes',
-    #            -label => 'Phenotypes',
-    #            -href  => "$prepender/phenotypes"
-    #        )
-    #    ) if $self->show_phenotypes;
     $panel->add_item(
         $self->tab(
             key   => 'references',
             label => 'References',
-            href  => "$prepender/references"
+            href  => $ctx->url_to( $prepender, 'references' )
         )
     ) if $self->show_refs;
     $panel->add_item(
@@ -166,16 +148,17 @@ sub init {
             label    => 'BLAST',
             source   => '/tools/blast?noheader=1&primary_id=' . $primary_id,
             dispatch => 'true',
-            href     => "$prepender/blast"
+            href     => $ctx->url_to( $prepender, 'blast' )
         )
     );
+
     if ( $self->active_tab && $self->active_tab eq 'feature' ) {
         $panel->add_item(
             $self->tab(
                 key        => 'feature',
                 label      => $self->sub_id,
                 primary_id => $self->sub_id,
-                href       => "$prepender/feature/" . $self->sub_id
+                href => $ctx->url_to( $prepender, 'feature', $self->sub_id )
             )
         );
     }
@@ -183,6 +166,23 @@ sub init {
     $config->add_panel($panel);
     $self->config($config);
     return $self;
+
+    #   $panel->add_item(
+    #        $self->tab(
+    #            -key   => 'go',
+    #            -label => 'Gene Ontology',
+    #            -href  => "$prepender/go"
+    #        )
+    #    ) if $self->show_go;
+
+    #    $panel->add_item(
+    #        $self->tab(
+    #            -key   => 'phenotypes',
+    #            -label => 'Phenotypes',
+    #            -href  => "$prepender/phenotypes"
+    #        )
+    #    ) if $self->show_phenotypes;
+
 }
 
 =head2 protein_tab
@@ -222,7 +222,9 @@ sub protein_tab {
                 key        => 'protein',
                 label      => 'Splice Variant ' . $alphabet[$i],
                 primary_id => $trans_id,
-                href => $base_url . '/' . $gene_id . '/protein/' . $trans_id,
+                href       => $self->context->url_to(
+                    $base_url, $gene_id, 'protein', $trans_id
+                )
             );
             push @$items, $subtab;
         }
@@ -236,7 +238,7 @@ sub protein_tab {
             label   => 'Protein Information',
             type    => 'toolbar',
             content => [$panel],
-            href    => $base_url . '/' . $gene_id . '/protein/'
+            href => $self->context->url_to( $base_url, $gene_id, 'protein' )
         );
         return $tab;
     }
@@ -246,7 +248,9 @@ sub protein_tab {
         key        => 'protein',
         label      => 'Protein Information',
         primary_id => $trans_id,
-        href => $base_url . '/' . $gene->primary_id . '/protein/' . $trans_id,
+        href       => $self->context->url_to(
+            $base_url, $gene_id, 'protein', $trans_id
+        )
     );
     return $tab;
 }
@@ -289,42 +293,6 @@ sub show_protein {
         )->count;
 }
 
-=head2 show_go
-
- Title    : show_go
- Function : defines if to show go tab
- Usage    : $show = $self->show_go();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_go {
-#    my ($self) = @_;
-#
-#    my $go = Genome::Tabview::JSON::GO->new(
-#        -primary_id => $self->feature->primary_id );
-#    return $go->{has_annotations} ? 1 : 0;
-#}
-
-=head2 show_phenotypes
-
- Title    : show_phenotypes
- Function : defines if to show strains and phenotypes tab
- Usage    : $show = $self->show_phenotypes();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_phenotypes {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    return if !@{ $gene->features };
-#    my $genotypes = $gene->genotype();
-#    return $genotypes ? 1 : 0;
-#}
-
 =head2 show_refs
 
  Title    : show_refs
@@ -339,22 +307,6 @@ sub show_refs {
     my ($self) = @_;
     return $self->feature->search_related( 'feature_pubs', {} )->count;
 }
-
-=head2 show_blast
-
- Title    : show_blast
- Function : defines if to show blast tab
- Usage    : $show = $self->show_blast();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_blast {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    return @{ $gene->features() } ? 1 : 0;
-#}
 
 =head2 show_orthologs
 
@@ -391,17 +343,14 @@ sub show_orthologs {
 =cut
 
 sub tab_source {
-    my ( $self, %arg ) = validated_hash(
+    my ( $self, $key, $primary_id ) = validated_list(
         \@_,
         key        => { isa => 'Str' },
         primary_id => { isa => 'Str', optional => 1 }
     );
-
-    my $url = $self->base_url;
-    $url .= '/' . $self->primary_id . '/' . $arg{key};
-    $url .= '/' . $arg{primary_id} if $arg{primary_id};
-    $url .= '.json';
-    return $url;
+    $primary_id ||= $self->primary_id;
+    return $self->context->url_to( $self->base_url, $primary_id,
+        $key . '.json' );
 }
 
 =head2 tab
@@ -434,21 +383,74 @@ sub tab {
         && $arg{key} eq $self->active_tab ? 'true' : 'false';
     my $href = $arg{href} ? $arg{href} : $arg{key};
 
-    my $source = $self->tab_source(
+
+    my $source = $arg{source} || $self->tab_source(
         key        => $arg{key},
         primary_id => $arg{primary_id} || $self->primary_id
-    ) if !$arg{source};
+    );
 
     my $item = Genome::Tabview::Config::Panel::Item::Tab->new(
-        key       => $arg{key},
-        label     => $arg{label},
-        active    => $active_tab,
-        href      => $href,
-        -source   => $source,
-        -dispatch => $arg{dispatch}
+        key    => $arg{key},
+        label  => $arg{label},
+        active => $active_tab,
+        href   => $href,
+        source => $source
     );
+    $item->dispatch( $arg{dispatch} ) if $arg{dispatch};
     return $item;
 }
+
+=head2 show_go
+
+ Title    : show_go
+ Function : defines if to show go tab
+ Usage    : $show = $self->show_go();
+ Returns  : boolean
+ Args     : none
+ 
+=cut
+
+#sub show_go {
+#    my ($self) = @_;
+#
+#    my $go = Genome::Tabview::JSON::GO->new(
+#        -primary_id => $self->feature->primary_id );
+#    return $go->{has_annotations} ? 1 : 0;
+#}
+
+=head2 show_phenotypes
+
+ Title    : show_phenotypes
+ Function : defines if to show strains and phenotypes tab
+ Usage    : $show = $self->show_phenotypes();
+ Returns  : boolean
+ Args     : none
+ 
+=cut
+
+#sub show_phenotypes {
+#    my ($self) = @_;
+#    my $gene = $self->feature;
+#    return if !@{ $gene->features };
+#    my $genotypes = $gene->genotype();
+#    return $genotypes ? 1 : 0;
+#}
+
+=head2 show_blast
+
+ Title    : show_blast
+ Function : defines if to show blast tab
+ Usage    : $show = $self->show_blast();
+ Returns  : boolean
+ Args     : none
+ 
+=cut
+
+#sub show_blast {
+#    my ($self) = @_;
+#    my $gene = $self->feature;
+#    return @{ $gene->features() } ? 1 : 0;
+#}
 
 __PACKAGE__->meta->make_immutable;
 
