@@ -400,57 +400,6 @@ sub tab {
     return $item;
 }
 
-=head2 show_go
-
- Title    : show_go
- Function : defines if to show go tab
- Usage    : $show = $self->show_go();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_go {
-#    my ($self) = @_;
-#
-#    my $go = Genome::Tabview::JSON::GO->new(
-#        -primary_id => $self->feature->primary_id );
-#    return $go->{has_annotations} ? 1 : 0;
-#}
-
-=head2 show_phenotypes
-
- Title    : show_phenotypes
- Function : defines if to show strains and phenotypes tab
- Usage    : $show = $self->show_phenotypes();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_phenotypes {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    return if !@{ $gene->features };
-#    my $genotypes = $gene->genotype();
-#    return $genotypes ? 1 : 0;
-#}
-
-=head2 show_blast
-
- Title    : show_blast
- Function : defines if to show blast tab
- Usage    : $show = $self->show_blast();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_blast {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    return @{ $gene->features() } ? 1 : 0;
-#}
 
 __PACKAGE__->meta->make_immutable;
 

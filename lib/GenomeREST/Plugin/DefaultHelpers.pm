@@ -7,27 +7,21 @@ sub register {
     my ( $self, $app ) = @_;
     $app->helper( is_ddb => sub { $_[1] =~ m{^[A-Z]{3}\d+$} } );
     $app->helper(
-        base_url => sub {
-            my $c = shift;
-                $c->app->log->debug($c->req->url->path);
-            $c->req->url->path =~ m{^((\/.+?)\/gene)} ? $1 : '';
+        gene2transid => sub {
+            my ( $self, $id ) = @_;
+            my $model = $app->modware->handler;
+            my $row
+                = $model->resultset('Sequence::Feature')
+                ->search( { 'dbxref.accession' => $id },
+                { join => 'dbxref' } )->search_related(
+                'feature_relationship_objects',
+                { 'type_2.name' => 'part_of' },
+                { join          => 'type' }
+                )->search_related( 'subject', {}, { rows => 1 } )->single;
+
+            return $row->dbxref->accession if $row;
         }
     );
-    $app->helper(
-        render_format => sub {
-            my $c      = shift;
-            my $format = $c->stash('format') || 'html';
-            my $method = $c->stash('action') . '_' . $format;
-            $c->$method;
-        }
-    );
-    $app->helper(
-        panel_to_json => sub {
-            my $obj = $_[1]->instantiate;
-            $obj->init();
-            my $conf = $obj->config();
-            [ map { $_->to_json } @{ $conf->panels } ];
-        }
-    );
+
 }
 1;

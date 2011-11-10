@@ -45,28 +45,30 @@ sub startup {
     my $organism = $top->waypoint('/:common_name')->name('genome')
         ->to('genome#species_index');
 
-    #my $species = $router->bridge('/:species')->to('genome#validate');
 
     ## all that goes under..
     $organism->route('/supercontig')->name('supercontig')
         ->to('genome#supercontig');
     $organism->route( '/supercontig/search', format => 'datatable' )
         ->name('super_pager')->to('genome#supercontig_search');
+
     $organism->route('/contig')->to('genome#contig');
     $organism->route( '/contig/search', format => 'datatable' )
         ->name('contig_pager')->to('genome#contig_search');
+
     $organism->route('/downloads')->to('genome#download');
 
-    ## second brige for gene id/name validation
-    #my $gene = $species->bridge('/gene/:id')->to('gene#validate');
 
+     ### ---
     my $gene = $organism->waypoint('/gene')->name('all_genes')->to('gene#list');
     $gene->route( '/search', format => 'datatable' )->name('gene_pager')
         ->to('gene#gene_search');
+
     my $id = $gene->waypoint('/:id')->name('gene')
         ->to( 'gene#index_html');
     $gene->route('/:id',  format => 'json')->name('gene_json')
         ->to( 'gene#index_json');
+
     my $tab = $id->waypoint('/:tab')->to('gene#tab');
     $tab->route('/:section')->to('gene#section');
     $tab->route('/:subid/:section')->to('gene#section');

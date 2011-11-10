@@ -1,6 +1,7 @@
 package GenomeREST::Controller::Gene;
 
 use strict;
+
 #use Genome::Tabview::Page::Gene;
 #use Genome::Factory::Tabview::Tab;
 #use Genome::Factory::Tabview::Section;
@@ -59,7 +60,7 @@ sub gene_search {
 sub index_html {
     my ($self)  = @_;
     my $gene_id = $self->stash('gene_id');
-    my $tabview      = Genome::Tabview::Page::Gene->new(
+    my $tabview = Genome::Tabview::Page::Gene->new(
         primary_id => $gene_id,
         base_url   => $self->url_for('current'),
         active_tab => 'gene'
@@ -80,7 +81,7 @@ sub index_json {
     );
 
     my $tabview = $factory->instantiate;
-    $tabview->model($self->app->modware->handler);
+    $tabview->model( $self->app->modware->handler );
     $tabview->init;
     my $conf = $tabview->config;
     $self->render_json( [ map { $_->to_json } $conf->panels ] );
@@ -101,30 +102,32 @@ sub tab_html {
     if ( $app->config->{tab}->{dynamic} eq $tab ) {
 
         #convert gene id to its primary DDB id
-        my ($trans_id) = @{ $self->stash('transcripts') };
+        my $trans_id = $self->gene2transid($gene_id);
         if ( !$trans_id ) {    #do some octocat based template here
             $app->log->error(
                 "unable to convert to transcript id for $gene_id");
             return;
         }
-        $db = dicty::UI::Tabview::Page::Gene->new(
-            -primary_id => $gene_id,
-            -active_tab => $tab,
-            -sub_id     => $trans_id,
-            -base_url   => $self->base_url
+        $db = Genome::Tabview::Page::Gene->new(
+            primary_id => $gene_id,
+            active_tab => $tab,
+            sub_id     => $trans_id,
+            context    => $self,
+            model      => $app->modware->handler
         );
         $app->log->debug("going through $trans_id");
     }
     else {
-        $db = dicty::UI::Tabview::Page::Gene->new(
-            -primary_id => $gene_id,
-            -active_tab => $tab,
-            -base_url   => $self->base_url
+        $db = Genome::Tabview::Page::Gene->new(
+            primary_id => $gene_id,
+            active_tab => $tab,
+            context    => $self,
+            model      => $app->modware->handler
         );
     }
 
     $self->stash( $db->result );
-    $self->render( template => '/gene/index' );
+    $self->render( template => 'gene/index' );
 
 }
 
