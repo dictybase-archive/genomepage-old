@@ -139,7 +139,8 @@ use Moose;
 =cut
 
 
-has [qw/key label/] => ( is => 'rw', isa => 'Str', required => 1 );
+has 'key' => ( is => 'rw', isa => 'Str', required => 1 );
+has 'label' => ( is => 'rw', isa => 'ArrayRef', required => 1 );
 has [qw/source type/] => ( is => 'rw', isa => 'Str' );
 has 'content' => (
     is         => 'rw',
@@ -165,7 +166,7 @@ sub to_json {
     $item->{source} = $self->source if $self->source;
     $item->{type}   = $self->type if $self->type;
     if ( $self->content ) {
-        foreach my $panel ( $self->content } ) {
+        foreach my $panel ( $self->content ) {
             push @{ $item->{content} }, $panel->to_json;
         }
     }

@@ -87,17 +87,17 @@ use Genome::Tabview::Config::Panel::Item::Accordion;
 
 has 'tab' => ( is => 'rw', isa => 'Str', predicate => 'has_tab' );
 
-before 'base_url' => sub {
-    my ($self) = @_;
-    croak "context attribute need to be set\n" if !$self->has_context;
-};
-
 has 'base_url' => (
     is      => 'rw',
     isa     => 'Str',
     lazy    => 1,
     builder => '_build_base_url'
 );
+
+before 'base_url' => sub {
+    my ($self) = @_;
+    croak "context attribute need to be set\n" if !$self->has_context;
+};
 
 sub _build_base_url {
     my ($self) = @_;
@@ -111,13 +111,17 @@ has 'context' => (
 );
 has 'config' => ( is => 'rw', isa => 'Genome::Tabview::Config' );
 
-has 'json' =>
-    ( is => 'rw', isa => 'Genome::Tabview::Config::Panel::Item::JSON' );
+has 'json' => (
+    is      => 'rw',
+    isa     => 'Genome::Tabview::Config::Panel::Item::JSON',
+    lazy    => 1,
+    default => sub { Genome::Tabview::Config::Panel::Item::JSON->new }
+);
 
 has 'feature' => ( is => 'rw', isa => 'DBIx::Class::Row' );
 
 has 'model' =>
-    ( is => 'rw', isa => 'Bio::Chado::Schema,  ' predicate => 'has_model' );
+    ( is => 'rw', isa => 'Bio::Chado::Schema', predicate => 'has_model' );
 
 has '_slots_needed' => (
     is         => 'rw',
@@ -128,6 +132,8 @@ has '_slots_needed' => (
     },
     lazy => 1
 );
+
+sub init {return}
 
 before 'init' => sub {
     my ($self) = @_;
@@ -187,11 +193,11 @@ has 'section_base_url' => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        my $ctx = $self->ctx;
-        my $gene
-            = $self->feature->type eq 'gene'
-            ? $self->feature
-            : $self->feature->gene;
+        my $ctx = $self->context;
+#        my $gene
+#            = $self->feature->type eq 'gene'
+#            ? $self->feature
+#            : $self->feature->gene;
         return $ctx->url_to( $self->base_url, $self->primary_id );
     }
 );
@@ -238,11 +244,11 @@ sub accordion {
     my ( $self, %arg ) = validated_hash(
         \@_,
         key        => { isa => 'Str' },
-        label      => { isa => 'Str' },
+        label      => { isa => 'ArrayRef' },
         primary_id => { isa => 'Str', optional => 1 }
     );
 
-    $primary_id = $self->primary_id if !$arg{$primary_id};
+    my $primary_id = $self->primary_id if !$arg{primary_id};
     my $item = Genome::Tabview::Config::Panel::Item::Accordion->new(
         key    => $arg{key},
         label  => $arg{label},

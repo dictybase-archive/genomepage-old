@@ -320,11 +320,11 @@ sub gbrowse_window {
     my $window_ext = int( $length / 10 );
     $window_ext = $window_ext > 1000 ? 1000 : $window_ext;
 
-    my $start = $start - $window_ext;
-    my $end   = $end + $window_ext;
+    my $flank_start = $start - $window_ext;
+    my $flank_end   = $end + $window_ext;
     my $chrom = $floc->srcfeature->name;
 
-    my $name = "$chrom:$start..$end";
+    my $name = "$chrom:$flank_start..$flank_end";
     return $name;
 }
 
@@ -352,7 +352,7 @@ has '_reference_stack' => (
     isa      => 'ArrayRef',
     traits   => [qw/Array/],
     lazy     => 1,
-    _builder => '_build_references',
+    builder => '_build_references',
     handles  => { 'references' => 'elements' }
 );
 
@@ -362,6 +362,7 @@ sub _build_references {
         { order_by => { -desc => 'pyear' } } );
     return if !$pub_rs->count;
 
+	my $references;
     while ( my $row = $pub_rs->next ) {
         my $json_reference = Genome::Tabview::JSON::Reference->new(
             pub_id => $row->uniquename );

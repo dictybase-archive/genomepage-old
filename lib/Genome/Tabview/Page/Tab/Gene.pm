@@ -82,6 +82,7 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Tab::Gene;
 
 use namespace::autoclean;
+use Carp;
 use Moose;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
@@ -90,6 +91,8 @@ use Genome::Tabview::JSON::Feature::Gene;
 
 #use Genome::Tabview::JSON::GO;
 extends 'Genome::Tabview::Page::Tab';
+
+has '+tab' => ( lazy => 1, default => 'gene' );
 
 sub _build_base_url {
     my ($self) = @_;
@@ -104,10 +107,6 @@ has 'primary_id' => (
     required => 1,
 );
 
-before 'feature' => sub {
-    my ($self) = @_;
-    croak "Need to set the model attribute\n" if !$self->has_model;
-};
 has '+feature' => (
     lazy    => 1,
     default => sub {
@@ -116,13 +115,19 @@ has '+feature' => (
             {   'dbxref.accession' => $self->primary_id,
                 'type.name'        => 'gene'
             },
-            { join     => [qw/dbxref type/], 'rows' => 1 },
-            { prefetch => [qw/featureloc_features organism/] }
+            {   join => [qw/dbxref type/],
+                rows => 1
+            }
         )->single;
         croak $self->primary_id, " is not a gene\n" if !$row;
         return $row;
     }
 );
+
+before 'feature' => sub {
+    my ($self) = @_;
+    croak "Need to set the model attribute\n" if !$self->has_model;
+};
 
 =head2 init
 
@@ -134,7 +139,7 @@ has '+feature' => (
  
 =cut
 
-sub init {
+override 'init' => sub {
     my ($self) = @_;
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'accordion' );
@@ -165,17 +170,17 @@ sub init {
         label => $self->simple_label("Links"),
         ) if $self->show_links;
 
-        push @$items,
+    push @$items,
         $self->accordion(
         key   => 'references',
         label => $self->references_label,
         ) if $self->show_references;
 
-    $panel->items($items);
+    $panel->add_item($_) for @$items;
     $config->add_panel($panel);
     $self->config($config);
 
-}
+};
 
 =head2 show_genomic_info
 
@@ -191,16 +196,18 @@ sub show_genomic_info {
     my ($self) = @_;
     my $gene = $self->feature;
 
-    my $primary_feat_rs = $gene->search_related(
+    my $primary_feature_rs = $gene->search_related(
         'feature_relationship_objects',
         { 'type.name' => 'part_of' },
         { join        => 'type' }
     )->search_related( 'subject', {}, { prefetch => 'type' } );
 
-    return if !$primary_feature_rs->count;
+    if (!$primary_feature_rs->count) {
+    	return;
+    }
 
     ## --show the gbrowse map for RNA features (right now tRNA, ncRNA, mRNA) and pseudogenes
-    return $primary_feature_rs->first->type() =~ m{RNA|pseudogene}ix ? 1 : 0;
+    return $primary_feature_rs->first->type->name =~ m{RNA|pseudogene}ix ? 1 : 0;
 }
 
 =head2 show_product
@@ -235,7 +242,7 @@ sub show_sequences {
     my $end    = $gene->featureloc_features->first->fmax;
     return $self->model->resultset('Sequence::Featureloc')->count(
         {   'fmin'                => { '<=', $end },
-            'fmax'                => { '=>', $start },
+            'fmax'                => { '>=', $start },
             'feature.organism_id' => $gene->organism_id
         },
         { join => 'feature' }
@@ -301,127 +308,6 @@ sub references_label {
     my $text = $self->json->text("Latest References");
     return [ $text, $references_link ];
 }
-
-=head2 phenotypes_label
-
- Title    : phenotypes_label
- Function : returns label for phenotypes section
- Usage    : $label = $tab->phenotypes_label();
- Returns  : array reference
- Args     : none
- 
-=cut
-
-#sub phenotypes_label {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    my $base_url = $self->base_url || '';
-#
-#    my $pheno_link = $self->json->link(
-#        -caption => 'View Phenotype Information',
-#        -url     => $base_url . '/' . $gene->primary_id . "/phenotypes",
-#        -type    => 'tab',
-#    );
-#    my $text = $self->json->text("Strains and Phenotypes");
-#    return [ $text, $pheno_link ];
-#}
-
-=head2 show_promoters
-
- Title    : show_promoters
- Function : defines if to show gene associated promoters
- Usage    : $show = $tab->show_promoters();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_promoters {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    return @{ $gene->promoters() } ? 1 : 0;
-#}
-
-=head2 show_go
-
- Title    : show_go
- Function : defines if to show gene GO information
- Usage    : $show = $tab->show_go();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_go {
-#    my ($self) = @_;
-#    my $go = Genome::Tabview::JSON::GO->new(
-#        -primary_id => $self->feature->primary_id );
-#    return $go->{has_annotations} ? 1 : 0;
-#}
-
-=head2 go_label
-
- Title    : go_label
- Function : returns label for GO section
- Usage    : $label = $tab->go_label();
- Returns  : array reference
- Args     : none
- 
-=cut
-
-#sub go_label {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    my $base_url = $self->base_url || '';
-#    my $go_link = $self->json->link(
-#        -caption => 'View evidence and references',
-#        -url     => $base_url . '/' . $gene->primary_id . "/go",
-#        -type    => 'tab',
-#    );
-#    my $text = $self->json->text("Gene Ontology Annotations");
-#    return [ $text, $go_link ];
-#}
-
-=head2 show_phenotypes
-
- Title    : show_phenotypes
- Function : defines if to show gene phenotypes section
- Usage    : $show = $tab->show_phenotypes();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_phenotypes {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    return if !@{ $gene->features };
-#
-#    my $count
-#        = dicty::Search::Genotype->count_by_feature_id( $gene->feature_id );
-#    my @urls = $gene->get_insertional_mutants_urls();
-#    return $count || @urls || $gene->plasmids ? 1 : 0;
-#}
-
-=head2 show_summary
-
- Title    : show_summary
- Function : defines if to show gene summary section
- Usage    : $show = $tab->show_summary();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-#sub show_summary {
-#    my ($self) = @_;
-#    my $gene = $self->feature;
-#    return $gene->has_paragraph ? 1 : 0;
-#}
-
-
-
-
 
 1;
 

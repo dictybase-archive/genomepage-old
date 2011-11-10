@@ -220,7 +220,7 @@ sub format_url {
     #return $string if $string !~ m{href}ixg;
 
     # fixing links without closing tag
-    $string .= '</a>' if $string !~ m{</a>} ixg;
+    $string .= '</a>' if $string !~ m{</a>}ixg;
     $string =~ s{\n}{}g;
     my $input = $string;
     my $match_hash;

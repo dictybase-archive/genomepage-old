@@ -78,6 +78,7 @@ sub index_json {
         tab        => 'gene',
         context    => $self
     );
+
     my $tabview = $factory->instantiate;
     $tabview->model($self->app->modware->handler);
     $tabview->init;

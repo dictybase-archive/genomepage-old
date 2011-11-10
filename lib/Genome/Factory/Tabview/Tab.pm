@@ -141,14 +141,32 @@ Args     : string
 
 =cut
 
-has [qw/primary_id base_url tab/] => ( is => 'rw', isa => 'Str' );
+has 'primary_id' => ( is => 'rw', isa => 'Str', required => 1 );
+has 'tab'      => ( is => 'rw', isa => 'Str', predicate => 'has_tab' );
+has 'base_url' => ( is => 'rw', isa => 'Str', predicate => 'has_base_url' );
 has 'default_namespace' => (
     is      => 'rw',
     isa     => 'Str',
     default => 'Genome::Tabview::Page::Tab',
     lazy    => 1
 );
-has 'context' => ( is => 'rw', isa => 'Mojolicious::Controller' );
+has 'context' => (
+    is        => 'rw',
+    isa       => 'Mojolicious::Controller',
+    predicate => 'has_context'
+);
+has 'model' =>
+    ( is => 'rw', isa => 'Bio::Chado::Schema', predicate => 'has_model' );
+
+has '_passthrough_attribute' => (
+    is      => 'rw',
+    isa     => 'ArrayRef',
+    default => sub {
+        return [qw/context base_url model tab/];
+    },
+    lazy       => 1,
+    auto_deref => 1
+);
 
 =head2 instantiate
 
@@ -163,20 +181,28 @@ has 'context' => ( is => 'rw', isa => 'Mojolicious::Controller' );
 sub instantiate {
     my ($self) = @_;
 
-    my $tab        = $self->tab;
+    my $tab = $self->tab;
     my @modules = grep {/::$tab$/i} findsubmod $self->default_namespace;
     croak "Module matching tab $tab not found in namespace ",
         $self->default_namespace, "\n"
         if !@modules;
 
-    Class::MOP->load_class($modules[0]);
-    my $obj = $modules[0]
-        ->new( primary_id => $self->primary_id, base_url => $self->base_url );
-    if ( $self->context ) {
-        $obj->context( $self->context ) if $obj->can('context');
+    Class::MOP::load_class( $modules[0] );
+    my $obj = $modules[0]->new( primary_id => $self->primary_id );
+
+    for my $name ( $self->_passthrough_attribute ) {
+        my $api = 'has_' . $name;
+        if ( $self->$api ) {
+            $obj->$name( $self->$name );
+        }
     }
     return $obj;
 }
+
+before 'instantiate' => sub {
+    my ($self) = @_;
+    croak "tab attribute need to be set\n" if !$self->has_tab;
+};
 
 __PACKAGE__->meta->make_immutable;
 

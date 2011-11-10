@@ -235,7 +235,6 @@ sub primary_features {
     return $self->{primary_features};
 }
 
-
 =head2 ests
 
  Title    : ests
@@ -264,6 +263,7 @@ sub ests {
     my $count = $est_rs->count;
     return !$count;
 
+    my $links;
     ## -- need to fix
     if ( $count == 6 ) {
         my $more_link = $self->json->link(
@@ -274,18 +274,16 @@ sub ests {
                 . $gene->name,
             type => 'outer',
         );
+        push @$links, $more_link;
     }
 
-    my $links;
     foreach my $est ( $est_rs->all ) {
-        push @$links, $self->json->link(
+        unshift @$links, $self->json->link(
             caption => $est->dbxref->accession,
             url     => $self->base_url . '/' . $est->dbxref->accession,
             type    => 'outer',
         );
     }
-    push @$links, $more_link;
-
     return $links;
 }
 
@@ -306,11 +304,11 @@ sub external_links {
     my $trans_rs = $gene->search_related(
         'feature_relationship_objects',
         {   'type.name' => 'part_of',
-            'cv.name'   => 'sequence'
         },
         { join => [ { 'type' => 'cv' } ] }
-        )->search_related( 'subject', {} )
-        ->search_related( 'secondary_dbxrefs', {}, { prefetch => 'db' } );
+        )->search_related( 'subject',        {} )
+        ->search_related( 'feature_dbxrefs', {} )
+        ->search_related( 'dbxref', {}, { prefetch => 'db' } );
     return if !$trans_rs->count;
 
     my $external_links;
@@ -318,7 +316,7 @@ sub external_links {
         push @$external_links,
             $self->external_link(
             source => $xref->db->name,
-            id    => $xref->accession,
+            id     => $xref->accession,
             );
 
   #        my $divider
@@ -380,12 +378,10 @@ sub gene_link {
     );
 }
 
-
 sub orthologs {
     my ($self) = @_;
     return $self->source_feature->orthologs;
 }
-
 
 1;
 
@@ -450,7 +446,6 @@ sub orthologs {
 #    return $self->{genbank_mrnas};
 #}
 #
-
 
 =head2 promoters
 
@@ -678,7 +673,6 @@ sub orthologs {
 #    return $link;
 #}
 
-
 =head2 summary
 
  Title    : summary
@@ -852,7 +846,6 @@ sub orthologs {
 #    return $self;
 #}
 
-
 =head2 go
 
  Title    : go
@@ -875,7 +868,6 @@ sub orthologs {
 #    return $self->{go};
 #}
 
-
 =head2 plasmids
 
  Title    : plasmids
@@ -890,7 +882,6 @@ sub orthologs {
 #    my ($self) = @_;
 #    return $self->source_feature->plasmids;
 #}
-
 
 #sub topics_by_reference {
 #    my ( $self, $reference ) = @_;
@@ -951,7 +942,4 @@ sub orthologs {
 #    return if !$gene->name_description;
 #    return $self->json->text( $gene->name_description );
 #}
-
-
-
 
