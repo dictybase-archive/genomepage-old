@@ -83,50 +83,27 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Section::Gene;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Carp;
+use Moose;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::Config::Panel::Item::Tab;
-use base qw( Genome::Tabview::Page::Section );
 
-=head2 new
+extends 'Genome::Tabview::Page::Section';
 
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Section::Gene> object. 
- Usage    : my $page = Genome::Tabview::Page::Section::Gene->new();
- Returns  : Genome::Tabview::Page::Section::Gene object with default configuration.     
- Args     : -primary_id   - gene primary id. If feature id passed, guesses for the corresponding gene
-            -section      - section id
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID SECTION BASE_URL CONTEXT/];
-    $self->{root} = Bio::Root::Root->new();
-
-    my ( $primary_id, $section, $base_url,  $context ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-
-    #    $self->{root}->throw('section is not provided')    if !$section;
-
-    my $gene = Genome::Tabview::JSON::Feature::Gene->new(
-        -primary_id => $primary_id );
-	if ($context) {
-		$gene->context($context);
-		$self->context($context);
+has '+gene' => (
+	lazy => 1, 
+	default => sub {
+		my ($self) = @_;
+		my $row = $self->model->resultset('Sequence::Feature')->search({
+			'dbxref.accession' => $self->primary_id
+		},  { rows => 1,  join => 'dbxref'})->single;
+		return $row;
 	}
-    $self->gene($gene);
-    $self->section($section) if $section;
-    $self->base_url($base_url) if $base_url;
-    return $self;
-}
+);
+	
 
 =head2 init
 

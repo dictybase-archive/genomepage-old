@@ -68,13 +68,47 @@ sub index {
 
 sub contig {
     my ($self) = @_;
+
     my $common_name = $self->stash('common_name');
     if ( !$self->check_organism($common_name) ) {
         $self->render_not_found;
         return;
     }
     $self->set_organism($common_name);
+    if ( $self->stash('format') and $self->stash('format') eq 'fasta' ) {
+        return $self->contig_fasta;
+    }
     $self->render( template => 'contig' );
+}
+
+sub contig_fasta {
+    my ($self) = @_;
+
+    my $common_name = $self->stash('common_name');
+    my $filename    = $common_name . '_contig.fa';
+    $self->res->headers->content_type('application/x-fasta');
+    $self->res->headers->content_disposition(
+        "attachment; filename=$filename");
+
+    my $contig_rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'type.name' => 'contig' },
+        {   join     => 'type',
+            prefetch => [qw/dbxref featureloc_features/]
+        }
+    );
+    while ( my $row = $contig_rs->next ) {
+		my $floc = $row->featureloc_features;
+		my $start = $floc->first->fmin + 1;
+		my $end = $floc->first->fmax;
+        my $seq = $row->residues;
+        if ( !$seq ) {
+            $seq = $self->infer_seq_from_genome($floc);
+        }
+        $seq =~ s/(.{1,60})/$1\n/g;
+        $self->write_chunk( '>' . $row->dbxref->accession . "| from $start to $end\n$seq" );
+    }
+    $self->write_chunk('');
 }
 
 sub contig_search {
@@ -111,6 +145,9 @@ sub contig_search {
 
 sub supercontig {
     my ($self) = @_;
+    if ( $self->stash('format') and $self->stash('format') eq 'fasta' ) {
+        return $self->supercontig_fasta;
+    }
     my $common_name = $self->stash('common_name');
     if ( !$self->check_organism($common_name) ) {
         $self->render_not_found;
@@ -118,6 +155,34 @@ sub supercontig {
     }
     $self->set_organism($common_name);
     $self->render( template => 'supercontig' );
+}
+
+sub supercontig_fasta {
+    my ($self) = @_;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+
+    my $filename = $common_name . '_supercontig.fa';
+    $self->res->headers->content_type('application/x-fasta');
+    $self->res->headers->content_disposition(
+        "attachment; filename=$filename");
+    my $supercontig_rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'type.name' => 'supercontig' },
+        {   join     => 'type',
+            prefetch => 'dbxref'
+        }
+    );
+    while ( my $row = $supercontig_rs->next ) {
+        my $seq = $row->residues;
+        $seq =~ s/(.{1,60})/$1\n/g;
+        $self->write_chunk( '>' . $row->dbxref->accession . "\n$seq" );
+    }
+    $self->write_chunk('');
 }
 
 sub supercontig_search {

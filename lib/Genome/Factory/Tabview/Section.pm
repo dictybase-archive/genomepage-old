@@ -11,9 +11,9 @@ This document describes B<Genome::Factory::Tabview::Section> version 0.0.1
 
  use Genome::Factory::Tabview::Section;
  my $factory = Genome::Factory::Tabview::Section->new( 
-     -tab => 'gene', 
-     -primary_id => $primary_id, 
-     -section =>'info'
+     tab => 'gene', 
+     primary_id => $primary_id, 
+     section =>'info'
  );
  my $section = $factory->instantiate;
 
@@ -34,11 +34,6 @@ This document describes B<Genome::Factory::Tabview::Section> version 0.0.1
 
 B<Genome::Factory::Tabview::Section> requires setting up of standard dictybase environment
 variables. For detail look in the I<conf.sh> file under the bin folder of dictybase codebase.
-
-=head1 DEPENDENCIES
-
-dicty::Root
-Module::Find
 
 =head1 INCOMPATIBILITIES
 
@@ -95,58 +90,10 @@ SUCH DAMAGES.
 package Genome::Factory::Tabview::Section;
 
 use strict;
+use namespace::autoclean;
 use Module::Find;
-use Bio::Root::Root;
-
-=head2 new
-
- Title    : new
- Function : Constructor for Genome::Factory::Tabview::Section
- Usage    : my $tab = Genome::Factory::Tabview::Section->new( 
-                -tab        => 'gene', 
-                -primary_id => $primary_id,
-                -section    => 'info'
-            );
-            or
-            my $tab = Genome::Factory::Tabview::Section->new();
- Returns  : Genome::Factory::Tabview::Section object.
- Args     : -tab            : name of the tab. Generally the tab name gets mapped to a 
-                              class name under the default namespace.   
-            -primary_id     : primary id of the feature
-            -section        : name of the section on the specified tab
-            -base_url       : base url for the section
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-    $self->{root} = Bio::Root::Root->new();
-
-    ## -- arguments
-
-    my $arglist = [qw/TAB PRIMARY_ID SECTION BASE_URL CONTEXT/];
-    my ( $tab, $primary_id, $section, $base_url, $context ) =
-
-        $self->{root}->_rearrange( $arglist, @args );
-
-    $self->default_namespace('dicty::UI::Tabview::Page::Section');
-    $self->tab($tab)               if $tab;
-    $self->primary_id($primary_id) if $primary_id;
-    $self->section($section)       if $section;
-    $self->base_url($base_url)     if $base_url;
-    $self->context($context)       if $context;
-    return $self;
-}
-
-sub context {
-    my ( $self, $arg ) = @_;
-    $self->{context} = $arg if defined $arg;
-    return $self->{context} if defined $self->{context};
-}
+use Class::MOP;
+use Moose;
 
 =head2 tab
 
@@ -158,15 +105,6 @@ sub context {
  
 =cut
 
-sub tab {
-    my ( $self, $arg ) = @_;
-
-    ## -- check if it is a set call
-    $self->{tab} = $arg if defined $arg;
-    $self->{root}->throw('Tab is not defined') if not defined $self->{tab};
-    return $self->{tab};
-}
-
 =head2 section
 
  Title    : section
@@ -176,16 +114,6 @@ sub tab {
  Args     : string
  
 =cut
-
-sub section {
-    my ( $self, $arg ) = @_;
-
-    ## -- check if it is a set call
-    $self->{section} = $arg if defined $arg;
-    $self->{root}->throw('Section is not defined')
-        if not defined $self->{section};
-    return $self->{section};
-}
 
 =head2 base_url
 
@@ -197,12 +125,6 @@ sub section {
 
 =cut
 
-sub base_url {
-    my ( $self, $arg ) = @_;
-    $self->{base_url} = $arg if defined $arg;
-    return $self->{base_url};
-}
-
 =head2 primary_id
 
  Title    : primary_id
@@ -212,16 +134,6 @@ sub base_url {
  Args     : string
  
 =cut
-
-sub primary_id {
-    my ( $self, $arg ) = @_;
-
-    ## -- check if it is a set call
-    $self->{primary_id} = $arg if defined $arg;
-    $self->{root}->throw('Primary ID is not defined')
-        if not defined $self->{primary_id};
-    return $self->{primary_id};
-}
 
 =head2 default_namespace
 
@@ -238,53 +150,90 @@ sub primary_id {
  
 =cut
 
-sub default_namespace {
-    my ( $self, $arg ) = @_;
+=head2 tab
 
-    $self->{namespace} = $arg if defined $arg;
+ Title    : tab
+ Function : gets/sets tab
+ Usage    : $factory->tab('gene');
+ Returns  : string
+ Args     : string
+ 
+=cut
 
-    return $self->{namespace};
+=head2 section
+
+ Title    : section
+ Function : gets/sets section
+ Usage    : $factory->section('info');
+ Returns  : string
+ Args     : string
+ 
+=cut
+
+has 'primary_id' => ( is => 'rw', isa => 'Str', required => 1 );
+
+for my $attr(qw/section tab base_url/) {
+	has $attr => (is => 'rw',  isa => 'Str',  predicate => 'has_'.$attr);
 }
+
+has 'default_namespace' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'Genome::Tabview::Page::Section',
+    lazy    => 1
+);
+has 'context' => (
+    is        => 'rw',
+    isa       => 'Mojolicious::Controller',
+    predicate => 'has_context'
+);
+has 'model' =>
+    ( is => 'rw', isa => 'Bio::Chado::Schema', predicate => 'has_model' );
+
+has '_passthrough_attributes' => (
+    is      => 'rw',
+    isa     => 'ArrayRef',
+    default => sub {
+        return [qw/context base_url model tab section/];
+    },
+    lazy       => 1,
+    auto_deref => 1
+);
 
 =head2 instantiate
 
  Title    : instantiate
- Function : Instantiates dicty::UI::Tabview::GenePage::Section subclass based on provided data
+ Function : Instantiates Genome::Tabview::GenePage::Section subclass based on provided data
  Usage    : my $section = Genome::Factory::Tabview::Section->instantiate();
- Returns  : dicty::UI::Tabview::Page::Section implementing object with default configuration.
+ Returns  : Genome::Tabview::Page::Section implementing object with default configuration.
  Args     : none
  
 =cut
 
 sub instantiate {
     my ( $self, @args ) = @_;
-
-    my $tab        = $self->tab;
-    my $primary_id = $self->primary_id;
-    my $section    = $self->section;
-    my $base_url   = $self->base_url;
-
+    my $tab = $self->tab;
     my @modules = grep {/::$tab$/i} findsubmod $self->default_namespace;
-
-    $self->{root}
-        ->throw( "Module matching section for $tab not found in namespace "
-            . $self->default_namespace )
+    croak "Module matching tab $tab not found in namespace ", $self->default_namespace, "\n"
         if !@modules;
 
-    eval "require $modules[0]";
-    $self->{root}->throw($@) if $@;
+    Class::MOP::load_class( $modules[0] );
+    my $obj = $modules[0]->new( primary_id => $self->primary_id );
 
-    return $self->context
-        ? $modules[0]->new(
-        -primary_id => $primary_id,
-        -section    => $section,
-        -base_url   => $base_url,
-        -context    => $self->context
-        )
-        : $modules[0]->new(
-        -primary_id => $primary_id,
-        -section    => $section,
-        -base_url   => $base_url
-        );
+    for my $name ( $self->_passthrough_attributes ) {
+        my $api = 'has_' . $name;
+        if ( $self->$api ) {
+            $obj->$name( $self->$name );
+        }
+    }
+    return $obj;
 }
+
+before 'instantiate' => sub {
+    my ($self) = @_;
+    croak "tab attribute need to be set\n" if !$self->has_tab;
+};
+
+__PACKAGE__->meta->make_immutable;
+
 1;

@@ -79,36 +79,15 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Section;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Carp;
+use Moose;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::Config::Panel::Item;
 use Genome::Tabview::Config::Panel::Item::JSON;
 use Genome::Tabview::Config::Panel::Item::Column;
 use Genome::Tabview::Config::Panel::Item::Row;
 
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Section> object.
- Returns  : Genome::Tabview::Page::Section object 
- Args     : none
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    $self->{root} = Bio::Root::Root->new();
-    bless $self, $class;
-    return $self;
-}
-
-sub context {
-    my ( $self, $arg ) = @_;
-    $self->{context} = $arg if defined $arg;
-    return $self->{context} if defined $self->{context};
-}
 
 =head2 section
 
@@ -120,14 +99,6 @@ sub context {
 
 =cut
 
-sub section {
-    my ( $self, $arg ) = @_;
-    $self->{section} = $arg if defined $arg;
-    $self->{root}->throw('Section is not defined')
-        if not defined $self->{section};
-    return $self->{section};
-}
-
 =head2 base_url
 
  Title    : base_url
@@ -137,35 +108,6 @@ sub section {
  Args     : string
 
 =cut
-
-sub base_url {
-    my ( $self, $arg ) = @_;
-    $self->{base_url} = $arg if defined $arg;
-    return $self->{base_url};
-}
-
-=head2 config
-
- Title    : config
- Usage    : $tab->config($config);
- Function : gets/sets the tab config
- Returns  : Genome::Tabview::Config implementing object
- Args     : Genome::Tabview::Config implementing object
-
-=cut
-
-sub config {
-    my ( $self, $arg ) = @_;
-
-    $self->{config} = $arg if defined $arg;
-    $self->{root}->throw('Config is not defined')
-        if not defined $self->{config};
-    $self->{root}->throw(
-        'Config should be Genome::Tabview::Config implementing object')
-        if ref( $self->{config} ) !~ m{Genome::Tabview::Config};
-
-    return $self->{config};
-}
 
 =head2 json
 
@@ -177,13 +119,53 @@ sub config {
 
 =cut
 
-sub json {
-    my ( $self, $arg ) = @_;
-    $self->{json} = $arg if $arg;
-    $self->{json} = Genome::Tabview::Config::Panel::Item::JSON->new()
-        if !$self->{json};
-    return $self->{json};
+has 'primary_id' => (
+    is       => 'rw',
+    isa      => 'Str',
+    required => 1,
+);
+
+
+
+has 'base_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    builder => '_build_base_url'
+);
+
+before 'base_url' => sub {
+    my ($self) = @_;
+    croak "context attribute need to be set\n" if !$self->has_context;
+};
+
+sub _build_base_url {
+    my ($self) = @_;
+    return $self->context->url_to;
 }
+
+for my $attr(qw/section tab/) {
+	has $attr => (is => 'rw',  isa => 'Str',  predicate => 'has_'.$attr);
+}
+
+has 'context' => (
+    is        => 'rw',
+    isa       => 'Mojolicious::Controller',
+    predicate => 'has_context'
+);
+
+has 'model' =>
+    ( is => 'rw', isa => 'Bio::Chado::Schema', predicate => 'has_model' );
+
+has 'config' => ( is => 'rw', isa => 'Genome::Tabview::Config' );
+
+has 'json' => (
+    is      => 'rw',
+    isa     => 'Genome::Tabview::Config::Panel::Item::JSON',
+    lazy    => 1,
+    default => sub { Genome::Tabview::Config::Panel::Item::JSON->new }
+);
+
 
 =head2 process
 
@@ -212,16 +194,7 @@ sub process {
 
 =cut
 
-sub feature {
-    my ( $self, $arg ) = @_;
-    $self->{feature} = $arg if defined $arg;
-    $self->{root}->throw('Feature is not defined')
-        if not defined $self->{feature};
-    $self->{root}->throw(
-        'Feature should be Genome::Tabview::JSON::Feature implementing class'
-    ) if ref( $self->{feature} ) !~ m{Genome::Tabview::JSON::Feature}x;
-    return $self->{feature};
-}
+has 'feature' => ( is => 'rw', isa => 'Genome::Tabview::JSON::Feature' );
 
 =head2 gene
 
@@ -233,16 +206,7 @@ sub feature {
 
 =cut
 
-sub gene {
-    my ( $self, $arg ) = @_;
-    $self->{gene} = $arg if $arg;
-    $self->{root}->throw('Gene is not defined')
-        if not defined $self->{gene};
-    $self->{root}
-        ->throw('Gene should be Genome::Tabview::JSON::Feature::Gene')
-        if ref( $self->{gene} ) ne 'Genome::Tabview::JSON::Feature::Gene';
-    return $self->{gene};
-}
+has 'gene' => ( is => 'rw', isa => 'Genome::Tabview::JSON::Feature::Gene' );
 
 =head2 row
 
@@ -260,11 +224,11 @@ sub gene {
 sub row {
     my ( $self, @column_data ) = @_;
     my $column_panel = Genome::Tabview::Config::Panel->new(
-        -layout => 'column',
-        -items  => $self->columns(@column_data)
+        layout => 'column',
+        items  => $self->columns(@column_data)
     );
     my $item = Genome::Tabview::Config::Panel::Item::Row->new(
-        -content => [$column_panel] );
+        content => [$column_panel] );
     return $item;
 }
 
@@ -289,8 +253,8 @@ sub columns {
         my $class = $i == 0 ? 'content_table_title' : undef;
         push @columns,
             Genome::Tabview::Config::Panel::Item::Column->new(
-            -type    => $class,
-            -content => [$json_panel],
+            type    => $class,
+            content => [$json_panel],
             );
         $i = 1;
     }
@@ -318,19 +282,26 @@ sub json_panel {
         my $ref = \$element;
         if ( ref($ref) eq 'SCALAR' ) {
             my $item =
-                $json_item->new( -content => $self->json->text($element) );
+                $json_item->new( content => $self->json->text($element) );
             push @json_items, $item;
         }
         else {
-            my $item = $json_item->new( -content => $element );
+            my $item = $json_item->new( content => $element );
             push @json_items, $item;
         }
     }
     my $json_panel = Genome::Tabview::Config::Panel->new(
-        -layout => 'json',
-        -items  => \@json_items,
+        layout => 'json',
+        _items  => \@json_items,
     );
     return $json_panel;
 }
+
+before 'gene' => sub {
+	my ($self) = @_;
+	croak "model attribute need to set\n" if !$self->has_model;
+};
+
+__PACKAGE__->meta->make_immutable;
 
 1;

@@ -79,121 +79,14 @@ SUCH DAMAGES.
 package Genome::Tabview::JSON::Feature::Generic;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Moose;
+use Carp;
 use Genome::Tabview::Config::Panel::Item::JSON::Table;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::JSON::Feature::Protein;
 use Genome::Tabview::JSON::Feature;
-use base qw(Genome::Tabview::JSON::Feature);
-
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::JSON::Feature::Generic> object. 
- Usage    : my $page = Genome::Tabview::JSON::Feature::Generic->new( -primary_id => 'DDB0185055' );
- Returns  : Genome::Tabview::JSON::Feature::Generic object with default configuration.     
- Args     : -primary_id   - feature primary id.
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID/];
-    $self->{root} = Bio::Root::Root->new();
-    my ( $primary_id, $section ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-    my $feature = dicty::Feature->new( -primary_id => $primary_id );
-    $self->source_feature($feature);
-    return $self;
-}
-
-=head2 curation_status
-
- Title    : curation_status
- Function : returns json formatted feature curation status
- Usage    : my $status = $feature->curation_status;
- Returns  : hash
- Args     : none
- 
-=cut
-
-sub curation_status {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    my $curated_img
-        = '<img src="/inc/images/icon_yes_green.png" border="0" style="vertical-align: text-bottom;" title="Curator Reviewed Entry">';
-    if ($self->context) {
-    	$curated_img = $self->context->image_tag('icon_yes_green.png',  border => '0');
-    }
-    my $curation_status;
-
-    return if $feature->type =~ m{pseudo}ix;
-    
-    $curation_status = $curated_img . ' (Curator reviewed) '
-        if $feature->type =~ m{mRNA} && !$feature->is_prediction;
-        
-    return if !$curation_status;
-    return $self->json->text($curation_status);
-}
-
-=head2 evidence_support
-
- Title    : evidence_support
- Function : returns json formatted feature evidence and support information
- Usage    : my $info = $feature->evidence_support;
- Returns  : hash
- Args     : none
- 
-=cut
-
-sub evidence_support {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-
-    my $question_img =
-        '<img src="/inc/images/icon_question.png" border="0" style="vertical-align: text-bottom;">';
-    my $warn_img =
-        '<img src="/inc/images/icon_warn.png" border="0" style="vertical-align: text-bottom;">';
-
-    my $evidence_sentence = '';
-
-    $evidence_sentence .=
-        "<br>Derived from " . join( ", ", @{ $feature->derived_from } ) . ". "
-        if @{ $feature->derived_from };
-
-    $evidence_sentence .=
-        "Supported by " . join( ", ", @{ $feature->supported_by } ) . "."
-        if @{ $feature->supported_by };
-
-    $evidence_sentence .= $question_img
-        if $evidence_sentence =~ m{genomic context}x;
-
-    my @incomplete_support =
-        grep {m{incomplete support}i} @{ $feature->qualifiers };
-    my @conflict =
-        grep {m{Conflicting evidence}i} @{ $feature->qualifiers };
-
-    my @add_info_items = $evidence_sentence;
-    push @add_info_items, grep {m{Pseudogene}i} @{ $feature->qualifiers };
-    push @add_info_items,
-        'The supporting evidence for this gene model is incomplete. '
-        . $question_img
-        if @incomplete_support;
-    push @add_info_items,
-        'There is conflicting evidence for this gene model.' . $warn_img
-        if @conflict;
-
-    my $add_info_html = join( '<br>', @add_info_items );
-
-    return if !$add_info_html;
-    return $self->json->text($add_info_html);
-}
+extends 'Genome::Tabview::JSON::Feature';
 
 =head2 gene_type
 
@@ -210,9 +103,9 @@ sub gene_type {
     my ($self) = @_;
     my $feature = $self->source_feature;
     my $type =
-        $feature->type =~ m{mRNA}ix
+        $feature->type->name =~ m{mRNA}ix
         ? 'Protein Coding Gene'
-        : $feature->display_type();
+        : $feature->type->name;
     return $self->json->text($type);
 }
 
@@ -248,12 +141,10 @@ sub feature_tab_link {
 
 sub genbank_link {
     my ( $self, $id ) = @_;
-    my $feature = $self->source_feature;
-
     my $link = $self->json->link(
-        -caption => $id,
-        -url     => 'http://www.ncbi.nlm.nih.gov/nuccore/' . $id,
-        -type    => 'outer',
+        caption => $id,
+        url     => 'http://www.ncbi.nlm.nih.gov/nuccore/' . $id,
+        type    => 'outer',
     );
     return $link;
 

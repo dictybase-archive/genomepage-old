@@ -62,16 +62,14 @@ sub startup {
      ### ---
     my $gene = $organism->waypoint('/gene')->name('all_genes')->to('gene#list');
     $gene->route( '/search', format => 'datatable' )->name('gene_pager')
-        ->to('gene#gene_search');
+        ->to('gene#search');
 
     my $id = $gene->waypoint('/:id')->name('gene')
-        ->to( 'gene#index_html');
-    $gene->route('/:id',  format => 'json')->name('gene_json')
-        ->to( 'gene#index_json');
+        ->to( 'gene#show');
 
-    my $tab = $id->waypoint('/:tab')->to('gene#tab');
-    $tab->route('/:section')->to('gene#section');
-    $tab->route('/:subid/:section')->to('gene#section');
+    my $tab = $id->waypoint('/:tab')->to('gene#show_tab');
+    $tab->route('/:section')->to('gene#show_section');
+    $tab->route('/:subid/:subsection',  format => 'json')->to('gene#show_subsection_json');
 
     ## init database connection
     my $datasource = Homology::Chado::DataSource->instance;

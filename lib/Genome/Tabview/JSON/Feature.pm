@@ -111,8 +111,8 @@ has 'context' => ( is => 'rw', isa => 'Mojolicious::Controller' );
  Title    : source_feature
  Usage    : $feature->source_feature($feature);
  Function : gets/sets feature, that would be used as a source for all calls
- Returns  : dicty::Feature object
- Args     : dicty::Feature object
+ Returns  : DBIx::Class::Row object
+ Args     : DBIx::Class::Row object
 
 =cut
 

@@ -158,7 +158,7 @@ has 'context' => (
 has 'model' =>
     ( is => 'rw', isa => 'Bio::Chado::Schema', predicate => 'has_model' );
 
-has '_passthrough_attribute' => (
+has '_passthrough_attributes' => (
     is      => 'rw',
     isa     => 'ArrayRef',
     default => sub {
@@ -190,11 +190,11 @@ sub instantiate {
     Class::MOP::load_class( $modules[0] );
     my $obj = $modules[0]->new( primary_id => $self->primary_id );
 
-    for my $name ( $self->_passthrough_attribute ) {
+    for my $name ( $self->_passthrough_attributes ) {
         my $api = 'has_' . $name;
         if ( $self->$api ) {
             $obj->$name( $self->$name );
-        }
+       }
     }
     return $obj;
 }

@@ -25,6 +25,24 @@ sub register {
             return @$genomes;
         }
     );
+
+    $app->helper(
+        infer_seq_from_genome => sub {
+            my ( $self, $floc ) = @_;
+            my $start = $floc->first->fmin;
+            my $end   = $floc->first->fmax;
+
+            my $seqrow = $floc->search_related(
+                'srcfeature',
+                {},
+                {   select =>
+                        [ \"SUBSTR(srcfeature.residues, $start, $end )" ],
+                    as => 'fseq'
+                }
+            );
+            return $seqrow->first->get_column('fseq');
+        }
+    );
 }
 
 sub _genomes_from_db {

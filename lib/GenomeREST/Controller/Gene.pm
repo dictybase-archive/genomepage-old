@@ -20,7 +20,7 @@ sub list {
     $self->render( template => 'gene' );
 }
 
-sub gene_search {
+sub search {
     my ($self) = @_;
 
     my $model = $self->app->modware->handler;
@@ -57,7 +57,22 @@ sub gene_search {
     );
 }
 
-sub index_html {
+sub show {
+    my ($self) = @_;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+
+    if ( $self->stash('format') and $self->stash('format') eq 'json' ) {
+        return $self->show_json;
+    }
+    $self->show_html;
+}
+
+sub show_html {
     my ($self)  = @_;
     my $gene_id = $self->stash('gene_id');
     my $tabview = Genome::Tabview::Page::Gene->new(
@@ -70,7 +85,7 @@ sub index_html {
     $self->render( template => 'gene/index' );
 }
 
-sub index_json {
+sub show_json {
     my ($self) = @_;
     my $gene_id = $self->stash('gene_id');
 
@@ -87,12 +102,22 @@ sub index_json {
     $self->render_json( [ map { $_->to_json } $conf->panels ] );
 }
 
-sub tab {
+sub show_tab {
     my ($self) = @_;
-    $self->render_format;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+
+    if ( $self->stash('format') and $self->stash('format') eq 'json' ) {
+        return $self->show_tab_json;
+    }
+    $self->show_tab_html;
 }
 
-sub tab_html {
+sub show_tab_html {
     my ($self)  = @_;
     my $tab     = $self->stash('tab');
     my $gene_id = $self->stash('gene_id');
@@ -111,9 +136,9 @@ sub tab_html {
         $db = Genome::Tabview::Page::Gene->new(
             primary_id => $gene_id,
             active_tab => $tab,
-            sub_id     => $trans_id,
             context    => $self,
-            model      => $app->modware->handler
+            model      => $app->modware->handler,
+            sub_id     => $trans_id
         );
         $app->log->debug("going through $trans_id");
     }
@@ -131,42 +156,51 @@ sub tab_html {
 
 }
 
-sub tab_json {
+sub show_tab_json {
     my ($self) = @_;
 
     my $tab     = $self->stash('tab');
     my $gene_id = $self->stash('gene_id');
 
-    my $factory = dicty::Factory::Tabview::Tab->new(
-        -tab        => $tab,
-        -primary_id => $gene_id,
-        -base_url   => $self->base_url
+    my $factory = Genome::Factory::Tabview::Tab->new(
+        tab        => $tab,
+        primary_id => $gene_id,
+        base_url   => $self->base_url model => ''
     );
     $self->render_json( $self->panel_to_json($factory) );
 }
 
-sub section {
+sub show_section {
     my ($self) = @_;
-    $self->render_format;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+    if ( $self->stash('format') and $self->stash('format') eq 'json' ) {
+        return $self->show_section_json;
+    }
+    $self->show_section_html;
 }
 
 sub section_html {
     my ($self) = @_;
 
+    my $gene_id = $self->stash('gene_id');
     my $tab     = $self->stash('tab');
     my $section = $self->stash('section');
-    my $gene_id = $self->stash('gene_id');
 
     if ( $self->app->config->{tab}->{dynamic} eq $tab ) {
-        my $db = dicty::UI::Tabview::Page::Gene->new(
-            -primary_id => $gene_id,
-            -active_tab => $tab,
-            -base_url   => $self->base_url,
-            -sub_id     => $section,
+        my $db = Genome::Tabview::Page::Gene->new(
+            primary_id => $gene_id,
+            active_tab => $tab,
+            base_url   => $self->base_url,
+            sub_id     => $section,
         );
 
         $self->stash( $db->result );
-        $self->render( template => '/gene/index' );
+        $self->render( template => 'gene/index' );
     }
 }
 
@@ -176,39 +210,48 @@ sub section_json {
     my $tab     = $self->stash('tab');
     my $section = $self->stash('section');
     my $gene_id = $self->stash('gene_id');
-    my $subid   = $self->stash('subid');
 
     my $factory;
     if ( $self->is_ddb($section) ) {
-        $factory = dicty::Factory::Tabview::Tab->new(
-            -tab        => $tab,
-            -primary_id => $section,
-            -base_url   => $self->base_url
+        $factory = Genome::Factory::Tabview::Tab->new(
+            tab        => $tab,
+            primary_id => $section,
+            base_url   => $self->base_url
         );
     }
-    if ( $subid || !$self->is_ddb($section) ) {
-        $factory = dicty::Factory::Tabview::Section->new(
-            -base_url   => $self->base_url,
-            -primary_id => $subid || $gene_id,
-            -tab        => $tab,
-            -section    => $section,
+    else {
+        $factory = Genome::Factory::Tabview::Section->new(
+            base_url   => $self->base_url,
+            primary_id => $gene_id,
+            tab        => $tab,
+            section    => $section,
+            context    => $self
         );
     }
     $self->render_json( $self->panel_to_json($factory) );
 }
 
-sub validate {
+sub show_subsection_json {
     my ($self) = @_;
-    my $id = $self->stash('id');
-
-    if (   !$self->check_gene($id)
-        || $self->stash('replaced')
-        || $self->stash('deleted') )
-    {
-        $self->res->code(404);
-        $self->render('gene/not_found');
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
     }
-    return 1;
+    $self->set_organism($common_name);
+
+    my $gene_id = $self->stash('gene_id');
+    my $tab     = $self->stash('tab');
+    my $subid = $self->stash('subid');
+    my $sub_section = $self->stash('subsection');
+
+    my $factory = Genome::Factory::Tabview::Section->new(
+        primary_id => $subid,
+        tab        => $tab,
+        section    => $sub_section,
+        context    => $self, 
+        model => $self->app->modware->handler
+    );
 }
 
 1;
