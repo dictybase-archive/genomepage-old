@@ -81,12 +81,51 @@ package Genome::Tabview::JSON::Feature::Generic;
 use strict;
 use namespace::autoclean;
 use Moose;
+use MooseX::Params::Validate;
 use Carp;
 use Genome::Tabview::Config::Panel::Item::JSON::Table;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::JSON::Feature::Protein;
 use Genome::Tabview::JSON::Feature;
 extends 'Genome::Tabview::JSON::Feature';
+
+has '_exon_featureloc' => (
+    isa     => 'DBIx::Class::ResultSet',
+    is      => 'ro',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $feat = $self->source_feature;
+        return $feat->search_related(
+            'feature_relationship_objects',
+            { 'type.name' => 'part_of' },
+            { join        => 'type' }
+            )->search_related(
+            'subject',
+            { 'type_2.name' => 'exon' },
+            { join          => 'type' }
+            )->search_related( 'featureloc_features', {} )->all;
+    }
+);
+
+has 'gene' => (
+    isa     => 'DBIx::Class::Row',
+    is      => 'rw',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $rs = $self->source_feature->search_related(
+            'feature_relationship_subjects',
+            { 'type' => 'part_of' },
+            { join   => 'type' }
+            )->search(
+            'object',
+            { 'type_2.name' => 'gene' },
+            { join          => 'type', prefetch => 'dbxref' }
+            );
+        return $rs->first;
+    }
+);
 
 =head2 gene_type
 
@@ -102,8 +141,8 @@ extends 'Genome::Tabview::JSON::Feature';
 sub gene_type {
     my ($self) = @_;
     my $feature = $self->source_feature;
-    my $type =
-        $feature->type->name =~ m{mRNA}ix
+    my $type
+        = $feature->type->name =~ m{mRNA}ix
         ? 'Protein Coding Gene'
         : $feature->type->name;
     return $self->json->text($type);
@@ -120,21 +159,21 @@ sub gene_type {
 =cut
 
 sub feature_tab_link {
-    my ( $self, @args ) = @_;
-    my $feature = $self->source_feature;
-
-    my $arglist = [qw/CAPTION BASE_URL/];
-    my ( $caption, $base_url ) = $self->{root}->_rearrange( $arglist, @args );
-
-    $base_url ||= '';
-    $caption = $caption || $feature->primary_id;
+    my $self = shift;
+    my ( $caption, $base_url ) = validated_list(
+        \@_,
+        caption  => { isa => 'Str', optional => 1 },
+        base_url => { isa => 'Str' }
+    );
+    my $primary_id = $self->source_feature->dbxref->accession;
+    $caption = $caption || $primary_id;
     my $link = $self->json->link(
-        -caption => $caption,
-        -url     => $base_url . '/'
-            . $feature->gene->primary_id
-            . "/feature/"
-            . $feature->primary_id,
-        -type => 'tab',
+        caption => $caption,
+        url     => $self->context->url_to(
+            $base_url, $self->gene->dbxref->accession,
+            'feature', $primary_id
+        ),
+        type => 'tab',
     );
     return $link;
 }
@@ -360,8 +399,8 @@ sub available_sequences {
     my ($self)  = @_;
     my $feature = $self->source_feature;
     my $type    = $feature->type;
-    my $sequences =
-        $type =~ m{mRNA}i
+    my $sequences
+        = $type =~ m{mRNA}i
         ? [ 'Protein', 'DNA coding sequence', 'Genomic DNA' ]
         : $type =~ m{Pseudo}i ? [ 'Pseudogene',         'Genomic' ]
         : $type =~ m{RNA}i    ? [ 'Spliced transcript', 'Genomic' ]
@@ -397,8 +436,9 @@ sub small_gbrowse_image {
     my $type    = $feature->type;
     my $source  = $feature->source;
 
-    my $track =
-        $type eq "mRNA" && $source eq "geneID reprediction" ? "Repredictions"
+    my $track
+        = $type eq "mRNA"
+        && $source eq "geneID reprediction" ? "Repredictions"
         : $type =~ m{[mRNA|pseudogene]}ix
         && $source eq "$ENV{'SITE_NAME'} Curator" ? $ENV{'SITE_NAME'}
         : $type eq "mRNA" && $source =~ m{JGI}ix ? "JGImodel"
@@ -408,8 +448,8 @@ sub small_gbrowse_image {
 
     my $name    = $self->gbrowse_window($feature);
     my $species = $feature->organism->species;
-    my $image =
-        "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=250&type=${track}&keystyle=none&abs=1";
+    my $image
+        = "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=250&type=${track}&keystyle=none&abs=1";
 
     my $link    = "/db/cgi-bin/ggb/gbrowse/$species?name=${name}";
     my $gbrowse = $self->json->link(
@@ -435,44 +475,41 @@ sub coordinate_table {
 
     my $table = Genome::Tabview::Config::Panel::Item::JSON::Table->new();
     $table->add_column(
-        -key      => 'name',
-        -label    => 'Exon',
-        -sortable => 'true'
+        key      => 'name',
+        label    => 'Exon',
+        sortable => 'true'
     );
     $table->add_column(
-        -key      => 'local',
-        -label    => 'Local coords.',
-        -sortable => 'true'
+        key      => 'local',
+        label    => 'Local coords.',
+        sortable => 'true'
     );
     $table->add_column(
-        -key      => 'chrom',
-        -label    => 'Chrom. coords.',
-        -sortable => 'true'
+        key      => 'chrom',
+        label    => 'Chrom. coords.',
+        sortable => 'true'
     );
-    my $bioperl = $feature->bioperl;
-    my @feature_parts =
-        $feature->type =~ m{mRNA}i
-        ? ( $bioperl->exons )
-        : ( $bioperl->get_SeqFeatures() );
 
-    @feature_parts = sort {
-              $feature->strand eq '1'
-            ? $a->start <=> $b->start
-            : $b->start <=> $a->start
-    } @feature_parts;
-    my $exoncount = 0;
-    foreach my $part (@feature_parts) {
-        my $label = ++$exoncount;
+    my $floc   = $feature->featureloc_features->first;
+    my $strand = $floc->strand eq '1';
+    my $start  = $floc->fmin + 1;
+    my $end    = $floc->fmax;
+    my $offset = $strand == 1 ? $start : $end;
 
-        my $start = $feature->strand eq "1" ? $part->start() : $part->end();
-        my $end   = $feature->strand eq "1" ? $part->end()   : $part->start();
-        my $offset =
-            $feature->strand eq "1" ? $feature->start() : $feature->end();
+    my @exon_parts
+        = $strand == 1
+        ? sort { $a->fmin <=> $b->fmin } $self->_exon_featureloc
+        : sort { $b->fmin <=> $a->fmin } $self->_exon_featureloc;
+
+    my $exoncount = 1;
+    foreach my $part (@exon_parts) {
+        my $start = $strand == 1 ? $part->fmin + 1 : $part->fmax;
+        my $end   = $strand == 1 ? $part->fmax     : $part->fmin + 1;
         my $rel_start = abs( $offset - $start ) + 1;
         my $rel_end   = abs( $offset - $end ) + 1;
 
         my $data = {
-            name  => [ $self->json->text($label) ],
+            name  => [ $self->json->text($exoncount++) ],
             local => [ $self->json->text( $rel_start . ' - ' . $rel_end ) ],
             chrom => [ $self->json->text( $start . ' - ' . $end ) ],
         };
@@ -495,22 +532,6 @@ sub derived_from {
     my $feature = $self->source_feature;
     return if !@{ $feature->derived_from() };
     return $self->json->text( join( ", ", @{ $feature->derived_from() } ) );
-}
-
-=head2 supported_by
-
- Title    : supported_by
- Function : returns json formatted supported_by data for the feature
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub supported_by {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !@{ $feature->supported_by() };
-    return $self->json->text( join( ", ", @{ $feature->supported_by() } ) );
 }
 
 1;
