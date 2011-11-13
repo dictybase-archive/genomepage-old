@@ -254,15 +254,12 @@ has '_record_stack' => (
 
 sub structure {
     my ($self) = @_;
-    my $structure = {
-        type        => $self->type,
-        columns     => $self->columns,
-        records     => $self->records,
-        table_class => $self->class,
-    };
-    $structure->{id}        = $self->id        if $self->id;
-    $structure->{filter}    = $self->filter    if $self->filter;
-    $structure->{paginator} = $self->paginator if $self->paginator;
+    my $structure;
+    $structure->{$_} = $self->$_
+        for qw/type columns records records table_class/;
+	for my $param(qw/id filter paginator/) {
+		$structure->{$param} = $self->$param if $self->$param;
+	}
     return $structure;
 }
 
