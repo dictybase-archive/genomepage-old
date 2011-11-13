@@ -200,13 +200,25 @@ sub genbank_link {
  
 =cut
 
-sub protein {
-    my ($self) = @_;
-    return
-        if $self->source_feature->type !~ m{mRNA|databank_entry|cDNA_clone};
-    return Genome::Tabview::JSON::Feature::Protein->new(
-        -primary_id => $self->source_feature->primary_id );
-}
+has 'protein' => (
+    is      => 'rw',
+    isa     => 'Genome::Tabview::JSON::Feature::Protein',
+    lazy    => 1,
+    default => sub {
+        my $feat            = $self->source_feature;
+        my $polypeptide_row = $feat->search_related(
+            'feature_relationship_objects',
+            { 'type_of' => 'derived_from' },
+            { join      => 'type' }
+            )->search_related(
+            'subject',
+            { 'type_2.name' => 'polypeptide' },
+            { join          => 'type', 'rows' => 1 }
+            )->single;
+        return Genome::Tabview::JSON::Feature::Protein->new(
+            source_feature => $polypeptide_row );
+    }
+);
 
 =head2 transcript
 
@@ -509,7 +521,7 @@ sub coordinate_table {
         my $rel_end   = abs( $offset - $end ) + 1;
 
         my $data = {
-            name  => [ $self->json->text($exoncount++) ],
+            name  => [ $self->json->text( $exoncount++ ) ],
             local => [ $self->json->text( $rel_start . ' - ' . $rel_end ) ],
             chrom => [ $self->json->text( $start . ' - ' . $end ) ],
         };
