@@ -90,43 +90,14 @@ SUCH DAMAGES.
 package Genome::Tabview::Config::Panel::Item::JSON::Table;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Moose;
+use MooseX::Params::Validate;
 
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Config::Panel::Item::JSON::Table> object. 
- Usage    : my $json_section = Genome::Tabview::Config::Panel::Item::JSON::Table->new( 
-                -id         => '123_table',
-                -paginator  => 'true',
-                -filter     => 'true' 
-            );
- Returns  : Genome::Tabview::Config::Panel::Item::JSON::Table object.
- Args     : -id         :   optional, defines inner id for the table, generally used if 
-                            table has to be tied to the different element function
-            -paginator  :   optional, if set to be true, table will be displayed with paging
-            -filter     :   optional, if set to be true, table will be displayed with filter
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-    $self->{root} = Bio::Root::Root->new();
-
-    my $arglist = [qw/ID PAGINATOR FILTER/];
-    my ( $id, $paginator, $filter ) =
-        $self->{root}->_rearrange( $arglist, @args );
-
-    $self->id($id)               if $id;
-    $self->filter($filter)       if $filter;
-    $self->paginator($paginator) if $paginator;
-
-    $self->type('table');
-    return $self;
-}
+has [qw/id paginator filter class/] => (
+    is  => 'rw',
+    isa => 'Str'
+);
 
 =head2 class
 
@@ -138,12 +109,6 @@ sub new {
  
 =cut
 
-sub class {
-    my ( $self, $arg ) = @_;
-    $self->{class} = $arg if defined $arg;
-    return $self->{class};
-}
-
 =head2 type
 
  Title    : type
@@ -153,12 +118,6 @@ sub class {
  Args     : string
  
 =cut
-
-sub type {
-    my ( $self, $arg ) = @_;
-    $self->{type} = $arg if defined $arg;
-    return $self->{type};
-}
 
 =head2 id
 
@@ -170,12 +129,6 @@ sub type {
  
 =cut
 
-sub id {
-    my ( $self, $arg ) = @_;
-    $self->{id} = $arg if defined $arg;
-    return $self->{id};
-}
-
 =head2 filter
 
  Title    : filter
@@ -185,12 +138,6 @@ sub id {
  Args     : string
  
 =cut
-
-sub filter {
-    my ( $self, $arg ) = @_;
-    $self->{filter} = $arg if defined $arg;
-    return $self->{filter};
-}
 
 =head2 paginator
 
@@ -202,12 +149,6 @@ sub filter {
  
 =cut
 
-sub paginator {
-    my ( $self, $arg ) = @_;
-    $self->{paginator} = $arg if defined $arg;
-    return $self->{paginator};
-}
-
 =head2 columns
 
  Title    : columns
@@ -218,10 +159,54 @@ sub paginator {
  
 =cut
 
-sub columns {
-    my ( $self, $arg ) = @_;
-    $self->{columns} = $arg if defined $arg;
-    return $self->{columns};
+has '_column_stack' => (
+    is      => 'rw',
+    isa     => 'ArrayRef',
+    traits  => [qw/Array/],
+    lazy    => 1,
+    default => sub { [] },
+    handles => {
+        'add_to_column' => 'push',
+        'columns'       => 'elements'
+    }
+);
+
+=head2 add_column
+
+ Title    : add_column
+ Function : adds column for the table 
+ Usage    : $table->add_column(key => 'name', label => ' ', sortable => 'true');
+ Returns  : nothing
+ Args     : key        : column key
+            label      : column label to be displayed
+            sortable   : whether column should be sortable
+=cut
+
+sub add_column {
+    my $self = shift;
+    my ( $key, $label, $sortable, $width, $formatter, $group, $hidden )
+        = validated_list(
+        \@_,
+        key      => { isa => 'Str' },
+        label    => { isa => 'Str', optional => 1 },
+        sortable => { isa => 'Str', optional => 1, default => 'false' },
+        width     => { isa => 'Str', optional => 1 },
+        formatter => { isa => 'Str', optional => 1 },
+        group     => { isa => 'Str', optional => 1 },
+        hidden    => { isa => 'Str', optional => 1 }
+        );
+
+    $label = $key if !$label;
+    my $column = {
+        key      => $key,
+        label    => $label,
+        sortable => $sortable
+    };
+    $column->{width}     = $width     if $width;
+    $column->{formatter} = $formatter if $formatter;
+    $column->{group}     = $group     if $group;
+    $column->{hidden}    = $hidden    if $hidden;
+    $self->add_to_column($column);
 }
 
 =head2 records
@@ -234,46 +219,17 @@ sub columns {
  
 =cut
 
-sub records {
-    my ( $self, $arg ) = @_;
-    $self->{records} = $arg if defined $arg;
-    return $self->{records};
-}
-
-=head2 add_column
-
- Title    : add_column
- Function : adds column for the table 
- Usage    : $table->add_column( -key => 'name', -label => ' ', -sortable => 'true');
- Returns  : nothing
- Args     : -key        : column key
-            -label      : column label to be displayed
-            -sortable   : whether column should be sortable
-=cut
-
-sub add_column {
-    my ( $self, @args ) = @_;
-
-    my $arglist = [qw/KEY LABEL SORTABLE WIDTH FORMATTER GROUP HIDDEN/];
-    my ( $key, $label, $sortable, $width, $formatter, $group, $hidden ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('key is not provided') if !$key;
-    $label    = $key    if !$label;
-    $sortable = 'false' if !$sortable;
-
-    my $column = {
-        key      => $key,
-        label    => $label,
-        sortable => $sortable
-    };
-    $column->{width}     = $width     if $width;
-    $column->{formatter} = $formatter if $formatter;
-    $column->{group}     = $group     if $group;
-    $column->{hidden}    = $hidden    if $hidden;
-
-    push @{ $self->{columns} }, $column;
-    return;
-}
+has '_record_stack' => (
+    is      => 'rw',
+    isa     => 'ArrayRef',
+    traits  => [qw/Array/],
+    lazy    => 1,
+    default => sub { [] },
+    handles => {
+        'add_record' => 'push',
+        'records'    => 'elements'
+    }
+);
 
 =head2 add_record
 
@@ -286,12 +242,6 @@ sub add_column {
  
 =cut
 
-sub add_record {
-    my ( $self, $arg ) = @_;
-    push @{ $self->{records} }, $arg;
-    return;
-}
-
 =head2 structure
 
  Title    : structure
@@ -303,7 +253,7 @@ sub add_record {
 =cut
 
 sub structure {
-    my ( $self, $arg ) = @_;
+    my ($self) = @_;
     my $structure = {
         type        => $self->type,
         columns     => $self->columns,
@@ -327,7 +277,7 @@ sub structure {
 =cut
 
 sub to_json {
-    my ( $self, $arg ) = @_;
+    my ($self) = @_;
     my $structure = $self->structure();
     return $structure;
 }
