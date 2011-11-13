@@ -79,43 +79,10 @@ SUCH DAMAGES.
 package Genome::Tabview::JSON::Feature::Protein;
 
 use strict;
-use Bio::Root::Root;
-use Genome::Tabview::JSON::Feature;
-use base qw( Genome::Tabview::JSON::Feature);
-
-my $config;
-
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::JSON::Feature::Protein> object. 
- Usage    : my $page = Genome::Tabview::JSON::Feature::Protein->new();
- Returns  : Genome::Tabview::JSON::Feature::Protein object with default configuration.     
- Args     : -primary_id   - protein primary id.
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID/];
-    $self->{root} = Bio::Root::Root->new();
-    my ( $primary_id, $section ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-#    $self->{root}->throw($primary_id.'had been provided to protein tab');
-#    $self->{root}->throw('primary_id should belong to protein, not gene')
-#        if $primary_id =~ m{DDB_G}i;
-    my $feature = dicty::Feature->new( -primary_id => $primary_id );
-    return if !$feature->protein_info;
-
-    $self->source_feature($feature);
-    return $self;
-}
+use namespace::autoclean;
+use Carp;
+use Moose;
+extends 'Genome::Tabview::JSON::Feature';
 
 =head2 length
 
@@ -126,13 +93,16 @@ sub new {
  
 =cut
 
-sub length {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    my $length =
-        dicty::MiscUtility::commify( $feature->protein_info->protein_length );
-    return $self->json->text( $length . ' aa' );
-}
+has 'length' => (
+    is   => 'ro',
+    isa  => 'Str',
+    lazy => 1,
+    sub {
+        my ($self) = @_;
+        my $length = $self->source_feature->seqlen;
+        return $self->json->text( $length . ' aa' );
+    }
+);
 
 =head2 description
 
@@ -162,12 +132,13 @@ sub molecular_weight {
 =cut
 
 sub protein_tab_link {
-    my ($self, $base_url)  = @_;
+    my ( $self, $base_url ) = @_;
     my $feature = $self->source_feature;
     $base_url ||= '';
-    my $link    = $self->json->link(
+    my $link = $self->json->link(
         -caption => 'Protein sequence, domains and much more...',
-        -url     => $base_url.'/'.$feature->gene->primary_id
+        -url     => $base_url . '/'
+            . $feature->gene->primary_id
             . "/protein/"
             . $feature->primary_id,
         -type => 'tab',
@@ -344,8 +315,8 @@ sub domains_image {
     my $feature = $self->source_feature;
     my $name    = $feature->polypeptide->primary_id;
     my $species = $feature->organism->species;
-    my $embed =
-        "/db/cgi-bin/ggb/gbrowse_img/$species\_protein?name=$name&width=575&keystyle=left&abs=1&grid=0&embed=1";
+    my $embed
+        = "/db/cgi-bin/ggb/gbrowse_img/$species\_protein?name=$name&width=575&keystyle=left&abs=1&grid=0&embed=1";
 
     my $domains_gbrowse = $self->json->link(
         -url  => $embed,
@@ -369,8 +340,9 @@ sub domains_table_link {
 
     my $domains_table = $self->json->link(
         -caption => 'Table view',
-        -url =>
-            '/db/cgi-bin/' . $config->value('SITE_NAME') . '/service/polypeptide_domains.pl?ref='
+        -url     => '/db/cgi-bin/'
+            . $config->value('SITE_NAME')
+            . '/service/polypeptide_domains.pl?ref='
             . $feature->polypeptide->primary_id,
         -type => 'outer',
     );
@@ -435,9 +407,9 @@ sub external_links {
 =cut
 
 sub primary_id {
-    my ($self)  = @_;
+    my ($self) = @_;
     my $feature = $self->source_feature();
-    return $self->json->text($feature->primary_id);
+    return $self->json->text( $feature->primary_id );
 }
 
 1;
