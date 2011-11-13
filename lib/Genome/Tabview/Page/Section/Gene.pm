@@ -94,16 +94,17 @@ use Genome::Tabview::Config::Panel::Item::Tab;
 extends 'Genome::Tabview::Page::Section';
 
 has '+gene' => (
-	lazy => 1, 
-	default => sub {
-		my ($self) = @_;
-		my $row = $self->model->resultset('Sequence::Feature')->search({
-			'dbxref.accession' => $self->primary_id
-		},  { rows => 1,  join => 'dbxref'})->single;
-		return $row;
-	}
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $row
+            = $self->model->resultset('Sequence::Feature')
+            ->search( { 'dbxref.accession' => $self->primary_id },
+            { rows => 1, join => 'dbxref' } )->single;
+        return Genome::Tabview::JSON::Feature::Gene->new(
+            source_feature => $row );
+    }
 );
-	
 
 =head2 init
 
@@ -123,13 +124,8 @@ sub init {
         genomic_info => sub { $self->genomic_info(@_) },
         product      => sub { $self->product(@_) },
         sequences    => sub { $self->sequences(@_) },
-        promoters    => sub { $self->promoters(@_) },
-        go           => sub { $self->go(@_) },
         links        => sub { $self->links(@_) },
         references   => sub { $self->references(@_) },
-        summary      => sub { $self->summary(@_) },
-        expression   => sub { $self->expression(@_) },
-        phenotypes   => sub { $self->phenotypes(@_) },
     };
     my $config = $settings->{$section}->();
     $self->config($config);
@@ -150,67 +146,20 @@ sub info {
     my ($self) = @_;
     my $gene = $self->gene;
 
-    my @primary_features = @{ $gene->source_feature->primary_features() };
-    return $self->reserved_gene_info() if !@primary_features;
-
     # the coordinates section contains the notes directly under
     # gbrowse.  Since many features do not contain a gbrowse image
     # we display the notes here, in the general_information section
 
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
-    my ($primary_feature) = @{ $gene->source_feature->primary_features() };
-    my $note = $gene->public_notes()
-        if ( $primary_feature->type !~ m{RNA|pseudogene}ix );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
     ## -- collect section rows
     my @rows;
     push @rows, $self->row( 'Gene Name',        $gene->name );
-    push @rows, $self->row( 'Name Description', $gene->name_description )
-        if $gene->name_description;
-    push @rows, $self->row( 'Alternative Gene Names', $gene->synonyms )
-        if $gene->synonyms;
     push @rows, $self->row( 'Gene ID',      $gene->primary_id );
     push @rows, $self->row( 'Gene Product', $gene->gene_products )
         if $gene->gene_products;
-    push @rows,
-        $self->row( 'Alternative Protein Names', $gene->protein_synonyms )
-        if $gene->protein_synonyms;
-    push @rows, $self->row( 'Description', $gene->description )
-        if $gene->description;
-
     push @rows, $self->row( 'Community Annotations', $gene->wiki_links );
-    push @rows, $self->row( 'Alert', $gene->alert ) if $gene->alert;
-    push @rows, $self->row( 'Notes', $note ) if $note;
-
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
-}
-
-=head2 reserved_gene_info
-
- Title    : reserved_gene_info
- Function : returns general information section data for reserved genes
- Usage    : $json = $section->reserved_gene_info();
- Returns  : array reference
- Args     : none
- 
-=cut
-
-sub reserved_gene_info {
-    my ($self) = @_;
-    my $gene = $self->gene;
-
-    my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
-    ## -- collect section rows
-    my @rows;
-    push @rows, $self->row( 'Gene Name', $gene->name );
-    push @rows, $self->row( 'Notes',     $gene->public_notes )
-        if $gene->public_notes;
     $panel->items( \@rows );
     $config->add_panel($panel);
     return $config;
@@ -231,7 +180,7 @@ sub genomic_info {
     my $gene = $self->gene;
 
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
     my $gbrowse_link = $gene->gbrowse_link;
     my $gbrowse_text = $self->json->text(
@@ -242,15 +191,12 @@ sub genomic_info {
     my @rows;
     push @rows, $self->row( 'Location',    $gene->location );
     push @rows, $self->row( 'Genomic Map', \@gbrowse );
-    push @rows, $self->row( 'Notes',       $gene->public_notes )
-        if $gene->public_notes;
-
     $panel->items( \@rows );
     $config->add_panel($panel);
     return $config;
 }
 
-=head2 gene_product
+=head2 product
 
  Title    : gene_product
  Function : returns gene product section data
@@ -263,14 +209,12 @@ sub genomic_info {
 sub product {
     my ($self)   = @_;
     my $gene     = $self->gene;
-    my $features = $gene->primary_features;
     my $config   = Genome::Tabview::Config->new();
 
     my @panels;
     my @primary_ids;
-    foreach my $feature ( @{ $gene->primary_features } ) {
-        my $panel =
-            Genome::Tabview::Config::Panel->new( -layout => 'row' );
+    foreach my $feature ( $gene->transcripts } ) {
+        my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
         my @rows = @{ $self->product_coordinates($feature) };
         $panel->items( \@rows );
         push @panels,      $panel;
@@ -279,17 +223,17 @@ sub product {
     return $config->add_panel( $panels[0] ) if scalar @panels == 1;
 
     my $tab_panel = Genome::Tabview::Config::Panel->new(
-        -layout => 'tabview',
-        -type   => 'isoform-tab'
+        layout => 'tabview',
+        type   => 'isoform-tab'
     );
     my @alphabet = ( 'A' .. 'Z' );
     my $i        = 0;
     foreach my $panel (@panels) {
         my $item = Genome::Tabview::Config::Panel::Item::Tab->new(
-            -key     => 'product_isoform',
-            -label   => 'Splice Variant ' . $alphabet[$i],
-            -content => [$panel],
-            -href    => $gene->source_feature->primary_id
+            key     => 'product_isoform',
+            label   => 'Splice Variant ' . $alphabet[$i],
+            content => [$panel],
+            href    => $gene->source_feature->primary_id
                 . '/sequence/'
                 . $primary_ids[$i],
         );
@@ -314,13 +258,12 @@ sub product_coordinates {
     my @rows;
 
     ## -- a bit complicated panel with four columns, two of each have rowspan = 5
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'column' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'column' );
     my $column_item = 'Genome::Tabview::Config::Panel::Item::Column';
     my $row_item    = 'Genome::Tabview::Config::Panel::Item::Row';
 
     my @feature_data = (
-        $feature->feature_tab_link( -base_url => $self->base_url ),
-        $feature->curation_status, $feature->evidence_support
+        $feature->feature_tab_link( base_url => $self->base_url ),
     );
 
     my @columns;
@@ -328,23 +271,23 @@ sub product_coordinates {
     if ( !$feature->pseudogene ) {
         push @columns,
             $column_item->new(
-            -type    => 'content_table_second_title',
-            -rowspan => 5,
-            -content => [ $self->json_panel('Genomic Coordinates') ],
+            type    => 'content_table_second_title',
+            rowspan => 5,
+            content => [ $self->json_panel('Genomic Coordinates') ],
             );
         push @columns,
             $column_item->new(
-            -rowspan => 5,
-            -content => [ $self->json_panel( $feature->coordinate_table ) ],
+            rowspan => 5,
+            content => [ $self->json_panel( $feature->coordinate_table ) ],
             );
     }
     $panel->items( \@columns );
-    my $row = $row_item->new( -content => [$panel] );
+    my $row = $row_item->new(content => [$panel] );
 
     push @rows, $row;
 
-    my $length_row =
-          $feature->protein
+    my $length_row
+        = $feature->protein
         ? $self->row( 'Protein Length', $feature->protein->length )
         : $feature->transcript ? $self->row( 'Transcript Sequence Length',
         $feature->transcript_length )
@@ -577,9 +520,9 @@ sub phenotypes {
     if ( $gene->additional_strains ) {
         my @additional_links;
         foreach my $genotype ( @{ $gene->additional_strains } ) {
-            my $divider =
-                ( scalar @additional_links ) / 2 <
-                scalar @{ $gene->additional_strains } - 1
+            my $divider
+                = ( scalar @additional_links ) / 2
+                < scalar @{ $gene->additional_strains } - 1
                 ? '&nbsp;|&nbsp;'
                 : undef;
 
@@ -595,8 +538,8 @@ sub phenotypes {
         my $url = "/db/cgi-bin/$ENV{'SITE_NAME'}/SC/plasmid_details.pl?id=";
         my @links;
         foreach my $plasmid ( @{ $gene->plasmids } ) {
-            my $divider =
-                ( scalar @links ) / 2 < scalar @{ $gene->plasmids } - 1
+            my $divider
+                = ( scalar @links ) / 2 < scalar @{ $gene->plasmids } - 1
                 ? '&nbsp;|&nbsp;'
                 : undef;
 

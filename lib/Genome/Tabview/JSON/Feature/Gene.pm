@@ -80,9 +80,7 @@ package Genome::Tabview::JSON::Feature::Gene;
 use strict;
 use namespace::autoclean;
 use Moose;
-use Genome::Tabview::JSON::Genotype;
 use Genome::Tabview::JSON::Feature::Generic;
-use Genome::Tabview::JSON::GO;
 extends 'Genome::Tabview::JSON::Feature';
 
 =head2 wiki_links
@@ -194,46 +192,37 @@ sub gene_products {
  
 =cut
 
-sub features {
-    my ($self) = @_;
-    return $self->{features} if $self->{features};
-    my $features;
-    foreach my $feature ( @{ $self->source_feature->features } ) {
-        my $json_feature = Genome::Tabview::JSON::Feature::Generic->new(
-            -primary_id => $feature->primary_id );
-        $json_feature->context( $self->context ) if $self->context;
-        push @$features, $json_feature;
+has 'features' => (
+    is         => 'ro',
+    isa        => 'ArrayRef[DBIx::Class::Row]',
+    lazy       => 1,
+    auto_deref => 1,
+    default    => sub {
+        my ($self) = @_;
+        return $self->transcripts;
     }
-    $self->{features} = $features;
-    return $self->{features};
-}
+);
 
-=head2 primary_features
-
- Title    : primary_features
- Function : returns gene primary features
- Usage    : @features = @{$gene->primary_features()};
- Returns  : reference to an array of Genome::Tabview::JSON::Feature::Generic objects
- Args     : none
- 
-=cut
-
-sub primary_features {
-    my ($self) = @_;
-    return $self->{primary_features} if $self->{primary_features};
-
-    return if !@{ $self->source_feature->primary_features };
-
-    my $features;
-    foreach my $feature ( @{ $self->source_feature->primary_features } ) {
-        my $json_feature = Genome::Tabview::JSON::Feature::Generic->new(
-            -primary_id => $feature->primary_id );
-        $json_feature->context( $self->context ) if $self->context;
-        push @$features, $json_feature;
+has 'transcripts' => (
+    is         => 'ro',
+    isa        => 'ArrayRef[Genome::Tabview::JSON::Feature]',
+    lazy       => 1,
+    auto_deref => 1,
+    default    => sub {
+        my ($self) = @_;
+        my @rows = $self->source_feature->search_related(
+            'feature_relation_objects',
+            { 'type.name' => 'part_of' },
+            { join        => 'type' }
+        )->search_related( 'subject', {} )->all;
+        return [
+            map {
+                Genome::Tabview::JSON::Feature::Generic->new(
+                    source_feature => $_ )
+                } @rows
+        ];
     }
-    $self->{primary_features} = $features;
-    return $self->{primary_features};
-}
+);
 
 =head2 ests
 
@@ -303,9 +292,8 @@ sub external_links {
     ## -- get  transcript
     my $trans_rs = $gene->search_related(
         'feature_relationship_objects',
-        {   'type.name' => 'part_of',
-        },
-        { join => [ { 'type' => 'cv' } ] }
+        { 'type.name' => 'part_of', },
+        { join        => [ { 'type' => 'cv' } ] }
         )->search_related( 'subject',        {} )
         ->search_related( 'feature_dbxrefs', {} )
         ->search_related( 'dbxref', {}, { prefetch => 'db' } );
@@ -385,206 +373,6 @@ sub orthologs {
 
 1;
 
-=head2 genbank_fragment
-
- Title    : genbank_fragment
- Function : returns json genbank genomic fragment links for a gene 
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub genbank_fragments {
-#    my ($self) = @_;
-#    my $gene = $self->source_feature;
-#    my $features;
-#
-#    return $self->{genbank_fragments} if $self->{genbank_fragments};
-#
-#    my @genbank = grep { $_->source() =~ m{GenBank}ix } @{ $gene->features };
-#    my @genbank_cdna = grep { $_->type() =~ m{databank}ix } @genbank;
-#
-#    return if !@genbank_cdna;
-#    foreach my $feature (@genbank_cdna) {
-#        my $json_feature = Genome::Tabview::JSON::Feature::Generic->new(
-#            -primary_id => $feature->primary_id );
-#        $json_feature->context( $self->context ) if $self->context;
-#        push @$features, $json_feature;
-#    }
-#    $self->{genbank_fragments} = $features;
-#    return $self->{genbank_fragments};
-#}
-#
-
-=head2 genbank_mrna
-
- Title    : genbank_mrna
- Function : returns json genbank mrna links for a gene 
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub genbank_mrnas {
-#    my ($self) = @_;
-#    my $gene = $self->source_feature;
-#    my $features;
-#
-#    return $self->{genbank_mrnas} if $self->{genbank_mrnas};
-#
-#    my @genbank = grep { $_->source() =~ m{GenBank}ix } @{ $gene->features };
-#    my @genbank_mrna = grep { $_->type() =~ m{cdna}ix } @genbank;
-#
-#    return if !@genbank_mrna;
-#    foreach my $feature (@genbank_mrna) {
-#        my $json_feature = Genome::Tabview::JSON::Feature::Generic->new(
-#            -primary_id => $feature->primary_id );
-#        $json_feature->context( $self->context ) if $self->context;
-#        push @$features, $json_feature;
-#    }
-#    $self->{genbank_mrnas} = $features;
-#    return $self->{genbank_mrnas};
-#}
-#
-
-=head2 promoters
-
- Title    : promoters
- Function : returns json formatted gene promoter links
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub promoters {
-#    my ($self) = @_;
-#    my $gene = $self->source_feature;
-#    my @links;
-#    foreach my $promoter ( @{ $gene->promoters() } ) {
-#        my $link = $self->json->link(
-#            -caption => $promoter->primary_id,
-#            -url     => $promoter->details_url,
-#            -type    => 'outer',
-#        );
-#        push @links, $link;
-#    }
-#    return \@links;
-#}
-
-=head2 function_annotations
-
- Title    : function_annotations
- Function : returns json formatted gene function annotation links
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub function_annotations {
-#    my ($self) = @_;
-#    return $self->get_GO_annotations( $self->go->function_annotations )
-#        || ' ';
-#}
-
-=head2 process_annotations
-
- Title    : process_annotations
- Function : returns json formatted gene process annotation links 
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub process_annotations {
-#    my ($self) = @_;
-#    return $self->get_GO_annotations( $self->go->process_annotations )
-#        || ' ';
-#}
-
-=head2 component_annotations
-
- Title    : component_annotations
- Function : returns json formatted gene component annotation links 
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub component_annotations {
-#    my ($self) = @_;
-#    return $self->get_GO_annotations( $self->go->component_annotations )
-#        || ' ';
-#}
-
-=head2 get_GO_annotations
-
- Title    : get_GO_annotations
- Function : returns formatted GO annotations for a gene 
- Returns  : string
- Args     : dicty::Feature::GENE object
-
-=cut
-
-#sub get_GO_annotations {
-#    my ( $self, $ann ) = @_;
-#    return if !$ann->count;
-#
-#    my $json = $self->json;
-#    my @links;
-#    while ( my $annotation = $ann->next ) {
-#        my $link = $self->go->annotation_link($annotation);
-#        my $divider
-#            = ( scalar @links ) / 2 < scalar $ann->count - 1 ? ',' : '';
-#        push @links,
-#            (
-#            @$link,
-#            $json->text(
-#                '&nbsp;('
-#                    . $self->go->evidence_code(
-#                    $self->go->get_evidence($annotation)
-#                    )
-#                    . ')'
-#                    . $divider
-#                    . '&nbsp;&nbsp;'
-#            ),
-#            );
-#    }
-#    return \@links;
-#}
-
-=head2 pathways
-
- Title    : pathways
- Function : returns json formatted gene pathway links 
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub pathways {
-#    my ($self)   = @_;
-#    my $gene     = $self->source_feature;
-#    my @pathways = @{ $gene->pathways };
-#
-#    return if !@pathways;
-#
-#    my @pathway_links;
-#    foreach my $pathway (@pathways) {
-#        my $divider = scalar @pathway_links < scalar @pathways - 1 ? ',' : '';
-#        my $pathway_name = $pathway->pathway_name;
-#        my $common_name  = $pathway->common_name . $divider;
-#        my $link         = $self->json->link(
-#            -caption => $common_name,
-#            -url =>
-#                "/pathways/DICTY/new-image?type=PATHWAY&object=$pathway_name&detail-level=2",
-#            -type => 'outer',
-#        );
-#        push @pathway_links, $link;
-#    }
-#    return if !@pathway_links;
-#    return \@pathway_links;
-#}
-
 =head2 expression
 
  Title    : expression
@@ -646,300 +434,5 @@ sub orthologs {
 #    }
 #    return if !@expression_links;
 #    return \@expression_links;
-#}
-
-=head2 researchers
-
- Title    : expression
- Function : returns json formatted gene researchers links
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub researchers {
-#    my ($self) = @_;
-#    my $gene = $self->source_feature;
-#    return if !@{ $gene->colleagues() };
-#
-#    my $link = $self->json->link(
-#        -caption => $gene->name . " Researchers",
-#        -url     => "/db/cgi-bin/"
-#            . $config->value('SITE_NAME')
-#            . "/colleague/colleagueSearch?locus="
-#            . $gene->feature_id,
-#        -type => 'outer',
-#    );
-#    return $link;
-#}
-
-=head2 summary
-
- Title    : summary
- Function : returns gene summary
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub summary {
-#    my ($self) = @_;
-#    return $self->{summary} if $self->{summary};
-#    my $gene      = $self->source_feature;
-#    my $paragraph = $gene->paragraph();
-#    my $xsl       = $config->value('WEB_DB_ROOT') . "/xsl/paragraph.xsl";
-#
-#    $self->{summary} = $paragraph->transform($xsl);
-#    return $self->{summary};
-#}
-
-=head2 curator_notes
-
- Title    : curator_notes
- Function : returns json formatted gene curator notes 
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub curator_notes {
-#    my ($self) = @_;
-#    my $summary = $self->summary;
-#    my $notes;
-#    if ( $summary =~ m{\[Curation\sStatus:\s.+\]}sx ) {
-#        $summary =~ m{(.+)\[Curation\sStatus:\s.+\]}sx;
-#        $notes = $1;
-#    }
-#    else {
-#        $notes = $summary;
-#    }
-#    my $check = $notes;
-#    $check =~ s{\s\n}{}gx;
-#
-#    return $self->json->format_url($notes) if $notes =~ m{\S+}x;
-#    return;
-#}
-
-=head2 curation_status
-
- Title    : curation_status
- Function : returns json formatted gene curation status
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub curation_status {
-#    my ($self) = @_;
-#    my $summary = $self->summary;
-#    if ( $summary =~ m{.+\[Curation\sStatus:\s(.+)\]}sx ) {
-#        my $status = $1;
-#
-#        return $self->json->text($status) if $status ne ' ';
-#    }
-#    return;
-#}
-
-=head2 genotypes
-
- Title    : genotypes
- Function : returns gene genotypes data
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub genotypes {
-#    my ($self) = @_;
-#    $self->_get_genotypes if !$self->{genotypes};
-#    return $self->{genotypes};
-#}
-
-=head2 additional_strains
-
- Title    : additional_strains
- Function : returns additional strains data for a gene 
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub additional_strains {
-#    my ($self) = @_;
-#    $self->_get_genotypes
-#        if !$self->{genotypes} && !$self->{additional_strains};
-#    return $self->{additional_strains};
-#}
-
-=head2 mutant_strains
-
- Title    : mutant_strains
- Function : returns mutant links data for a gene 
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub mutant_links {
-#    my ($self) = @_;
-#    my $gene   = $self->source_feature;
-#    my @urls   = $gene->get_insertional_mutants_urls();
-#    return if @urls == 0;
-#
-#    my @mutant_links;
-#    foreach my $array_ref (@urls) {
-#        my $title = @$array_ref[0];
-#        my $url   = @$array_ref[1];
-#        my $link  = $self->json->link(
-#            -caption => $title,
-#            -url     => $url,
-#            -type    => 'outer',
-#        );
-#        push @mutant_links, $link;
-#    }
-#    return \@mutant_links if @mutant_links;
-#}
-
-=head2 _get_genotypes
-
- Title    : _get_genotypes
- Function : gets gene genotypes data
- Returns  : string
- Args     : none
-
-=cut
-
-#sub _get_genotypes {
-#    my ($self) = @_;
-#    my $gene = $self->source_feature;
-#
-#    return if !$gene->genotype;
-#
-#    my @inviable_strains
-#        = dicty::Search::Genotype->search_inviable_by_feature_id(
-#        $gene->feature_id );
-#    my @null_strains = dicty::Search::Genotype->search_null_by_feature_id(
-#        $gene->feature_id );
-#    my @strains
-#        = dicty::Search::Genotype->search_not_null_not_inviable_by_feature_id(
-#        $gene->feature_id );
-#    my @genotypes;
-#    my @additional_strains;
-#
-#    foreach my $genotype ( @null_strains, @strains, @inviable_strains ) {
-#        my $json_genotype = Genome::Tabview::JSON::Genotype->new(
-#            -genotype_id => $genotype->genotype_id );
-#        $json_genotype->context( $self->context ) if $self->context;
-#
-#        my $count = dicty::Search::Genotype->count_experiments_by_id(
-#            $genotype->genotype_id );
-#        if ( $count > 0 ) {
-#            push @genotypes, $json_genotype;
-#        }
-#        else {
-#            push @additional_strains, $json_genotype;
-#        }
-#    }
-#    $self->{genotypes}          = \@genotypes;
-#    $self->{additional_strains} = \@additional_strains
-#        if @additional_strains;
-#    return $self;
-#}
-
-=head2 go
-
- Title    : go
- Function : returns gene go
- Usage    : my $go = $gene->go;
- Returns  : hash
- Args     : none
- 
-=cut
-
-#sub go {
-#    my ($self) = @_;
-#    my $primary_id = $self->source_feature->primary_id;
-#
-#    return $self->{go} if $self->{go};
-#
-#    $self->{go}
-#        = Genome::Tabview::JSON::GO->new( -primary_id => $primary_id );
-#    $self->{go}->context( $self->context ) if $self->context;
-#    return $self->{go};
-#}
-
-=head2 plasmids
-
- Title    : plasmids
- Usage    : $gene->plasmids();
- Function : returns array reference of plasmids for gene
- Returns  : array reference 
- Args     : none
-
-=cut
-
-#sub plasmids {
-#    my ($self) = @_;
-#    return $self->source_feature->plasmids;
-#}
-
-#sub topics_by_reference {
-#    my ( $self, $reference ) = @_;
-#    return $self->source_feature->topics_by_reference(
-#        $reference->source_reference );
-#}
-
-=head2 protein_synonyms
-
- Title    : features
- Function : returns json formatted gene protein synonyms
- Usage    : $protein_synonyms = $gene->protein_synonyms();
- Returns  : hash
- Args     : none
- 
-=cut
-
-#sub protein_synonyms {
-#    my ($self) = @_;
-#    return if !@{ $self->source_feature->protein_synonyms };
-#    my $synonyms = join( ", ", @{ $self->source_feature->protein_synonyms } );
-#    return $self->json->text($synonyms);
-#}
-
-=head2 synonyms
-
- Title    : features
- Function : returns json formatted gene synonyms
- Usage    : $synonyms = $gene->synonyms();
- Returns  : hash
- Args     : none
- 
-=cut
-
-#sub synonyms {
-#    my ($self) = @_;
-#
-#    return if !@{ $self->source_feature->synonyms };
-#    my $synonyms = '<i>'
-#        . join( ", ", @{ $self->source_feature->synonyms() } ) . '</i>';
-#    return $self->json->text($synonyms);
-#}
-
-=head2 name_description
-
- Title    : name_description
- Function : returns json formatted gene name description
- Usage    : $name_description = $gene->name_description();
- Returns  : hash
- Args     : none
- 
-=cut
-
-#sub name_description {
-#    my ($self) = @_;
-#
-#    my $gene = $self->source_feature;
-#    return if !$gene->name_description;
-#    return $self->json->text( $gene->name_description );
 #}
 
