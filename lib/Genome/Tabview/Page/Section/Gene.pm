@@ -155,7 +155,7 @@ sub info {
 
     ## -- collect section rows
     my @rows;
-    push @rows, $self->row( 'Gene Name',        $gene->name );
+    push @rows, $self->row( 'Gene Name',    $gene->name );
     push @rows, $self->row( 'Gene ID',      $gene->primary_id );
     push @rows, $self->row( 'Gene Product', $gene->gene_products )
         if $gene->gene_products;
@@ -207,40 +207,46 @@ sub genomic_info {
 =cut
 
 sub product {
-    my ($self)   = @_;
-    my $gene     = $self->gene;
-    my $config   = Genome::Tabview::Config->new();
+    my ($self) = @_;
+    my $gene   = $self->gene;
+    my $config = Genome::Tabview::Config->new();
 
     my @panels;
     my @primary_ids;
-    foreach my $feature ( $gene->transcripts } ) {
-        my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
-        my @rows = @{ $self->product_coordinates($feature) };
-        $panel->items( \@rows );
-        push @panels,      $panel;
-        push @primary_ids, $feature->source_feature->primary_id;
+    foreach my $feature (
+        $gene->transcripts;
+        ;
+        ;
     }
-    return $config->add_panel( $panels[0] ) if scalar @panels == 1;
+    )
+{
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
+    my @rows = @{ $self->product_coordinates($feature) };
+    $panel->items( \@rows );
+    push @panels,      $panel;
+    push @primary_ids, $feature->source_feature->primary_id;
+}
+return $config->add_panel( $panels[0] ) if scalar @panels == 1;
 
-    my $tab_panel = Genome::Tabview::Config::Panel->new(
-        layout => 'tabview',
-        type   => 'isoform-tab'
+my $tab_panel = Genome::Tabview::Config::Panel->new(
+    layout => 'tabview',
+    type   => 'isoform-tab'
+);
+my @alphabet = ( 'A' .. 'Z' );
+my $i        = 0;
+foreach my $panel (@panels) {
+    my $item = Genome::Tabview::Config::Panel::Item::Tab->new(
+        key     => 'product_isoform',
+        label   => 'Splice Variant ' . $alphabet[$i],
+        content => [$panel],
+        href    => $gene->source_feature->primary_id
+            . '/sequence/'
+            . $primary_ids[$i],
     );
-    my @alphabet = ( 'A' .. 'Z' );
-    my $i        = 0;
-    foreach my $panel (@panels) {
-        my $item = Genome::Tabview::Config::Panel::Item::Tab->new(
-            key     => 'product_isoform',
-            label   => 'Splice Variant ' . $alphabet[$i],
-            content => [$panel],
-            href    => $gene->source_feature->primary_id
-                . '/sequence/'
-                . $primary_ids[$i],
-        );
-        $tab_panel->add_item($item);
-        $i++;
-    }
-    return $config->add_panel($tab_panel);
+    $tab_panel->add_item($item);
+    $i++;
+}
+return $config->add_panel($tab_panel);
 }
 
 =head2 product_coordinates
@@ -262,9 +268,8 @@ sub product_coordinates {
     my $column_item = 'Genome::Tabview::Config::Panel::Item::Column';
     my $row_item    = 'Genome::Tabview::Config::Panel::Item::Row';
 
-    my @feature_data = (
-        $feature->feature_tab_link( base_url => $self->base_url ),
-    );
+    my @feature_data
+        = ( $feature->feature_tab_link( base_url => $self->base_url ), );
 
     my @columns;
     push @columns, @{ $self->columns( $feature->gene_type, \@feature_data ) };
@@ -282,7 +287,7 @@ sub product_coordinates {
             );
     }
     $panel->items( \@columns );
-    my $row = $row_item->new(content => [$panel] );
+    my $row = $row_item->new( content => [$panel] );
 
     push @rows, $row;
 
@@ -296,17 +301,20 @@ sub product_coordinates {
         : undef;
     push @rows, $length_row if $length_row;
 
-    push @rows,
-        $self->row( 'Protein Molecular Weight',
-        $feature->protein->molecular_weight )
-        if $feature->protein;
-    push @rows,
-        $self->row( 'More Protein Data',
-        $feature->protein->protein_tab_link( $self->base_url ) )
-        if $feature->protein;
+    if ( $feature->protein ) {
+        push @rows,
+            $self->row(
+            'Protein Molecular Weight',
+            $feature->protein->molecular_weight
+            ),
+            $self->row( 'More Protein Data',
+            $feature->protein->protein_tab_link( $self->base_url ) );
+    }
+
     push @rows,
         $self->row( 'Sequence',
         $feature->get_fasta_selection( -base_url => $self->base_url ) );
+
     return \@rows;
 }
 
