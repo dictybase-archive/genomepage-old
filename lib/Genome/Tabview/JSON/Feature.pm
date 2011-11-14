@@ -205,7 +205,7 @@ sub primary_id {
                       If not defined, 'outer' will be used as a default value;
 =cut
 
-sub external_link {
+sub make_external_link {
     my ( $self, $source, $id, $type ) = validated_list(
         \@_,
         source => { isa => 'Str' },
@@ -286,6 +286,36 @@ sub external_link {
     ) if $source eq 'JGI_DPUR';
 
 }
+
+=head2 external_links
+
+ Title    : external_links
+ Function : Returns json formatted external links array for the feature
+ Returns  : array  
+ Args     : none
+ 
+=cut
+
+sub external_links {
+    my ($self) = @_;
+    my $feature = $self->source_feature();
+    my $ext_hash;
+	for my $xref_row($feature->secondary_dbxrefs) {
+		next if $xref_row->db->name eq 'GFF_source';
+		push @{$ext->hash{$xref_row->db->name}}, $xref_row->accession;
+	}
+    return if scalar keys %$ext_hash == 0;
+
+    my $links;
+    foreach my $key ( keys %$ext_hash ) {
+        push @$links,  $self->make_external_link(
+            source => $key,
+            ids    => $ext_hash->{$key},
+        );
+    }
+    return $links if @$links;
+}
+
 
 =head2 description
 
