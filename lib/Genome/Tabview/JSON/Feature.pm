@@ -106,6 +106,18 @@ has 'json' => (
 
 has 'context' => ( is => 'rw', isa => 'Mojolicious::Controller' );
 
+has 'reference_feature' => (
+    is      => 'rw',
+    isa     => 'DBIx::Class::Row',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $rs = $self->source_feature->search_related( 'featureloc_features',
+            {} )->search_related( 'srcfeature', { prefetch => 'dbxref' } );
+        return $rs->first;
+    }
+);
+
 =head2 source_feature
 
  Title    : source_feature
@@ -322,7 +334,7 @@ sub gbrowse_window {
 
     my $flank_start = $start - $window_ext;
     my $flank_end   = $end + $window_ext;
-    my $chrom = $floc->srcfeature->name;
+    my $chrom       = $floc->srcfeature->name;
 
     my $name = "$chrom:$flank_start..$flank_end";
     return $name;
@@ -348,12 +360,12 @@ sub gbrowse_window {
 =cut
 
 has '_reference_stack' => (
-    is       => 'rw',
-    isa      => 'ArrayRef',
-    traits   => [qw/Array/],
-    lazy     => 1,
+    is      => 'rw',
+    isa     => 'ArrayRef',
+    traits  => [qw/Array/],
+    lazy    => 1,
     builder => '_build_references',
-    handles  => { 'references' => 'elements' }
+    handles => { 'references' => 'elements' }
 );
 
 sub _build_references {
@@ -362,7 +374,7 @@ sub _build_references {
         { order_by => { -desc => 'pyear' } } );
     return if !$pub_rs->count;
 
-	my $references;
+    my $references;
     while ( my $row = $pub_rs->next ) {
         my $json_reference = Genome::Tabview::JSON::Reference->new(
             pub_id => $row->uniquename );
