@@ -361,18 +361,20 @@ sub external_links {
 =cut
 
 sub get_fasta_selection {
-    my ( $self, @args ) = @_;
+    my  $self = shift;
+    my ( $caption, $base_url ) = validated_list(
+    	@_, 
+    	caption => { isa => 'Str',  optional => 1}, 
+    	base_url => { isa => 'Str',  optional => 1}
+    );
 
-    my $arglist = [qw/CAPTION BASE_URL/];
-    my ( $caption, $base_url ) = $self->{root}->_rearrange( $arglist, @args );
-
-    $base_url ||= '';
+    $base_url ||= $self->base_url;
     my $feature      = $self->source_feature;
     my $sequences    = $self->available_sequences;
     my $fasta_button = $self->json->link(
-        -caption => 'Get Fasta',
-        -type    => 'outer',
-        -url =>
+        caption => 'Get Fasta',
+        type    => 'outer',
+        url =>
             "/db/cgi-bin/$ENV{'SITE_NAME'}/yui/get_fasta.pl?decor=1&primary_id="
             . $feature->primary_id,
     );
