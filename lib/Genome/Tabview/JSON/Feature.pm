@@ -208,83 +208,16 @@ sub primary_id {
 sub make_external_link {
     my ( $self, $source, $id, $type ) = validated_list(
         \@_,
-        source => { isa => 'Str' },
+        source => { isa => 'DBIx::Class::Row' },
         id     => { isa => 'Str' },
         type   => { isa => 'Str', optional => 1, default => 'outer' }
     );
 
-    my $json = $self->json;
-    return $json->link(
-        url     => $self->link( 'Entrez Nucleotide Multiple Entries', $id ),
-        caption => 'Entrez Nucleotide',
+    return $self->json->link(
+        url     => $source->urlprefix.$id,
+        caption => $source->name,
         type    => $type
-    ) if $source eq 'GI Number';
-
-    return $json->link(
-        url     => $self->link( 'Entrez Protein Multiple Entries', $id ),
-        caption => 'Entrez Protein',
-        type    => $type,
-    ) if $source eq 'Protein GI Number';
-
-    return $json->link(
-        url     => $self->link( 'GenBank Protein', $id ),
-        caption => 'GenBank Protein',
-        type    => $type
-    ) if $source eq 'Protein Accession Number';
-
-    return $json->link(
-        url     => $self->link( 'ENA', $id ),
-        caption => 'ENA',
-        type    => $type,
-    ) if $source eq 'ENA';
-
-    return $json->link(
-        url     => $self->link( 'UniProt', $id ),
-        caption => "UniProtKB: $id",
-        type    => $type,
-        )
-        if ( $source eq 'UniProt'
-        or $source eq 'Swissprot'
-        or $source eq 'TrEMBL'
-        or $source eq 'UniProt' );
-
-    return $json->link(
-        url     => $self->link( 'EC Number', $id ),
-        caption => "EC: $id",
-        type    => $type,
-
-    ) if $source eq 'EC Number';
-
-    return $json->link(
-        url     => $self->link( 'RefSeq:Protein', $id ),
-        caption => 'RefSeq Protein',
-        type    => $type,
-    ) if $source eq 'refseq:protein';
-
-    return $json->link(
-        url     => $self->link( $source, $id ),
-        caption => 'Inparanoid',
-        type    => $type,
-    ) if $source eq 'Inparanoid v.7.0';
-
-    return $json->link(
-        url     => $self->link( 'dictyExpress', $id ),
-        caption => 'dictyExpress (microarray)',
-        type    => $type
-    ) if $source eq 'dictyExpress';
-
-    return $json->link(
-        url     => $self->link( 'dictyExpress RNAseq', $id ),
-        caption => 'dictyExpress (RNA-Seq)',
-        type    => $type
-    ) if $source eq 'dictyExpress RNAseq';
-
-    return $json->link(
-        url     => $self->link( 'JGI_DPUR', $id ),
-        caption => "JGI: $id",
-        type    => $type
-    ) if $source eq 'JGI_DPUR';
-
+    ); 
 }
 
 =head2 external_links
@@ -299,18 +232,11 @@ sub make_external_link {
 sub external_links {
     my ($self) = @_;
     my $feature = $self->source_feature();
-    my $ext_hash;
-	for my $xref_row($feature->secondary_dbxrefs) {
-		next if $xref_row->db->name eq 'GFF_source';
-		push @{$ext->hash{$xref_row->db->name}}, $xref_row->accession;
-	}
-    return if scalar keys %$ext_hash == 0;
-
     my $links;
-    foreach my $key ( keys %$ext_hash ) {
+	for my $xref_row($feature->secondary_dbxrefs) {
         push @$links,  $self->make_external_link(
-            source => $key,
-            ids    => $ext_hash->{$key},
+            source => $xref_row->db,
+            id    => $xref_row->accession,
         );
     }
     return $links if @$links;
@@ -333,15 +259,6 @@ sub external_links {
 #    return if !$feature->description;
 #    return $self->json->format_url( $feature->description );
 #}
-
-sub link {
-    my $self = shift;
-    my ( $source, $id )
-        = pos_validated_list( \@_, { isa => 'Str' }, { isa => 'Str' } );
-    my $db
-        = $self->model->resultset('General::Db')->find( { name => $source } );
-    return $db->urlprefix . '/' . $id if $db;
-}
 
 =head2 gbrowse_window
 
@@ -369,15 +286,6 @@ sub gbrowse_window {
     my $name = "$chrom:$flank_start..$flank_end";
     return $name;
 }
-
-=head2 gene
-
- Title    : gene
- Function : returns gene for the feature
- Returns  : Genome::Tabview::JSON::Gene
- Args     : none
-
-=cut
 
 =head2 references
 

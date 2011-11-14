@@ -247,17 +247,16 @@ sub aa_composition {
 =cut
 
 sub sequence {
-    my ($self)  = @_;
+    my ($self) = @_;
     my $feature = $self->source_feature();
 
-	my $ref = $self->reference_feature;
-	my $ref_name = $ref->name ? $ref->name : $ref->uniquename;
-	my $ref_start = $ref->featureloc_features->first->fmin + 1;
-	my $ref_end = $ref->featureloc_features->first->fmax ;
+    my $ref       = $self->reference_feature;
+    my $ref_name  = $ref->name ? $ref->name : $ref->uniquename;
+    my $ref_start = $ref->featureloc_features->first->fmin + 1;
+    my $ref_end   = $ref->featureloc_features->first->fmax;
 
     my $transcript_id = $self->transcript->dbxref->accession;
-    my $gene_id = $self->gene->dbxref->accession;
-
+    my $gene_id       = $self->gene->dbxref->accession;
 
     my $header = ">$transcript_id|$gene_id|Protein|gene: $gene";
     $header .= "on supercontig: $ref_name position $ref_start to $ref_end\n";
@@ -266,34 +265,5 @@ sub sequence {
     return $self->json->text("$header\n$seq");
 }
 
-=head2 external_links
-
- Title    : external_links
- Function : Returns json formatted external links array for the feature
- Returns  : array  
- Args     : none
- 
-=cut
-
-sub external_links {
-    my ($self)           = @_;
-    my $feature          = $self->source_feature();
-    my $external_id_hash = $feature->external_ids();
-
-    return if !( keys %$external_id_hash );
-
-    my @links;
-    foreach my $key ( keys %$external_id_hash ) {
-        next if $key !~ m{protein|uniprot|swissprot|trembl|ec}i;
-        my $link = $self->external_link(
-            -source => $key,
-            -ids    => [ $external_id_hash->{$key} ],
-        );
-
-        push @links, $link if $link;
-    }
-    return if !@links;
-    return \@links;
-}
 
 1;
