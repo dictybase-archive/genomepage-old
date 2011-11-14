@@ -86,6 +86,25 @@ use Carp;
 use Moose;
 extends 'Genome::Tabview::JSON::Feature';
 
+has 'transcript' => (
+    isa     => 'DBIx::Class::Row',
+    is      => 'rw',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $rs = $self->source_feature->search_related(
+            'feature_relationship_subjects',
+            { 'type' => 'derived_from' },
+            { join   => 'type' }
+            )->search(
+            'object',
+            { 'type_2.name' => 'mRNA' },
+            { join          => 'type', 'prefetch' => 'dbxref' }
+            );
+        return $rs->first;
+    }
+);
+
 has 'gene' => (
     isa     => 'DBIx::Class::Row',
     is      => 'rw',
@@ -198,10 +217,11 @@ sub aa_composition {
     my ($self)  = @_;
     my $feature = $self->source_feature;
     my $link    = $self->json->link(
-         caption => 'View Amino Acid Composition',
-         url => $ctx->url_to(
+        caption => 'View Amino Acid Composition',
+        url     => $ctx->url_to(
             $base_url, $self->gene->dbxref->accession,
-            'protein', $feature->dbxref->accession, 'statistics'
+            'protein', $feature->dbxref->accession,
+            'statistics'
         ),
         type => 'outer',
     );
@@ -217,8 +237,6 @@ sub aa_composition {
  
 =cut
 
-
-
 =head2 sequence
 
  Title    : sequence
@@ -231,9 +249,21 @@ sub aa_composition {
 sub sequence {
     my ($self)  = @_;
     my $feature = $self->source_feature();
-    my $fasta   = CGI->pre(
-        $feature->sequence( -type => 'Protein', -format => 'fasta' ) );
-    return $self->json->text($fasta);
+
+	my $ref = $self->reference_feature;
+	my $ref_name = $ref->name ? $ref->name : $ref->uniquename;
+	my $ref_start = $ref->featureloc_features->first->fmin + 1;
+	my $ref_end = $ref->featureloc_features->first->fmax ;
+
+    my $transcript_id = $self->transcript->dbxref->accession;
+    my $gene_id = $self->gene->dbxref->accession;
+
+
+    my $header = ">$transcript_id|$gene_id|Protein|gene: $gene";
+    $header .= "on supercontig: $ref_name position $ref_start to $ref_end\n";
+    my $seq = $self->source_feature->residues;
+    $seq =~ s/(.{1, 60})/$1\n/g;
+    return $self->json->text("$header\n$seq");
 }
 
 =head2 external_links
@@ -264,21 +294,6 @@ sub external_links {
     }
     return if !@links;
     return \@links;
-}
-
-=head2 primary_id
-
- Title    : primary_id
- Function : Returns json formatted primary_id
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub primary_id {
-    my ($self) = @_;
-    my $feature = $self->source_feature();
-    return $self->json->text( $feature->primary_id );
 }
 
 1;
