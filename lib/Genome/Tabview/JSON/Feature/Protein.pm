@@ -80,9 +80,38 @@ package Genome::Tabview::JSON::Feature::Protein;
 
 use strict;
 use namespace::autoclean;
+use Bio::Tools::SeqStats;
+use Bio::PrimarySeq;
 use Carp;
 use Moose;
 extends 'Genome::Tabview::JSON::Feature';
+
+has 'gene' => (
+    isa     => 'DBIx::Class::Row',
+    is      => 'rw',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $rs = $self->source_feature->search_related(
+            'feature_relationship_subjects',
+            { 'type' => 'derived_from' },
+            { join   => 'type' }
+            )->search(
+            'object',
+            { 'type_2.name' => 'mRNA' },
+            { join          => 'type' }
+            )->search_related(
+            'feature_relationship_subjects',
+            { 'type_3.name' => 'part_of' },
+            { join          => 'type' }
+            )->search_related(
+            'object',
+            { 'type_4.name' => 'gene' },
+            { joint         => 'type', prefetch => 'dbxref' }
+            );
+        return $rs->first;
+    }
+);
 
 =head2 length
 
@@ -113,13 +142,23 @@ has 'length' => (
  
 =cut
 
-sub molecular_weight {
-    my ($self)  = @_;
-    my $feature = $self->source_feature;
-    my $weight  = dicty::MiscUtility::commify(
-        $feature->protein_info->molecular_weight );
-    return $self->json->text( $weight . ' Da' );
-}
+has 'molecular_weight' => (
+    is   => 'ro',
+    isa  => 'Str',
+    lazy => 1,
+    sub {
+        my ($self)  = @_;
+        my $feature = $self->source_feature;
+        my $weight  = Bio::Tools::SeqStats->get_mol_wt(
+            Bio::PrimarySeq->new(
+                -seq      => $feature->residues,
+                -alphabet => 'protein',
+                -id       => $feature->uniquename
+            )
+        );
+        return $self->json->text( $weight . ' Da' );
+    }
+);
 
 =head2 protein_tab_link
 
@@ -134,14 +173,14 @@ sub molecular_weight {
 sub protein_tab_link {
     my ( $self, $base_url ) = @_;
     my $feature = $self->source_feature;
-    $base_url ||= '';
-    my $link = $self->json->link(
-        -caption => 'Protein sequence, domains and much more...',
-        -url     => $base_url . '/'
-            . $feature->gene->primary_id
-            . "/protein/"
-            . $feature->primary_id,
-        -type => 'tab',
+    my $ctx     = $self->context;
+    my $link    = $self->json->link(
+        caption => 'Protein sequence, domains and much more...',
+        url     => $ctx->url_to(
+            $base_url, $self->gene->dbxref->accession,
+            'protein', $feature->dbxref->accession
+        ),
+        type => 'tab',
     );
     return $link;
 }
@@ -159,29 +198,14 @@ sub aa_composition {
     my ($self)  = @_;
     my $feature = $self->source_feature;
     my $link    = $self->json->link(
-        -caption => 'View Amino Acid Composition',
-        -url     => "/db/cgi-bin/amino_acid_comp.pl?primary_id="
-            . $feature->primary_id,
-        -type => 'outer',
+         caption => 'View Amino Acid Composition',
+         url => $ctx->url_to(
+            $base_url, $self->gene->dbxref->accession,
+            'protein', $feature->dbxref->accession, 'statistics'
+        ),
+        type => 'outer',
     );
     return $link;
-}
-
-=head2 sequence_processing
-
- Title    : sequence_processing
- Function : returns json formatted sequence processing data
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub sequence_processing {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->polypeptide->properties->{'Sequence Processing'};
-    return $self->json->text(
-        $feature->polypeptide->properties->{'Sequence Processing'} );
 }
 
 =head2 protein_existence
@@ -193,162 +217,7 @@ sub sequence_processing {
  
 =cut
 
-sub protein_existence {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->polypeptide->properties->{'Evidence'};
-    return $self->json->text(
-        $feature->polypeptide->properties->{'Evidence'} );
-}
 
-=head2 subunit_structure
-
- Title    : subunit_structure
- Function : returns json formatted subunit structure data
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub subunit_structure {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->polypeptide->properties->{'Subunit Structure'};
-    return $self->json->text(
-        $feature->polypeptide->properties->{'Subunit Structure'} );
-}
-
-=head2 subcellular_location
-
- Title    : subcellular_location
- Function : returns json formatted subcellular location data
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub subcellular_location {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->polypeptide->properties->{'Subcellular Location'};
-    return $self->json->text(
-        $feature->polypeptide->properties->{'Subcellular Location'} );
-}
-
-=head2 post_modification
-
- Title    : post_modification
- Function : returns json formatted post-translational modification data
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub post_modification {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->polypeptide->properties->{'PTM'};
-    return $self->json->text( $feature->polypeptide->properties->{'PTM'} );
-}
-
-=head2 cofactor
-
- Title    : cofactor
- Function : returns json formatted cofactor data
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub cofactor {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->polypeptide->properties->{'Cofactor'};
-    return $self->json->text(
-        $feature->polypeptide->properties->{'Cofactor'} );
-}
-
-=head2 domain
-
- Title    : domain
- Function : returns json formatted domain data
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub domain {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->polypeptide->properties->{'Domain'};
-    return $self->json->text( $feature->polypeptide->properties->{'Domain'} );
-}
-
-=head2 catalityc_activity
-
- Title    : catalityc_activity
- Function : returns json formatted catalityc activity data
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub catalityc_activity {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    return if !$feature->polypeptide->properties->{'Catalityc Activity'};
-    return $self->json->text(
-        $feature->polypeptide->properties->{'Catalityc Activity'} );
-}
-
-=head2 domains_image
-
- Title    : domains_image
- Function : returns a formatted link to gbrowse domain display for the protein
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub domains_image {
-    my ($self)  = @_;
-    my $feature = $self->source_feature;
-    my $name    = $feature->polypeptide->primary_id;
-    my $species = $feature->organism->species;
-    my $embed
-        = "/db/cgi-bin/ggb/gbrowse_img/$species\_protein?name=$name&width=575&keystyle=left&abs=1&grid=0&embed=1";
-
-    my $domains_gbrowse = $self->json->link(
-        -url  => $embed,
-        -type => 'gbrowse_domain',
-    );
-    return $domains_gbrowse;
-}
-
-=head2 domains_table_link
-
- Title    : domains_table_link
- Function : returns a formatted link to gbrowse domain display for the protein
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub domains_table_link {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-
-    my $domains_table = $self->json->link(
-        -caption => 'Table view',
-        -url     => '/db/cgi-bin/'
-            . $config->value('SITE_NAME')
-            . '/service/polypeptide_domains.pl?ref='
-            . $feature->polypeptide->primary_id,
-        -type => 'outer',
-    );
-
-    return $domains_table;
-}
 
 =head2 sequence
 
