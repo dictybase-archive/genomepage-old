@@ -269,8 +269,7 @@ sub transcript_length {
 
 sub pseudogene {
     my ($self) = @_;
-    return if $self->source_feature->type !~ m{pseudogene}i;
-    return 1;
+    return 1 if $self->source_feature->type->name =~ m{pseudogene}i;
 }
 
 =head2 pseudogene_length
@@ -286,11 +285,8 @@ sub pseudogene {
 sub pseudogene_length {
     my ($self) = @_;
     return if !$self->pseudogene;
-    my $feature = $self->source_feature;
-    my $length  = dicty::MiscUtility::commify(
-        length( $feature->sequence( -type => 'Pseudogene' ) ) );
+    my $length = $self->source_feature->seqlen;
     return $self->json->text( $length . ' nt' );
-    return 1;
 }
 
 =head2 display_type
