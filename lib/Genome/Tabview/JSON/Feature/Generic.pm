@@ -287,6 +287,7 @@ sub pseudogene_length {
     return if !$self->pseudogene;
     my $length = $self->source_feature->seqlen;
     return $self->json->text( $length . ' nt' );
+    return 1;
 }
 
 =head2 display_type
@@ -406,26 +407,13 @@ sub get_fasta_selection {
 sub available_sequences {
     my ($self)  = @_;
     my $feature = $self->source_feature;
-    my $type    = $feature->type;
+    my $type    = $feature->type->name;
     my $sequences
         = $type =~ m{mRNA}i
         ? [ 'Protein', 'DNA coding sequence', 'Genomic DNA' ]
         : $type =~ m{Pseudo}i ? [ 'Pseudogene',         'Genomic' ]
         : $type =~ m{RNA}i    ? [ 'Spliced transcript', 'Genomic' ]
         :                       undef;
-    if ( $type =~ m{cDNA_clone|databank_entry} ) {
-        my @seqtypes = (
-            'mRNA Sequence',
-            'Protein',
-            'DNA coding sequence',
-            'Genomic DNA'
-        );
-        @seqtypes = grep {
-                   exists $feature->cached_sequences->{ lc($_) }
-                || exists $feature->cached_sequences->{$_}
-        } @seqtypes;
-        return \@seqtypes;
-    }
     return $sequences;
 }
 
