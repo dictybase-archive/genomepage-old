@@ -410,7 +410,7 @@ sub get_fasta_selection {
     my $fasta_button = $self->json->link(
         caption => 'Get Fasta',
         type    => 'outer',
-        url     => '/fasta'
+        url     => 'getfasta'
     );
     my $blast_button = $self->json->link(
         caption => 'BLAST',
