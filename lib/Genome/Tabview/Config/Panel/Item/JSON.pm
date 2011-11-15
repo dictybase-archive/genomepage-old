@@ -121,7 +121,7 @@ sub link {
     my ( $self, $url, $caption, $type, $style, $title, $name, $id )
         = validated_list(
         \@_,
-        url     => { isa => 'Str' },
+        url     => { isa => 'Str|ArrayRef' },
         type    => { isa => 'Str' },
         caption => { isa => 'Str', optional => 1 },
         style   => { isa => 'Str', optional => 1 },
@@ -170,18 +170,18 @@ sub text {
 =cut
 
 sub selector {
-    my ( $self, $options, $action, $class, $caption ) = validated_list(
+    my ( $self, $options, $action_link, $class, $caption ) = validated_list(
         \@_,
-        options => { isa => 'ArrayRef' },
-        action  => { isa => 'Object' },
-        class   => { isa => 'Str' },
-        caption => { isa => 'Str', optional => 1 }
+        options     => { isa => 'ArrayRef' },
+        action_link => { isa => 'ArrayRef' },
+        class       => { isa => 'Str' },
+        caption     => { isa => 'Str', optional => 1 }
     );
 
     my $selector = {
         type           => 'selector',
         options        => $options,
-        action_link    => $action,
+        action_link    => $action_link,
         selector_class => $class,
     };
     $selector->{caption} = $caption if $caption;
