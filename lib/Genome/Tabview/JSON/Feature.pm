@@ -118,6 +118,18 @@ has 'reference_feature' => (
     }
 );
 
+has 'reference_feature_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $feat = $self->reference_feature;
+        return $self->ctx->url_to( $self->base_url, $feat->type->name,
+            $feat->dbxref->accession );
+    }
+);
+
 =head2 source_feature
 
  Title    : source_feature

@@ -182,7 +182,7 @@ sub selector {
         type           => 'selector',
         options        => $options,
         action_link    => $action_link,
-        selector_class => $class,
+        selector_class => $class
     };
     $selector->{caption} = $caption if $caption;
     return $selector;
