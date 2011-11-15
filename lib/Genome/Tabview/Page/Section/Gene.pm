@@ -213,40 +213,33 @@ sub product {
 
     my @panels;
     my @primary_ids;
-    foreach my $feature (
-        $gene->transcripts;
-        ;
-        ;
+    foreach my $feature ( $gene->transcripts ) {
+        my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
+        my $rows = $self->product_coordinates($feature);
+        $panel->items($rows);
+        push @panels,      $panel;
+        push @primary_ids, $feature->source_feature->dbxref->accession;
     }
-    )
-{
-    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
-    my @rows = @{ $self->product_coordinates($feature) };
-    $panel->items( \@rows );
-    push @panels,      $panel;
-    push @primary_ids, $feature->source_feature->primary_id;
-}
-return $config->add_panel( $panels[0] ) if scalar @panels == 1;
+    return $config->add_panel( $panels[0] ) if scalar @panels == 1;
 
-my $tab_panel = Genome::Tabview::Config::Panel->new(
-    layout => 'tabview',
-    type   => 'isoform-tab'
-);
-my @alphabet = ( 'A' .. 'Z' );
-my $i        = 0;
-foreach my $panel (@panels) {
-    my $item = Genome::Tabview::Config::Panel::Item::Tab->new(
-        key     => 'product_isoform',
-        label   => 'Splice Variant ' . $alphabet[$i],
-        content => [$panel],
-        href    => $gene->source_feature->primary_id
-            . '/sequence/'
-            . $primary_ids[$i],
+    my $tab_panel = Genome::Tabview::Config::Panel->new(
+        layout => 'tabview',
+        type   => 'isoform-tab'
     );
-    $tab_panel->add_item($item);
-    $i++;
-}
-return $config->add_panel($tab_panel);
+    my @alphabet = ( 'A' .. 'Z' );
+    for my $i ( 0 .. $#panels ) {
+        my $item = Genome::Tabview::Config::Panel::Item::Tab->new(
+            key     => 'product_isoform',
+            label   => 'Splice Variant ' . $alphabet[$i],
+            content => [ $panels[$i] ],
+            href    => $self->context->url_to(
+                $gene->source_feature->dbxref->accession, 'feature',
+                $primary_ids[$i]
+            )
+        );
+        $tab_panel->add_item($item);
+    }
+    return $config->add_panel($tab_panel);
 }
 
 =head2 product_coordinates
