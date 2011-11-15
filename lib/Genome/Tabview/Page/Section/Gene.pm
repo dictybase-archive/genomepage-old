@@ -325,85 +325,15 @@ sub sequences {
     my ($self) = @_;
     my $gene   = $self->gene;
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
     my @rows;
-
-    if ( $gene->genbank_fragments ) {
-        my @links;
-        foreach my $feature ( @{ $gene->genbank_fragments } ) {
-            push @links,
-                $feature->genbank_link(
-                $feature->source_feature->external_ids->{'Accession Number'}
-                );
-        }
-        push @rows, $self->row( 'GenBank Genomic Fragment', \@links );
+    if ( my $ests = $gene->ests ) {
+        my @rows;
+        push @rows, $self->row( 'ESTs', $ests );
+        $panel->items( \@rows );
+        $config->add_panel($panel);
+        return $config;
     }
-    if ( $gene->genbank_mrnas ) {
-        my @links;
-        foreach my $feature ( @{ $gene->genbank_mrnas } ) {
-            push @links,
-                $feature->genbank_link(
-                $feature->source_feature->external_ids->{'Accession Number'}
-                );
-        }
-        push @rows, $self->row( 'GenBank mRNA', \@links );
-    }
-    push @rows, $self->row( 'ESTs', $gene->ests ) if $gene->ests;
-
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
-}
-
-=head2 promoters
-
- Title    : promoters
- Function : returns gene promoter section config
- Usage    : $config = $section->promoters();
- Returns  : Genome::Tabview::Config
- Args     : none
- 
-=cut
-
-sub promoters {
-    my ($self) = @_;
-    my $gene   = $self->gene;
-    my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-    my @rows;
-    push @rows, $self->row( 'Regulatory Motif', $gene->promoters );
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
-}
-
-=head2 go
-
- Title    : go
- Function : returns gene GO section config
- Usage    : $config = $section->go();
- Returns  : Genome::Tabview::Config
- Args     : none
- 
-=cut
-
-sub go {
-    my ($self) = @_;
-    my $gene   = $self->gene;
-    my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-    my @rows;
-
-    push @rows,
-        $self->row( 'Molecular Function', $gene->function_annotations );
-    push @rows,
-        $self->row( 'Biological Process', $gene->process_annotations );
-    push @rows,
-        $self->row( 'Cellular Component', $gene->component_annotations );
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
 }
 
 =head2 links
