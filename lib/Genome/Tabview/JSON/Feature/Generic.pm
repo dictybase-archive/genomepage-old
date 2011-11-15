@@ -127,6 +127,41 @@ has 'gene' => (
     }
 );
 
+has 'gene_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $feat = $self->gene;
+        return $self->context->url_to( $self->base_url, 'gene',
+            $feat->dbxref->accession );
+    }
+);
+
+has 'protein_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $feat = $self->protein;
+        return $self->context->url_to( $self->gene_url, 'protein',
+            $self->source_feature->dbxref->accession );
+    }
+);
+
+has 'source_feature_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        return $self->context->url_to( $self->gene_url, 'feature',
+            $self->source_feature->dbxref->accession );
+    }
+);
+
 =head2 gene_type
 
  Title    : gene_type
@@ -361,38 +396,35 @@ sub external_links {
 =cut
 
 sub get_fasta_selection {
-    my  $self = shift;
+    my $self = shift;
     my ( $caption, $base_url ) = validated_list(
-    	@_, 
-    	caption => { isa => 'Str',  optional => 1}, 
-    	base_url => { isa => 'Str',  optional => 1}
+        \@_,
+        caption  => { isa => 'Str', optional => 1 },
+        base_url => { isa => 'Str', optional => 1 }
     );
 
     $base_url ||= $self->base_url;
-    my $feature      = $self->source_feature;
-    my $sequences    = $self->available_sequences;
+    my $feature   = $self->source_feature;
+    my $sequences = $self->available_sequences;
+
     my $fasta_button = $self->json->link(
         caption => 'Get Fasta',
         type    => 'outer',
-        url =>
-            "/db/cgi-bin/$ENV{'SITE_NAME'}/yui/get_fasta.pl?decor=1&primary_id="
-            . $feature->primary_id,
+        url     => '/fasta'
     );
     my $blast_button = $self->json->link(
-        -caption => 'BLAST',
-        -type    => 'tab',
-
-        #-url     => "/tools/blast?&primary_id=" . $feature->primary_id,
-        -url => $base_url . '/'
-            . $feature->gene->primary_id
-            . "/blast?&primary_id="
-            . $feature->primary_id
+        caption => 'BLAST',
+        type    => 'tab',
+        url     => $self->context->url_to(
+            $self->gene_url,
+            'blast?&primary_id=' . $feature->dbxref->accession
+        )
     );
     my $get_fasta = $self->json->selector(
-        -options     => $sequences,
-        -action_link => [ $fasta_button, $blast_button ],
-        -class       => 'sequence_selector',
-        -caption     => $caption,
+        options     => $sequences,
+        action_link => [ $fasta_button, $blast_button ],
+        class       => 'sequence_selector',
+        caption     => $caption || undef
     );
     return $get_fasta;
 }
@@ -410,13 +442,17 @@ sub available_sequences {
     my ($self)  = @_;
     my $feature = $self->source_feature;
     my $type    = $feature->type->name;
-    my $sequences
-        = $type =~ m{mRNA}i
-        ? [ 'Protein', 'DNA coding sequence', 'Genomic DNA' ]
-        : $type =~ m{Pseudo}i ? [ 'Pseudogene',         'Genomic' ]
-        : $type =~ m{RNA}i    ? [ 'Spliced transcript', 'Genomic' ]
-        :                       undef;
-    return $sequences;
+    if ( $type eq 'mRNA' ) {
+        return [
+            [ 'Protein',             $self->protein_url . '.fasta' ],
+            [ 'DNA coding sequence', $self->source_feature_url . '.fasta' ],
+            [ 'Genomic',             $self->reference_feature_url . '.fasta' ]
+        ];
+    }
+    return [
+        [ 'Transcript', $self->source_feature_url . '.fasta' ],
+        [ 'Genomic',    $self->reference_feature_url . '.fasta' ]
+    ];
 }
 
 =head2 small_gbrowse_image
