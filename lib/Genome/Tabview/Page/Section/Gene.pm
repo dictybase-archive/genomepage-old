@@ -368,33 +368,6 @@ sub links {
     return $config;
 }
 
-=head2 summary
-
- Title    : summary
- Function : gene summary section configuration
- Usage    : $config = $section->summary()
- Returns  : Genome::Tabview::Config
- Args     : none
- 
-=cut
-
-sub summary {
-    my ( $self, @args ) = @_;
-    my $gene   = $self->gene;
-    my $config = Genome::Tabview::Config->new();
-    my $panel  = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-    my @rows;
-
-    push @rows, $self->row( 'Curator Notes', $gene->curator_notes )
-        if $gene->curator_notes;
-    push @rows, $self->row( 'Curation Status', $gene->curation_status )
-        if $gene->curation_status;
-
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
-}
-
 =head2 references
 
  Title    : references
@@ -423,71 +396,5 @@ sub references {
     return $config;
 }
 
-=head2 phenotypes
-
- Title    : phenotypes
- Function : gene strains and phenotypes section configuration
- Usage    : $config = $section->phenotypes()
- Returns  : Genome::Tabview::Config
- Args     : none
- 
-=cut
-
-sub phenotypes {
-    my ( $self, @args ) = @_;
-    my $gene = $self->gene;
-
-    my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
-    my @rows;
-    if ( $gene->genotypes ) {
-        foreach my $genotype ( @{ $gene->genotypes } ) {
-            push @rows,
-                $self->row( $genotype->strain_link,
-                $genotype->experiment_links );
-        }
-    }
-    if ( $gene->additional_strains ) {
-        my @additional_links;
-        foreach my $genotype ( @{ $gene->additional_strains } ) {
-            my $divider
-                = ( scalar @additional_links ) / 2
-                < scalar @{ $gene->additional_strains } - 1
-                ? '&nbsp;|&nbsp;'
-                : undef;
-
-            push @additional_links, $genotype->strain_link;
-            push @additional_links, $self->json->text($divider) if $divider;
-        }
-        push @rows, $self->row( 'Additional Strains', \@additional_links );
-    }
-    push @rows, $self->row( 'External Links', $gene->mutant_links )
-        if $gene->mutant_links;
-
-    if ( $gene->plasmids ) {
-        my $url = "/db/cgi-bin/$ENV{'SITE_NAME'}/SC/plasmid_details.pl?id=";
-        my @links;
-        foreach my $plasmid ( @{ $gene->plasmids } ) {
-            my $divider
-                = ( scalar @links ) / 2 < scalar @{ $gene->plasmids } - 1
-                ? '&nbsp;|&nbsp;'
-                : undef;
-
-            push @links, $self->json->link(
-                -url     => $url . $plasmid->id,
-                -type    => 'outer',
-                -caption => $plasmid->name
-            );
-            push @links, $self->json->text($divider) if $divider;
-        }
-        push @rows, $self->row( 'Plasmids', \@links );
-    }
-
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-
-    return $config;
-}
 
 1;
