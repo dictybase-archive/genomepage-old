@@ -349,11 +349,9 @@ sub sequences {
 
 sub links {
     my ( $self ) = @_;
-    my $gene   = $self->gene;
     my $config = Genome::Tabview::Config->new();
     my $panel  = Genome::Tabview::Config::Panel->new( layout => 'row' );
-    my @rows;
-    if ( my $row = $gene->external_links ) {
+    if ( my $row = $self->gene->external_links ) {
         $panel->items( [ $self->row( 'External Resources', $row ) ] );
         $config->add_panel($panel);
         return $config;
