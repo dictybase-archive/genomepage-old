@@ -246,19 +246,17 @@ sub row {
 
 sub columns {
     my ( $self, @column_data ) = @_;
-    my @columns;
-    my $i = 0;
-    foreach my $column (@column_data) {
-        my $json_panel = $self->json_panel($column);
+    my $columns;
+    for my $i (0 .. $#column_data) {
+        my $json_panel = $self->json_panel($column_data[$i]);
         my $class = $i == 0 ? 'content_table_title' : undef;
-        push @columns,
+        push @$columns,
             Genome::Tabview::Config::Panel::Item::Column->new(
             type    => $class,
             content => [$json_panel],
             );
-        $i = 1;
     }
-    return \@columns;
+    return $columns;
 }
 
 =head2 json_panel
