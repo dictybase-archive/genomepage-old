@@ -276,50 +276,6 @@ sub ests {
     return $links;
 }
 
-=head2 external_links
-
- Title    : external_links
- Function : returns json formatted gene external links 
- Returns  : hash
- Args     : none
-
-=cut
-
-sub external_links {
-    my ($self) = @_;
-    my $gene = $self->source_feature;
-
-    ## -- get  transcript
-    my $trans_rs = $gene->search_related(
-        'feature_relationship_objects',
-        { 'type.name' => 'part_of', },
-        { join        => [ { 'type' => 'cv' } ] }
-        )->search_related( 'subject',        {} )
-        ->search_related( 'feature_dbxrefs', {} )
-        ->search_related( 'dbxref', {}, { prefetch => 'db' } );
-    return if !$trans_rs->count;
-
-    my $external_links;
-    foreach my $xref ( $trans_rs->all ) {
-        push @$external_links,
-            $self->external_link(
-            source => $xref->db->name,
-            id     => $xref->accession,
-            );
-
-  #        my $divider
-  #            = ( scalar @external_links ) / 2 < scalar( keys(%linkage) ) - 1
-  #            ? '&nbsp;|&nbsp;'
-  #            : undef;
-  #
-  #        if (@link) {
-  #            push @external_links, @link;
-  #            push @external_links, $self->json->text($divider) if $divider;
-  #        }
-    }
-    return $external_links;
-}
-
 =head2 gbrowse_link
 
  Title    : gbrowse_link
@@ -373,66 +329,5 @@ sub orthologs {
 
 1;
 
-=head2 expression
 
- Title    : expression
- Function : returns json formatted gene expression links
- Returns  : hash
- Args     : none
-
-=cut
-
-#sub expression {
-#    my ($self) = @_;
-#    my $gene = $self->source_feature;
-#    my @expression_links;
-#
-#    my %hash    = $gene->get_expression_information();
-#    my $in_situ = 'In situ Expression Pattern';
-#
-#    foreach my $source ( keys %hash ) {
-#        my $link = $self->json->link(
-#            -caption => $source,
-#            -url     => $hash{$source},
-#            -type    => 'outer',
-#        );
-#        my $divider = (scalar @expression_links)/2 < scalar( keys(%hash)) -1 ? '&nbsp;|&nbsp;' : undef;
-#        push @expression_links, $link;
-#        push @expression_links, $self->json->text($divider) if $divider;
-#    }
-#    if ( exists $hash{$in_situ} ) {
-#        my $link = $self->json->link(
-#            -caption => $in_situ,
-#            -url     => $hash{$in_situ},
-#            -type    => 'outer',
-#        );
-#        push @expression_links, $link;
-#    }
-#
-#    my $dictyExpress       = $gene->external_ids->{dictyExpress};
-#    my $dicty_express_link = $self->external_link(
-#        -source => 'dictyExpress',
-#        -ids    => [$dictyExpress]
-#    ) if $dictyExpress;
-#
-#    my $rnaseq      = $gene->external_ids->{'dictyExpress RNAseq'};
-#    my $rnaseq_link = $self->external_link(
-#        -source => 'dictyExpress RNAseq',
-#        -ids    => [$rnaseq]
-#    ) if $rnaseq;
-#
-#    if ($dicty_express_link) {
-#        push @expression_links, $self->json->text('&nbsp;|&nbsp;')
-#            if scalar @expression_links > 0;
-#        push @expression_links, $dicty_express_link;
-#    }
-#
-#    if ($rnaseq_link) {
-#        push @expression_links, $self->json->text('&nbsp;|&nbsp;')
-#            if scalar @expression_links > 0;
-#        push @expression_links, $rnaseq_link;
-#    }
-#    return if !@expression_links;
-#    return \@expression_links;
-#}
 
