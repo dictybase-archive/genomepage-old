@@ -348,24 +348,16 @@ sub sequences {
 =cut
 
 sub links {
-    my ( $self, @args ) = @_;
+    my ( $self ) = @_;
     my $gene   = $self->gene;
     my $config = Genome::Tabview::Config->new();
-    my $panel  = Genome::Tabview::Config::Panel->new( -layout => 'row' );
+    my $panel  = Genome::Tabview::Config::Panel->new( layout => 'row' );
     my @rows;
-
-    push @rows, $self->row( 'Pathways', $gene->pathways )
-        if $gene->pathways;
-    push @rows, $self->row( 'Expression', $gene->expression )
-        if $gene->expression;
-    push @rows, $self->row( 'dictyBase Colleagues', $gene->researchers )
-        if $gene->researchers;
-    push @rows, $self->row( 'External Resources', $gene->external_links )
-        if $gene->external_links;
-
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
+    if ( my $row = $gene->external_links ) {
+        $panel->items( [ $self->row( 'External Resources', $row ) ] );
+        $config->add_panel($panel);
+        return $config;
+    }
 }
 
 =head2 references
@@ -382,7 +374,7 @@ sub references {
     my ($self) = @_;
     my $gene   = $self->gene;
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
     my $count = 0;
     my @rows;
@@ -395,6 +387,5 @@ sub references {
     $config->add_panel($panel);
     return $config;
 }
-
 
 1;
