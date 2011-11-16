@@ -80,39 +80,31 @@ SUCH DAMAGES.
 package Genome::Tabview::JSON::Reference;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Moose;
 use Modware::Publication::DictyBase;
 use Genome::Tabview::JSON::Feature::Gene;
 
-=head2 new
+has 'pub_id' => (
+    is  => 'rw',
+    isa => 'Str',
+);
 
- Title    : new
- Function : constructor for B<Genome::Tabview::JSON::Reference> object. 
- Usage    : my $reference = Genome::Tabview::JSON::Reference->new(
-            -ref_no => $reference->reference_no );
- Returns  : Genome::Tabview::JSON::Reference object with default configuration.     
- Args     : -ref_no   - reference number.
- 
+=head2 source_feature
+
+ Title    : source_reference
+ Usage    : $reference->source_reference($reference);
+ Function : gets/sets reference, that would be used as a source for all calls
+ Returns  : Modware::Publication::DictyBase object
+ Args     : Modware::Publication::DictyBase object
+
 =cut
 
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PUB_ID/];
-    $self->{root} = Bio::Root::Root->new();
-    my ($pub_id) = $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('reference id is not provided') if !$pub_id;
-
-    my $dbh       = dicty::DBH->new();
-    my $reference = Modware::Publication::DictyBase->find($pub_id);
-    $self->source_reference($reference);
-
-    return $self;
-}
+has 'source_feature' => (
+    is       => 'rw',
+    isa      => 'Modware::Publication::DictyBase',
+    required => 1
+);
 
 =head2 json
 
@@ -124,37 +116,19 @@ sub new {
 
 =cut
 
-sub json {
-    my ( $self, $arg ) = @_;
-    $self->{json} = $arg if $arg;
-    $self->{json} = Genome::Tabview::Config::Panel::Item::JSON->new()
-        if !$self->{json};
-    return $self->{json};
-}
+has 'json' => (
+    is      => 'rw',
+    isa     => 'Genome::Tabview::Config::Panel::Item::JSON',
+    lazy    => 1,
+    default => sub {
+        return Genome::Tabview::Config::Panel::Item::JSON->new;
+    }
+);
 
-sub context {
-    my ( $self, $arg ) = @_;
-    $self->{context} = $arg if defined $arg;
-    return $self->{context} if defined $self->{context};
-}
-
-=head2 source_reference
-
- Title    : source_reference
- Usage    : $reference->source_reference($reference);
- Function : gets/sets reference, that would be used as a source for all calls
- Returns  : Modware::Publication::DictyBase object
- Args     : Modware::Publication::DictyBase object
-
-=cut
-
-sub source_reference {
-    my ( $self, $arg ) = @_;
-    $self->{source_reference} = $arg if defined $arg;
-    $self->{root}->throw('Reference is not defined')
-        if not defined $self->{source_reference};
-    return $self->{source_reference};
-}
+has 'context' => (
+    is  => 'rw',
+    isa => 'Mojolicious::Controller'
+);
 
 =head2 links
 
@@ -166,14 +140,15 @@ sub source_reference {
 
 =cut
 
-sub links {
-    my ($self) = @_;
-    return $self->{links} if $self->{links};
-
-    my $reference = $self->source_reference;
-    my $json      = $self->json;
-    my ( $dicty_img, $pubmed_img, $full_img );
-    if ( $self->context ) {
+has 'links' => (
+    is      => 'ro',
+    isa     => 'ArrayRef',
+    lazy    => 1,
+    default => sub {
+        my ($self)    = @_;
+        my $reference = $self->source_feature;
+        my $json      = $self->json;
+        my ( $dicty_img, $pubmed_img, $full_img );
         $dicty_img = $self->context->image_tag(
             'refDicty.gif',
             alt    => 'dictyBase Papers Entry',
@@ -189,44 +164,34 @@ sub links {
             alt    => 'Reference full text',
             border => '0'
         );
+
+        my $links;
+        push @$links,
+            $json->link(
+            caption => $dicty_img,
+            url     => "/publication/" . $reference->pub_id,
+            type    => 'outer',
+            );
+
+        push @$links,
+            $json->link(
+            caption => $pubmed_img,
+            url  => 'http://view.ncbi.nlm.nih.gov/pubmed/' . $reference->id,
+            type => 'outer',
+            )
+            if $reference->id !~ /^PUB/
+                or $reference->id =~ /^\d+/;
+
+        push @$links,
+            $json->link(
+            caption => $full_img,
+            url     => $reference->full_text_url,
+            type    => 'outer',
+            ) if $reference->has_full_text_url;
+
+        return $links;
     }
-    else {
-        $dicty_img
-            = '<img title="dictyBase Paper" alt="dictyBase Papers Entry" src="/inc/images/refDicty.gif" border="0">';
-        $pubmed_img
-            = '<img title="PubMed" alt="Pubmed Entry" src="/inc/images/refPubmed.gif" border="0">';
-        $full_img
-            = '<img title="Full Text" alt="Reference full text" src="/inc/images/refFull.gif" border="0">';
-    }
-    my @links;
-
-    push @links,
-        $json->link(
-        -caption => $dicty_img,
-        -url => "/publication/"
-            . $reference->pub_id,
-        -type => 'outer',
-        );
-
-    push @links,
-        $json->link(
-        -caption => $pubmed_img,
-        -url     => 'http://view.ncbi.nlm.nih.gov/pubmed/' . $reference->id,
-        -type    => 'outer',
-        )
-        if $reference->id !~ /^PUB/
-            or $reference->id =~ /^\d+/;
-
-    push @links,
-        $json->link(
-        -caption => $full_img,
-        -url     => $reference->full_text_url,
-        -type    => 'outer',
-        ) if $reference->has_full_text_url;
-
-    $self->{links} = \@links;
-    return $self->{links};
-}
+);
 
 =head2 citation
 
@@ -238,11 +203,16 @@ sub links {
 
 =cut
 
-sub citation {
-    my ($self) = @_;
-    my $reference = $self->source_reference;
-    return $self->json->text( $reference->formatted_citation );
-}
+has 'citation' => (
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $reference = $self->source_feature;
+        return $self->json->text( $reference->formatted_citation );
+    }
+);
 
 =head2 genes
 
@@ -256,28 +226,25 @@ sub citation {
 
 sub genes {
     my ( $self, $limit ) = @_;
-
-    return $self->{genes} if $self->{genes};
-
+    $limit ||= 5;
     my $genes_rs
-        = $self->source_reference->chado->resultset('Sequence::Feature')
-        ->search(
-        {   'pub.uniquename' => $self->source_reference->id,
-            'type.name'      => 'gene',
-            'me.is_deleted'  => 0
-        },
-        {   join => [ 'type', 'dbxref', { 'feature_pubs' => 'pub' } ],
-            rows => $limit
+        = $self->source_feature->search_related( 'feature_pubs', {} )
+        ->search_related(
+        'feature',
+        { 'type.name' => 'gene'},
+        {   join     => 'type',
+            prefetch => 'dbxref',
+            rows     => $limit
         }
         );
 
-    my @genes = map {
-        Genome::Tabview::JSON::Feature::Gene->new(
-            -primary_id => $_->dbxref->accession )
-    } $genes_rs->all;
+    my $genes = [
+        map {
+            Genome::Tabview::JSON::Feature::Gene->new( source_feature => $_ )
+            } $genes_rs->all
+    ];
+    return $genes;
 
-    $self->{genes} = \@genes;
-    return $self->{genes};
 }
 
 1;
