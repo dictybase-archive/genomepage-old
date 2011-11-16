@@ -84,6 +84,7 @@ use Moose;
 use MooseX::Params::Validate;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::JSON::Reference;
+use Class::MOP;
 
 =head2 json
 
@@ -202,13 +203,13 @@ sub primary_id {
     return $self->json->text( $self->source_feature->dbxref->accession );
 }
 
-=head2 external_link
+=head2 make_external_link
 
- Title    : external_link
+ Title    : make_external_link
  Function : returns external_link for the provided id and type
- Usage    : my $link = $feature->external_link(
-                -source => 'UniProt',
-                -id    => 'O77203' 
+ Usage    : my $link = $feature->make_external_link(
+                source => 'UniProt',
+                id    => 'O77203' 
             );
  Returns  : hash with json representetion of a link
  Args     : source : source of the link
@@ -226,10 +227,10 @@ sub make_external_link {
     );
 
     return $self->json->link(
-        url     => $source->urlprefix.$id,
+        url     => $source->urlprefix . $id,
         caption => $source->name,
         type    => $type
-    ); 
+    );
 }
 
 =head2 external_links
@@ -245,15 +246,15 @@ sub external_links {
     my ($self) = @_;
     my $feature = $self->source_feature();
     my $links;
-	for my $xref_row($feature->secondary_dbxrefs) {
-        push @$links,  $self->make_external_link(
+    for my $xref_row ( $feature->secondary_dbxrefs ) {
+        push @$links,
+            $self->make_external_link(
             source => $xref_row->db,
-            id    => $xref_row->accession,
-        );
+            id     => $xref_row->accession,
+            );
     }
     return $links if @$links;
 }
-
 
 =head2 description
 
@@ -320,16 +321,21 @@ has '_reference_stack' => (
 
 sub _build_references {
     my ($self) = @_;
-    my $pub_rs = $self->source_feature->search_related( 'feature_pubs', {},
-        { order_by => { -desc => 'pyear' } } );
+    my $pub_rs
+        = $self->source_feature->search_related( 'feature_pubs', {} )
+        ->search_related( 'pub',
+        { order_by => { -desc => 'pyear' }, rows => 5 } );
     return if !$pub_rs->count;
 
+    Class::MOP->load_class('Modware::Publication::DictyBase');
     my $references;
     while ( my $row = $pub_rs->next ) {
-        my $json_reference = Genome::Tabview::JSON::Reference->new(
-            pub_id => $row->uniquename );
-        $json_reference->context( $self->context ) if $self->context;
-        push @$references, $json_reference;
+        push @$references,
+            Genome::Tabview::JSON::Reference->new(
+            source_feature =>
+                Modware::Publication::DictyBase->new( dbrow => $row ),
+            context => $self->context
+            );
     }
     return $references;
 }

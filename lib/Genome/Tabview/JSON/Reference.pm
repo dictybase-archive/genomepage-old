@@ -82,7 +82,6 @@ package Genome::Tabview::JSON::Reference;
 use strict;
 use namespace::autoclean;
 use Moose;
-use Modware::Publication::DictyBase;
 use Genome::Tabview::JSON::Feature::Gene;
 
 has 'pub_id' => (
@@ -246,5 +245,7 @@ sub genes {
     return $genes;
 
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

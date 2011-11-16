@@ -348,9 +348,9 @@ sub sequences {
 =cut
 
 sub links {
-    my ( $self ) = @_;
+    my ($self) = @_;
     my $config = Genome::Tabview::Config->new();
-    my $panel  = Genome::Tabview::Config::Panel->new( layout => 'row' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
     if ( my $row = $self->gene->external_links ) {
         $panel->items( [ $self->row( 'External Resources', $row ) ] );
         $config->add_panel($panel);
@@ -373,17 +373,15 @@ sub references {
     my $gene   = $self->gene;
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
-
-    my $count = 0;
-    my @rows;
-    return if !$gene->references;
     foreach my $reference ( @{ $gene->references } ) {
-        last if ( $count++ == 5 );
-        push @rows, $self->row( $reference->links, $reference->citation );
+        $panel->add_item(
+            $self->row( $reference->links, $reference->citation ) );
     }
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
+
+    if ( $panel->has_items ) {
+        $config->add_panel($panel);
+        return $config;
+    }
 }
 
 1;
