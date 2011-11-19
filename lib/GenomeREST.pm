@@ -67,9 +67,8 @@ sub startup {
     ## -- tabs
     my $general_tabs = $geneid->waypoint( '/:tab',
         tab => [qw/gene orthologs blast references/] )->to('gene#show_tab');
-    my $protein_tab
-        = $geneid->waypoint('/protein')->to('gene#show_protein_tab');
-    my $feat_tab = $geneid->waypoint('/feature')->to('gene#show_feature_tab');
+    my $protein_tab = $geneid->waypoint('/protein')->to('protein#show_tab');
+    my $feat_tab    = $geneid->waypoint('/feature')->to('feature#show_tab');
 
     ## -- section
     $general_tab->route(
@@ -79,52 +78,50 @@ sub startup {
     )->to('gene#show_section');
     my $protein_section
         = $protein_tab->waypoint( '/:id', id => qr/^[A-Z]{3}_\d{4, 12}$/ )
-        ->to('gene#show_protein_section');
+        ->to('protein#show_section');
     my $feature_section
         = $feature_tab->waypoint( '/:id', id => qr/^[A-Z]{3}_\d{4, 12}$/ )
-        ->to('gene#show_feature_section');
+        ->to('feature#show_section');
 
     ## -- subsection
     $protein_section->route(
         '/:subsection',
         format     => 'json',
         subsection => [qw/info sequence/]
-    )->to('gene#show_protein_subsection');
-	$feature_section->route(
+    )->to('protein#show_subsection');
+    $feature_section->route(
         '/:subsection',
         format     => 'json',
-        subsection => [qw/info references]
-    )->to('gene#show_protein_subsection');
-
-
-
-    ## init database connection
-    my $datasource = Homology::Chado::DataSource->instance;
-    $datasource->dsn( $self->config->{database}->{dsn} )
-        if !$datasource->has_dsn;
-    $datasource->user( $self->config->{database}->{user} )
-        if !$datasource->has_user;
-    $datasource->password( $self->config->{database}->{password} )
-        if !$datasource->has_password;
+        subsection => [qw/info references/]
+    )->to('feature#show_subsection');
 }
+    # init database connection
+#    my $datasource = Homology::Chado::DataSource->instance;
+#    $datasource->dsn( $self->config->{database}->{dsn} )
+#        if !$datasource->has_dsn;
+#    $datasource->user( $self->config->{database}->{user} )
+#        if !$datasource->has_user;
+#    $datasource->password( $self->config->{database}->{password} )
+#        if !$datasource->has_password;
+
 
 1;
 
-__END__
+                __END__
 
-=head1 NAME
+                =head1 NAME
 
-GenomeREST - Web Framework
+                GenomeREST - Web Framework
 
-=head1 SYNOPSIS
+                =head1 SYNOPSIS
 
-    use base 'GenomeREST';
-    sub startup {
-        my $self = shift;
+                use base 'GenomeREST';
+                sub startup {
+                my $self = shift;
 
-        my $r = $self->routes;
+                my $r = $self->routes;
 
-        $r->route('/:controller/:action')
+                $r->route('/ : controller /:action')
           ->to(controller => 'foo', action => 'bar');
     }
 
@@ -149,7 +146,7 @@ Returns the invocant if called with arguments.
 Defaults to C<$ENV{MOJO_MODE}> or C<development>.
 
     my $mode = $mojo->mode;
-    if ($mode =~ m/^dev/) {
+    if ($mode =~ m/ ^ dev /) {
         do_debug_output();
     }
 
