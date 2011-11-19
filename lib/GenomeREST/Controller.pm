@@ -24,6 +24,21 @@ sub set_organism {
     $self->stash( 'organism_resultset' => $org_rs );
 }
 
+sub show_tab {
+    my ($self) = @_;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+
+    if ( $self->stash('format') and $self->stash('format') eq 'json' ) {
+        return $self->show_tab_json;
+    }
+    $self->show_tab_html;
+}
+
 1;    # Magic true value required at end of module
 
 __END__
