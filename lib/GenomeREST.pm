@@ -45,7 +45,6 @@ sub startup {
     my $organism = $top->waypoint('/:common_name')->name('genome')
         ->to('genome#species_index');
 
-
     ## all that goes under..
     $organism->route('/supercontig')->name('supercontig')
         ->to('genome#supercontig');
@@ -58,18 +57,46 @@ sub startup {
 
     $organism->route('/downloads')->to('genome#download');
 
-
-     ### ---
-    my $gene = $organism->waypoint('/gene')->name('all_genes')->to('gene#list');
+    ### ---
+    my $gene
+        = $organism->waypoint('/gene')->name('all_genes')->to('gene#list');
     $gene->route( '/search', format => 'datatable' )->name('gene_pager')
         ->to('gene#search');
+    my $geneid = $gene->waypoint('/:id')->name('gene')->to('gene#show');
 
-    my $id = $gene->waypoint('/:id')->name('gene')
-        ->to( 'gene#show');
+    ## -- tabs
+    my $general_tabs = $geneid->waypoint( '/:tab',
+        tab => [qw/gene orthologs blast references/] )->to('gene#show_tab');
+    my $protein_tab
+        = $geneid->waypoint('/protein')->to('gene#show_protein_tab');
+    my $feat_tab = $geneid->waypoint('/feature')->to('gene#show_feature_tab');
 
-    my $tab = $id->waypoint('/:tab')->to('gene#show_tab');
-    $tab->route('/:section')->to('gene#show_section');
-    $tab->route('/:subid/:subsection',  format => 'json')->to('gene#show_subsection_json');
+    ## -- section
+    $general_tab->route(
+        '/:section',
+        format  => 'json',
+        section => [qw/info genomic_info product sequences links/]
+    )->to('gene#show_section');
+    my $protein_section
+        = $protein_tab->waypoint( '/:id', id => qr/^[A-Z]{3}_\d{4, 12}$/ )
+        ->to('gene#show_protein_section');
+    my $feature_section
+        = $feature_tab->waypoint( '/:id', id => qr/^[A-Z]{3}_\d{4, 12}$/ )
+        ->to('gene#show_feature_section');
+
+    ## -- subsection
+    $protein_section->route(
+        '/:subsection',
+        format     => 'json',
+        subsection => [qw/info sequence/]
+    )->to('gene#show_protein_subsection');
+	$feature_section->route(
+        '/:subsection',
+        format     => 'json',
+        subsection => [qw/info references]
+    )->to('gene#show_protein_subsection');
+
+
 
     ## init database connection
     my $datasource = Homology::Chado::DataSource->instance;
