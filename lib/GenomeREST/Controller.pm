@@ -53,9 +53,19 @@ sub show_section {
     $self->show_section_html;
 }
 
-1;    # Magic true value required at end of module
- 
+sub show_subsection {
+    my ($self)      = @_;
+    my ($self)      = @_;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+    $self->show_subsection_json;
+}
 
+1;    # Magic true value required at end of module
 
 __END__
 
