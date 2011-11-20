@@ -91,6 +91,7 @@ package Genome::Factory::Tabview::Section;
 
 use strict;
 use namespace::autoclean;
+use Carp;
 use Module::Find;
 use Class::MOP;
 use Moose;
