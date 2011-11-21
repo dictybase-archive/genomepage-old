@@ -99,7 +99,7 @@ use MooseX::Params::Validate;
 
 =cut
 
-has 'content' => ( is => 'rw', isa => 'Str' );
+has 'content' => ( is => 'rw', isa => 'ArrayRef' );
 
 =head2 link
 
