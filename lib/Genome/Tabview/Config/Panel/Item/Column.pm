@@ -121,6 +121,8 @@ has 'content' => (is => 'rw',  isa => 'ArrayRef',  required => 1);
 
 =cut
 
+has 'type' => ( isa => 'Str|Undef',  is => 'rw');
+
 =head2 rowspan
 
  Title    : rowspan
@@ -142,7 +144,7 @@ has 'content' => (is => 'rw',  isa => 'ArrayRef',  required => 1);
 
 =cut
 
-has [qw/type rowspan colspan/] => (is => 'rw',  isa => 'Str');
+has [qw/rowspan colspan/] => (is => 'rw',  isa => 'Str');
 
 =head2 to_json
 
