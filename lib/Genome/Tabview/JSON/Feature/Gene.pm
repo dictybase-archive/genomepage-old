@@ -146,8 +146,8 @@ sub gene_products {
     my $gene     = $self->source_feature;
     my $trans_rs = $gene->search_related(
         'feature_relationship_objects',
-        { 'type.name' => 'part_of', 'cv.name' => 'sequence' },
-        { join        => [          { 'type'  => 'cv' } ] }
+        { 'type.name' => 'part_of'},
+        { join        => 'type' }
         )->search_related(
         'subject',
         { 'type_2.name' => 'mRNA' },
@@ -157,7 +157,7 @@ sub gene_products {
 
     my $product_rs = $trans_rs->search_related(
         'feature_relationship_objects',
-        { 'type_3.name' => 'derived_from' },
+        { 'type_3.name' => 'derives_from' },
         { join          => 'type' }
         )->search_related(
         'subject',
@@ -166,7 +166,7 @@ sub gene_products {
         )->search_related(
         'featureprops',
         {   'type_5.name' => 'product',
-            'cv_2.name'   => 'feature_property'
+            'cv.name'   => 'feature_property'
         },
         { join => [ { 'type' => 'cv' } ] }
         );
