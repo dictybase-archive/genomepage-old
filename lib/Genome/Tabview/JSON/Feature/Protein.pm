@@ -165,7 +165,7 @@ has 'molecular_weight' => (
     is   => 'ro',
     isa  => 'Str',
     lazy => 1,
-    sub {
+    default => sub {
         my ($self)  = @_;
         my $feature = $self->source_feature;
         my $weight  = Bio::Tools::SeqStats->get_mol_wt(
