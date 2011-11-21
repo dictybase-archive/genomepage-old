@@ -113,9 +113,9 @@ has 'gene' => (
         my ($self) = @_;
         my $rs = $self->source_feature->search_related(
             'feature_relationship_subjects',
-            { 'type' => 'derived_from' },
+            { 'type.name' => 'derived_from' },
             { join   => 'type' }
-            )->search(
+            )->search_related(
             'object',
             { 'type_2.name' => 'mRNA' },
             { join          => 'type' }
@@ -126,7 +126,7 @@ has 'gene' => (
             )->search_related(
             'object',
             { 'type_4.name' => 'gene' },
-            { joint         => 'type', prefetch => 'dbxref' }
+            { join         => 'type', prefetch => 'dbxref' }
             );
         return $rs->first;
     }
@@ -143,7 +143,7 @@ has 'gene' => (
 
 has 'length' => (
     is   => 'ro',
-    isa  => 'Str',
+    isa  => 'HashRef',
     lazy => 1,
     default => sub {
         my ($self) = @_;
@@ -163,7 +163,7 @@ has 'length' => (
 
 has 'molecular_weight' => (
     is   => 'ro',
-    isa  => 'Str',
+    isa  => 'HashRef',
     lazy => 1,
     default => sub {
         my ($self)  = @_;
