@@ -240,6 +240,7 @@ has 'protein' => (
     isa     => 'Genome::Tabview::JSON::Feature::Protein',
     lazy    => 1,
     default => sub {
+    	my ($self) = @_;
         my $feat            = $self->source_feature;
         my $polypeptide_row = $feat->search_related(
             'feature_relationship_objects',
