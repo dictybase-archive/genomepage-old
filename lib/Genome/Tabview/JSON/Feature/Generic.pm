@@ -239,7 +239,7 @@ sub feature_tab_link {
     my $link = $self->json->link(
         caption => $caption,
         url     => $self->context->url_to(
-            $base_url, $self->gene->dbxref->accession,
+            $base_url, 'gene', $self->gene->dbxref->accession,
             'feature', $primary_id
         ),
         type => 'tab',
