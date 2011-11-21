@@ -133,10 +133,9 @@ has '_items' => (
     handles => {
         'add_item'  => 'push',
         'items'     => 'elements',
-        'has_items' => 'count'
+        'has_items' => 'count', 
+        'get_item' => 'get'
     },
-    lazy    => 1,
-    default => sub { [] }
 );
 
 =head2 to_json

@@ -108,7 +108,17 @@ use Moose;
 
 =cut
 
-has 'content' => (is => 'rw',  isa => 'ArrayRef',  required => 1);
+has 'content' => (
+    is        => 'rw',
+    isa       => 'ArrayRef',
+    required  => 1,
+    traits => [qw/Array/], 
+    handles => {
+    	'get_content' => 'get', 
+    	'has_content' => 'count'
+    }
+);
+
 
 
 =head2 type

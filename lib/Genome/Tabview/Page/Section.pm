@@ -220,8 +220,8 @@ has 'gene' => ( is => 'rw', isa => 'Genome::Tabview::JSON::Feature::Gene' );
 sub row {
     my ( $self, @column_data ) = @_;
     my $column_panel
-        = Genome::Tabview::Config::Panel->new( layout => 'column');
-    $column_panel->add_item( $self->columns(@column_data) );
+        = Genome::Tabview::Config::Panel->new( layout => 'column' );
+    $column_panel->add_item($_) for @{ $self->columns(@column_data) };
 
     my $item = Genome::Tabview::Config::Panel::Item::Row->new(
         content => [$column_panel] );
@@ -284,10 +284,8 @@ sub json_panel {
             push @json_items, $item;
         }
     }
-    my $json_panel = Genome::Tabview::Config::Panel->new(
-        layout => 'json',
-        _items => \@json_items,
-    );
+    my $json_panel = Genome::Tabview::Config::Panel->new( layout => 'json', );
+    $json_panel->add_item($_) for @json_items;
     return $json_panel;
 }
 

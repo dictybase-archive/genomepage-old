@@ -86,9 +86,18 @@ use strict;
 use namespace::autoclean;
 use Moose;
 
-has 'content' => (is => 'rw',  isa => 'ArrayRef',  required => 1);
-has 'type' => (is => 'rw',  isa => 'Str|Undef');
-has 'colspan' => (is => 'rw',  isa => 'Str');
+has 'content' => (
+    is        => 'rw',
+    isa       => 'ArrayRef',
+    required  => 1,
+    traits => [qw/Array/], 
+    handles => {
+    	'get_content' => 'get', 
+    	'has_content' => 'count'
+    }
+);
+has 'type'    => ( is => 'rw', isa => 'Str|Undef' );
+has 'colspan' => ( is => 'rw', isa => 'Str' );
 
 =head2 type
 
@@ -135,7 +144,7 @@ sub to_json {
     my $item;
     $item->{type}    = $self->type    if $self->type;
     $item->{colspan} = $self->colspan if $self->colspan;
-    if ( $self->content ) {
+    if ( $self->has_content ) {
         foreach my $panel ( @{ $self->content } ) {
             push @{ $item->{content} }, $panel->to_json;
         }

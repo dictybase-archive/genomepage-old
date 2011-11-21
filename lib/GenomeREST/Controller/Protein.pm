@@ -47,8 +47,8 @@ sub show_subsection_json {
 	my ($self) = @_;
     my $factory = Genome::Factory::Tabview::Section->new(
         primary_id => $self->stash('gene_id'),
-        tab        => $self->stash('tab'),
-        section    => 'protein',
+        tab        => 'protein',
+        section    => $self->stash('section'),
         context    => $self,
         model      => $self->app->modware->handler
         sub_section => $self->stash('sub_section')

@@ -102,28 +102,13 @@ sub show_tab_json {
     $self->render_json( [ map { $_->to_json } $conf->panels ] );
 }
 
-sub show_section {
-    my ($self) = @_;
-    my $common_name = $self->stash('common_name');
-    if ( !$self->check_organism($common_name) ) {
-        $self->render_not_found;
-        return;
-    }
-    $self->set_organism($common_name);
-    if ( $self->stash('format') and $self->stash('format') eq 'json' ) {
-        return $self->show_section_json;
-    }
-    $self->show_section_html;
-}
-
-
 sub show_section_json {
     my ($self) = @_;
     my $factory;
     $factory = Genome::Factory::Tabview::Section->new(
         primary_id => $self->stash('gene_id'),
         tab        => 'protein',
-        section    => $self->stash('id'),
+        section    => $self->stash('section'),
         context    => $self,
         model      => $self->app->modware->handler
     );

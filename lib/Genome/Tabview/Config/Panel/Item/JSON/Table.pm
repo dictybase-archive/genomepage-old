@@ -94,7 +94,7 @@ use namespace::autoclean;
 use Moose;
 use MooseX::Params::Validate;
 
-has [qw/id paginator filter class/] => (
+has [qw/id paginator filter class type table_class/] => (
     is  => 'rw',
     isa => 'Str'
 );

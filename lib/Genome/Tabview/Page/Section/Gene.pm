@@ -102,7 +102,10 @@ has '+gene' => (
             ->search( { 'dbxref.accession' => $self->primary_id },
             { rows => 1, join => 'dbxref' } )->single;
         return Genome::Tabview::JSON::Feature::Gene->new(
-            source_feature => $row );
+            source_feature => $row,
+            context        => $self->context, 
+            base_url => $self->base_url
+        );
     }
 );
 
@@ -154,12 +157,13 @@ sub info {
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
     ## -- collect section rows
-    $panel->add_item($self->row( 'Gene Name',    $gene->name ));
-    $panel->add_item($self->row( 'Gene ID',      $gene->primary_id ));
-    if (my $prod = $gene->gene_products) {
-    	$panel->add_item('Gene Product', $prod);
+    $panel->add_item( $self->row( 'Gene Name', $gene->name ) );
+    $panel->add_item( $self->row( 'Gene ID',   $gene->primary_id ) );
+    if ( my $prod = $gene->gene_products ) {
+        $panel->add_item( 'Gene Product', $prod );
     }
-    $panel->add_item($self->row( 'Community Annotations', $gene->wiki_links ));
+    $panel->add_item(
+        $self->row( 'Community Annotations', $gene->wiki_links ) );
     $config->add_panel($panel);
     return $config;
 }
@@ -212,14 +216,17 @@ sub product {
 
     my @panels;
     my @primary_ids;
-    foreach my $feature ( $gene->transcripts ) {
+    foreach my $feature ( $gene->coding_transcripts ) {
         my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
         my $rows = $self->product_coordinates($feature);
-        $panel->items($rows);
+        $panel->add_item($_) for @$rows;
         push @panels,      $panel;
         push @primary_ids, $feature->source_feature->dbxref->accession;
     }
-    return $config->add_panel( $panels[0] ) if scalar @panels == 1;
+    if ( @panels == 1 ) {
+        $config->add_panel( $panels[0] );
+        return $config;
+    }
 
     my $tab_panel = Genome::Tabview::Config::Panel->new(
         layout => 'tabview',
@@ -238,7 +245,8 @@ sub product {
         );
         $tab_panel->add_item($item);
     }
-    return $config->add_panel($tab_panel);
+    $config->add_panel($tab_panel);
+    return $config;
 }
 
 =head2 product_coordinates
@@ -278,7 +286,7 @@ sub product_coordinates {
             content => [ $self->json_panel( $feature->coordinate_table ) ],
             );
     }
-    $panel->items( \@columns );
+    $panel->add_item($_) for @columns;
     my $row = $row_item->new( content => [$panel] );
 
     push @rows, $row;
@@ -305,7 +313,7 @@ sub product_coordinates {
 
     push @rows,
         $self->row( 'Sequence',
-        $feature->get_fasta_selection( -base_url => $self->base_url ) );
+        $feature->get_fasta_selection( base_url => $self->base_url ) );
 
     return \@rows;
 }
@@ -352,8 +360,8 @@ sub links {
     if ( my $row = $self->gene->external_links ) {
         $panel->items( [ $self->row( 'External Resources', $row ) ] );
         $config->add_panel($panel);
-        return $config;
     }
+    return $config;
 }
 
 =head2 references
@@ -375,11 +383,10 @@ sub references {
         $panel->add_item(
             $self->row( $reference->links, $reference->citation ) );
     }
-
     if ( $panel->has_items ) {
         $config->add_panel($panel);
-        return $config;
     }
+    return $config;
 }
 
 1;

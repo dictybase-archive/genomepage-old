@@ -106,6 +106,15 @@ has 'json' => (
 );
 
 has 'context' => ( is => 'rw', isa => 'Mojolicious::Controller' );
+has 'base_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        return $self->context->url_to;
+    }
+);
 
 has 'reference_feature' => (
     is      => 'rw',
@@ -114,7 +123,7 @@ has 'reference_feature' => (
     default => sub {
         my ($self) = @_;
         my $rs = $self->source_feature->search_related( 'featureloc_features',
-            {} )->search_related( 'srcfeature', { prefetch => 'dbxref' } );
+            {} )->search_related( 'srcfeature',{},{ prefetch => 'dbxref' } );
         return $rs->first;
     }
 );
@@ -126,7 +135,7 @@ has 'reference_feature_url' => (
     default => sub {
         my ($self) = @_;
         my $feat = $self->reference_feature;
-        return $self->ctx->url_to( $self->base_url, $feat->type->name,
+        return $self->context->url_to( $self->base_url, $feat->type->name,
             $feat->dbxref->accession );
     }
 );

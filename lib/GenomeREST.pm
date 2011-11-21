@@ -65,7 +65,7 @@ sub startup {
     my $geneid = $gene->waypoint('/:id')->name('gene')->to('gene#show');
 
     ## -- tabs
-    my $general_tabs = $geneid->waypoint( '/:tab',
+    my $general_tab = $geneid->waypoint( '/:tab',
         tab => [qw/gene orthologs blast references/] )->to('gene#show_tab');
     my $protein_tab = $geneid->waypoint('/protein')->to('protein#show_tab');
     my $feat_tab    = $geneid->waypoint('/feature')->to('feature#show_tab');
@@ -76,9 +76,11 @@ sub startup {
         format  => 'json',
         section => [qw/info genomic_info product sequences links/]
     )->to('gene#show_section');
-    my $protein_section
-        = $protein_tab->waypoint( '/:id', id => qr/^[A-Z]{3}_\d{4, 12}$/ )
-        ->to('protein#show_section');
+    my $protein_section = $protein_tab->waypoint(
+        '/:id',
+        id     => qr/^[A-Z]{3}_\d{4, 12}$/,
+        format => 'json'
+    )->to('protein#show_section');
     my $feature_section
         = $feature_tab->waypoint( '/:id', id => qr/^[A-Z]{3}_\d{4, 12}$/ )
         ->to('feature#show_section');
@@ -95,7 +97,8 @@ sub startup {
         subsection => [qw/info references/]
     )->to('feature#show_subsection');
 }
-    # init database connection
+
+# init database connection
 #    my $datasource = Homology::Chado::DataSource->instance;
 #    $datasource->dsn( $self->config->{database}->{dsn} )
 #        if !$datasource->has_dsn;
@@ -103,7 +106,6 @@ sub startup {
 #        if !$datasource->has_user;
 #    $datasource->password( $self->config->{database}->{password} )
 #        if !$datasource->has_password;
-
 
 1;
 
