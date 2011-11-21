@@ -150,7 +150,7 @@ has '_items' => (
 =cut
 
 sub to_json {
-    my ( $self, @args ) = @_;
+    my ( $self) = @_;
     croak "No items found for the panel\n" if !$self->has_items;
 
     my $items;
