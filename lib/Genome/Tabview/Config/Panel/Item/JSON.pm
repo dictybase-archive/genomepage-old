@@ -118,7 +118,8 @@ has 'content' => ( is => 'rw', isa => 'ArrayRef|HashRef' );
 =cut
 
 sub link {
-    my ( $self, $url, $caption, $type, $style, $title, $name, $id )
+	my $self = shift;
+    my ( $url, $type, $caption, $style, $title, $name, $id )
         = validated_list(
         \@_,
         url     => { isa => 'Str|ArrayRef' },
@@ -133,7 +134,7 @@ sub link {
     my $json_link;
     $json_link->{url}     = $url;
     $json_link->{type}    = $type;
-    $json_link->{caption} = $url if !$caption;
+    $json_link->{caption} = $caption ? $caption : $url;
     $json_link->{style}   = $style if $style;
     $json_link->{title}   = $title if $title;
     $json_link->{id}      = $id if $id;
