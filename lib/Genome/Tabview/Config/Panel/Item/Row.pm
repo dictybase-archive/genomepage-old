@@ -83,38 +83,12 @@ SUCH DAMAGES.
 package Genome::Tabview::Config::Panel::Item::Row;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Moose;
 
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Config::Panel::Item::Row> object.
- Returns  : Genome::Tabview::Config::Panel::Item::Row object 
- Args     : -type    : class to be assigned to the element
-            -colspan : number of columns a row should take up
-            -content : If defined should contain elements to display inside the tab as a
-                          reference to an array of Genome::Tabview::Config::Panel objects.
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    $self->{root} = Bio::Root::Root->new();
-
-    my $arglist = [qw/TYPE CONTENT COLSPAN/];
-    my ( $type, $content, $colspan ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('content is not provided') if !$content;
-
-    $self->content($content);
-    $self->type($type)       if $type;
-    $self->colspan($colspan) if $colspan;
-    return $self;
-}
+has 'content' => (is => 'rw',  isa => 'ArrayRef',  required => 1);
+has 'type' => (is => 'rw',  isa => 'Str|Undef');
+has 'colspan' => (is => 'rw',  isa => 'Str');
 
 =head2 type
 
@@ -126,12 +100,6 @@ sub new {
 
 =cut
 
-sub type {
-    my ( $self, $arg ) = @_;
-    $self->{type} = $arg if defined $arg;
-    return $self->{type};
-}
-
 =head2 colspan
 
  Title    : colspan
@@ -142,12 +110,6 @@ sub type {
 
 =cut
 
-sub colspan {
-    my ( $self, $arg ) = @_;
-    $self->{colspan} = $arg if defined $arg;
-    return $self->{colspan};
-}
-
 =head2 content
 
  Title    : key
@@ -157,23 +119,6 @@ sub colspan {
  Args     : reference to an array of Genome::Tabview::Config::Panel objects
 
 =cut
-
-sub content {
-    my ( $self, $arg ) = @_;
-
-    if ($arg) {
-        $self->{root}->throw("Content should be array reference")
-            if ref($arg) ne 'ARRAY';
-        foreach my $panel (@$arg) {
-            my $warn =
-                'Content should be reference to an array of Genome::Tabview::Config::Panel objects';
-            $self->{root}->throw($warn)
-                if ref($panel) !~ m{Genome::Tabview::Config::Panel}i;
-        }
-        $self->{content} = $arg;
-    }
-    return $self->{content};
-}
 
 =head2 to_json
 
@@ -197,6 +142,8 @@ sub to_json {
     }
     return $item;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
