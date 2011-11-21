@@ -88,7 +88,6 @@ use Genome::Tabview::Config::Panel::Item::JSON;
 use Genome::Tabview::Config::Panel::Item::Column;
 use Genome::Tabview::Config::Panel::Item::Row;
 
-
 =head2 section
 
  Title    : section
@@ -125,8 +124,6 @@ has 'primary_id' => (
     required => 1,
 );
 
-
-
 has 'base_url' => (
     is      => 'rw',
     isa     => 'Str',
@@ -144,8 +141,8 @@ sub _build_base_url {
     return $self->context->url_to;
 }
 
-for my $attr(qw/section tab/) {
-	has $attr => (is => 'rw',  isa => 'Str',  predicate => 'has_'.$attr);
+for my $attr (qw/section tab/) {
+    has $attr => ( is => 'rw', isa => 'Str', predicate => 'has_' . $attr );
 }
 
 has 'context' => (
@@ -165,7 +162,6 @@ has 'json' => (
     lazy    => 1,
     default => sub { Genome::Tabview::Config::Panel::Item::JSON->new }
 );
-
 
 =head2 process
 
@@ -223,10 +219,10 @@ has 'gene' => ( is => 'rw', isa => 'Genome::Tabview::JSON::Feature::Gene' );
 
 sub row {
     my ( $self, @column_data ) = @_;
-    my $column_panel = Genome::Tabview::Config::Panel->new(
-        layout => 'column',
-        items  => $self->columns(@column_data)
-    );
+    my $column_panel
+        = Genome::Tabview::Config::Panel->new( layout => 'column');
+    $column_panel->add_item( $self->columns(@column_data) );
+
     my $item = Genome::Tabview::Config::Panel::Item::Row->new(
         content => [$column_panel] );
     return $item;
@@ -247,8 +243,8 @@ sub row {
 sub columns {
     my ( $self, @column_data ) = @_;
     my $columns;
-    for my $i (0 .. $#column_data) {
-        my $json_panel = $self->json_panel($column_data[$i]);
+    for my $i ( 0 .. $#column_data ) {
+        my $json_panel = $self->json_panel( $column_data[$i] );
         my $class = $i == 0 ? 'content_table_title' : undef;
         push @$columns,
             Genome::Tabview::Config::Panel::Item::Column->new(
@@ -279,8 +275,8 @@ sub json_panel {
     foreach my $element (@$data) {
         my $ref = \$element;
         if ( ref($ref) eq 'SCALAR' ) {
-            my $item =
-                $json_item->new( content => $self->json->text($element) );
+            my $item
+                = $json_item->new( content => $self->json->text($element) );
             push @json_items, $item;
         }
         else {
@@ -290,14 +286,14 @@ sub json_panel {
     }
     my $json_panel = Genome::Tabview::Config::Panel->new(
         layout => 'json',
-        _items  => \@json_items,
+        _items => \@json_items,
     );
     return $json_panel;
 }
 
 before 'gene' => sub {
-	my ($self) = @_;
-	croak "model attribute need to set\n" if !$self->has_model;
+    my ($self) = @_;
+    croak "model attribute need to set\n" if !$self->has_model;
 };
 
 __PACKAGE__->meta->make_immutable;
