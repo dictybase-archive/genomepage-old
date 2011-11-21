@@ -166,7 +166,7 @@ sub location {
 
     my $ref_feat = $floc->srcfeature;
     my $str
-        = $ref_feat->type . "<b>"
+        = $ref_feat->type->name . "<b>"
         . $ref_feat->name
         . "</b> coordinates <b>$start</b> to <b>$end</b>, <b>$strand</b> strand";
 
