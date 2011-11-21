@@ -104,7 +104,7 @@ has '_exon_featureloc' => (
             'subject',
             { 'type_2.name' => 'exon' },
             { join          => 'type' }
-            )->search_related( 'featureloc_features', {} )->all;
+            )->search_related( 'featureloc_features', {} );
     }
 );
 
@@ -116,14 +116,48 @@ has 'gene' => (
         my ($self) = @_;
         my $rs = $self->source_feature->search_related(
             'feature_relationship_subjects',
-            { 'type' => 'part_of' },
-            { join   => 'type' }
-            )->search(
+            { 'type.name' => 'part_of' },
+            { join        => 'type' }
+            )->search_related(
             'object',
             { 'type_2.name' => 'gene' },
             { join          => 'type', prefetch => 'dbxref' }
             );
         return $rs->first;
+    }
+);
+
+=head2 protein
+
+ Title    : protein
+ Function : returns protein feature for Genome::Tabview::JSON::Feature::Generic features with
+            dicty::Feature::mRNA source feature
+ Usage    : $protein = $feature->protein;
+ Returns  : Genome::Tabview::JSON::Feature::Protein
+ Args     : none
+ 
+=cut
+
+has 'protein' => (
+    is      => 'rw',
+    isa     => 'Genome::Tabview::JSON::Feature::Protein',
+    lazy    => 1,
+    default => sub {
+        my ($self)          = @_;
+        my $feat            = $self->source_feature;
+        my $polypeptide_row = $feat->search_related(
+            'feature_relationship_objects',
+            { 'type.name' => 'derived_from' },
+            { join        => 'type' }
+            )->search_related(
+            'subject',
+            { 'type_2.name' => 'polypeptide' },
+            { join          => 'type', 'rows' => 1 }
+            )->single;
+        return Genome::Tabview::JSON::Feature::Protein->new(
+            source_feature => $polypeptide_row,
+            context        => $self->context
+        );
     }
 );
 
@@ -224,38 +258,6 @@ sub genbank_link {
 
 }
 
-=head2 protein
-
- Title    : protein
- Function : returns protein feature for Genome::Tabview::JSON::Feature::Generic features with
-            dicty::Feature::mRNA source feature
- Usage    : $protein = $feature->protein;
- Returns  : Genome::Tabview::JSON::Feature::Protein
- Args     : none
- 
-=cut
-
-has 'protein' => (
-    is      => 'rw',
-    isa     => 'Genome::Tabview::JSON::Feature::Protein',
-    lazy    => 1,
-    default => sub {
-    	my ($self) = @_;
-        my $feat            = $self->source_feature;
-        my $polypeptide_row = $feat->search_related(
-            'feature_relationship_objects',
-            { 'type_of' => 'derived_from' },
-            { join      => 'type' }
-            )->search_related(
-            'subject',
-            { 'type_2.name' => 'polypeptide' },
-            { join          => 'type', 'rows' => 1 }
-            )->single;
-        return Genome::Tabview::JSON::Feature::Protein->new(
-            source_feature => $polypeptide_row );
-    }
-);
-
 =head2 transcript
 
  Title    : transcript
@@ -268,8 +270,8 @@ has 'protein' => (
 
 sub transcript {
     my ($self) = @_;
-    return if $self->source_feature->type =~ m{mRNA};
-    return if $self->source_feature->type !~ m{RNA};
+    return if $self->source_feature->type->name =~ m{mRNA};
+    return if $self->source_feature->type->name !~ m{RNA};
     return 1;
 }
 
@@ -421,12 +423,14 @@ sub get_fasta_selection {
             'blast?&primary_id=' . $feature->dbxref->accession
         )
     );
-    my $get_fasta = $self->json->selector(
+
+    my %params = (
         options     => $sequences,
         action_link => [ $fasta_button, $blast_button ],
         class       => 'sequence_selector',
-        caption     => $caption || undef
     );
+    $params{caption} = $caption if $caption;
+    my $get_fasta = $self->json->selector( %params );
     return $get_fasta;
 }
 
@@ -531,10 +535,11 @@ sub coordinate_table {
     my $end    = $floc->fmax;
     my $offset = $strand == 1 ? $start : $end;
 
+    my $exonfloc_rs = $self->_exon_featureloc;
     my @exon_parts
         = $strand == 1
-        ? sort { $a->fmin <=> $b->fmin } $self->_exon_featureloc
-        : sort { $b->fmin <=> $a->fmin } $self->_exon_featureloc;
+        ? sort { $a->fmin <=> $b->fmin } $exonfloc_rs->all
+        : sort { $b->fmin <=> $a->fmin } $exonfloc_rs->all;
 
     my $exoncount = 1;
     foreach my $part (@exon_parts) {
