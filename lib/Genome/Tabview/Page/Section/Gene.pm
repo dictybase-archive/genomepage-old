@@ -160,7 +160,7 @@ sub info {
     push @rows, $self->row( 'Gene Product', $gene->gene_products )
         if $gene->gene_products;
     push @rows, $self->row( 'Community Annotations', $gene->wiki_links );
-    $panel->items( \@rows );
+    $panel->add_item($_) for @rows;
     $config->add_panel($panel);
     return $config;
 }
