@@ -191,7 +191,7 @@ sub genomic_info {
     my @rows;
     push @rows, $self->row( 'Location',    $gene->location );
     push @rows, $self->row( 'Genomic Map', \@gbrowse );
-    $panel->items( \@rows );
+    $panel->add_item($_) for @rows;
     $config->add_panel($panel);
     return $config;
 }
