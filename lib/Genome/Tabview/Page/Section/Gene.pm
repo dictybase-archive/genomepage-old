@@ -154,13 +154,12 @@ sub info {
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
     ## -- collect section rows
-    my @rows;
-    push @rows, $self->row( 'Gene Name',    $gene->name );
-    push @rows, $self->row( 'Gene ID',      $gene->primary_id );
-    push @rows, $self->row( 'Gene Product', $gene->gene_products )
-        if $gene->gene_products;
-    push @rows, $self->row( 'Community Annotations', $gene->wiki_links );
-    $panel->add_item($_) for @rows;
+    $panel->add_item($self->row( 'Gene Name',    $gene->name ));
+    $panel->add_item($self->row( 'Gene ID',      $gene->primary_id ));
+    if (my $prod = $gene->gene_products) {
+    	$panel->add_item('Gene Product', $prod);
+    }
+    $panel->add_item($self->row( 'Community Annotations', $gene->wiki_links ));
     $config->add_panel($panel);
     return $config;
 }
@@ -189,9 +188,9 @@ sub genomic_info {
 
     ## -- collect section rows
     my @rows;
-    push @rows, $self->row( 'Location',    $gene->location );
-    push @rows, $self->row( 'Genomic Map', \@gbrowse );
-    $panel->add_item($_) for @rows;
+    $panel->add_item( $self->row( 'Location', $gene->location ) );
+    $panel->add_item(
+        $self->row( 'Genomic Map', [ $gbrowse_text, $gbrowse_link ] ) );
     $config->add_panel($panel);
     return $config;
 }
@@ -329,8 +328,7 @@ sub sequences {
     my @rows;
     if ( my $ests = $gene->ests ) {
         my @rows;
-        push @rows, $self->row( 'ESTs', $ests );
-        $panel->items( \@rows );
+        $panel->add_item( $self->row( 'ESTs', $ests ) );
         $config->add_panel($panel);
         return $config;
     }
