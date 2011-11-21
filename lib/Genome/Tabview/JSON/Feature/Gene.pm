@@ -146,7 +146,7 @@ sub gene_products {
     my $gene     = $self->source_feature;
     my $trans_rs = $gene->search_related(
         'feature_relationship_objects',
-        { 'type.name' => 'part_of'},
+        { 'type.name' => 'part_of' },
         { join        => 'type' }
         )->search_related(
         'subject',
@@ -166,7 +166,7 @@ sub gene_products {
         )->search_related(
         'featureprops',
         {   'type_5.name' => 'product',
-            'cv.name'   => 'feature_property'
+            'cv.name'     => 'feature_property'
         },
         { join => [ { 'type' => 'cv' } ] }
         );
@@ -194,7 +194,7 @@ sub gene_products {
 
 has 'features' => (
     is         => 'ro',
-    isa        => 'ArrayRef[DBIx::Class::Row]',
+    isa        => 'ArrayRef',
     lazy       => 1,
     auto_deref => 1,
     default    => sub {
@@ -211,14 +211,49 @@ has 'transcripts' => (
     default    => sub {
         my ($self) = @_;
         my @rows = $self->source_feature->search_related(
-            'feature_relation_objects',
+            'feature_relationship_objects',
             { 'type.name' => 'part_of' },
             { join        => 'type' }
-        )->search_related( 'subject', {} )->all;
+            )->search_related(
+            'subject',
+            { 'type_2.name' => { 'like', '%RNA' } },
+            { join          => 'type' }
+            )->all;
         return [
             map {
                 Genome::Tabview::JSON::Feature::Generic->new(
-                    source_feature => $_ )
+                    source_feature => $_,
+                    context        => $self->context,
+                    base_url       => $self->base_url
+                    )
+                } @rows
+        ];
+    }
+);
+
+has 'coding_transcripts' => (
+    is         => 'ro',
+    isa        => 'ArrayRef[Genome::Tabview::JSON::Feature]',
+    lazy       => 1,
+    auto_deref => 1,
+    default    => sub {
+        my ($self) = @_;
+        my @rows = $self->source_feature->search_related(
+            'feature_relationship_objects',
+            { 'type.name' => 'part_of' },
+            { join        => 'type' }
+            )->search_related(
+            'subject',
+            { 'type_2.name' => 'mRNA' },
+            { join          => 'type' }
+            )->all;
+        return [
+            map {
+                Genome::Tabview::JSON::Feature::Generic->new(
+                    source_feature => $_,
+                    context        => $self->context,
+                    base_url       => $self->base_url
+                    )
                 } @rows
         ];
     }
@@ -269,8 +304,10 @@ sub ests {
     foreach my $est ( $est_rs->all ) {
         unshift @$links, $self->json->link(
             caption => $est->dbxref->accession,
-            url     => $self->base_url . '/' . $est->dbxref->accession,
-            type    => 'outer',
+            url     => $self->context_url_to(
+                $self->base_url, $est->dbxref->accession
+            ),
+            type => 'outer',
         );
     }
     return $links;
@@ -328,6 +365,4 @@ sub orthologs {
 }
 
 1;
-
-
 
