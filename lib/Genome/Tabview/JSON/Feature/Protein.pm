@@ -145,7 +145,7 @@ has 'length' => (
     is   => 'ro',
     isa  => 'Str',
     lazy => 1,
-    sub {
+    default => sub {
         my ($self) = @_;
         my $length = $self->source_feature->seqlen;
         return $self->json->text( $length . ' aa' );
@@ -218,8 +218,8 @@ sub aa_composition {
     my $feature = $self->source_feature;
     my $link    = $self->json->link(
         caption => 'View Amino Acid Composition',
-        url     => $ctx->url_to(
-            $base_url, $self->gene->dbxref->accession,
+        url     => $self->context->url_to(
+            $self->base_url, $self->gene->dbxref->accession,
             'protein', $feature->dbxref->accession,
             'statistics'
         ),
@@ -258,7 +258,7 @@ sub sequence {
     my $transcript_id = $self->transcript->dbxref->accession;
     my $gene_id       = $self->gene->dbxref->accession;
 
-    my $header = ">$transcript_id|$gene_id|Protein|gene: $gene";
+    my $header = ">$transcript_id|$gene_id|Protein|gene: ";
     $header .= "on supercontig: $ref_name position $ref_start to $ref_end\n";
     my $seq = $self->source_feature->residues;
     $seq =~ s/(.{1, 60})/$1\n/g;
