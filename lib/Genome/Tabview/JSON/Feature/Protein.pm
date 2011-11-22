@@ -175,7 +175,7 @@ has 'molecular_weight' => (
                 -id       => $feature->uniquename
             )
         );
-        return $self->json->text( $weight . ' Da' );
+        return $self->json->text( $weight->[0] . ' Da' );
     }
 );
 
