@@ -122,8 +122,10 @@ has 'reference_feature' => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        my $rs = $self->source_feature->search_related( 'featureloc_features',
-            {} )->search_related( 'srcfeature',{},{ prefetch => 'dbxref' } );
+        my $rs
+            = $self->source_feature->search_related( 'featureloc_features',
+            {} )
+            ->search_related( 'srcfeature', {}, { prefetch => 'dbxref' } );
         return $rs->first;
     }
 );
@@ -234,10 +236,12 @@ sub make_external_link {
         id     => { isa => 'Str' },
         type   => { isa => 'Str', optional => 1, default => 'outer' }
     );
+	my $name = $source->name;
+	my $caption = $name =~ /^DB:/ ? ((split /:/,$name))[1]: $name;
 
     return $self->json->link(
         url     => $source->urlprefix . $id,
-        caption => $source->name,
+        caption => $caption.':'.$id,
         type    => $type
     );
 }
@@ -255,7 +259,9 @@ sub external_links {
     my ($self) = @_;
     my $feature = $self->source_feature();
     my $links;
-    for my $xref_row ( $feature->secondary_dbxrefs ) {
+    for my $xref_row ( grep { $_->db->name ne 'GFF_source' }
+        $feature->secondary_dbxrefs )
+    {
         push @$links,
             $self->make_external_link(
             source => $xref_row->db,
