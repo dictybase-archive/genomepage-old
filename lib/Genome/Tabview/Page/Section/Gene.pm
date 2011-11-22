@@ -268,11 +268,11 @@ sub product_coordinates {
     my $column_item = 'Genome::Tabview::Config::Panel::Item::Column';
     my $row_item    = 'Genome::Tabview::Config::Panel::Item::Row';
 
-    my @feature_data
-        = ( $feature->feature_tab_link( base_url => $self->base_url ), );
+    my $feature_data
+        = $feature->feature_tab_link( base_url => $self->base_url );
 
     my @columns;
-    push @columns, @{ $self->columns( $feature->gene_type, \@feature_data ) };
+    push @columns, @{ $self->columns( $feature->gene_type, $feature_data ) };
     if ( !$feature->pseudogene ) {
         push @columns,
             $column_item->new(
@@ -333,13 +333,11 @@ sub sequences {
     my $gene   = $self->gene;
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
-    my @rows;
     if ( my $ests = $gene->ests ) {
-        my @rows;
         $panel->add_item( $self->row( 'ESTs', $ests ) );
         $config->add_panel($panel);
-        return $config;
     }
+    return $config;
 }
 
 =head2 links
@@ -358,7 +356,7 @@ sub links {
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
     if ( my $row = $self->gene->external_links ) {
-        $panel->items( [ $self->row( 'External Resources', $row ) ] );
+        $panel->add_item( $self->row( 'External Resources', $row ) );
         $config->add_panel($panel);
     }
     return $config;

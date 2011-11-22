@@ -300,7 +300,7 @@ sub ests {
         push @$links, $more_link;
     }
 
-    foreach my $est ( $est_rs->search({}, {rows => 6}) ) {
+    foreach my $est ( $est_rs->search( {}, { rows => 6 } ) ) {
         unshift @$links, $self->json->link(
             caption => $est->dbxref->accession,
             url     => $self->context->url_to(
