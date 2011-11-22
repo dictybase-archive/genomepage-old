@@ -276,36 +276,35 @@ sub ests {
     my $end   = $gene->featureloc_features->first->fmax;
 
     my $est_rs
-        = $self->model->resultset('Sequence::Feature')
-        ->search( { 'type.name' => 'EST' },
-        { join => 'type', prefetch => 'dbxref' } )->search_related(
-        'featureloc_features',
-        {   fmin => { '<=', $end },
-            fmax => { '>=', $start }
-        }
+        = $gene->result_source->schema->resultset('Sequence::Feature')
+        ->search(
+        {   'type.name'                => 'EST',
+            'featureloc_features.fmin' => { '<=', $end },
+            'featureloc_features.fmax' => { '>=', $start },
+            'featureloc_features.srcfeature_id' =>
+                $self->reference_feature->feature_id
+        },
+        { join => [qw/featureloc_features type/], prefetch => 'dbxref' }
         );
     my $count = $est_rs->count;
-    return !$count;
+    return if !$count;
 
     my $links;
     ## -- need to fix
-    if ( $count == 6 ) {
+    if ( $count >= 6 ) {
         my $more_link = $self->json->link(
             caption => 'more..',
-            url     => "/db/cgi-bin/more_est.pl?feature_id="
-                . $gene->feature_id
-                . "&gene_name="
-                . $gene->name,
-            type => 'outer',
+            url     => $self->context->url_to( $self->base_url, 'est' ),
+            type    => 'outer',
         );
         push @$links, $more_link;
     }
 
-    foreach my $est ( $est_rs->all ) {
+    foreach my $est ( $est_rs->search({}, {rows => 6}) ) {
         unshift @$links, $self->json->link(
             caption => $est->dbxref->accession,
-            url     => $self->context_url_to(
-                $self->base_url, $est->dbxref->accession
+            url     => $self->context->url_to(
+                $self->base_url, 'est', $est->dbxref->accession
             ),
             type => 'outer',
         );
