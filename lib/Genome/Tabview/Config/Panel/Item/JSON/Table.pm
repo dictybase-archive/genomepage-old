@@ -256,9 +256,12 @@ sub structure {
     my ($self) = @_;
     my $structure;
     $structure->{$_} = $self->$_
-        for qw/type columns records records table_class/;
+        for qw/type table_class/;
 	for my $param(qw/id filter paginator/) {
 		$structure->{$param} = $self->$param if $self->$param;
+	}
+	for my $param(qw/records columns/) {
+		push @{$structure->{$param}}, $_ for $self->$param;
 	}
     return $structure;
 }
