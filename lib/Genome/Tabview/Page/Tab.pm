@@ -93,6 +93,7 @@ has 'parent_feature_id' => (
 );
 
 has 'tab' => ( is => 'rw', isa => 'Str', predicate => 'has_tab' );
+has 'primary_id' => (is => 'rw',  isa => 'Str',  required => 1);
 
 has 'base_url' => (
     is      => 'rw',
@@ -218,18 +219,18 @@ has 'section_base_url' => (
 =cut
 
 sub section_source {
-    my ( $self, %arg ) = validated_hash(
+    my $self = shift;
+    my ( $key, $primary_id ) = validated_list(
         \@_,
         key        => { isa => 'Str' },
         primary_id => { isa => 'Str', optional => 1 }
     );
     my $ctx = $self->context;
-    if ( $arg{primary_id} ) {
-        return $ctx->url_to( $self->section_base_url, $self->tab,
-            $arg{primary_id}, $arg{key} . '.json' );
+    if ($primary_id) {
+        return $ctx->url_to( $self->section_base_url, $primary_id,
+            $key . '.json' );
     }
-    return $ctx->url_to( $self->section_base_url, $self->tab,
-        $arg{key} . '.json' );
+    return $ctx->url_to( $self->section_base_url, $key . '.json' );
 }
 
 =head2 accordion
@@ -245,21 +246,23 @@ sub section_source {
 =cut
 
 sub accordion {
-    my ( $self, %arg ) = validated_hash(
+    my $self = shift;
+    my ( $key, $label, $primary_id ) = validated_list(
         \@_,
         key        => { isa => 'Str' },
         label      => { isa => 'ArrayRef' },
         primary_id => { isa => 'Str', optional => 1 }
     );
 
-    my $primary_id = $self->primary_id if !$arg{primary_id};
+    my %source_options
+        = $primary_id
+        ? ( primary_id => $primary_id, key => $key )
+        : ( key => $key );
+
     my $item = Genome::Tabview::Config::Panel::Item::Accordion->new(
-        key    => $arg{key},
-        label  => $arg{label},
-        source => $self->section_source(
-            key        => $arg{key},
-            primary_id => $primary_id
-        ),
+        key    => $key,
+        label  => $label,
+        source => $self->section_source( %source_options )
     );
     return $item;
 }
