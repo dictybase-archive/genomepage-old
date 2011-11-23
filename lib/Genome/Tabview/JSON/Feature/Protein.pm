@@ -86,6 +86,16 @@ use Carp;
 use Moose;
 extends 'Genome::Tabview::JSON::Feature';
 
+has '+reference_feature' => (
+    default => sub {
+        my ($self) = @_;
+        my $rs
+            = $self->transcript->search_related( 'featureloc_features', {} )
+            ->search_related( 'srcfeature', {}, { prefetch => 'dbxref' } );
+        return $rs->first;
+    }
+);
+
 has 'transcript' => (
     isa     => 'DBIx::Class::Row',
     is      => 'rw',
@@ -94,12 +104,14 @@ has 'transcript' => (
         my ($self) = @_;
         my $rs = $self->source_feature->search_related(
             'feature_relationship_subjects',
-            { 'type' => 'derived_from' },
-            { join   => 'type' }
-            )->search(
+            { 'type.name' => 'derived_from' },
+            { join        => 'type' }
+            )->search_related(
             'object',
             { 'type_2.name' => 'mRNA' },
-            { join          => 'type', 'prefetch' => 'dbxref' }
+            {   join       => 'type',
+                'prefetch' => [qw/dbxref featureloc_features/]
+            }
             );
         return $rs->first;
     }
@@ -247,19 +259,19 @@ sub aa_composition {
 =cut
 
 sub sequence {
-    my ($self) = @_;
-    my $feature = $self->source_feature();
+    my ($self)  = @_;
+    my $feature = $self->source_feature;
+    my $ref     = $self->reference_feature;
+    my $ref_name       = $ref->name ? $ref->name : $ref->uniquename;
+    my $trans_location = $self->transcript->featureloc_features->first;
+    my $start          = $trans_location->fmin + 1;
+    my $end            = $trans_location->fmax;
 
-    my $ref       = $self->reference_feature;
-    my $ref_name  = $ref->name ? $ref->name : $ref->uniquename;
-    my $ref_start = $ref->featureloc_features->first->fmin + 1;
-    my $ref_end   = $ref->featureloc_features->first->fmax;
+    my $protein_id = $feature->dbxref->accession;
+    my $gene_id    = $self->gene->dbxref->accession;
 
-    my $transcript_id = $self->transcript->dbxref->accession;
-    my $gene_id       = $self->gene->dbxref->accession;
-
-    my $header = ">$transcript_id|$gene_id|Protein|gene: ";
-    $header .= "on supercontig: $ref_name position $ref_start to $ref_end\n";
+    my $header = ">$protein_id|$gene_id|Protein|";
+    $header .= "on supercontig: $ref_name position $start to $end\n";
     my $seq = $self->source_feature->residues;
     $seq =~ s/(.{1, 60})/$1\n/g;
     return $self->json->text("$header\n$seq");
