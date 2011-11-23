@@ -82,42 +82,42 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Tab::Protein;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Carp;
+use Moose;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
-use base qw( Genome::Tabview::Page::Tab );
+extends 'Genome::Tabview::Page::Tab';
 
-=head2 new
+has '+tab' => ( lazy => 1, default => 'protein' );
 
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Tab::Protein> object. 
-            Sets templates and configuration parameters for tabs to be displayed
- Usage    : my $tab = Genome::Tabview::Page::Tab::Protein->new( -primary_id => 'DDB0185055' );
- Returns  : Genome::Tabview::Page::Tab::Protein object with default configuration.
- Args     : feature primary id
- 
-=cut
+has 'primary_id' => (
+    is       => 'rw',
+    isa      => 'Str',
+    required => 1,
+);
 
-sub new {
-    my ( $class, @args ) = @_;
+has '+feature' => (
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $row = $self->model->resultset('Sequence::Feature')->search(
+            {   'dbxref.accession' => $self->primary_id,
+                'type.name'        => 'polypeptide'
+            },
+            {   join => [qw/dbxref type/],
+                rows => 1
+            }
+        )->single;
+        croak $self->primary_id, " is not a protein\n" if !$row;
+        return $row;
+    }
+);
 
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID BASE_URL/];
-
-    $self->{root} = Bio::Root::Root->new();
-    my ($primary_id, $base_url) = $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-
-    my $feature = dicty::Feature->new( -primary_id => $primary_id );
-    $self->feature($feature);
-    $self->tab('protein');
-    $self->base_url($base_url) if $base_url;
-    return $self;
-}
+before 'feature' => sub {
+    my ($self) = @_;
+    croak "Need to set the model attribute\n" if !$self->has_model;
+};
 
 =head2 init
 
@@ -129,59 +129,35 @@ sub new {
  
 =cut
 
-sub init {
-    my ($self)  = @_;
-    my $feature = $self->feature;
-    my $config  = Genome::Tabview::Config->new();
-    my $panel   = Genome::Tabview::Config::Panel->new(
-        -layout => 'accordion' );
+override 'init' => sub {
+    my ($self) = @_;
+    my $config = Genome::Tabview::Config->new();
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'accordion' );
 
-    my @items;
-    push @items,
+    $panel->add_item(
         $self->accordion(
-        -key   => 'info',
-        -label => $self->simple_label("General Information"),
+            key   => 'info',
+            label => $self->simple_label("General Information"),
+        )
     );
-    push @items,
+    $panel->add_item(
         $self->accordion(
-        -key   => 'links',
-        -label => $self->simple_label("Links")
+            key   => 'links',
+            label => $self->simple_label("Links")
+        )
     ) if $self->show_links;
-    push @items,
+
+    $panel->add_item(
         $self->accordion(
-        -key   => 'domains',
-        -label => $self->simple_label("Protein Domains")
-    ) if $self->show_domains;
-    push @items,
-        $self->accordion(
-        -key   => 'sequence',
-        -label => $self->simple_label("Protein Sequence")
+            key   => 'sequence',
+            label => $self->simple_label("Protein Sequence")
+        )
     );
 
-    $panel->items( \@items );
     $config->add_panel($panel);
     $self->config($config);
     return $self;
-}
-
-=head2 show_domains
-
- Title    : show_domains
- Function : defines if to show domains section
- Usage    : $show = $tab->show_domains();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-sub show_domains {
-    my ($self) = @_;
-
-    my $poly       = $self->feature->polypeptide;
-    my $domain_itr = $poly->domains();
-    my $count      = $domain_itr->count();
-    return $count ? 1 : 0;
-}
+};
 
 =head2 show_links
 
@@ -195,15 +171,11 @@ sub show_domains {
 
 sub show_links {
     my ($self) = @_;
-
-    my $feature = $self->feature;
-    my $gene    = $feature->gene;
-
-    return 1 if @{ $gene->pathways() };
-
-    foreach my $key ( keys %{$feature->external_ids()} ) {
-        return 1 if $key =~ m{protein|uniprot|swissprot|trembl}i;
-    }
-    return;
+    my @xrefs = grep { $_->db->name ne 'GFF_source' }
+        $self->feature->secondary_dbxrerfs;
+    return 1 if @xrefs;
 }
+
+__PACKAGE__->meta->make_immutable;
+
 1;
