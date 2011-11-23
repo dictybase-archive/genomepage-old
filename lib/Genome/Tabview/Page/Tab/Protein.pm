@@ -113,12 +113,6 @@ has '+parent_feature_id' => (
     }
 );
 
-has 'primary_id' => (
-    is       => 'rw',
-    isa      => 'Str',
-    required => 1,
-);
-
 has '+feature' => (
     lazy    => 1,
     default => sub {
