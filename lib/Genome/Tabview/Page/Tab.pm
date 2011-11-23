@@ -85,6 +85,13 @@ use Carp;
 use Genome::Tabview::Config::Panel::Item::JSON;
 use Genome::Tabview::Config::Panel::Item::Accordion;
 
+has 'parent_feature_type' =>
+    ( is => 'rw', isa => 'Str', lazy => 1, default => 'gene' );
+has 'parent_feature_id' => (
+    is  => 'rw',
+    isa => 'Str'
+);
+
 has 'tab' => ( is => 'rw', isa => 'Str', predicate => 'has_tab' );
 
 has 'base_url' => (
@@ -194,11 +201,8 @@ has 'section_base_url' => (
     default => sub {
         my ($self) = @_;
         my $ctx = $self->context;
-#        my $gene
-#            = $self->feature->type eq 'gene'
-#            ? $self->feature
-#            : $self->feature->gene;
-        return $ctx->url_to( $self->base_url, $self->primary_id );
+        return $ctx->url_to( $self->base_url, $self->parent_feature_type,
+            $self->parent_feature_id, $self->tab );
     }
 );
 
