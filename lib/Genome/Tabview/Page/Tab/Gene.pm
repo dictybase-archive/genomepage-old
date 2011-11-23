@@ -101,11 +101,6 @@ sub _build_base_url {
         $self->primary_id );
 }
 
-has 'primary_id' => (
-    is       => 'rw',
-    isa      => 'Str',
-    required => 1,
-);
 
 has '+feature' => (
     lazy    => 1,
