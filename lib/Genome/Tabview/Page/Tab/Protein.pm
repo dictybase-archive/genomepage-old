@@ -90,6 +90,28 @@ use Genome::Tabview::Config::Panel;
 extends 'Genome::Tabview::Page::Tab';
 
 has '+tab' => ( lazy => 1, default => 'protein' );
+has '+parent_feature_id' => (
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $gene = $self->feature->search_related(
+            'feature_relationship_subjects',
+            { 'type.name' => 'derived_from' },
+            { join        => 'type' }
+            )->search_related( 'object', {} )->search_related(
+            'feature_relationship_subjects',
+            { 'type_2.name' => 'part_of' },
+            { join          => 'type' }
+            )->search_related(
+            'object',
+            { 'type_3.name' => 'gene' },
+            {   join     => 'type',
+                prefetch => 'dbxref'
+            }
+            );
+        return $gene->first->dbxref->accession;
+    }
+);
 
 has 'primary_id' => (
     is       => 'rw',
@@ -133,24 +155,28 @@ override 'init' => sub {
     my ($self) = @_;
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'accordion' );
+    my $primary_id = $self->primary_id;
 
     $panel->add_item(
         $self->accordion(
-            key   => 'info',
-            label => $self->simple_label("General Information"),
+            key        => 'info',
+            label      => $self->simple_label("General Information"),
+            primary_id => $primary_id
         )
     );
     $panel->add_item(
         $self->accordion(
-            key   => 'links',
-            label => $self->simple_label("Links")
+            key        => 'links',
+            label      => $self->simple_label("Links"),
+            primary_id => $primary_id
         )
     ) if $self->show_links;
 
     $panel->add_item(
         $self->accordion(
-            key   => 'sequence',
-            label => $self->simple_label("Protein Sequence")
+            key        => 'sequence',
+            label      => $self->simple_label("Protein Sequence"),
+            primary_id => $primary_id
         )
     );
 
@@ -172,7 +198,7 @@ override 'init' => sub {
 sub show_links {
     my ($self) = @_;
     my @xrefs = grep { $_->db->name ne 'GFF_source' }
-        $self->feature->secondary_dbxrerfs;
+        $self->feature->secondary_dbxrefs;
     return 1 if @xrefs;
 }
 
