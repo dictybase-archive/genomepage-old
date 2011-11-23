@@ -32,11 +32,9 @@ sub show_tab_json {
 
 sub show_section_json {
     my ($self) = @_;
-    my $factory;
-    $factory = Genome::Factory::Tabview::Section->new(
-        primary_id => $self->stash('gene_id'),
+    my $factory = Genome::Factory::Tabview::Tab->new(
         tab        => 'protein',
-        section    => $self->stash('id'),
+        primary_id => $self->stash('id'),
         context    => $self,
         model      => $self->app->modware->handler
     );
@@ -44,14 +42,13 @@ sub show_section_json {
 }
 
 sub show_subsection_json {
-	my ($self) = @_;
+    my ($self) = @_;
     my $factory = Genome::Factory::Tabview::Section->new(
-        primary_id => $self->stash('gene_id'),
+        primary_id => $self->stash('id'),
         tab        => 'protein',
-        section    => $self->stash('section'),
+        section    => $self->stash('subsection'),
         context    => $self,
         model      => $self->app->modware->handler
-        sub_section => $self->stash('sub_section')
     );
     $self->render_json( $self->panel_to_json($factory) );
 }
