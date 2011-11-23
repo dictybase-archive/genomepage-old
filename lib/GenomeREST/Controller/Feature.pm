@@ -48,11 +48,9 @@ sub show_section_html {
 
 sub section_json {
     my ($self) = @_;
-
-    my $factory = Genome::Factory::Tabview::Tab->new(
+	my $factory = Genome::Factory::Tabview::Tab->new(
         tab        => 'feature',
-        primary_id => $self->stash('section'),
-        base_url   => $self->base_url,
+        primary_id => $self->stash('id'),
         context    => $self,
         model      => $self->app->modware->handler
     );

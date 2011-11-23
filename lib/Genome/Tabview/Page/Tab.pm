@@ -267,6 +267,12 @@ sub accordion {
     return $item;
 }
 
+
+sub show_references {
+	my ($self) = @_;
+	return $self->feature->search_related('feature_pubs', {})->count;
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;

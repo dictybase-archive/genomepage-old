@@ -93,6 +93,8 @@ use Genome::Tabview::JSON::Feature::Gene;
 extends 'Genome::Tabview::Page::Tab';
 
 has '+tab' => ( lazy => 1, default => 'gene' );
+has '+parent_feature_id' =>
+    ( lazy => 1, default => sub { return $_[0]->primary_id } );
 
 sub _build_base_url {
     my ($self) = @_;
@@ -100,7 +102,6 @@ sub _build_base_url {
     return $ctx->url_to( $ctx->stash('common_name'), 'gene',
         $self->primary_id );
 }
-
 
 has '+feature' => (
     lazy    => 1,
@@ -197,12 +198,14 @@ sub show_genomic_info {
         { join        => 'type' }
     )->search_related( 'subject', {}, { prefetch => 'type' } );
 
-    if (!$primary_feature_rs->count) {
-    	return;
+    if ( !$primary_feature_rs->count ) {
+        return;
     }
 
     ## --show the gbrowse map for RNA features (right now tRNA, ncRNA, mRNA) and pseudogenes
-    return $primary_feature_rs->first->type->name =~ m{RNA|pseudogene}ix ? 1 : 0;
+    return $primary_feature_rs->first->type->name =~ m{RNA|pseudogene}ix
+        ? 1
+        : 0;
 }
 
 =head2 show_product
@@ -261,7 +264,6 @@ sub show_links {
         source_feature => $self->feature );
     return $ui_gene->external_links ? 1 : 0;
 }
-
 
 =head2 references_label
 

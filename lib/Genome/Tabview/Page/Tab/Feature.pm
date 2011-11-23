@@ -82,63 +82,86 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Tab::Feature;
 
 use strict;
-use Bio::Root::Root;
-use Module::Find;
-use Genome::Tabview::Config;
-use Genome::Tabview::Config::Panel;
-use base qw( Genome::Tabview::Page::Tab );
+use namespace::autoclean;
+use Carp;
+use Moose;
+extends 'Genome::Tabview::Page::Tab';
 
-=head2 new
 
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Tab::Feature> object. 
-            Determines which subclass to instanciate based on the feature type
- Usage    : my $tab = Genome::Tabview::Page::Tab::Feature->new( -primary_id => 'DDB0185055' );
- Returns  : Genome::Tabview::Page::Tab::Feature subclass object with default configuration.
- Args     : feature primary id
+has '+tab' => ( lazy => 1, default => 'feature' );
+has '+parent_feature_id' => (
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $gene = $self->feature->search_related(
+            'feature_relationship_subjects',
+            { 'type.name' => 'part_of' },
+            { join        => 'type' }
+            )->search_related(
+            'object',
+            { 'type_2.name' => 'gene' },
+            {   join     => 'type',
+                prefetch => 'dbxref'
+            }
+            );
+        return $gene->first->dbxref->accession;
+    }
+);
+
+has '+feature' => (
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $row = $self->model->resultset('Sequence::Feature')->search(
+            {   'dbxref.accession' => $self->primary_id,
+            },
+            {   join => [qw/dbxref/],
+                rows => 1
+            }
+        )->single;
+        croak $self->primary_id, " is not a protein\n" if !$row;
+        return $row;
+    }
+);
+
+before 'feature' => sub {
+    my ($self) = @_;
+    croak "Need to set the model attribute\n" if !$self->has_model;
+};
+
+
+=head2 init
+
+ Title    : init
+ Function : initializes the tab. Sets tab configuration parameters
+ Usage    : $tab->init();
+ Returns  : nothing
+ Args     : none
  
 =cut
 
-sub new {
-    my ( $class, @args ) = @_;
+sub init {
+    my ($self) = @_;
+    my $config = Genome::Tabview::Config->new();
+    my $panel  = Genome::Tabview::Config::Panel->new(
+        layout => 'accordion' );
 
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
+    $panel->add_item($self->accordion(
+        key   => 'info',
+        label => $self->simple_label("General Information"),
+        primary_id => $self->primary_id
+    ));
+    $panel->add_item($self->accordion(
+        key   => 'references',
+        label => $self->simple_label("References"),
+        primary_id => $self->primary_id
+    )) if $self->show_references;
 
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID BASE_URL/];
-
-    $self->{root} = Bio::Root::Root->new();
-    my ($primary_id, $base_url) = $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-
-    $self->base_url($base_url) if $base_url;
-    
-    my $feature = dicty::Feature->new( -primary_id => $primary_id );
-    $self->{root}->throw('primary_id should be DDB ID')
-        if $feature->type eq 'gene';
-    $self->feature($feature);
-
-    my $namespace = 'Genome::Tabview::Page::Tab::Feature';
-
-    my $type = $feature->type;
-    my $subclass =
-          $type =~ m{RNA|Pseudo}i ? 'Generic'
-        : $type =~ m{databank_entry|cDNA_clone}i ? 'GenBank'
-        : $type eq 'EST Contig' ? 'EST_Contig'
-        :                         $type;
-
-    my @modules = grep {/::$subclass$/ix} findsubmod $namespace;
-    $self->{root}
-        ->throw( "Module matching tab for $subclass not found in namespace "
-            . $namespace )
-        if !@modules;
-
-    eval "require $modules[0]";
-    $self->{root}->throw($@) if $@;
-
-    return $modules[0]->new( -primary_id => $feature->primary_id, -base_url => $base_url );
+    $config->add_panel($panel);
+    $self->config($config);
+    return $self;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

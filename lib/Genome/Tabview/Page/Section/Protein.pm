@@ -84,46 +84,30 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Section::Protein;
 
 use strict;
+use namespace::autoclean;
+use Moose;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::JSON::Feature::Protein;
-use base qw( Genome::Tabview::Page::Section );
+extends 'Genome::Tabview::Page::Section';
 
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Section::Protein> object. 
- Usage    : my $page = Genome::Tabview::Page::Section::Protein->new();
- Returns  : Genome::Tabview::Page::Section::Protein object with default configuration.
- Args     : -primary_id   - feature primary id
-            -section      - section id
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID SECTION BASE_URL/];
-    $self->{root} = Bio::Root::Root->new();
-
-    my ( $primary_id, $section, $base_url ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-
-    #    $self->{root}->throw('section is not provided')    if !$section;
-
-    my $feature = Genome::Tabview::JSON::Feature::Protein->new(
-        -primary_id => $primary_id );
-
-    $self->section($section) if $section;
-    $self->feature($feature);
-    $self->base_url($base_url) if $base_url;
-    return $self;
-}
+has '+feature' => (
+    lazy    => 1,
+    default => sub {
+    	my ($self) = @_;
+        my $rs = $self->model->resultset('Sequence::Feature')->search(
+            {   'dbxref.accession' => $self->primary_id,
+                'type.name'        => 'polypeptide'
+            },
+            { join => [qw/dbxref type/] }
+        );
+        return Genome::Tabview::JSON::Feature::Protein->new(
+            source_feature => $rs->first,
+            base_url       => $self->base_url,
+            context        => $self->context
+        );
+    }
+);
 
 =head2 init
 
@@ -162,89 +146,23 @@ sub init {
 sub info {
     my ( $self, @args ) = @_;
     my $protein = $self->feature;
-    my $gene    = $protein->gene;
 
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
-    my @rows;
-    push @rows, $self->row( 'Gene Product', $gene->gene_products )
-        if $gene->gene_products;
-
-    push @rows, $self->row( 'Alternative Protein Names', $gene->protein_synonyms )
-        if $gene->protein_synonyms;
-    push @rows, $self->row( 'dictyBase ID', $protein->primary_id );
-    push @rows, $self->row( 'Description',  $gene->description )
-        if $gene->description;
-    push @rows, $self->row( 'Protein Length',   $protein->length );
-    push @rows, $self->row( 'Molecular Weight', $protein->molecular_weight );
-    push @rows, $self->row( 'AA Composition',   $protein->aa_composition );
-
-    my @uniprot_rows;
-
-    push @uniprot_rows,
-        $self->row( 'Sequence processing*', $protein->sequence_processing )
-        if $protein->sequence_processing;
-    push @uniprot_rows,
-        $self->row( 'Subunit structure*', $protein->subunit_structure )
-        if $protein->subunit_structure;
-    push @uniprot_rows,
-        $self->row( 'Subcellular location*', $protein->subcellular_location )
-        if $protein->subcellular_location;
-    push @uniprot_rows, $self->row( 'Domain*', $protein->domain )
-        if $protein->domain;
-    push @uniprot_rows,
-        $self->row( 'Post-translational modification*',
-        $protein->post_modification )
-        if $protein->post_modification;
-    push @uniprot_rows, $self->row( 'Cofactor*', $protein->cofactor )
-        if $protein->cofactor;
-    push @uniprot_rows,
-        $self->row( 'Catalityc activity*', $protein->catalityc_activity )
-        if $protein->catalityc_activity;
-
-    push @uniprot_rows,
-        $self->row( 'Protein existence*', $protein->protein_existence )
-        if @uniprot_rows
-            || (   $protein->protein_existence
-                && $protein->protein_existence->{text} !~ m{Predicted} );
-    push @uniprot_rows,
-        $self->row( 'Note',
-        '<b>*This information was obtained from UniProt manually reviewed record<b>'
-        ) if @uniprot_rows;
-
-    my @all_rows = ( @rows, @uniprot_rows );
-    $panel->items( \@all_rows );
+    if ( my $name = $protein->name ) {
+        $panel->add_item( $self->row( 'Gene Product', $name ) );
+    }
+    $panel->add_item( $self->row( 'Protein ID',     $protein->primary_id ) );
+    $panel->add_item( $self->row( 'Protein Length', $protein->length ) );
+    $panel->add_item(
+        $self->row( 'Molecular Weight', $protein->molecular_weight ) );
+    $panel->add_item(
+        $self->row( 'AA Composition', $protein->aa_composition ) );
     $config->add_panel($panel);
     return $config;
 }
 
-=head2 domains
-
- Title    : domains
- Function : returns protein domains section
- Usage    : $json = $section->domains();
- Returns  : string
- Args     : none
- 
-=cut
-
-sub domains {
-    my ( $self, @args ) = @_;
-    my $protein = $self->feature;
-    my $config  = Genome::Tabview::Config->new();
-    my $panel   = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
-    my $text = $self->json->text(
-        '[Click on track to get information about a particular domain]');
-    my @domains =
-        ( $text, $protein->domains_image, $protein->domains_table_link );
-    my $row = $self->row( 'Protein Domains', \@domains );
-
-    $panel->add_item($row);
-    $config->add_panel($panel);
-    return $config;
-}
 
 =head2 sequence
 
@@ -258,12 +176,9 @@ sub domains {
 sub sequence {
     my ($self) = @_;
     my $protein = $self->feature;
-
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
-    my $row = $self->row( 'Protein Sequence', $protein->sequence );
-    $panel->add_item($row);
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
+    $panel->add_item($self->row('Protein Sequence',  $protein->sequence));
     $config->add_panel($panel);
     return $config;
 }
@@ -280,19 +195,15 @@ sub sequence {
 sub links {
     my ($self)  = @_;
     my $protein = $self->feature;
-    my $gene    = $protein->gene;
-
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
-    my @rows;
-    push @rows, $self->row( 'Pathways', $gene->pathways ) if $gene->pathways;
-    push @rows, $self->row( 'External Links', $protein->external_links )
-        if $protein->external_links;
-
-    $panel->items( \@rows );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
+    if (my $link = $protein->external_links) {
+    	$panel->add_item('External Links',  $link);
+    }
     $config->add_panel($panel);
     return $config;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
