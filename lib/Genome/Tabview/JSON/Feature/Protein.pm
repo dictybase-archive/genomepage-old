@@ -114,7 +114,7 @@ has 'gene' => (
         my $rs = $self->source_feature->search_related(
             'feature_relationship_subjects',
             { 'type.name' => 'derived_from' },
-            { join   => 'type' }
+            { join        => 'type' }
             )->search_related(
             'object',
             { 'type_2.name' => 'mRNA' },
@@ -126,7 +126,7 @@ has 'gene' => (
             )->search_related(
             'object',
             { 'type_4.name' => 'gene' },
-            { join         => 'type', prefetch => 'dbxref' }
+            { join          => 'type', prefetch => 'dbxref' }
             );
         return $rs->first;
     }
@@ -142,9 +142,9 @@ has 'gene' => (
 =cut
 
 has 'length' => (
-    is   => 'ro',
-    isa  => 'HashRef',
-    lazy => 1,
+    is      => 'ro',
+    isa     => 'HashRef',
+    lazy    => 1,
     default => sub {
         my ($self) = @_;
         my $length = $self->source_feature->seqlen;
@@ -162,9 +162,9 @@ has 'length' => (
 =cut
 
 has 'molecular_weight' => (
-    is   => 'ro',
-    isa  => 'HashRef',
-    lazy => 1,
+    is      => 'ro',
+    isa     => 'HashRef',
+    lazy    => 1,
     default => sub {
         my ($self)  = @_;
         my $feature = $self->source_feature;
@@ -220,7 +220,7 @@ sub aa_composition {
         caption => 'View Amino Acid Composition',
         url     => $self->context->url_to(
             $self->base_url, $self->gene->dbxref->accession,
-            'protein', $feature->dbxref->accession,
+            'protein',       $feature->dbxref->accession,
             'statistics'
         ),
         type => 'outer',
@@ -265,5 +265,16 @@ sub sequence {
     return $self->json->text("$header\n$seq");
 }
 
+sub name {
+    my ($self) = @_;
+    my $row = $self->source_feature->search_related(
+        'featureprops',
+        {   'type.name' => 'product',
+            'cv.name'   => 'feature_property'
+        },
+        { join => [ { 'type' => 'cv' } ], rows => 1 }
+    )->single;
+    return $row->value if $row;
+}
 
 1;
