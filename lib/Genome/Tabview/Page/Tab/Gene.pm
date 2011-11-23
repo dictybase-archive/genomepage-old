@@ -262,21 +262,6 @@ sub show_links {
     return $ui_gene->external_links ? 1 : 0;
 }
 
-=head2 show_references
-
- Title    : show_references
- Function : defines if to show gene latest references section
- Usage    : $show = $tab->show_references();
- Returns  : boolean
- Args     : none
- 
-=cut
-
-sub show_references {
-    my ($self) = @_;
-    my $gene = $self->feature;
-    return $gene->search_related( 'feature_pubs', {} )->count;
-}
 
 =head2 references_label
 
