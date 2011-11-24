@@ -239,8 +239,9 @@ sub feature_tab_link {
     my $link = $self->json->link(
         caption => $caption,
         url     => $self->context->url_to(
-            $base_url, 'gene', $self->gene->dbxref->accession,
-            'feature', $primary_id
+            $base_url,                      'gene',
+            $self->gene->dbxref->accession, 'feature',
+            $primary_id
         ),
         type => 'tab',
     );
@@ -430,7 +431,7 @@ sub get_fasta_selection {
         class       => 'sequence_selector',
     );
     $params{caption} = $caption if $caption;
-    my $get_fasta = $self->json->selector( %params );
+    my $get_fasta = $self->json->selector(%params);
     return $get_fasta;
 }
 
@@ -470,31 +471,22 @@ sub available_sequences {
 =cut
 
 sub small_gbrowse_image {
-    my ($self)  = @_;
+    my ($self) = @_;
     my $feature = $self->source_feature;
-    my $type    = $feature->type;
-    my $source  = $feature->source;
+    my $species = $feature->organism->common_name;
+    my ($track)
+        = map { $_->accession }
+        grep { $_->db->name eq 'GFF_source' } $feature->secondary_dbxrefs;
 
-    my $track
-        = $type eq "mRNA"
-        && $source eq "geneID reprediction" ? "Repredictions"
-        : $type =~ m{[mRNA|pseudogene]}ix
-        && $source eq "$ENV{'SITE_NAME'} Curator" ? $ENV{'SITE_NAME'}
-        : $type eq "mRNA" && $source =~ m{JGI}ix ? "JGImodel"
-        : $type eq "mRNA" && $source !~ m{curator}ix ? "Predictions"
-        : $type =~ m{[^t]RNA}ix ? "ncRNA"
-        :                         $type;
-
-    my $name    = $self->gbrowse_window($feature);
-    my $species = $feature->organism->species;
+    my $name = $self->gbrowse_window($feature);
     my $image
         = "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=250&type=${track}&keystyle=none&abs=1";
 
     my $link    = "/db/cgi-bin/ggb/gbrowse/$species?name=${name}";
     my $gbrowse = $self->json->link(
-        -caption => $image,
-        -url     => $link,
-        -type    => 'gbrowse',
+        caption => $image,
+        url     => $link,
+        type    => 'gbrowse',
     );
     return $gbrowse;
 }
