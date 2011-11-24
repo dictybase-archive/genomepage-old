@@ -89,6 +89,19 @@ use Genome::Tabview::JSON::Feature::Protein;
 use Genome::Tabview::JSON::Feature;
 extends 'Genome::Tabview::JSON::Feature';
 
+has 'display_type' => (
+	is => 'ro', 
+	isa => 'Str', 
+	lazy => 1, 
+	default => sub {
+		my ($self) = @_;
+		my ($type) = 
+        = map { $_->accession }
+        grep { $_->db->name eq 'GFF_source' } $self->feature->secondary_dbxrefs;
+        return $type;
+	}
+);
+
 has '_exon_featureloc' => (
     isa     => 'DBIx::Class::ResultSet',
     is      => 'ro',
@@ -474,10 +487,7 @@ sub small_gbrowse_image {
     my ($self) = @_;
     my $feature = $self->source_feature;
     my $species = $feature->organism->common_name;
-    my ($track)
-        = map { $_->accession }
-        grep { $_->db->name eq 'GFF_source' } $feature->secondary_dbxrefs;
-
+    my $track = $self->display_type;
     my $name = $self->gbrowse_window($feature);
     my $image
         = "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=250&type=${track}&keystyle=none&abs=1";
