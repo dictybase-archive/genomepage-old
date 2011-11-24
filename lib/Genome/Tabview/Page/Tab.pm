@@ -79,8 +79,8 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Tab;
 
 use namespace::autoclean;
-use Moose;
-use MooseX::Params::Validate;
+use Mouse;
+use MouseX::Params::Validate;
 use Carp;
 use Genome::Tabview::Config::Panel::Item::JSON;
 use Genome::Tabview::Config::Panel::Item::Accordion;
@@ -266,7 +266,6 @@ sub accordion {
     );
     return $item;
 }
-
 
 sub show_references {
 	my ($self) = @_;
