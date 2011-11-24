@@ -84,64 +84,48 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Section::Feature;
 
 use strict;
-use Module::Find;
+use namespace::autoclean;
+use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
-use Bio::Root::Root;
+extends 'Genome::Tabview::Page::Section';
 
-use base qw( Genome::Tabview::Page::Section );
+has '+feature' => (
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $rs
+            = $self->model->resultset('Sequence::Feature')
+            ->search( { 'dbxref.accession' => $self->primary_id },
+            { join => 'type' } );
+        return Genome::Tabview::JSON::Feature::Generic->new(
+            source_feature => $rs->first,
+            base_url       => $self->base_url,
+            context        => $self->context
+        );
+    }
+);
 
-=head2 new
+=head2 init
 
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Section::Feature> object. 
-            Determines which subclass to instanciate based on the feature type
- Usage    : my $tab = Genome::Tabview::Page::Section::Feature->new( -primary_id => 'DDB0185055', section => 'info' );
- Returns  : Genome::Tabview::Page::Section::Feature subclass object with default configuration.
- Args     : feature primary id
+ Title    : init
+ Function : initializes the section.
+ Usage    : $section->init();
+ Returns  : nothing
+ Args     : none
  
 =cut
 
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID SECTION BASE_URL/];
-
-    $self->{root} = Bio::Root::Root->new();
-    my ( $primary_id, $section, $base_url ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-
-    my $feature = dicty::Feature->new( -primary_id => $primary_id );
-    $self->{root}->throw('provided is should belong to feature, not a gene')
-        if $feature->type eq 'gene';
-
-    my $namespace = 'Genome::Tabview::Page::Section::Feature';
-
-    my $type = $feature->type;
-
-    my $subclass =
-          $type =~ m{RNA|Pseudo}i ? 'Generic'
-        : $type =~ m{databank_entry|cDNA_clone}i ? 'GenBank'
-        : $type eq 'EST Contig' ? 'EST_Contig'
-        :                         $type;
-
-    my @modules = grep {m{::$subclass$}ix} findsubmod $namespace;
-    $self->{root}->throw(
-        "Module matching section for $subclass not found in namespace "
-            . $namespace )
-        if !@modules;
-
-    eval "require $modules[0]";
-    $self->{root}->throw($@) if $@;
-
-    return $modules[0]
-        ->new( -primary_id => $feature->primary_id, -section => $section, -base_url => $base_url );
+sub init {
+    my ($self)   = @_;
+    my $section  = $self->section;
+    my $settings = {
+        info       => sub { $self->info(@_) },
+        references => sub { $self->references(@_) },
+    };
+    my $config = $settings->{$section}->();
+    $self->config($config);
+    return $self;
 }
 
 =head2 info
@@ -154,8 +138,17 @@ sub new {
 =cut
 
 sub info {
-    my ( $self, @args ) = @_;
+    my ( $self ) = @_;
     my $feature = $self->feature;
+
+    my $gbrowse_link = $feature->small_gbrowse_image();
+    my $gbrowse_text = $self->json->text(
+        '[Click on the map to browse the genome from this location]<br>');
+    my @map = ( $gbrowse_text, $gbrowse_link );
+
+    my $location = $feature->location;
+    my $coords   = $feature->coordinate_table;
+    my @table    = ( $location, $coords );
 
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
@@ -163,48 +156,56 @@ sub info {
     my @rows;
     push @rows, $self->row( 'Feature Type', $feature->display_type );
     push @rows, $self->row( 'Sequence ID',  $feature->primary_id );
-    push @rows, $self->row( 'Description',  $feature->description )
+    push @rows, $self->row( 'Map',          \@map, \@table );
+
+    push @rows, $self->row( 'Alert', $feature->alert ) if $feature->alert;
+    push @rows, $self->row( 'Description', $feature->description )
         if $feature->description;
-    push @rows, $self->row( 'Accession Number', $feature->accession_number )
-        if $feature->accession_number;
+    push @rows, $self->row( 'Derived from', $feature->derived_from )
+        if $feature->derived_from;
+    push @rows, $self->row( 'Supported by', $feature->supported_by )
+        if $feature->supported_by;
     push @rows, $self->row( 'Links', $feature->external_links )
         if $feature->external_links;
-    push @rows, $self->row( 'Sequence', $feature->get_fasta_selection );
+    push @rows,
+        $self->row( 'Sequence',
+        $feature->get_fasta_selection( -base_url => $self->base_url ) );
 
     $panel->items( \@rows );
     $config->add_panel($panel);
     return $config;
 }
 
-=head2 protein
+=head2 columns
 
- Title    : protein
- Function : Returns protein section rows for the feature
- Returns  : array  
- Args     : none
+ Title    : columns
+ Function : returns reference to an array of Genome::Tabview::Config::Panel::Item::JSON
+            objects containing column data. First column would have "title" class 
+            that would result in different display.
+ Usage    : $columns = $section->columns(@elements);
+ Returns  : Genome::Tabview::Config::Panel object
+ Args     : array of items to put into columns inside the row
  
 =cut
 
-sub protein {
-    my ( $self, @args ) = @_;
-    my $feature = $self->feature;
-    my $protein = $feature->protein;
+sub columns {
+    my ( $self, @column_data ) = @_;
+    my @columns;
+    my $i = 0;
+    foreach my $column (@column_data) {
+        my $json_panel = $self->json_panel($column);
+        my $class      = $i == 0 ? 'content_table_title' : undef;
+        my $colspan    = $i == 0 || @column_data > 2 ? undef : '2';
 
-    my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
-    my $cds_length = length(
-        $feature->source_feature->sequence( -type => 'DNA coding sequence' )
-    );
-    my @rows;
-    push @rows, $self->row( 'Protein Length',   $protein->length );
-    push @rows, $self->row( 'Molecular Weight', $protein->molecular_weight );
-    push @rows, $self->row( 'AA Composition',   $protein->aa_composition );
-    push @rows, $self->row( 'CDS Length',       $cds_length . ' nt' );
-
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
+        push @columns,
+            Genome::Tabview::Config::Panel::Item::Column->new(
+            -type    => $class,
+            -content => [$json_panel],
+            -colspan => $colspan,
+            );
+        $i = 1;
+    }
+    return \@columns;
 }
 
 =head2 references
