@@ -80,8 +80,8 @@ package Genome::Tabview::JSON::Feature::Generic;
 
 use strict;
 use namespace::autoclean;
-use Moose;
-use MooseX::Params::Validate;
+use Mouse;
+use MouseX::Params::Validate;
 use Carp;
 use Genome::Tabview::Config::Panel::Item::JSON::Table;
 use Genome::Tabview::JSON::Feature::Gene;

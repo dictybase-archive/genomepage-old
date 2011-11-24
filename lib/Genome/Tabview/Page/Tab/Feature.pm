@@ -84,7 +84,7 @@ package Genome::Tabview::Page::Tab::Feature;
 use strict;
 use namespace::autoclean;
 use Carp;
-use Moose;
+use Mouse;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::Config;
 extends 'Genome::Tabview::Page::Tab';

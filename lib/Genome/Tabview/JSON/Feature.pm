@@ -80,8 +80,8 @@ SUCH DAMAGES.
 package Genome::Tabview::JSON::Feature;
 
 use namespace::autoclean;
-use Moose;
-use MooseX::Params::Validate;
+use Mouse;
+use MouseX::Params::Validate;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::JSON::Reference;
 use Class::MOP;

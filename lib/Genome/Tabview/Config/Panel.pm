@@ -91,7 +91,7 @@ SUCH DAMAGES.
 package Genome::Tabview::Config::Panel;
 
 use namespace::autoclean;
-use Moose;
+use Mouse;
 use Carp;
 
 =head2 layout

@@ -82,7 +82,7 @@ package Genome::Tabview::Page;
 use strict;
 use namespace::autoclean;
 use Carp;
-use Moose;
+use Mouse;
 
 
 has 'base_url' => (

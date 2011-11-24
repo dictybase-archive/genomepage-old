@@ -91,9 +91,9 @@ package Genome::Factory::Tabview::Tab;
 
 use strict;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 use Module::Find;
-use Class::MOP;
+use Module::Load;
 use Carp;
 
 =head2 tab
@@ -187,7 +187,7 @@ sub instantiate {
         $self->default_namespace, "\n"
         if !@modules;
 
-    Class::MOP::load_class( $modules[0] );
+   load( $modules[0] );
     my $obj = $modules[0]->new( primary_id => $self->primary_id );
 
     for my $name ( $self->_passthrough_attributes ) {

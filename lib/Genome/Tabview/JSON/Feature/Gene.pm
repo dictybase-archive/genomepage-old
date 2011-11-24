@@ -79,7 +79,7 @@ package Genome::Tabview::JSON::Feature::Gene;
 
 use strict;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 use Genome::Tabview::JSON::Feature::Generic;
 extends 'Genome::Tabview::JSON::Feature';
 

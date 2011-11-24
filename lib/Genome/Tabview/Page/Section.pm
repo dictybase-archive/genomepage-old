@@ -81,7 +81,7 @@ package Genome::Tabview::Page::Section;
 use strict;
 use namespace::autoclean;
 use Carp;
-use Moose;
+use Mouse;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::Config::Panel::Item;
 use Genome::Tabview::Config::Panel::Item::JSON;

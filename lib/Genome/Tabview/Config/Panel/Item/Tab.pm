@@ -89,7 +89,7 @@ SUCH DAMAGES.
 package Genome::Tabview::Config::Panel::Item::Tab;
 
 use namespace::autoclean;
-use Moose;
+use Mouse;
 
 =head2 key
 

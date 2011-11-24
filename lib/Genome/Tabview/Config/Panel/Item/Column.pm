@@ -84,7 +84,7 @@ package Genome::Tabview::Config::Panel::Item::Column;
 
 use strict;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 
 =head2 new
 

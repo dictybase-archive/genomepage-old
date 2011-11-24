@@ -83,7 +83,7 @@ package Genome::Tabview::Page::Tab::Gene;
 
 use namespace::autoclean;
 use Carp;
-use Moose;
+use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::Config::Panel::Item::Accordion;

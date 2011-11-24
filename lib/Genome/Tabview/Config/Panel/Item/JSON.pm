@@ -86,8 +86,8 @@ package Genome::Tabview::Config::Panel::Item::JSON;
 use strict;
 use namespace::autoclean;
 use Carp;
-use Moose;
-use MooseX::Params::Validate;
+use Mouse;
+use MouseX::Params::Validate;
 
 =head2 content
 

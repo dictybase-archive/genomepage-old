@@ -93,8 +93,8 @@ use strict;
 use namespace::autoclean;
 use Carp;
 use Module::Find;
-use Class::MOP;
-use Moose;
+use Module::Load;
+use Mouse;
 
 =head2 tab
 
@@ -218,7 +218,7 @@ sub instantiate {
     croak "Module matching tab $tab not found in namespace ", $self->default_namespace, "\n"
         if !@modules;
 
-    Class::MOP::load_class( $modules[0] );
+    load ($modules[0]);
     my $obj = $modules[0]->new( primary_id => $self->primary_id );
 
     for my $name ( $self->_passthrough_attributes ) {

@@ -96,7 +96,7 @@ package Genome::Tabview::Config;
 
 use strict;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 use JSON qw/encode_json/;
 
 =head2 panels

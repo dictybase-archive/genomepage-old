@@ -91,8 +91,8 @@ package Genome::Tabview::Config::Panel::Item::JSON::Table;
 
 use strict;
 use namespace::autoclean;
-use Moose;
-use MooseX::Params::Validate;
+use Mouse;
+use MouseX::Params::Validate;
 
 has [qw/id paginator filter class type table_class/] => (
     is  => 'rw',

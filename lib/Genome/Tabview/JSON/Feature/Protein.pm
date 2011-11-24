@@ -83,7 +83,7 @@ use namespace::autoclean;
 use Bio::Tools::SeqStats;
 use Bio::PrimarySeq;
 use Carp;
-use Moose;
+use Mouse;
 extends 'Genome::Tabview::JSON::Feature';
 
 has '+reference_feature' => (

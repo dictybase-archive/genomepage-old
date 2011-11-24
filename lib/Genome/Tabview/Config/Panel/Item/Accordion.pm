@@ -86,7 +86,7 @@ package Genome::Tabview::Config::Panel::Item::Accordion;
 
 use strict;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 
 =head2 key
 

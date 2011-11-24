@@ -84,7 +84,7 @@ package Genome::Tabview::Config::Panel::Item::Row;
 
 use strict;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 
 has 'content' => (
     is        => 'rw',
