@@ -300,7 +300,7 @@ sub external_links {
 sub gbrowse_window {
     my ( $self, $feature ) = @_;
     my $floc   = $feature->featureloc_features->single;
-    my $start  = $floc->fmin;
+    my $start  = $floc->fmin + 1;
     my $end    = $floc->fmax;
     my $length = $end - $start;
 
