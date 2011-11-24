@@ -9,7 +9,7 @@
 
 =head1 SYNOPSIS
 
-    my $tab = Genome::Tabview::Page::Tab::Feature->new( -primary_id => 'DDB0185055' );
+    my $tab = Genome::Tabview::Page::Tab::Feature->new( primary_id => 'DDB0185055' );
     my $json = $tab->configure();
     print $cgi->header(), $json;
     
@@ -85,6 +85,8 @@ use strict;
 use namespace::autoclean;
 use Carp;
 use Moose;
+use Genome::Tabview::Config::Panel;
+use Genome::Tabview::Config;
 extends 'Genome::Tabview::Page::Tab';
 
 
