@@ -84,7 +84,7 @@ use Mouse;
 use MouseX::Params::Validate;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::JSON::Reference;
-use Class::MOP;
+use Module::Load;
 
 =head2 json
 
@@ -340,9 +340,9 @@ sub _build_references {
         = $self->source_feature->search_related( 'feature_pubs', {} )
         ->search_related( 'pub',
         { order_by => { -desc => 'pyear' }, rows => 5 } );
-    return if !$pub_rs->count;
+    return [] if !$pub_rs->count;
 
-    Class::MOP->load_class('Modware::Publication::DictyBase');
+    load('Modware::Publication::DictyBase');
     my $references;
     while ( my $row = $pub_rs->next ) {
         push @$references,
@@ -354,5 +354,7 @@ sub _build_references {
     }
     return $references;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
