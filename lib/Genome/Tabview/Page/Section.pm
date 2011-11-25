@@ -289,6 +289,29 @@ sub json_panel {
     return $json_panel;
 }
 
+=head2 references
+
+ Title    : references
+ Function : returns json formatted gene latest references
+ Usage    : $config = $section->references();
+ Returns  : Genome::Tabview::Config
+ Args     : none
+ 
+=cut
+
+sub references {
+    my ($self) = @_;
+    my $gene   = $self->feature;
+    my $config = Genome::Tabview::Config->new();
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
+    foreach my $reference ( $gene->references ) {
+        $panel->add_item(
+            $self->row( $reference->links, $reference->citation ) );
+    }
+    $config->add_panel($panel);
+    return $config;
+}
+
 before 'gene' => sub {
     my ($self) = @_;
     croak "model attribute need to set\n" if !$self->has_model;
