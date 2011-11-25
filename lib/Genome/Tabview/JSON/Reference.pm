@@ -81,7 +81,7 @@ package Genome::Tabview::JSON::Reference;
 
 use strict;
 use namespace::autoclean;
-use Moose;
+use Mouse;
 use Genome::Tabview::JSON::Feature::Gene;
 
 has 'pub_id' => (
