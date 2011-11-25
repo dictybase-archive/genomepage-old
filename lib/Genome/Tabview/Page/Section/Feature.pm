@@ -138,40 +138,36 @@ sub init {
 =cut
 
 sub info {
-    my ( $self ) = @_;
+    my ($self) = @_;
     my $feature = $self->feature;
 
-    my $gbrowse_link = $feature->small_gbrowse_image();
+    my $gbrowse_link = $feature->small_gbrowse_image;
     my $gbrowse_text = $self->json->text(
         '[Click on the map to browse the genome from this location]<br>');
-    my @map = ( $gbrowse_text, $gbrowse_link );
-
-    my $location = $feature->location;
-    my $coords   = $feature->coordinate_table;
-    my @table    = ( $location, $coords );
 
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
 
-    my @rows;
-    push @rows, $self->row( 'Feature Type', $feature->display_type );
-    push @rows, $self->row( 'Sequence ID',  $feature->primary_id );
-    push @rows, $self->row( 'Map',          \@map, \@table );
+    $panel->add_item( $self->row( 'Feature Type', $feature->display_type ) );
+    $panel->add_item( $self->row( 'Sequence ID',  $feature->primary_id ) );
+    $panel->add_item(
+        $self->row(
+            'Map',
+            [   $gbrowse->text,     $gbrowse->link,
+                $feature->location, $feature->coordinate_table
+            ]
+        )
+    );
 
-    push @rows, $self->row( 'Alert', $feature->alert ) if $feature->alert;
-    push @rows, $self->row( 'Description', $feature->description )
-        if $feature->description;
-    push @rows, $self->row( 'Derived from', $feature->derived_from )
-        if $feature->derived_from;
-    push @rows, $self->row( 'Supported by', $feature->supported_by )
-        if $feature->supported_by;
-    push @rows, $self->row( 'Links', $feature->external_links )
-        if $feature->external_links;
-    push @rows,
-        $self->row( 'Sequence',
-        $feature->get_fasta_selection( -base_url => $self->base_url ) );
-
-    $panel->items( \@rows );
+    if ( $ext = $feature->external_links ) {
+        $panel->add_item( $self->row( 'Links', $ext ) );
+    }
+    $panel->add_item(
+        $self->row(
+            'Sequence',
+            $feature->get_fasta_selection( base_url => $self->base_url )
+        )
+    );
     $config->add_panel($panel);
     return $config;
 }
@@ -208,34 +204,7 @@ sub columns {
     return \@columns;
 }
 
-=head2 references
 
- Title    : references
- Function : Returns reference rows for the feature
- Returns  : array  
- Args     : none
- 
-=cut
-
-sub references {
-    my ($self)  = @_;
-    my $feature = $self->feature;
-    my $config  = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
-
-    if ( !$feature->references ) {
-        my $row = $self->row( ' ', 'No References available' );
-        $panel->add_item($row);
-        $config->add_panel($panel);
-        return $config;
-    }
-    my @rows;
-    foreach my $reference ( @{ $feature->references() } ) {
-        push @rows, $self->row( $reference->links, $reference->citation );
-    }
-    $panel->items( \@rows );
-    $config->add_panel($panel);
-    return $config;
-}
+__PACKAGE__->meta->make_immutable;
 
 1;
