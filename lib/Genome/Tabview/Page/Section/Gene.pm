@@ -103,10 +103,15 @@ has '+gene' => (
             { rows => 1, join => 'dbxref' } )->single;
         return Genome::Tabview::JSON::Feature::Gene->new(
             source_feature => $row,
-            context        => $self->context, 
-            base_url => $self->base_url
+            context        => $self->context,
+            base_url       => $self->base_url
         );
     }
+);
+
+has '+feature' => (
+    lazy    => 1,
+    default => sub { return $self->gene }
 );
 
 =head2 init
@@ -362,29 +367,5 @@ sub links {
     return $config;
 }
 
-=head2 references
-
- Title    : references
- Function : returns json formatted gene latest references
- Usage    : $config = $section->references();
- Returns  : Genome::Tabview::Config
- Args     : none
- 
-=cut
-
-sub references {
-    my ($self) = @_;
-    my $gene   = $self->gene;
-    my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
-    foreach my $reference ( @{ $gene->references } ) {
-        $panel->add_item(
-            $self->row( $reference->links, $reference->citation ) );
-    }
-    if ( $panel->has_items ) {
-        $config->add_panel($panel);
-    }
-    return $config;
-}
 
 1;
