@@ -82,7 +82,8 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Tab::References;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::JSON::Feature::Gene;
@@ -90,42 +91,16 @@ use Genome::Tabview::Config::Panel::Item::Row;
 use Genome::Tabview::Config::Panel::Item::Column;
 use Genome::Tabview::Config::Panel::Item::JSON::Tree;
 use Genome::Tabview::Config::Panel::Item::JSON::Table;
-use Modware::DataSource::Chado;
-use base qw( Genome::Tabview::Page::Tab );
+extends 'Genome::Tabview::Page::Tab';
 
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Tab::References> object. 
-            Sets templates and configuration parameters for tabs to be displayed
- Usage    : my $tab = Genome::Tabview::Page::Tab::References->new( -primary_id => 'DDB0185055' );
- Returns  : Genome::Tabview::Page::Tab::References object with default configuration.
- Args     : feature primary id
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID BASE_URL CONTEXT/];
-
-    $self->{root} = Bio::Root::Root->new();
-    my ( $primary_id, $base_url, $context )
-        = $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-
-    my $feature = dicty::Feature->new( -primary_id => $primary_id );
-    $self->feature($feature);
-    $self->inner_id( rand(200) );
-    $self->base_url($base_url) if $base_url;
-    $self->context($context)   if $context;
-    return $self;
-}
+has 'inner_id' => (
+    is      => 'rw',
+    isa     => 'Int',
+    lazy    => 1,
+    default => sub {
+        return int( rand(2000) );
+    }
+);
 
 =head2 inner_id
 
@@ -136,14 +111,6 @@ sub new {
  Args     : string
 
 =cut
-
-sub inner_id {
-    my ( $self, $arg ) = @_;
-    $self->{inner_id} = $arg if defined $arg;
-    $self->{root}->throw('inner_id is not defined')
-        if not defined $self->{inner_id};
-    return $self->{inner_id};
-}
 
 =head2 init
 
@@ -156,13 +123,11 @@ sub inner_id {
 =cut
 
 sub init {
-    my ($self) = @_;
-
-    my $config = Genome::Tabview::Config->new();
-
+    my ($self)       = @_;
+    my $config       = Genome::Tabview::Config->new();
     my $column_panel = Genome::Tabview::Config::Panel->new(
-        -layout => 'column',
-        -items  => [ $self->topic_tree, $self->references_info ],
+        layout => 'column',
+        items  => [ $self->topic_tree, $self->references_info ],
     );
     $config->add_panel($column_panel);
     $self->config($config);
@@ -263,25 +228,28 @@ sub references_info {
     my ($self) = @_;
 
     my $gene = $self->feature;
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
-    my @references = @{ $gene->references };
-    my $not_curated = grep { !$gene->topics_by_reference($_) } @references;
+    my $references  = $gene->num_of_references;
+    my $not_curated = 0;
 
     my @rows;
-    push @rows,
-        $self->row( 'This page displays all the papers associated with '
-            . $self->feature->name
-            . ' in dictyBase, along with all the literature topics those papers address. Click on a topic on the left to see the papers that address it.'
-        );
-    push @rows,
-        $self->row( 'Curated references: ' . ( @references - $not_curated ) );
-    push @rows, $self->row( 'References not yet curated: ' . $not_curated );
-    push @rows, $self->reference_table;
-    $panel->items( \@rows );
+    $panel->add_item(
+        $self->row(
+                  'This page displays all the papers associated with '
+                . $self->feature->name
+                . ' in dictyBase, along with all the literature topics those papers address. Click on a topic on the left to see the papers that address it.'
+        )
+    );
+    $panel->add_item(
+        $self->row( 'Curated references: ' . ( $references - $not_curated ) )
+    );
+    $panel->add_item(
+        $self->row( 'References not yet curated: ' . $not_curated ) );
+    $panel->add_item( $self->reference_table );
 
     my $column = Genome::Tabview::Config::Panel::Item::Column->new(
-        -content => [$panel] );
+        content => [$panel] );
     return $column;
 }
 
@@ -302,8 +270,7 @@ sub reference_table {
     my $primary_id = $self->feature->primary_id;
     my $gene       = Genome::Tabview::JSON::Feature::Gene->new(
         -primary_id => $primary_id );
-	$gene->context($self->context) if $self->context;
-	
+    $gene->context( $self->context ) if $self->context;
 
     my $table = Genome::Tabview::Config::Panel::Item::JSON::Table->new(
         -id        => $self->inner_id . '_table',
@@ -362,11 +329,10 @@ sub reference_table {
         };
         $table->add_record($data);
     }
-    my $reference_table_row
-        = Genome::Tabview::Config::Panel::Item::Row->new(
+    my $reference_table_row = Genome::Tabview::Config::Panel::Item::Row->new(
         -content => [ $self->json_panel( $table->structure ) ],
         -colspan => 2
-        );
+    );
 
     return $reference_table_row;
 }
@@ -456,5 +422,7 @@ sub json_panel {
     );
     return $json_panel;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
