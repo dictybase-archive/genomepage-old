@@ -360,7 +360,16 @@ sub gene_link {
 
 sub orthologs {
     my ($self) = @_;
-    return $self->source_feature->orthologs;
+    my $feature = $self->source_feature;
+    return $feature->search_related(
+        'feature_relationship_subjects',
+        { 'type.name' => 'member_of' },
+        { join        => 'type' }
+        )->search_related(
+        'object',
+        { 'type_2.name' => 'gene_group' },
+        { join          => 'type' }
+        )->all;
 }
 
 1;
