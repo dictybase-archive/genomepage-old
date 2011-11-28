@@ -368,7 +368,7 @@ sub orthologs {
         )->search_related(
         'object',
         { 'type_2.name' => 'gene_group' },
-        { join          => 'type' }
+        { join          => 'type',  prefetch => 'organism' }
         )->all;
 }
 
