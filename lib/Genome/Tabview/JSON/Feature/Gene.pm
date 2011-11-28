@@ -359,17 +359,29 @@ sub gene_link {
 }
 
 sub orthologs {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $feature = $self->source_feature;
-    return $feature->search_related(
+    my $rs      = $feature->search_related(
         'feature_relationship_subjects',
         { 'type.name' => 'member_of' },
         { join        => 'type' }
         )->search_related(
         'object',
         { 'type_2.name' => 'gene_group' },
-        { join          => 'type',  prefetch => 'organism' }
+        { join          => 'type' }
+        );
+    my $group_row = $rs->first;
+    return $group_row->search_related(
+        'feature_relationship_objects',
+        { 'type.name' => 'member_of' },
+        { join        => 'type' }
+        )->search_related(
+        'subject',
+        {   'organism.common_name' =>
+                { '!=', $feature->organism->common_name }
+        }{ join => 'organism', prefetch => [qw/dbxref feature_dbxrefs/] }
         )->all;
+
 }
 
 1;
