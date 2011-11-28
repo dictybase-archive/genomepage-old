@@ -81,45 +81,34 @@ SUCH DAMAGES.
 package Genome::Tabview::Page::Tab::Orthologs;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
 use Genome::Tabview::JSON::Feature::Gene;
 use Genome::Tabview::Config::Panel::Item::JSON::Table;
 
-use base qw( Genome::Tabview::Page::Tab );
+extends 'Genome::Tabview::Page::Tab';
 
-=head2 new
-
- Title    : new
- Function : constructor for B<Genome::Tabview::Page::Tab::Orthologs> object. 
-            Sets templates and configuration parameters for tabs to be displayed
- Usage    : my $tab = Genome::Tabview::Page::Tab::Orthologs->new( -primary_id => 'DDB_GXXXXXX' );
- Returns  : Genome::Tabview::Page::Tab::Orthologs object with default configuration.
- Args     : gene primary id
- 
-=cut
-
-sub new {
-    my ( $class, @args ) = @_;
-
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-
-    ## -- allowed arguments
-    my $arglist = [qw/PRIMARY_ID BASE_URL/];
-
-    $self->{root} = Bio::Root::Root->new();
-    my ( $primary_id, $base_url ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('primary id is not provided') if !$primary_id;
-
-    my $feature = dicty::Feature->new( -primary_id => $primary_id );
-    $self->feature($feature);
-    $self->base_url($base_url) if $base_url;
-    return $self;
-}
+has 'binomial_array' => (
+    is         => 'rw',
+    isa        => 'ArrayRef',
+    auto_deref => 1,
+    lazy       => 1,
+    default    => sub {
+        return [
+            'Dictyostelium discoideum',
+            'Dictyostelium purpureum',
+            'Homo sapiens',
+            'Mus musculus',
+            'Saccharomyces cerevisiae S288c',
+            'Drosophila melanogaster',
+            'Caenorhabditis elegans',
+            'Escherichia coli K-12',
+            'Arabidopsis thaliana',
+        ];
+    }
+);
 
 =head2 init
 
@@ -134,101 +123,95 @@ sub new {
 sub init {
     my ($self) = @_;
     my $gene = Genome::Tabview::JSON::Feature::Gene->new(
-        -primary_id => $self->feature->primary_id );
+        primary_id => $self->feature->primary_id );
 
     my $table = Genome::Tabview::Config::Panel::Item::JSON::Table->new();
     $table->class('general');
     $table->add_column(
-        -key       => 'species',
-        -label     => 'Species',
-        -sortable  => 'true',
-        -width     => '190',
-        -formatter => 'grouper',
+        key       => 'species',
+        label     => 'Species',
+        sortable  => 'true',
+        width     => '190',
+        formatter => 'grouper',
     );
     $table->add_column(
-        -key       => 'id',
-        -label     => 'ID',
-        -sortable  => 'true',
-        -width     => '140',
-        -formatter => 'grouper',
+        key       => 'id',
+        label     => 'ID',
+        sortable  => 'true',
+        width     => '140',
+        formatter => 'grouper',
     );
     $table->add_column(
-        -key       => 'uniprot',
-        -label     => 'UniProtKB',
-        -sortable  => 'true',
-        -width     => '70',
-        -formatter => 'grouper',
+        key       => 'uniprot',
+        label     => 'UniProtKB',
+        sortable  => 'true',
+        width     => '70',
+        formatter => 'grouper',
     );
     $table->add_column(
-        -key       => 'product',
-        -label     => 'Gene product',
-        -sortable  => 'true',
-        -formatter => 'grouper',
+        key       => 'product',
+        label     => 'Gene product',
+        sortable  => 'true',
+        formatter => 'grouper',
     );
     $table->add_column(
-        -key       => 'source',
-        -label     => 'Source',
-        -sortable  => 'true',
-        -formatter => 'grouper',
+        key       => 'source',
+        label     => 'Source',
+        sortable  => 'true',
+        formatter => 'grouper',
     );
 
     my $ortholog_hash;
-    foreach my $ortholog ( @{ $gene->orthologs } ) {
-        my $binomial   = $ortholog->organism->binomial;
-        my $collection = $ortholog->get_dbxref('UniProtKB');
-        my @uniprot_links =
+    ## -- $ortholog is a BCS::Sequence::Feature object
+    foreach my $ortholog ( $gene->orthologs ) {
+        my $name = $ortholog->uniquename;
+        my $binomial
+            = $ortholog->organism->genus . $ortholog->organism->species;
+        my @dbxrefs = $ortholog->search_related(
+            'feature_dbxref',
+            { 'db.name' => { '!=', 'GFF_source' } },
+            { join      => 'db' }
+        );
+        my $uniprot_links = [
             map {
-            $self->json->link(
-                -url =>
-                    Genome::Tabview::JSON::Feature::Gene->link('UniProt')
-                    ->get_links( $_->primary_id ),
-                -caption => $_->primary_id,
-                -type    => 'outer'
-                )
-            } $collection->get_Annotations('dblink');
+                $self->json->link(
+                    url     => $_->db->urlprefix . '/' . $_->accession,
+                    caption => $_->accession,
+                    type    => 'outer'
+                    )
+                } grep { $_->db->name eq 'DB:UniProtKB' } @dbxrefs
+        ];
+        my $product = join(
+            ',',
+            map { $_->value } $ortholog->search_related(
+                'featureprops',
+                {   'type.name' => 'product',
+                    'cv.name'   => 'feature_property'
+                },
+                { join => [ { 'type' => 'cv' } ] }
+                )->all
+        );
+        my $source
+            = $ortholog->search_related( 'analysisfeatures', {} )
+            ->search_related( 'analysis', {}, { 'rows' => 1 } )
+            ->single->program;
 
-        my $product = join( ', ',
-            map { $_->product_name } @{ $ortholog->gene_products } );
-
-        my $source = $ortholog->source;
-        $source .= ' protein ' . $ortholog->organism->common_name
-            if $ortholog->source =~ m{ensembl}i;
-
-        my $link =
-              $ortholog->source =~ m{dictyBase}
-            ? $ortholog->primary_id
-            : $ortholog->name;
-
-        $ortholog_hash->{$binomial}->{ $ortholog->name }->{linkout} =
-            $self->json->link(
-            -url => Genome::Tabview::JSON::Feature::Gene->link($source)
-                ->get_links($link),
-            -caption => $ortholog->name,
-            -type    => 'outer'
-            );
-        $ortholog_hash->{$binomial}->{ $ortholog->name }->{uniprot} =
-            \@uniprot_links;
-        $ortholog_hash->{$binomial}->{ $ortholog->name }->{product} =
-            $product;
-        push
-            @{ $ortholog_hash->{$binomial}->{ $ortholog->name }->{source} },
-            $ortholog->{algorithm};
+        $ortholog_hash->{$binomial}->{$name}->{linkout} = $self->json->link(
+            url => $ortholog->dbxref->db->urlprefix . '/'
+                . $ortholog->dbxref->accession,
+            caption => $name,
+            type    => 'outer'
+        );
+        $ortholog_hash->{$binomial}->{$name}->{uniprot} = $uniprot_links
+            if @$uniprot_links;
+        $ortholog_hash->{$binomial}->{$name}->{product} = $product
+            if $product;
+        push @{ $ortholog_hash->{$binomial}->{$name}->{source} }, $source;
     }
 
-    my $binomial_array = [
-        'Dictyostelium discoideum',
-        'Dictyostelium purpureum',
-        'Homo sapiens',
-        'Mus musculus',
-        'Saccharomyces cerevisiae S288c',
-        'Drosophila melanogaster',
-        'Caenorhabditis elegans',
-        'Escherichia coli K-12',
-        'Arabidopsis thaliana',
-    ];
-
-    foreach my $binomial (@$binomial_array) {
-        next if !exists $ortholog_hash->{$binomial};
+BINOMIAL:
+    foreach my $binomial ( $self->binomial_array ) {
+        next BINOMIAL if not exists $ortholog_hash->{$binomial};
         foreach my $id ( keys %{ $ortholog_hash->{$binomial} } ) {
             my $ortholog = $ortholog_hash->{$binomial}->{$id};
             my $data     = {
@@ -244,11 +227,10 @@ sub init {
     }
 
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'json' );
-
-    my $item = Genome::Tabview::Config::Panel::Item::JSON->new(
-        -type    => 'orthologs_table',
-        -content => $table->structure,
+    my $panel  = Genome::Tabview::Config::Panel->new( layout => 'json' );
+    my $item   = Genome::Tabview::Config::Panel::Item::JSON->new(
+        type    => 'orthologs_table',
+        content => $table->structure,
     );
 
     $panel->add_item($item);
@@ -256,5 +238,7 @@ sub init {
     $self->config($config);
     return $self;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
