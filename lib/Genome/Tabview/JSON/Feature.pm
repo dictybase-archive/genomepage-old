@@ -331,7 +331,7 @@ has '_reference_stack' => (
     traits  => [qw/Array/],
     lazy    => 1,
     builder => '_build_references',
-    handles => { 'references' => 'elements' }
+    handles => { 'references' => 'elements',  'num_of_references' => 'count' }
 );
 
 sub _build_references {
