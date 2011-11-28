@@ -93,7 +93,7 @@ has 'parent_feature_id' => (
 );
 
 has 'tab' => ( is => 'rw', isa => 'Str', predicate => 'has_tab' );
-has 'primary_id' => (is => 'rw',  isa => 'Str',  required => 1);
+has 'primary_id' => ( is => 'rw', isa => 'Str', required => 1 );
 
 has 'base_url' => (
     is      => 'rw',
@@ -126,7 +126,22 @@ has 'json' => (
     default => sub { Genome::Tabview::Config::Panel::Item::JSON->new }
 );
 
-has 'feature' => ( is => 'rw', isa => 'DBIx::Class::Row' );
+has 'feature' => (
+    is      => 'rw',
+    isa     => 'DBIx::Class::Row',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my $row = $self->model->resultset('Sequence::Feature')->search(
+            { 'dbxref.accession' => $self->primary_id, },
+            {   join => 'dbxref',
+                rows => 1
+            }
+        )->single;
+        croak $self->primary_id, " is not a gene\n" if !$row;
+        return $row;
+    }
+);
 
 has 'model' =>
     ( is => 'rw', isa => 'Bio::Chado::Schema', predicate => 'has_model' );
@@ -262,14 +277,14 @@ sub accordion {
     my $item = Genome::Tabview::Config::Panel::Item::Accordion->new(
         key    => $key,
         label  => $label,
-        source => $self->section_source( %source_options )
+        source => $self->section_source(%source_options)
     );
     return $item;
 }
 
 sub show_references {
-	my ($self) = @_;
-	return $self->feature->search_related('feature_pubs', {})->count;
+    my ($self) = @_;
+    return $self->feature->search_related( 'feature_pubs', {} )->count;
 }
 
 __PACKAGE__->meta->make_immutable;
