@@ -266,72 +266,69 @@ sub references_info {
 
 sub reference_table {
     my ($self) = @_;
-
-    my $primary_id = $self->feature->primary_id;
-    my $gene       = Genome::Tabview::JSON::Feature::Gene->new(
-        -primary_id => $primary_id );
-    $gene->context( $self->context ) if $self->context;
+    my $gene = Genome::Tabview::JSON::Feature::Gene->new(
+        source_feature => $self->feature,
+        context        => $self->context,
+        base_url       => $self->base_url
+    );
 
     my $table = Genome::Tabview::Config::Panel::Item::JSON::Table->new(
-        -id        => $self->inner_id . '_table',
-        -filter    => 'true',
-        -paginator => 'true'
+        id        => $self->inner_id . '_table',
+        filter    => 'true',
+        paginator => 'true'
     );
-
     $table->class('general');
     $table->add_column(
-        -key      => 'ref',
-        -label    => 'Reference',
-        -sortable => 'true',
+        key      => 'ref',
+        label    => 'Reference',
+        sortable => 'true',
     );
     $table->add_column(
-        -key      => 'ref_link',
-        -label    => ' ',
-        -sortable => 'false',
-        -width    => '140',
+        key      => 'ref_link',
+        label    => ' ',
+        sortable => 'false',
+        width    => '140',
     );
     $table->add_column(
-        -key      => 'genes',
-        -label    => 'Other Genes Addressed',
-        -width    => '200',
-        -sortable => 'true',
+        key      => 'genes',
+        label    => 'Other Genes Addressed',
+        width    => '200',
+        sortable => 'true',
     );
     $table->add_column(
-        -key    => 'topics',
-        -label  => '',
-        -hidden => 'true'
+        key    => 'topics',
+        label  => '',
+        hidden => 'true'
     );
 
-    foreach my $reference ( @{ $gene->references } ) {
-        my @gene_links = map { $_->gene_link }
-            grep { $_->source_feature->primary_id ne $primary_id }
-            @{ $reference->genes(7) };
-
-        if ( scalar @gene_links >= 6 ) {
+    foreach my $reference ( $gene->references ) {
+        my $gene_links;
+        my $num_of_genes = $reference->num_of_genes - 1;
+        if ( $num_of_genes >= 6 ) {
             my $more_link = $self->json->link(
-                -caption => 'more..',
-                -url => "/db/cgi-bin/dictyBase/reference/reference.pl?refNo="
+                caption => 'more..',
+                url     => '/publication/'
+                    . 
                     . $reference->source_reference->pub_id
                     . '#summary',
-                -type  => 'outer',
-                -style => 'font-weight: bold; color: #CC0000',
+                type  => 'outer',
+                style => 'font-weight: bold; color: #CC0000',
             );
-            push @gene_links, $more_link;
+            push @$gene_links, $more_link;
         }
-        my $topics = $gene->topics_by_reference($reference)
-            || ['Not yet curated'];
+        my $topics = ('Not yet curated');
 
         my $data = {
             ref      => [ $reference->citation ],
-            genes    => \@gene_links,
+            genes    => $gene_links,
             ref_link => $reference->links,
-            topics   => [ $self->json->text( join( ',', @{$topics} ) ) ]
+            topics   => [ $self->json->text( join( ',', @topics ) ) ]
         };
         $table->add_record($data);
     }
     my $reference_table_row = Genome::Tabview::Config::Panel::Item::Row->new(
-        -content => [ $self->json_panel( $table->structure ) ],
-        -colspan => 2
+        content => [ $self->json_panel( $table->structure ) ],
+        colspan => 2
     );
 
     return $reference_table_row;
