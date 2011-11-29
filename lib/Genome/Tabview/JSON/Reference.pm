@@ -224,16 +224,14 @@ has 'citation' => (
 =cut
 
 sub genes {
-    my ( $self, $limit ) = @_;
-    $limit ||= 5;
+    my ($self) = @_;
     my $genes_rs
-        = $self->source_feature->search_related( 'feature_pubs', {} )
+        = $self->source_feature->dbrow->search_related( 'feature_pubs', {} )
         ->search_related(
         'feature',
-        { 'type.name' => 'gene'},
+        { 'type.name' => 'gene' },
         {   join     => 'type',
             prefetch => 'dbxref',
-            rows     => $limit
         }
         );
 
@@ -244,6 +242,16 @@ sub genes {
     ];
     return $genes;
 
+}
+
+sub num_of_genes {
+    my ($self) = @_;
+
+    return $self->source_feature->dbrow->search_related( 'feature_pubs', {} )->search_related(
+        'feature',
+        { 'type.name' => 'gene' },
+        { join        => 'type', }
+        )->count;
 }
 
 __PACKAGE__->meta->make_immutable;
