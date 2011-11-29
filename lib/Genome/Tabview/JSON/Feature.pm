@@ -339,7 +339,7 @@ sub _build_references {
     my $pub_rs
         = $self->source_feature->search_related( 'feature_pubs', {} )
         ->search_related( 'pub',
-        { order_by => { -desc => 'pyear' }, rows => 5 } );
+        { order_by => { -desc => 'pyear' }} );
     return [] if !$pub_rs->count;
 
     load('Modware::Publication::DictyBase');
