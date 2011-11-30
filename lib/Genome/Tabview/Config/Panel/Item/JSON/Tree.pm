@@ -98,6 +98,7 @@ package Genome::Tabview::Config::Panel::Item::JSON::Tree;
 use strict;
 use namespace::autoclean;
 use Mouse;
+use MouseX::Params::Validate;
 
 =head2 new
 
@@ -114,23 +115,22 @@ use Mouse;
                             defines id of the element, action to be used on
 =cut
 
+has [qw/action argument/] => ( isa => 'Str', is => 'rw', required => 1 );
 
-has [qw/action argument/] => ( isa => 'Str',  is => 'rw',  required => 1);
+has 'type' => ( is => 'rw', isa => 'Str', lazy => 1, default => 'tree' );
 
-has 'type' => (is => 'rw', isa => 'Str',  lazy => 1,  default => 'tree');
-
-has 'class' => (is => 'rw', isa => 'Str'  );
+has 'class' => ( is => 'rw', isa => 'Str' );
 
 has '_node_stack' => (
-	is => 'rw', 
-	isa => 'ArrayRef', 
-	traits => [qw/Array/], 
-	lazy => 1, 
-	default => sub {[]}, 
-	handles => {
-		'add_node' => 'push', 
-		'get_all_nodes' => 'elements'
-	}
+    is      => 'rw',
+    isa     => 'ArrayRef',
+    traits  => [qw/Array/],
+    lazy    => 1,
+    default => sub { [] },
+    handles => {
+        'add_node'      => 'push',
+        'get_all_nodes' => 'elements'
+    }
 );
 
 =head2 class
@@ -163,7 +163,6 @@ has '_node_stack' => (
  
 =cut
 
-
 =head2 argument
 
  Title    : argument
@@ -193,7 +192,6 @@ has '_node_stack' => (
             children   : reference to an array of child nodes 
 =cut
 
-
 =head2 add_node
 
  Title    : add_node
@@ -203,7 +201,6 @@ has '_node_stack' => (
  Args     : node 
  
 =cut
-
 
 =head2 node
 
@@ -224,28 +221,27 @@ has '_node_stack' => (
             children   : reference to an array of child nodes 
 =cut
 
-
 sub node {
-    my ( $self, @args ) = @_;
-
-    my $arglist = [qw/TYPE LABEL TITLE EXPANDED CHILDREN/];
-    my ( $type, $label, $title, $expanded, $children ) =
-        $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('type is not provided')  if !$type;
-    $self->{root}->throw('label is not provided') if !$label;
+    my $self = shift;
+    my ( $type, $label, $title, $expanded, $childrean ) = validated_list(
+        \@_,
+        type     => { isa => 'Str' },
+        label    => { isa => 'Str' },
+        title    => { isa => 'Str', optional => 1 },
+        expanded => { isa => 'Str', optional => 1 },
+        children => { isa => 'ArrayRef', optional => 1 }
+    );
 
     my $node = {
         type  => $type,
         label => $label,
     };
+
     $node->{title}    = $title    if $title;
     $node->{expanded} = $expanded if $expanded;
     $node->{children} = $children if $children;
-
     return $node;
 }
-
-
 
 =head2 structure
 
@@ -261,7 +257,7 @@ sub structure {
     my ($self) = @_;
     my $structure = {
         type  => $self->type,
-        nodes => [$self->get_all_nodes],
+        nodes => [ $self->get_all_nodes ],
     };
     $structure->{action}   = $self->action   if $self->action;
     $structure->{argument} = $self->argument if $self->argument;
