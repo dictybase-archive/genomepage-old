@@ -147,7 +147,7 @@ sub init {
 
 sub topic_tree {
     my ($self) = @_;
-    my $gene = $self->feature;
+    my $gene   = $self->feature;
     my $schema = $gene->result_source->schema;
 
     my $tree = Genome::Tabview::Config::Panel::Item::JSON::Tree->new(
@@ -198,14 +198,12 @@ sub topic_tree {
         ) if $topic_class;
         $tree->add_node($node);
     }
-    if ( grep { !$gene->topics_by_reference($_) } @{ $gene->references } ) {
-        my $node = $tree->node(
-            type  => 'text',
-            label => 'Not yet curated',
-            title => 'Click to show only not yet curated papers',
-        );
-        $tree->add_node($node);
-    }
+    my $node = $tree->node(
+        type  => 'text',
+        label => 'Not yet curated',
+        title => 'Click to show only not yet curated papers',
+    );
+    $tree->add_node($node);
     my $column = Genome::Tabview::Config::Panel::Item::Column->new(
         type    => 'content_table_title',
         content => [ $self->json_panel( $tree->structure ) ],
@@ -346,7 +344,6 @@ sub reference_table {
  
 =cut
 
-
 sub row {
     my ( $self, @column_data ) = @_;
     my $column_panel
@@ -411,9 +408,7 @@ sub json_panel {
             push @json_items, $item;
         }
     }
-    my $json_panel = Genome::Tabview::Config::Panel->new(
-        layout => 'json',
-    );
+    my $json_panel = Genome::Tabview::Config::Panel->new( layout => 'json', );
 
     $json_panel->add_item($_) for @json_items;
     return $json_panel;
