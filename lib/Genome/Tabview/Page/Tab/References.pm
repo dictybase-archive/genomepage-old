@@ -148,14 +148,14 @@ sub init {
 sub topic_tree {
     my ($self) = @_;
     my $gene = $self->feature;
+    my $schema = $gene->result_source->schema;
 
     my $tree = Genome::Tabview::Config::Panel::Item::JSON::Tree->new(
-        -action   => 'filter',
-        -argument => $self->inner_id . '_table'
+        action   => 'filter',
+        argument => $self->inner_id . '_table'
     );
 
     ## get topics by category
-    my $schema     = Modware::DataSource::Chado->handler;
     my $root_topic = $schema->resultset('Cv::Cvterm')->find(
         {   'cvterm_relationship_subjects.subject_id' => undef,
             'is_obsolete'                             => 0,
@@ -183,32 +183,32 @@ sub topic_tree {
         foreach my $topic ( @{ $topics->{$topic_class} } ) {
             push @child_nodes,
                 $tree->node(
-                -type  => 'text',
-                -label => $topic,
-                -title => 'Click to show only papers with ' 
+                type  => 'text',
+                label => $topic,
+                title => 'Click to show only papers with ' 
                     . $topic
                     . ' topic',
                 );
         }
         my $node = $tree->node(
-            -type     => 'text',
-            -label    => '<b>' . $topic_class . '</b>',
-            -expanded => 'true',
-            -children => \@child_nodes,
+            type     => 'text',
+            label    => '<b>' . $topic_class . '</b>',
+            expanded => 'true',
+            children => \@child_nodes,
         ) if $topic_class;
         $tree->add_node($node);
     }
     if ( grep { !$gene->topics_by_reference($_) } @{ $gene->references } ) {
         my $node = $tree->node(
-            -type  => 'text',
-            -label => 'Not yet curated',
-            -title => 'Click to show only not yet curated papers',
+            type  => 'text',
+            label => 'Not yet curated',
+            title => 'Click to show only not yet curated papers',
         );
         $tree->add_node($node);
     }
     my $column = Genome::Tabview::Config::Panel::Item::Column->new(
-        -type    => 'content_table_title',
-        -content => [ $self->json_panel( $tree->structure ) ],
+        type    => 'content_table_title',
+        content => [ $self->json_panel( $tree->structure ) ],
     );
     return $column;
 }
@@ -231,9 +231,8 @@ sub references_info {
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
     my $references  = $gene->num_of_references;
-    my $not_curated = 0;
+    my $not_curated = $references;
 
-    my @rows;
     $panel->add_item(
         $self->row(
                   'This page displays all the papers associated with '
