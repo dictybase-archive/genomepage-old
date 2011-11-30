@@ -347,14 +347,15 @@ sub reference_table {
  
 =cut
 
+
 sub row {
     my ( $self, @column_data ) = @_;
-    my $column_panel = Genome::Tabview::Config::Panel->new(
-        -layout => 'column',
-        -items  => $self->columns(@column_data)
-    );
+    my $column_panel
+        = Genome::Tabview::Config::Panel->new( layout => 'column' );
+    $column_panel->add_item($_) for @{ $self->columns(@column_data) };
+
     my $item = Genome::Tabview::Config::Panel::Item::Row->new(
-        -content => [$column_panel] );
+        content => [$column_panel] );
     return $item;
 }
 
@@ -372,16 +373,14 @@ sub row {
 
 sub columns {
     my ( $self, @column_data ) = @_;
-    my @columns;
-    my $i = 0;
-    foreach my $column (@column_data) {
-        my $json_panel = $self->json_panel($column);
-        push @columns,
+    my $columns;
+    foreach my $col (@column_data) {
+        my $json_panel = $self->json_panel($col);
+        push @$columns,
             Genome::Tabview::Config::Panel::Item::Column->new(
-            -content => [$json_panel], );
-        $i = 1;
+            content => [$json_panel] );
     }
-    return \@columns;
+    return $columns;
 }
 
 =head2 json_panel
@@ -405,18 +404,19 @@ sub json_panel {
         my $ref = \$element;
         if ( ref($ref) eq 'SCALAR' ) {
             my $item
-                = $json_item->new( -content => $self->json->text($element) );
+                = $json_item->new( content => $self->json->text($element) );
             push @json_items, $item;
         }
         else {
-            my $item = $json_item->new( -content => $element );
+            my $item = $json_item->new( content => $element );
             push @json_items, $item;
         }
     }
     my $json_panel = Genome::Tabview::Config::Panel->new(
-        -layout => 'json',
-        -items  => \@json_items,
+        layout => 'json',
     );
+
+    $json_panel->add_item($_) for @json_items;
     return $json_panel;
 }
 
