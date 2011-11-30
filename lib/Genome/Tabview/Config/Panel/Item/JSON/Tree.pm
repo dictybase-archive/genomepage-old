@@ -96,7 +96,8 @@ SUCH DAMAGES.
 package Genome::Tabview::Config::Panel::Item::JSON::Tree;
 
 use strict;
-use Bio::Root::Root;
+use namespace::autoclean;
+use Mouse;
 
 =head2 new
 
@@ -113,24 +114,24 @@ use Bio::Root::Root;
                             defines id of the element, action to be used on
 =cut
 
-sub new {
-    my ( $class, @args ) = @_;
 
-    $class = ref $class || $class;
-    my $self = {};
-    bless $self, $class;
-    $self->{root} = Bio::Root::Root->new();
+has [qw/action argument/] => ( isa => 'Str',  is => 'rw',  required => 1);
 
-    my $arglist = [qw/ACTION ARGUMENT/];
-    my ( $action, $argument ) = $self->{root}->_rearrange( $arglist, @args );
-    $self->{root}->throw('argument is not provided') if $action && !$argument;
-    $self->{root}->throw('action is not provided') if $argument && !$action;
+has 'type' => (is => 'rw', isa => 'Str',  lazy => 1,  default => 'tree');
 
-    $self->action($action);
-    $self->argument($argument);
-    $self->type('tree');
-    return $self;
-}
+has 'class' => (is => 'rw', isa => 'Str'  );
+
+has '_node_stack' => (
+	is => 'rw', 
+	isa => 'ArrayRef', 
+	traits => [qw/Array/], 
+	lazy => 1, 
+	default => sub {[]}, 
+	handles => {
+		'add_node' => 'push', 
+		'get_all_nodes' => 'elements'
+	}
+);
 
 =head2 class
 
@@ -142,12 +143,6 @@ sub new {
  
 =cut
 
-sub class {
-    my ( $self, $arg ) = @_;
-    $self->{class} = $arg if defined $arg;
-    return $self->{class};
-}
-
 =head2 type
 
  Title    : type
@@ -157,28 +152,6 @@ sub class {
  Args     : string
  
 =cut
-
-sub type {
-    my ( $self, $arg ) = @_;
-    $self->{type} = $arg if defined $arg;
-    return $self->{type};
-}
-
-=head2 nodes
-
- Title    : nodes
- Function : sets/gets nodes for the tree
- Usage    : my $tree->nodes(\@nodes);
- Returns  : array reference
- Args     : array reference
- 
-=cut
-
-sub nodes {
-    my ( $self, $arg ) = @_;
-    $self->{nodes} = $arg if defined $arg;
-    return $self->{nodes};
-}
 
 =head2 action
 
@@ -190,11 +163,6 @@ sub nodes {
  
 =cut
 
-sub action {
-    my ( $self, $arg ) = @_;
-    $self->{action} = $arg if defined $arg;
-    return $self->{action};
-}
 
 =head2 argument
 
@@ -206,30 +174,56 @@ sub action {
  
 =cut
 
-sub argument {
-    my ( $self, $arg ) = @_;
-    $self->{argument} = $arg if defined $arg;
-    return $self->{argument};
-}
+=head2 node
+
+ Title    : node
+ Function : creates tree node
+ Usage    : my $node = $tree->node( 
+                type => 'Text', 
+                label => 'Hello', 
+                title => 'click here',
+                expanded => 'true',
+                children => \@child_nodes, 
+            );
+ Returns  : hash
+ Args     : type       : type of the node (Text/HTML/MenuNode), 
+            label      : label to display, 
+            title      : text to show in tooltip,
+            expanded   : is node expanded by default,
+            children   : reference to an array of child nodes 
+=cut
+
+
+=head2 add_node
+
+ Title    : add_node
+ Function : adds tree node 
+ Usage    : $tree->add_node($node);
+ Returns  : nothing
+ Args     : node 
+ 
+=cut
+
 
 =head2 node
 
  Title    : node
  Function : creates tree node
  Usage    : my $node = $tree->node( 
-                -type => 'Text', 
-                -label => 'Hello', 
-                -title => 'click here',
-                -expanded => 'true',
-                -children => \@child_nodes, 
+                type => 'Text', 
+                label => 'Hello', 
+                title => 'click here',
+                expanded => 'true',
+                children => \@child_nodes, 
             );
  Returns  : hash
- Args     : -type       : type of the node (Text/HTML/MenuNode), 
-            -label      : label to display, 
-            -title      : text to show in tooltip,
-            -expanded   : is node expanded by default,
-            -children   : reference to an array of child nodes 
+ Args     : type       : type of the node (Text/HTML/MenuNode), 
+            label      : label to display, 
+            title      : text to show in tooltip,
+            expanded   : is node expanded by default,
+            children   : reference to an array of child nodes 
 =cut
+
 
 sub node {
     my ( $self, @args ) = @_;
@@ -251,21 +245,7 @@ sub node {
     return $node;
 }
 
-=head2 add_node
 
- Title    : add_node
- Function : adds tree node 
- Usage    : $tree->add_node($node);
- Returns  : nothing
- Args     : node 
- 
-=cut
-
-sub add_node {
-    my ( $self, $node ) = @_;
-    return if !$node;
-    push @{ $self->{nodes} }, $node;
-}
 
 =head2 structure
 
@@ -281,11 +261,13 @@ sub structure {
     my ($self) = @_;
     my $structure = {
         type  => $self->type,
-        nodes => $self->nodes,
+        nodes => [$self->get_all_nodes],
     };
     $structure->{action}   = $self->action   if $self->action;
     $structure->{argument} = $self->argument if $self->argument;
     return $structure;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
