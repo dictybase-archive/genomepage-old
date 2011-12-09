@@ -1,7 +1,7 @@
 package GenomeREST;
 
 use strict;
-use Homology::Chado::DataSource;
+#use Homology::Chado::DataSource;
 use base 'Mojolicious';
 
 # This will run once at startup
@@ -40,22 +40,36 @@ sub startup {
     my $base   = $router->namespace();
     $router->namespace( $base . '::Controller' );
 
-    # -- routing
+    ## -- genomes
     my $top      = $router->waypoint('/')->to('genome#index');
     my $organism = $top->waypoint('/:common_name')->name('genome')
-        ->to('genome#species_index');
-
-    ## all that goes under..
-    $organism->route('/supercontig')->name('supercontig')
-        ->to('genome#supercontig');
-    $organism->route( '/supercontig/search', format => 'datatable' )
-        ->name('super_pager')->to('genome#supercontig_search');
-
-    $organism->route('/contig')->to('genome#contig');
-    $organism->route( '/contig/search', format => 'datatable' )
-        ->name('contig_pager')->to('genome#contig_search');
-
+        ->to('genome#show');
     $organism->route('/downloads')->to('genome#download');
+
+    ## supercontig
+    my $supercontig = $organism->waypoint('/supercontig')->name('supercontig')
+        ->to('supercontig#index');
+    $supercontig->route( '/search', format => 'datatable' )
+        ->name('super_pager')->to('supercontig#search');
+	$supercontig->route('/:id')->to('supercontig#show');
+
+
+    ## -- contig
+    my $contig = $organism->waypoint('/contig')->name('contig')
+        ->to('contig#index');
+    $contig->route( '/search', format => 'datatable' )
+        ->name('contig_pager')->to('contig#search');
+	$contig->route('/:id')->to('contig#show');
+
+
+    ## -- est
+    my $est = $organism->waypoint('/est')->name('est')
+        ->to('est#index');
+    $est->route( '/search', format => 'datatable' )
+        ->name('est_pager')->to('est#search');
+	$est->route('/:id')->to('est#show');
+
+
 
     ### ---
     my $gene

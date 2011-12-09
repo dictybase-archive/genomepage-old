@@ -1,0 +1,36 @@
+% layout 'default', title => 'List of ESTs',  include_content => 'datatables', include_template => 'layouts/datatables' ;
+
+<% content_for datatables => begin %>
+	<%= javascript begin %>
+    	$(document).ready(function() {
+    		$('#est_datatable').dataTable({
+    			"bFilter": false, 
+    			"sPaginationType": "full_numbers", 
+    			"bProcessing": true, 
+    			"bServerSide": true, 
+    			"sAjaxSource": "/<%= $common_name %>/contig/search.datatable", 
+    			"aoColumnDefs": [
+    						{ "sClass": 'center',  "aTargets": [ 0,  1 ] }
+    			], 
+    			"bJQueryUI": true
+    		}), 
+    	});
+    <% end %>
+<% end %>
+
+<!-- Central Column start -->
+<table id="est_datatable" class="display">                    
+	<thead>
+		<tr>
+			<th> Name </th>
+			<th> Length(bp) </th>
+		</tr>
+	</thead>
+	<tbody>
+    <tr>
+      <td colspan="5" class="dataTables_empty">Loading data from server ....</td>
+	  </tr>
+  </tbody>
+</table>																
+
+

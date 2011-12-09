@@ -1,4 +1,4 @@
-package GenomeREST::Controller::Genome;
+package GenomeREST::Controller::Supercontig;
 
 use warnings;
 use strict;
@@ -6,7 +6,21 @@ use File::Spec::Functions;
 use Mojolicious::Static;
 use base 'GenomeREST::Controller';
 
-sub show {
+sub index {
+    my ($self) = @_;
+    if ( $self->stash('format') and $self->stash('format') eq 'fasta' ) {
+        return $self->fasta;
+    }
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+    $self->render( template => 'supercontig' );
+}
+
+sub fasta {
     my ($self) = @_;
     my $common_name = $self->stash('common_name');
     if ( !$self->check_organism($common_name) ) {
@@ -15,79 +29,79 @@ sub show {
     }
     $self->set_organism($common_name);
 
-    my $org_rs = $self->stash('organism_resultset');
-    my $feature_rs = $org_rs->search_related( 'features', {},
-        { prefetch => 'type', cache => 1 } );
-
-    my %stash;
-    for my $type (qw/supercontig contig gene EST/) {
-        my $count = $feature_rs->count( { 'type.name' => $type } );
-        if ($count) {
-            $stash{$type} = $count;
+    my $filename = $common_name . '_supercontig.fa';
+    $self->res->headers->content_type('application/x-fasta');
+    $self->res->headers->content_disposition(
+        "attachment; filename=$filename");
+    my $supercontig_rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'type.name' => 'supercontig' },
+        {   join     => 'type',
+            prefetch => 'dbxref'
         }
+    );
+    while ( my $row = $supercontig_rs->next ) {
+        my $seq = $row->residues;
+        $seq =~ s/(.{1,60})/$1\n/g;
+        $self->write_chunk( '>' . $row->dbxref->accession . "\n$seq" );
     }
-
-    # first get genes
-    my $gene_rs = $feature_rs->search( { 'type.name' => 'gene' } );
-
-    #-- walk down for transcript
-    my $trans_rs
-        = $gene_rs->search_related( 'feature_relationship_objects', {}, {} )
-        ->search_related(
-        'subject',
-        { 'type_2.name' => 'mRNA' },
-        { 'join'        => 'type' }
-        );
-
-    ## -- now down for polypeptide
-    my $poly_rs
-        = $trans_rs->search_related( 'feature_relationship_objects', {}, {} )
-        ->search_related(
-        'subject',
-        { 'type_3.name' => 'polypeptide' },
-        { 'join'        => 'type', }
-        );
-
-    $stash{polypeptide} = $poly_rs->count( {}, { select => 'feature_id' } );
-
-    $stash{gene_id}
-        = $gene_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
-    $stash{transcript_id}
-        = $trans_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
-    $stash{polypeptide_id}
-        = $poly_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
-
-    $stash{template} = 'species';
-    $self->render(%stash);
+    $self->write_chunk('');
 }
 
-sub index {
+sub search {
     my ($self) = @_;
-    $self->render_text('Nothing here please move on');
+
+    my $model = $self->app->modware->handler;
+    $self->set_organism( $self->stash('common_name') );
+
+    my $rows = $self->param('iDisplayLength');
+    my $page = $self->param('iDisplayStart') / $rows + 1;
+
+    my $supercontig_rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        {   'type.name'   => 'supercontig',
+            'type_2.name' => 'gene',
+        },
+        {   join => [
+                'type', 'dbxref',
+                { 'featureloc_srcfeatures' => { 'feature' => 'type' } }
+            ],
+            select => [
+                'features.uniquename',
+                'dbxref.accession',
+                { count => 'feature_id', -as => 'gene_count' },
+            ],
+            group_by => [ 'features.uniquename', 'dbxref.accession' ],
+            having   => \'count(feature_id) > 0',
+            rows     => $rows,
+            page     => $page,
+        }
+    );
+
+    my $data;
+    while ( my $row = $supercontig_rs->next ) {
+        push @$data,
+            [
+            $row->uniquename,
+            $model->resultset('Sequence::Feature')
+                ->find( { uniquename => $row->uniquename } )->seqlen,
+            $row->get_column('gene_count')
+            ];
+    }
+    my $total = $supercontig_rs->pager->total_entries;
+    $self->render_json(
+        {   sEcho                => $self->param('sEcho'),
+            iTotalRecords        => $total,
+            iTotalDisplayRecords => $total,
+            aaData               => $data
+        }
+    );
 }
 
-sub download {
-    my ($self) = @_;
-    if ( !$self->check_organism( $self->stash('common_name') ) ) {
-        $self->render_not_found;
-        return;
-    }
-
-    my $filename = $self->req->param('file');
-    if ($filename) {
-        my $dispatcher = Mojolicious::Static->new;
-        $dispatcher->root(
-            catdir( $self->app->config->{download}, $self->stash('species') )
-        );
-        $self->res->headers->content_disposition(
-            qq{'attatchment; filename="$filename"'});
-        $dispatcher->serve( $self, $filename );
-        $self->rendered;
-    }
-    else {
-        $self->render( template => $self->stash('species') . '/download' );
-    }
+sub show {
+	my ($self) = @_;
 }
+
 
 1;    # Magic true value required at end of module
 
