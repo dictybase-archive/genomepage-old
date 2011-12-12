@@ -22,6 +22,13 @@ sub register {
             return $row->dbxref->accession if $row;
         }
     );
+    $app->helper(
+    	html_formatted_sequence => sub {
+    		my ($self, $seq) = @_;
+    		$seq =~ s/(.{1,60})/$1<br\/>/g;
+    		return $seq;
+    	}
+    );
 
 }
 1;
