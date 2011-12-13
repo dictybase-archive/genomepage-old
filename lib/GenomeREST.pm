@@ -68,7 +68,7 @@ sub startup {
         ->to('est#index');
     $est->route( '/search', format => 'datatable' )
         ->name('est_pager')->to('est#search');
-	$est->route('/:id')->to('est#show');
+	$est->route('/:id')->to('est#show',  format => 'html');
 
 
 

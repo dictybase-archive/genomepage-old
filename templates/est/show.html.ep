@@ -77,7 +77,7 @@
       						<td width="80%" class="content_table_title"> EST sequence</td>
       						<td width="80%" class="content_table_data">
       							<pre>&gt;<%= $id %>|EST <br/>
-                      <%= html_formatted_sequence($est->residues) =%>
+                      <%= formatted_sequence($est->residues) =%>
       							</pre>
       						</td>
    						</tr>

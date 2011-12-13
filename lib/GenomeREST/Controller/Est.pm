@@ -95,7 +95,17 @@ sub show {
         $self->render_not_found;
         return;
     }
-    $self->stash('est' => $est);
+    $self->stash( 'est' => $est );
+    if ( $self->stash('format') eq 'fasta' ) {
+        return $self->show_fasta;
+    }
+}
+
+sub show_fasta {
+    my ($self) = @_;
+    my $header = '>' . $self->stash('id') . '|EST';
+    $self->render_text( $header . "\n"
+            . $self->formatted_sequence( $self->stash('est')->residues ) );
 }
 
 1;    # Magic true value required at end of module
