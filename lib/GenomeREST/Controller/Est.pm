@@ -66,7 +66,7 @@ sub search {
     while ( my $row = $est_rs->next ) {
         push @$data, [ $row->dbxref->accession, $row->seqlen ];
     }
-    my $total = $contig_rs->pager->total_entries;
+    my $total = $est_rs->pager->total_entries;
     $self->render_json(
         {   sEcho                => $self->param('sEcho'),
             iTotalRecords        => $total,

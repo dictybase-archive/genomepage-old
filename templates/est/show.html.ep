@@ -1,6 +1,9 @@
 % layout 'default', title => "Information for EST $id ";
 
-<h2> Information for EST <%= $id %> </h2>
+<div style="font-size:25px;font-weight:bold;
+            margin:10px auto 20px auto;width:40%;">
+      Information for EST <%= $id %> 
+</div>
 
 <div style="margin-left:10px;margin-right:10px;">
     <table width="100%" cellspacing="3" cellpadding="3" 

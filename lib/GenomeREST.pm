@@ -8,7 +8,7 @@ use base 'Mojolicious';
 sub startup {
     my ($self) = @_;
 
-    ## -- plugin loading sections
+    ##-- plugin loading sections
     $self->plugin('yml_config');
     $self->plugin(
         'modware-oracle',
@@ -34,8 +34,9 @@ sub startup {
         );
     }
     $self->plugin('GenomeREST::Plugin::Genome');
+    $self->plugin('GenomeREST::Plugin::DefaultHelpers');
 
-    ## routing setup
+    ##-- routing setup
     my $router = $self->routes();
     my $base   = $router->namespace();
     $router->namespace( $base . '::Controller' );
@@ -82,7 +83,7 @@ sub startup {
     my $general_tab = $geneid->waypoint( '/:tab',
         tab => [qw/gene orthologs blast references/] )->to('gene#show_tab');
     my $protein_tab = $geneid->waypoint('/protein')->to('protein#show_tab');
-    my $feat_tab    = $geneid->waypoint('/feature')->to('feature#show_tab');
+    my $feature_tab    = $geneid->waypoint('/feature')->to('feature#show_tab');
 
     ## -- section
     $general_tab->route(

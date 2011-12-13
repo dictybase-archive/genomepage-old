@@ -25,7 +25,7 @@ sub register {
     $app->helper(
     	html_formatted_sequence => sub {
     		my ($self, $seq) = @_;
-    		$seq =~ s/(.{1,60})/$1<br\/>/g;
+    		$seq =~ s/([ATGC]{1,60})/$1\n/g;
     		return $seq;
     	}
     );
