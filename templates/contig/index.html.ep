@@ -10,7 +10,13 @@
     			"bServerSide": true, 
     			"sAjaxSource": "/<%= $common_name %>/contig/search.datatable", 
     			"aoColumnDefs": [
-    						{ "sClass": 'center',  "aTargets": [ 0,  1 ] }
+    						{ "sClass": 'center',  "aTargets": [ 0,  1 ] }, 
+    						{
+    							"fnRender": function (obj) {
+    								return '<a href="/' + "<%= $common_name %>" + '/contig/' + obj.aData[0] + '">' + obj.aData[0] + '</a>'; 
+    							}, 
+    							"aTargets": [ 0 ]
+    						}
     			], 
     			"bJQueryUI": true
     		});
@@ -22,7 +28,7 @@
 <table id="genome_datatable" class="display">                    
 	<thead>
 		<tr>
-			<th> Name </th>
+			<th> Contig ID </th>
 			<th> Length(bp) </th>
 		</tr>
 	</thead>

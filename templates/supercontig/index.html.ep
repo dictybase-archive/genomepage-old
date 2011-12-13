@@ -10,7 +10,13 @@
     			"bServerSide": true, 
     			"sAjaxSource": "/<%= $common_name %>/supercontig/search.datatable", 
     			"aoColumnDefs": [
-    						{ "sClass": 'center',  "aTargets": [ 1,  2 ] }
+    						{ "sClass": 'center',  "aTargets": [ 1,  2 ] }, 
+    						{
+    							"fnRender": function (obj) {
+    								return '<a href="/' + "<%= $common_name %>" + '/supercontig/' + obj.aData[0] + '">' + obj.aData[0] + '</a>'; 
+    							}, 
+    							"aTargets": [ 0 ]
+    						}
     			], 
     			"bJQueryUI": true
     		});

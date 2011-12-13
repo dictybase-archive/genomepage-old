@@ -24,8 +24,9 @@ sub register {
     );
     $app->helper(
     	formatted_sequence => sub {
-    		my ($self, $seq) = @_;
-    		$seq =~ s/(\w{1,60})/$1\n/g;
+    		my ($self, $seq, $width) = @_;
+    		$width ||= 60;
+    		$seq =~ s/(\w{1,$width})/$1\n/g;
     		return $seq;
     	}
     );

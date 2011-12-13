@@ -4,9 +4,20 @@ use strict;
 use Mojo::Base -base;
 use Mojo::Base 'Mojolicious::Plugin';
 use GenomeREST::Organism;
+use GenomeREST::Feature::Source;
 use Data::Dump qw/pp/;
 
 has '_genomes';
+has 'feat2seqtype' => sub {
+    return {
+        'gene'        => 'nucleotide',
+        'polypeptide' => 'protein',
+        'mRNA'        => 'nucleotide',
+        'contig'      => 'nucleotide',
+        'supercontig' => 'nucleotide',
+        'chromosome'  => 'nucleotide'
+    };
+};
 
 sub register {
     my ( $self, $app ) = @_;
@@ -28,7 +39,7 @@ sub register {
 
     $app->helper(
         infer_seq_from_genome => sub {
-            my ( $self, $floc ) = @_;
+            my ( $c, $floc ) = @_;
             my $start = $floc->first->fmin;
             my $end   = $floc->first->fmax;
 
@@ -41,6 +52,41 @@ sub register {
                 }
             );
             return $seqrow->first->get_column('fseq');
+        }
+    );
+
+    $app->helper(
+        feature_source => sub {
+            my ( $c, $feature ) = @_;
+            my ($dbxref)
+                = grep { $_->db->name eq 'GFF_source' }
+                $feature->secondary_dbxrefs;
+            if ($dbxref) {
+                my $name   = $dbxref->accession;
+                my $schema = $feature->result_source->schema;
+                my $dbrow  = $schema->resultset('General::Db')
+                    ->find( { name => 'DB:' . $name } );
+                if ($dbrow) {
+                    return GenomeREST::Feature::Source->new(
+                        name       => $name,
+                        url        => $dbrow->urlprefix,
+                        feature_id => $feature->uniquename
+                    );
+                }
+                else {
+                    my $hash    = $self->feat2seqtype;
+                    my $seqtype = $hash->{ $feature->type->name };
+                    $dbrow
+                        = $schema->resultset('General::Db')
+                        ->find(
+                        { 'name' => 'DB:' . $name . ':' . $seqtype } );
+                    return GenomeREST::Feature::Source->new(
+                        name       => $name,
+                        url        => $dbrow->urlprefix,
+                        feature_id => $feature->uniquename
+                    ) if $dbrow;
+                }
+            }
         }
     );
 }

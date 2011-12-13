@@ -52,7 +52,7 @@ sub startup {
         ->to('supercontig#index');
     $supercontig->route( '/search', format => 'datatable' )
         ->name('super_pager')->to('supercontig#search');
-	$supercontig->route('/:id')->to('supercontig#show');
+	$supercontig->route('/:id')->to('supercontig#show',  format => 'html');
 
 
     ## -- contig
@@ -60,7 +60,7 @@ sub startup {
         ->to('contig#index');
     $contig->route( '/search', format => 'datatable' )
         ->name('contig_pager')->to('contig#search');
-	$contig->route('/:id')->to('contig#show');
+	$contig->route('/:id')->to('contig#show',  format => 'html');
 
 
     ## -- est
