@@ -111,12 +111,14 @@ use JSON qw/encode_json/;
 
 has '_panels' => (
     is      => 'rw',
-    isa     => 'ArrayRef[Genome::Tabview::Config::Panel]',
+    isa     => 'ArrayRef',
     traits  => [qw/Array/],
     handles => {
         'add_panel' => 'push',
         'panels'    => 'elements'
-    }
+    },
+    default => sub { [] },
+    lazy    => 1
 );
 
 =head2 to_json

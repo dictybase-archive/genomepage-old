@@ -85,6 +85,7 @@ SUCH DAMAGES.
 package Genome::Tabview::Config::Panel::Item::Accordion;
 
 use strict;
+use Carp::Always;
 use namespace::autoclean;
 use Mouse;
 

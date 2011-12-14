@@ -4,6 +4,7 @@ use strict;
 use Genome::Tabview::Page::Gene;
 use Genome::Factory::Tabview::Tab;
 use Genome::Factory::Tabview::Section;
+use Carp::Always;
 use base 'GenomeREST::Controller';
 
 sub index {
@@ -72,7 +73,7 @@ sub show {
         return;
     }
 
-	$self->stash('gene' => $gene);
+    $self->stash( 'gene' => $gene );
     my $fmt = $self->stash('format');
     if ( $fmt eq 'json' ) {
         $self->show_tab_json;
@@ -86,7 +87,6 @@ sub show {
     }
 }
 
-
 sub show_fasta {
     my ($self) = @_;
     my $header = '>' . $self->stash('id') . '|gene';
@@ -95,30 +95,29 @@ sub show_fasta {
 }
 
 sub show_tab_html {
-    my ($self)  = @_;
-    my $gene_id = $self->stash('id');
+    my ($self) = @_;
     my $tabview = Genome::Tabview::Page::Gene->new(
-        primary_id => $gene_id,
-        base_url   => $self->url_for('current'),
-        active_tab => $self->stash('tab')
+        primary_id => $self->stash('id'),
+        base_url   => $self->gene_url,
+        active_tab => $self->stash('tab'),
+        context    => $self,
+        model      => $self->app->modware->handler
     );
-    $tabview->model( $self->app->modware->handler );
     $self->stash( $tabview->result );
     $self->render( template => 'gene/show' );
 }
 
 sub show_tab_json {
     my ($self) = @_;
-    my $gene_id = $self->stash('gene_id');
-
     my $factory = Genome::Factory::Tabview::Tab->new(
-        primary_id => $gene_id,
+        primary_id => $self->stash('id'),
         tab        => $self->stash('tab'),
-        context    => $self
+        context    => $self,
+        model      => $self->app->modware->handler,
+        base_url   => $self->gene_url
     );
 
     my $tabview = $factory->instantiate;
-    $tabview->model( $self->app->modware->handler );
     $tabview->init;
     my $conf = $tabview->config;
     $self->render_json( [ map { $_->to_json } $conf->panels ] );
@@ -126,15 +125,19 @@ sub show_tab_json {
 
 sub show_section_json {
     my ($self) = @_;
-    my $factory;
-    $factory = Genome::Factory::Tabview::Section->new(
-        primary_id => $self->stash('gene_id'),
-        tab        => 'protein',
+    my $factory = Genome::Factory::Tabview::Section->new(
+        primary_id => $self->stash('id'),
+        tab        => $self->stash('tab'),
         section    => $self->stash('section'),
         context    => $self,
-        model      => $self->app->modware->handler
+        model      => $self->app->modware->handler,
+        base_url   => $self->gene_url
     );
-    $self->render_json( $self->panel_to_json($factory) );
+
+    my $tabview = $factory->instantiate;
+    $tabview->init;
+    my $conf = $tabview->config;
+    $self->render_json( [ map { $_->to_json } $conf->panels ] );
 }
 
 1;

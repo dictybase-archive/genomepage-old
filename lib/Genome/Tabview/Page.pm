@@ -208,23 +208,12 @@ sub _build_feature {
 
 =cut
 
-before 'result' => sub {
-    my ($self) = @_;
-    for my $name ( $self->_slots_needed ) {
-        my $api = 'has_' . $name;
-        croak "value for $name attribute need to set\n" if !$self->$api;
-    }
-};
-
 sub result {
     my ($self) = @_;
     $self->init();
     my $conf   = $self->config;
     my $output = {
-        config => $conf->to_json,
-
-        #        header => $self->get_header,
-        #        raw => [ map { $_->to_json } @{ $conf->panels }],
+        config => $conf->to_json
     };
     return $output;
 }
@@ -264,6 +253,16 @@ before 'feature' => sub {
     croak "model attribute need to be set before retreiving feature\n"
         if !$self->model;
 };
+
+before 'result' => sub {
+    my ($self) = @_;
+    for my $name ( $self->_slots_needed ) {
+        my $api = 'has_' . $name;
+        croak "value for $name attribute need to set\n" if !$self->$api;
+    }
+};
+
+
 
 
 __PACKAGE__->meta->make_immutable;

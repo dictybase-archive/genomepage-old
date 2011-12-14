@@ -207,10 +207,12 @@ sub protein_tab_link {
     my $ctx     = $self->context;
     my $link    = $self->json->link(
         caption => 'Protein sequence, domains and much more...',
-        url     => $ctx->url_to(
-            $base_url, $self->gene->dbxref->accession,
-            'protein', $feature->dbxref->accession
-        ),
+        url     => $ctx->url_for(
+                  $base_url . '/'
+                . $self->gene->dbxref->accession
+                . '/protein/'
+                . $feature->dbxref->accession
+            )->to_string,
         type => 'tab',
     );
     return $link;
@@ -230,11 +232,13 @@ sub aa_composition {
     my $feature = $self->source_feature;
     my $link    = $self->json->link(
         caption => 'View Amino Acid Composition',
-        url     => $self->context->url_to(
-            $self->base_url, $self->gene->dbxref->accession,
-            'protein',       $feature->dbxref->accession,
-            'statistics'
-        ),
+        url     => $self->context->url_for(
+                  $self->base_url . '/'
+                . $self->gene->dbxref->accession
+                . '/protein/'
+                . $feature->dbxref->accession
+                . '/statistics'
+            )->to_string,
         type => 'outer',
     );
     return $link;

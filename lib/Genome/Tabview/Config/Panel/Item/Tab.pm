@@ -195,7 +195,8 @@ sub to_json {
     my $item;
     $item->{key}   = $self->key;
     $item->{label} = $self->label;
-    for my $tag (qw/active source type href dispatch/) {
+    $item->{active} = $self->active eq 'true' ? 1 : 0;
+    for my $tag (qw/source type href dispatch/) {
         $item->{$tag} = $self->$tag if $self->$tag;
     }
     if ( $self->content ) {

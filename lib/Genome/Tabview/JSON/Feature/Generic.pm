@@ -90,16 +90,16 @@ use Genome::Tabview::JSON::Feature;
 extends 'Genome::Tabview::JSON::Feature';
 
 has 'display_type' => (
-	is => 'ro', 
-	isa => 'Str', 
-	lazy => 1, 
-	default => sub {
-		my ($self) = @_;
-		my ($type) = 
-        = map { $_->accession }
-        grep { $_->db->name eq 'GFF_source' } $self->feature->secondary_dbxrefs;
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        my ($type) = map { $_->accession }
+            grep { $_->db->name eq 'GFF_source' }
+            $self->feature->secondary_dbxrefs;
         return $type;
-	}
+    }
 );
 
 has '_exon_featureloc' => (
@@ -181,8 +181,9 @@ has 'gene_url' => (
     default => sub {
         my ($self) = @_;
         my $feat = $self->gene;
-        return $self->context->url_to( $self->base_url, 'gene',
-            $feat->dbxref->accession );
+        return $self->context->url_for(
+            $self->base_url . '/gene/' . $feat->dbxref->accession )
+            ->to_string;
     }
 );
 
@@ -193,8 +194,9 @@ has 'protein_url' => (
     default => sub {
         my ($self) = @_;
         my $feat = $self->protein;
-        return $self->context->url_to( $self->gene_url, 'protein',
-            $self->source_feature->dbxref->accession );
+        return $self->context->url_for( $self->gene_url
+                . '/protein/'
+                . $self->source_feature->dbxref->accession )->to_string;
     }
 );
 
@@ -204,8 +206,9 @@ has 'source_feature_url' => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        return $self->context->url_to( $self->gene_url, 'feature',
-            $self->source_feature->dbxref->accession );
+        return $self->context->url_for( $self->gene_url
+                . '/feature/'
+                . $self->source_feature->dbxref->accession )->to_string;
     }
 );
 
@@ -251,11 +254,13 @@ sub feature_tab_link {
     $caption = $caption || $primary_id;
     my $link = $self->json->link(
         caption => $caption,
-        url     => $self->context->url_to(
-            $base_url,                      'gene',
-            $self->gene->dbxref->accession, 'feature',
-            $primary_id
-        ),
+        url     => $self->context->url_for(
+                  $base_url 
+                . '/gene/'
+                . $self->gene->dbxref->accession
+                . '/feature/'
+                . $primary_id
+        )->to_string,
         type => 'tab',
     );
     return $link;
@@ -432,10 +437,11 @@ sub get_fasta_selection {
     my $blast_button = $self->json->link(
         caption => 'BLAST',
         type    => 'tab',
-        url     => $self->context->url_to(
-            $self->gene_url,
-            'blast?&primary_id=' . $feature->dbxref->accession
-        )
+        url     => $self->context->url_for(
+                  $self->gene_url
+                . 'blast?&primary_id='
+                . $feature->dbxref->accession
+        )->to_string
     );
 
     my %params = (
@@ -484,11 +490,11 @@ sub available_sequences {
 =cut
 
 sub small_gbrowse_image {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $feature = $self->source_feature;
     my $species = $feature->organism->common_name;
-    my $track = $self->display_type;
-    my $name = $self->gbrowse_window($feature);
+    my $track   = $self->display_type;
+    my $name    = $self->gbrowse_window($feature);
     my $image
         = "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=250&type=${track}&keystyle=none&abs=1";
 

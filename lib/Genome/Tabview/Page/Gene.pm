@@ -80,7 +80,7 @@ package Genome::Tabview::Page::Gene;
 
 use strict;
 use namespace::autoclean;
-use Carp;
+use Carp::Always;
 use Mouse;
 use MouseX::Params::Validate;
 use Genome::Tabview::Config;
@@ -117,7 +117,8 @@ sub init {
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'tabview' );
 
     my $ctx       = $self->context;
-    my $prepender = $ctx->url_to($self->base_url, $self->primary_id);
+    my $prepender = $ctx->url_for( $self->base_url . '/' . $self->primary_id )
+        ->to_string;
     $panel->add_item(
         $self->tab(
             key   => 'gene',
@@ -131,7 +132,7 @@ sub init {
         $self->tab(
             key   => 'orthologs',
             label => 'Orthologs',
-            href  => $ctx->url_to( $prepender, 'orthologs' )
+            href  => $ctx->url_for( $prepender . '/orthologs' )->to_string
         )
     ) if $self->show_orthologs;
 
@@ -139,7 +140,7 @@ sub init {
         $self->tab(
             key   => 'references',
             label => 'References',
-            href  => $ctx->url_to( $prepender, 'references' )
+            href  => $ctx->url_for( $prepender . '/references' )->to_string
         )
     ) if $self->show_refs;
     $panel->add_item(
@@ -148,7 +149,7 @@ sub init {
             label    => 'BLAST',
             source   => '/tools/blast?noheader=1&primary_id=' . $primary_id,
             dispatch => 'true',
-            href     => $ctx->url_to( $prepender, 'blast' )
+            href     => $ctx->url_for( $prepender . '/blast' )->to_string
         )
     );
 
@@ -158,7 +159,9 @@ sub init {
                 key        => 'feature',
                 label      => $self->sub_id,
                 primary_id => $self->sub_id,
-                href => $ctx->url_to( $prepender, 'feature', $self->sub_id )
+                href =>
+                    $ctx->url_for( $prepender . '/feature/' . $self->sub_id )
+                    ->to_string
             )
         );
     }
@@ -166,23 +169,6 @@ sub init {
     $config->add_panel($panel);
     $self->config($config);
     return $self;
-
-    #   $panel->add_item(
-    #        $self->tab(
-    #            -key   => 'go',
-    #            -label => 'Gene Ontology',
-    #            -href  => "$prepender/go"
-    #        )
-    #    ) if $self->show_go;
-
-    #    $panel->add_item(
-    #        $self->tab(
-    #            -key   => 'phenotypes',
-    #            -label => 'Phenotypes',
-    #            -href  => "$prepender/phenotypes"
-    #        )
-    #    ) if $self->show_phenotypes;
-
 }
 
 =head2 protein_tab
@@ -222,9 +208,9 @@ sub protein_tab {
                 key        => 'protein',
                 label      => 'Splice Variant ' . $alphabet[$i],
                 primary_id => $trans_id,
-                href       => $self->context->url_to(
-                    $base_url, $gene_id, 'protein', $trans_id
-                )
+                href       => $self->context->url_for(
+                    $base_url . '/' . $gene_id . '/protein/' . $trans_id
+                    )->to_string
             );
             push @$items, $subtab;
         }
@@ -238,7 +224,9 @@ sub protein_tab {
             label   => 'Protein Information',
             type    => 'toolbar',
             content => [$panel],
-            href => $self->context->url_to( $base_url, $gene_id, 'protein' )
+            href    => $self->context->url_for(
+                $base_url . '/' . $gene_id . '/protein'
+                )->to_string
         );
         return $tab;
     }
@@ -248,9 +236,9 @@ sub protein_tab {
         key        => 'protein',
         label      => 'Protein Information',
         primary_id => $trans_id,
-        href       => $self->context->url_to(
-            $base_url, $gene_id, 'protein', $trans_id
-        )
+        href       => $self->context->url_for(
+            $base_url . '/' . $gene_id . '/protein/' . $trans_id
+            )->to_string
     );
     return $tab;
 }
@@ -349,8 +337,9 @@ sub tab_source {
         primary_id => { isa => 'Str', optional => 1 }
     );
     $primary_id ||= $self->primary_id;
-    return $self->context->url_to( $self->base_url, $primary_id,
-        $key . '.json' );
+    return $self->context->url_for(
+        $self->base_url . '/' . $primary_id . '/' . $key . '.json' )
+        ->to_string;
 }
 
 =head2 tab
@@ -383,7 +372,6 @@ sub tab {
         && $arg{key} eq $self->active_tab ? 'true' : 'false';
     my $href = $arg{href} ? $arg{href} : $arg{key};
 
-
     my $source = $arg{source} || $self->tab_source(
         key        => $arg{key},
         primary_id => $arg{primary_id} || $self->primary_id
@@ -399,7 +387,6 @@ sub tab {
     $item->dispatch( $arg{dispatch} ) if $arg{dispatch};
     return $item;
 }
-
 
 __PACKAGE__->meta->make_immutable;
 

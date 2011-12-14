@@ -83,6 +83,7 @@ package Genome::Tabview::Page::Tab::Gene;
 
 use namespace::autoclean;
 use Carp;
+use Carp::Always;
 use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
@@ -95,6 +96,14 @@ extends 'Genome::Tabview::Page::Tab';
 has '+tab' => ( lazy => 1, default => 'gene' );
 has '+parent_feature_id' =>
     ( lazy => 1, default => sub { return $_[0]->primary_id } );
+
+sub _build_section_base_url {
+    my ($self) = @_;
+    my $ctx = $self->context;
+    return $ctx->url_for(
+        $self->base_url . '/' . $self->primary_id . '/' . $self->tab )
+        ->to_string;
+}
 
 sub _build_base_url {
     my ($self) = @_;
@@ -283,8 +292,8 @@ sub references_label {
     my $references_link = $self->json->link(
         caption => 'View complete list of references (' . $count . ' papers)',
         url     => $self->context->url_for(
-            $self->base_url, $self->primary_id, 'references'
-        ),
+            $self->base_url . '/' . $self->primary_id . '/' . 'references'
+            )->to_string,
         type => 'tab',
     );
     my $text = $self->json->text("Latest References");

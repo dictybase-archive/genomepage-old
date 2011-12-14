@@ -268,7 +268,7 @@ sub external_links {
             id     => $xref_row->accession,
             );
     }
-    return $links if @$links;
+    return $links if defined $links;
 }
 
 =head2 description

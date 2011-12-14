@@ -65,6 +65,11 @@ sub show_subsection {
     $self->show_subsection_json;
 }
 
+sub gene_url {
+	my ($self) = @_;
+	return $self->url_for('/'.$self->stash('common_name'). '/gene')->to_string;
+}
+
 1;    # Magic true value required at end of module
 
 __END__

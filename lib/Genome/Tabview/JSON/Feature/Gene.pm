@@ -290,12 +290,14 @@ sub ests {
     return if !$count;
 
     my $links;
+    my $ctx = $self->context;
     ## -- need to fix
     if ( $count >= 6 ) {
         my $more_link = $self->json->link(
             caption => 'more..',
-            url     => $self->context->url_to( $self->base_url, 'est' ),
-            type    => 'outer',
+            url => $ctx->url_for( $ctx->stash('common_name') . '/' . 'est' )
+                ->to_string,
+            type => 'outer',
         );
         push @$links, $more_link;
     }
@@ -303,9 +305,10 @@ sub ests {
     foreach my $est ( $est_rs->search( {}, { rows => 6 } ) ) {
         unshift @$links, $self->json->link(
             caption => $est->dbxref->accession,
-            url     => $self->context->url_to(
-                $self->base_url, 'est', $est->dbxref->accession
-            ),
+            url     => $ctx->url_for(
+                      $ctx->stash('common_name') . '/' . 'est' . '/'
+                    . $est->dbxref->accession
+                )->to_string,
             type => 'outer',
         );
     }
@@ -379,7 +382,8 @@ sub orthologs {
         'subject',
         {   'organism.common_name' =>
                 { '!=', $feature->organism->common_name }
-        }{ join => 'organism', prefetch => [qw/dbxref feature_dbxrefs/] }
+        },
+        { join => 'organism', prefetch => [qw/dbxref feature_dbxrefs/] }
         )->all;
 
 }

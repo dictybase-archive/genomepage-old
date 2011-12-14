@@ -138,7 +138,7 @@ before 'base_url' => sub {
 
 sub _build_base_url {
     my ($self) = @_;
-    return $self->context->url_to;
+    return $self->context->url_for;
 }
 
 for my $attr (qw/section tab/) {

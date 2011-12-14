@@ -1,6 +1,7 @@
 package GenomeREST;
 
 use strict;
+
 #use Homology::Chado::DataSource;
 use base 'Mojolicious';
 
@@ -42,9 +43,9 @@ sub startup {
     $router->namespace( $base . '::Controller' );
 
     ## -- genomes
-    my $top      = $router->waypoint('/')->to('genome#index');
-    my $organism = $top->waypoint('/:common_name')->name('genome')
-        ->to('genome#show');
+    my $top = $router->waypoint('/')->to('genome#index');
+    my $organism
+        = $top->waypoint('/:common_name')->name('genome')->to('genome#show');
     $organism->route('/downloads')->to('genome#download');
 
     ## supercontig
@@ -52,44 +53,39 @@ sub startup {
         ->to('supercontig#index');
     $supercontig->route( '/search', format => 'datatable' )
         ->name('super_pager')->to('supercontig#search');
-	$supercontig->route('/:id')->to('supercontig#show',  format => 'html');
-
+    $supercontig->route('/:id')->to( 'supercontig#show', format => 'html' );
 
     ## -- contig
-    my $contig = $organism->waypoint('/contig')->name('contig')
-        ->to('contig#index');
-    $contig->route( '/search', format => 'datatable' )
-        ->name('contig_pager')->to('contig#search');
-	$contig->route('/:id')->to('contig#show',  format => 'html');
-
+    my $contig
+        = $organism->waypoint('/contig')->name('contig')->to('contig#index');
+    $contig->route( '/search', format => 'datatable' )->name('contig_pager')
+        ->to('contig#search');
+    $contig->route('/:id')->to( 'contig#show', format => 'html' );
 
     ## -- est
-    my $est = $organism->waypoint('/est')->name('est')
-        ->to('est#index');
-    $est->route( '/search', format => 'datatable' )
-        ->name('est_pager')->to('est#search');
-	$est->route('/:id')->to('est#show',  format => 'html');
-
-
+    my $est = $organism->waypoint('/est')->name('est')->to('est#index');
+    $est->route( '/search', format => 'datatable' )->name('est_pager')
+        ->to('est#search');
+    $est->route('/:id')->to( 'est#show', format => 'html' );
 
     ### ---
     my $gene
         = $organism->waypoint('/gene')->name('all_genes')->to('gene#index');
     $gene->route( '/search', format => 'datatable' )->name('gene_pager')
         ->to('gene#search');
-    my $geneid = $gene->waypoint('/:id')->name('gene')->to('gene#show',  format => 'html');
+    my $geneid = $gene->waypoint('/:id')->name('gene')
+        ->to( 'gene#show', format => 'html' );
 
     ## -- tabs
-    my $general_tab = $geneid->waypoint( '/:tab',
-        tab => [qw/gene orthologs blast references/] )->to('gene#show_tab');
+    my $general_tab = $geneid->waypoint( '/:tab' )->to('gene#show_tab');
     my $protein_tab = $geneid->waypoint('/protein')->to('protein#show_tab');
-    my $feature_tab    = $geneid->waypoint('/feature')->to('feature#show_tab');
+    my $feature_tab = $geneid->waypoint('/feature')->to('feature#show_tab');
 
     ## -- section
     $general_tab->route(
         '/:section',
         format  => 'json',
-        section => [qw/info genomic_info product sequences links/]
+        #section => qr/^(info|genomic_info|product|sequences|links)$/
     )->to('gene#show_section');
     my $protein_section = $protein_tab->waypoint(
         '/:id',

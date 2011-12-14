@@ -129,13 +129,15 @@ has [qw/type position/] => ( is => 'rw', isa => 'Str' );
 has '_items' => (
     isa     => 'ArrayRef',
     is      => 'rw',
-    traits => [qw/Array/], 
+    traits  => [qw/Array/],
     handles => {
         'add_item'  => 'push',
         'items'     => 'elements',
-        'has_items' => 'count', 
-        'get_item' => 'get'
+        'has_items' => 'count',
+        'get_item'  => 'get'
     },
+    default => sub { [] },
+    lazy    => 1
 );
 
 =head2 to_json
@@ -149,7 +151,7 @@ has '_items' => (
 =cut
 
 sub to_json {
-    my ( $self) = @_;
+    my ($self) = @_;
     croak "No items found for the panel\n" if !$self->has_items;
 
     my $items;

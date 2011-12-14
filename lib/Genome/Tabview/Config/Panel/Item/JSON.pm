@@ -86,6 +86,7 @@ package Genome::Tabview::Config::Panel::Item::JSON;
 use strict;
 use namespace::autoclean;
 use Carp;
+use Carp::Always;
 use Mouse;
 use MouseX::Params::Validate;
 
@@ -153,8 +154,7 @@ sub link {
 =cut
 
 sub text {
-    my $self = shift;
-    my ($string) = pos_validated_list( \@_, { isa => 'Str' } );
+    my ($self, $string) = @_;
     my $text = { text => $string };
     return $text;
 }

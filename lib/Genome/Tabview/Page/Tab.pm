@@ -80,10 +80,15 @@ package Genome::Tabview::Page::Tab;
 
 use namespace::autoclean;
 use Mouse;
+use Mouse::Util::TypeConstraints;
 use MouseX::Params::Validate;
 use Carp;
+use Carp::Always;
 use Genome::Tabview::Config::Panel::Item::JSON;
 use Genome::Tabview::Config::Panel::Item::Accordion;
+
+subtype 'TabLabel' => as 'ArrayRef';
+coerce 'TabLabel' => from 'HashRef' => via { [$_] };
 
 has 'parent_feature_type' =>
     ( is => 'rw', isa => 'Str', lazy => 1, default => 'gene' );
@@ -109,7 +114,7 @@ before 'base_url' => sub {
 
 sub _build_base_url {
     my ($self) = @_;
-    return $self->context->url_to;
+    return $self->context->url_for;
 }
 
 has 'context' => (
@@ -196,7 +201,7 @@ sub process {
 sub simple_label {
     my ( $self, $string ) = @_;
     my $text = $self->json->text($string);
-    return [$text];
+    return $text;
 }
 
 =head2 section_base_url
@@ -214,13 +219,17 @@ has 'section_base_url' => (
     is      => 'rw',
     isa     => 'Str',
     lazy    => 1,
-    default => sub {
-        my ($self) = @_;
-        my $ctx = $self->context;
-        return $ctx->url_to( $self->base_url, $self->parent_feature_type,
-            $self->parent_feature_id, $self->tab );
-    }
+    builder => '_build_section_base_url'
 );
+
+sub _build_section_base_url {
+    my ($self) = @_;
+    my $ctx = $self->context;
+    return $ctx->url_for( $self->base_url . '/'
+            . $self->parent_feature_type . '/'
+            . $self->parent_feature_id . '/'
+            . $self->tab )->to_string;
+}
 
 =head2 section_source
 
@@ -242,10 +251,13 @@ sub section_source {
     );
     my $ctx = $self->context;
     if ($primary_id) {
-        return $ctx->url_to( $self->section_base_url, $primary_id,
-            $key . '.json' );
+        return $ctx->url_for( $self->section_base_url . '/'
+                . $primary_id . '/'
+                . $key
+                . '.json' )->to_string;
     }
-    return $ctx->url_to( $self->section_base_url, $key . '.json' );
+    return $ctx->url_for( $self->section_base_url . '/' . $key . '.json' )
+        ->to_string;
 }
 
 =head2 accordion
@@ -265,7 +277,7 @@ sub accordion {
     my ( $key, $label, $primary_id ) = validated_list(
         \@_,
         key        => { isa => 'Str' },
-        label      => { isa => 'ArrayRef' },
+        label      => { isa => 'TabLabel', coerce => 1 },
         primary_id => { isa => 'Str', optional => 1 }
     );
 
