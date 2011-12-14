@@ -1,42 +1,42 @@
-% layout 'gene', title => 'Gene Summary for '. stash 'header';
+% layout 'default', title => 'Contig page',  include_content => 'datatables', include_template => 'layouts/datatables' ;
 
-<script type="text/javascript">
+<% content_for datatables => begin %>
+	<%= javascript begin %>
+    	$(document).ready(function() {
+    		$('#genome_datatable').dataTable({
+    			"bFilter": false, 
+    			"sPaginationType": "full_numbers", 
+    			"bProcessing": true, 
+    			"bServerSide": true, 
+    			"sAjaxSource": "/<%= $common_name %>/gene/search.datatable", 
+    			"aoColumnDefs": [
+    						{ "sClass": 'center',  "aTargets": [ 0,  1 ] }, 
+    						{
+    							"fnRender": function (obj) {
+    								return '<a href="/' + "<%= $common_name %>" + '/gene/' + obj.aData[0] + '">' + obj.aData[0] + '</a>'; 
+    							}, 
+    							"aTargets": [ 0 ]
+    						}
+    			], 
+    			"bJQueryUI": true
+    		});
+    	});
+    <% end %>
+<% end %>
 
-// disabing ESC 
-function addEvent(el,ev,func){
-    if(el.addEventListener) el.addEventListener(ev,func,null);
-    else if(el.attachEvent) el.attachEvent('on'+ev,func);
-    else el['on'+ev]=func;		
+<!-- Central Column start -->
+<table id="genome_datatable" class="display">                    
+	<thead>
+		<tr>
+			<th> ID </th>
+			<th> Length(kb) </th>
+		</tr>
+	</thead>
+	<tbody>
+    <tr>
+      <td colspan="5" class="dataTables_empty">Loading data from server ....</td>
+	  </tr>
+  </tbody>
+</table>																
 
-}
-addEvent(document,'keypress',catchEscape);
-    
-function catchEscape(e){
-    e= (window.event)? window.event: e;
-    if(e.keyCode==27){ // you could have a switch here for more keys
-        //do what you want here
-        var browserName=navigator.appName; 
-        if (browserName=="Microsoft Internet Explorer")
-            e.returnValue = false;
-        else
-            e.preventDefault();
-    }
-    return true; // ignore the default 'escape' 
-};
-
-YAHOO.util.Event.onDOMReady(function(){ 
-    var config      = <%== stash('config') %>;
-    var panel = new YAHOO.Dicty.Panel(config[0]); 
-    panel.render('container');
-    var util = panel.util; 
-    YAHOO.util.Event.on(window,  'resize', util.handleResize,  util,  true  );
-});   
-        
-</script>
-
-<div class="page_header">Gene Information for <%= stash 'header' %></div> 
-<div style="padding-left:10px; padding-right:10px;">
-    <div id="container"></div>
-</div>
-<div id='dicty-log'></div>
 

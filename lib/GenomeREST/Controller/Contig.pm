@@ -49,8 +49,6 @@ sub fasta {
 
 sub search {
     my ($self) = @_;
-
-    my $model = $self->app->modware->handler;
     $self->set_organism( $self->stash('common_name') );
 
     my $rows = $self->param('iDisplayLength');

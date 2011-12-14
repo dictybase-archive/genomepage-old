@@ -74,10 +74,10 @@ sub startup {
 
     ### ---
     my $gene
-        = $organism->waypoint('/gene')->name('all_genes')->to('gene#list');
+        = $organism->waypoint('/gene')->name('all_genes')->to('gene#index');
     $gene->route( '/search', format => 'datatable' )->name('gene_pager')
         ->to('gene#search');
-    my $geneid = $gene->waypoint('/:id')->name('gene')->to('gene#show');
+    my $geneid = $gene->waypoint('/:id')->name('gene')->to('gene#show',  format => 'html');
 
     ## -- tabs
     my $general_tab = $geneid->waypoint( '/:tab',

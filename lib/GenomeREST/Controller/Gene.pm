@@ -4,11 +4,9 @@ use strict;
 use Genome::Tabview::Page::Gene;
 use Genome::Factory::Tabview::Tab;
 use Genome::Factory::Tabview::Section;
-use Module::Load;
-use Try::Tiny;
 use base 'GenomeREST::Controller';
 
-sub list {
+sub index {
     my ($self) = @_;
     my $common_name = $self->stash('common_name');
     if ( !$self->check_organism($common_name) ) {
@@ -16,13 +14,11 @@ sub list {
         return;
     }
     $self->set_organism($common_name);
-    $self->render( template => 'gene' );
 }
 
 sub search {
     my ($self) = @_;
 
-    my $model = $self->app->modware->handler;
     $self->set_organism( $self->stash('common_name') );
 
     my $rows = $self->param('iDisplayLength');
@@ -44,7 +40,7 @@ sub search {
             my $floc = $row->featureloc_features->first;
             $seqlen = sprintf( "%.1f", ( $floc->fmax - $floc->fmin ) / 1000 );
         }
-        push @$data, [ $row->dbxref->accession, $row->uniquename, $seqlen ];
+        push @$data, [ $row->dbxref->accession, $seqlen ];
     }
     my $total = $gene_rs->pager->total_entries;
     $self->render_json(
@@ -65,16 +61,42 @@ sub show {
     }
     $self->set_organism($common_name);
 
-	$self->stash('tab' => 'gene');
-    if ( $self->stash('format') and $self->stash('format') eq 'json' ) {
-        return $self->show_tab_json;
+    my $gene = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'dbxref.accession' => $self->stash('id') },
+        { join               => 'dbxref', rows => 1 }
+    )->single;
+
+    if ( !$gene ) {
+        $self->render_not_found;
+        return;
     }
-    $self->show_tab_html;
+
+	$self->stash('gene' => $gene);
+    my $fmt = $self->stash('format');
+    if ( $fmt eq 'json' ) {
+        $self->show_tab_json;
+    }
+    elsif ( $fmt eq 'fasta' ) {
+        $self->show_fasta;
+    }
+    else {
+        $self->stash( 'tab' => 'gene' );
+        $self->show_tab_html;
+    }
+}
+
+
+sub show_fasta {
+    my ($self) = @_;
+    my $header = '>' . $self->stash('id') . '|gene';
+    $self->render_text( $header . "\n"
+            . $self->formatted_sequence( $self->stash('gene')->residues ) );
 }
 
 sub show_tab_html {
     my ($self)  = @_;
-    my $gene_id = $self->stash('gene_id');
+    my $gene_id = $self->stash('id');
     my $tabview = Genome::Tabview::Page::Gene->new(
         primary_id => $gene_id,
         base_url   => $self->url_for('current'),
@@ -82,7 +104,7 @@ sub show_tab_html {
     );
     $tabview->model( $self->app->modware->handler );
     $self->stash( $tabview->result );
-    $self->render( template => 'gene/index' );
+    $self->render( template => 'gene/show' );
 }
 
 sub show_tab_json {
