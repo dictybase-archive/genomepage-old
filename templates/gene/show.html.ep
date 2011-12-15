@@ -1,4 +1,4 @@
-% layout 'gene', title => 'Gene Summary for '. stash 'header';
+% layout 'gene', title => 'Gene Summary for '. $id;
 
 <script type="text/javascript">
 
@@ -34,7 +34,7 @@ YAHOO.util.Event.onDOMReady(function(){
         
 </script>
 
-<div class="page_header">Gene Information for <%= stash 'header' %></div> 
+<div class="page_header">Gene Information for <%= $id %></div> 
 <div style="padding-left:10px; padding-right:10px;">
     <div id="container"></div>
 </div>

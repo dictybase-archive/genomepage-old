@@ -18,7 +18,7 @@ my @yui_js_min = (
 my @yui_js      = ('yahoo-dom-event');
 my @yui_plugins = ( 'bubbling', 'accordion', 'dispatcher' );
 my @app_js      = (
-    'custom/util',       'custom/formatter',
+    'custom/util',       'custom/formatter_v1',
     'custom/dispatcher', 'custom/panel',
     'custom/item',       'menu',
     'language-en',       'nopcart'

@@ -86,9 +86,9 @@ package Genome::Tabview::Config::Panel::Item::JSON;
 use strict;
 use namespace::autoclean;
 use Carp;
-use Carp::Always;
 use Mouse;
 use MouseX::Params::Validate;
+
 
 =head2 content
 
@@ -125,7 +125,7 @@ sub link {
         \@_,
         url     => { isa => 'Str|ArrayRef' },
         type    => { isa => 'Str' },
-        caption => { isa => 'Str', optional => 1 },
+        caption => { isa => 'Any', optional => 1 },
         style   => { isa => 'Str', optional => 1 },
         title   => { isa => 'Str', optional => 1 },
         name    => { isa => 'Str', optional => 1 },

@@ -250,9 +250,10 @@ sub show_sequences {
     return $self->model->resultset('Sequence::Featureloc')->count(
         {   'fmin'                => { '<=', $end },
             'fmax'                => { '>=', $start },
-            'feature.organism_id' => $gene->organism_id
+            'feature.organism_id' => $gene->organism_id, 
+            'type.name' => 'EST'
         },
-        { join => 'feature' }
+        { join => [ { 'feature' => 'type' } ] }
     );
 }
 

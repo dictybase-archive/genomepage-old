@@ -112,7 +112,7 @@ has 'base_url' => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        return $self->context->url_to;
+        return $self->context->url_for->to_string;
     }
 );
 
@@ -137,8 +137,9 @@ has 'reference_feature_url' => (
     default => sub {
         my ($self) = @_;
         my $feat = $self->reference_feature;
-        return $self->context->url_to( $self->base_url, $feat->type->name,
-            $feat->dbxref->accession );
+        return $self->context->url_for( $self->base_url . '/'
+                . $feat->type->name . '/'
+                . $feat->dbxref->accession )->to_string;
     }
 );
 
@@ -177,8 +178,8 @@ sub location {
 
     my $ref_feat = $floc->srcfeature;
     my $str
-        = $ref_feat->type->name . "<b>"
-        . $ref_feat->name
+        = $ref_feat->type->name . " <b>"
+        . $ref_feat->dbxref->accession
         . "</b> coordinates <b>$start</b> to <b>$end</b>, <b>$strand</b> strand";
 
     return $self->json->text($str);
@@ -236,12 +237,12 @@ sub make_external_link {
         id     => { isa => 'Str' },
         type   => { isa => 'Str', optional => 1, default => 'outer' }
     );
-	my $name = $source->name;
-	my $caption = $name =~ /^DB:/ ? ((split /:/,$name))[1]: $name;
+    my $name = $source->name;
+    my $caption = $name =~ /^DB:/ ? ( ( split /:/, $name ) )[1] : $name;
 
     return $self->json->link(
         url     => $source->urlprefix . $id,
-        caption => $caption.':'.$id,
+        caption => $caption . ':' . $id,
         type    => $type
     );
 }
@@ -331,15 +332,13 @@ has '_reference_stack' => (
     traits  => [qw/Array/],
     lazy    => 1,
     builder => '_build_references',
-    handles => { 'references' => 'elements',  'num_of_references' => 'count' }
+    handles => { 'references' => 'elements', 'num_of_references' => 'count' }
 );
 
 sub _build_references {
     my ($self) = @_;
-    my $pub_rs
-        = $self->source_feature->search_related( 'feature_pubs', {} )
-        ->search_related( 'pub',
-        { order_by => { -desc => 'pyear' }} );
+    my $pub_rs = $self->source_feature->search_related( 'feature_pubs', {} )
+        ->search_related( 'pub', {}, { order_by => { -desc => 'pyear' } } );
     return [] if !$pub_rs->count;
 
     load('Modware::Publication::DictyBase');

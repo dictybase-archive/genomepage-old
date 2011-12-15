@@ -204,7 +204,7 @@ has 'links' => (
 
 has 'citation' => (
     is      => 'ro',
-    isa     => 'Str',
+    isa     => 'HashRef',
     lazy    => 1,
     default => sub {
         my ($self) = @_;

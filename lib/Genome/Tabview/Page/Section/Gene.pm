@@ -84,7 +84,7 @@ package Genome::Tabview::Page::Section::Gene;
 
 use strict;
 use namespace::autoclean;
-use Carp;
+use Carp::Always;
 use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
@@ -111,7 +111,7 @@ has '+gene' => (
 
 has '+feature' => (
     lazy    => 1,
-    default => sub { return $self->gene }
+    default => sub { return $_[0]->gene }
 );
 
 =head2 init
@@ -133,7 +133,7 @@ sub init {
         product      => sub { $self->product(@_) },
         sequences    => sub { $self->sequences(@_) },
         links        => sub { $self->links(@_) },
-        references   => sub { $self->references(@_) },
+        references   => sub { $self->references(@_) }
     };
     my $config = $settings->{$section}->();
     $self->config($config);
@@ -165,7 +165,7 @@ sub info {
     $panel->add_item( $self->row( 'Gene Name', $gene->name ) );
     $panel->add_item( $self->row( 'Gene ID',   $gene->primary_id ) );
     if ( my $prod = $gene->gene_products ) {
-        $panel->add_item( 'Gene Product', $prod );
+        $panel->add_item( $self->row( 'Gene Product', $prod ) );
     }
     $panel->add_item(
         $self->row( 'Community Annotations', $gene->wiki_links ) );
@@ -296,14 +296,22 @@ sub product_coordinates {
 
     push @rows, $row;
 
-    my $length_row
-        = $feature->protein
-        ? $self->row( 'Protein Length', $feature->protein->length )
-        : $feature->transcript ? $self->row( 'Transcript Sequence Length',
-        $feature->transcript_length )
-        : $feature->pseudogene ? $self->row( 'Pseudogene Sequence Length',
-        $feature->pseudogene_length )
-        : undef;
+    my $length_row;
+    if ( $feature->protein ) {
+        $length_row
+            = $self->row( 'Protein Length', $feature->protein->length );
+    }
+    elsif ( $feature->transcript ) {
+        $length_row = $self->row( 'Transcript Sequence Length',
+            $feature->transcript_length );
+    }
+    elsif ( $feature->psedudogene ) {
+        $length_row = $self->row( 'Pseudogene Sequence Length',
+            $feature->pseudogene_length );
+    }
+    else {
+        $length_row = undef;
+    }
     push @rows, $length_row if $length_row;
 
     if ( $feature->protein ) {
@@ -368,6 +376,5 @@ sub links {
 }
 
 __PACKAGE__->meta->make_immutable;
-
 
 1;

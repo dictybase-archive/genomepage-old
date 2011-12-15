@@ -160,7 +160,7 @@ has 'protein' => (
         my $feat            = $self->source_feature;
         my $polypeptide_row = $feat->search_related(
             'feature_relationship_objects',
-            { 'type.name' => 'derived_from' },
+            { 'type.name' => 'derives_from' },
             { join        => 'type' }
             )->search_related(
             'subject',

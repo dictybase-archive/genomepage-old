@@ -125,7 +125,7 @@ has 'gene' => (
         my ($self) = @_;
         my $rs = $self->source_feature->search_related(
             'feature_relationship_subjects',
-            { 'type.name' => 'derived_from' },
+            { 'type.name' => 'derives_from' },
             { join        => 'type' }
             )->search_related(
             'object',

@@ -94,10 +94,12 @@ use namespace::autoclean;
 use Mouse;
 use MouseX::Params::Validate;
 
-has [qw/id paginator filter class type table_class/] => (
+has [qw/id paginator filter class table_class/] => (
     is  => 'rw',
     isa => 'Str'
 );
+
+has 'type' => ( is => 'rw', isa => 'Str', lazy => 1, default => 'table' );
 
 =head2 class
 
@@ -255,14 +257,13 @@ has '_record_stack' => (
 sub structure {
     my ($self) = @_;
     my $structure;
-    $structure->{$_} = $self->$_
-        for qw/type table_class/;
-	for my $param(qw/id filter paginator/) {
-		$structure->{$param} = $self->$param if $self->$param;
-	}
-	for my $param(qw/records columns/) {
-		push @{$structure->{$param}}, $_ for $self->$param;
-	}
+    $structure->{$_} = $self->$_ for qw/type table_class/;
+    for my $param (qw/id filter paginator/) {
+        $structure->{$param} = $self->$param if $self->$param;
+    }
+    for my $param (qw/records columns/) {
+        push @{ $structure->{$param} }, $_ for $self->$param;
+    }
     return $structure;
 }
 
