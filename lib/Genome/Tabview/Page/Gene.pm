@@ -237,7 +237,7 @@ sub protein_tab {
         label      => 'Protein Information',
         primary_id => $trans_id,
         href       => $self->context->url_for(
-            $base_url . '/' . $gene_id . '/protein/' . $trans_id
+            $base_url . '/' . $gene_id . '/protein'
             )->to_string
     );
     return $tab;
