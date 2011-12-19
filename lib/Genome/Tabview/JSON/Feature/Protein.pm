@@ -104,7 +104,7 @@ has 'transcript' => (
         my ($self) = @_;
         my $rs = $self->source_feature->search_related(
             'feature_relationship_subjects',
-            { 'type.name' => 'derived_from' },
+            { 'type.name' => 'derives_from' },
             { join        => 'type' }
             )->search_related(
             'object',
@@ -274,11 +274,10 @@ sub sequence {
     my $protein_id = $feature->dbxref->accession;
     my $gene_id    = $self->gene->dbxref->accession;
 
-    my $header = ">$protein_id|$gene_id|Protein|";
-    $header .= "on supercontig: $ref_name position $start to $end\n";
+    my $header = "<pre>&gt;$protein_id<br/>";
     my $seq = $self->source_feature->residues;
-    $seq =~ s/(.{1, 60})/$1\n/g;
-    return $self->json->text("$header\n$seq");
+    $seq =~ s/(\w{1,60})/$1\n/g;
+    return $self->json->text("$header$seq</pre>");
 }
 
 sub name {
