@@ -90,42 +90,33 @@ use Genome::Tabview::Config::Panel;
 extends 'Genome::Tabview::Page::Tab';
 
 has '+tab' => ( lazy => 1, default => 'protein' );
-has '+parent_feature_id' => (
-    lazy    => 1,
-    default => sub {
-        my ($self) = @_;
-        my $gene = $self->feature->search_related(
-            'feature_relationship_subjects',
-            { 'type.name' => 'derived_from' },
-            { join        => 'type' }
-            )->search_related( 'object', {} )->search_related(
-            'feature_relationship_subjects',
-            { 'type_2.name' => 'part_of' },
-            { join          => 'type' }
-            )->search_related(
-            'object',
-            { 'type_3.name' => 'gene' },
-            {   join     => 'type',
-                prefetch => 'dbxref'
-            }
-            );
-        return $gene->first->dbxref->accession;
-    }
-);
-
 has '+feature' => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        my $row = $self->model->resultset('Sequence::Feature')->search(
-            {   'dbxref.accession' => $self->primary_id,
-                'type.name'        => 'polypeptide'
-            },
-            {   join => [qw/dbxref type/],
-                rows => 1
-            }
-        )->single;
-        croak $self->primary_id, " is not a protein\n" if !$row;
+        my $rs
+            = $self->model->resultset('Sequence::Feature')
+            ->search( { 'dbxref.accession' => $self->primary_id, },
+            { join => 'dbxref' } )->search_related(
+            'feature_relationship_objects',
+            { 'type.name' => 'part_of' },
+            { join        => 'type' }
+            )->search_related(
+            'subject',
+            { 'type_2.name' => 'mRNA' },
+            { join          => 'type' }
+            )->search_related(
+            'feature_relationship_objects',
+            { 'type_3.name' => 'deries_from' },
+            { join          => 'type' }
+            )->search_related(
+            'subject',
+            { 'type_4.name' => 'polypeptide' },
+            { join          => 'type', prefetch => 'dbxref' }
+            );
+		my $row = $rs->first;
+        croak $self->primary_id, " is not a gene id\n" if !$row;
+        $self->parent_feature_id($self->primary_id);
         return $row;
     }
 );
@@ -149,7 +140,7 @@ override 'init' => sub {
     my ($self) = @_;
     my $config = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'accordion' );
-    my $primary_id = $self->primary_id;
+    my $primary_id = $self->feature->dbxref->accession;
 
     $panel->add_item(
         $self->accordion(
