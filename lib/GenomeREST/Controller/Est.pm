@@ -51,16 +51,53 @@ sub search {
 
     my $rows = $self->param('iDisplayLength');
     my $page = $self->param('iDisplayStart') / $rows + 1;
-
-    my $est_rs = $self->stash('organism_resultset')->search_related(
-        'features',
-        { 'type.name' => 'EST' },
-        {   join     => 'type',
-            prefetch => 'dbxref',
-            rows     => $rows,
-            page     => $page,
+    my $est_rs;
+    if ( my $gene_id = $self->param('gene') ) {
+        my $row = $self->stash('organism_resultset')->search_related(
+            'features',
+            { 'dbxref.accession' => $gene_id },
+            { join               => 'dbxref' }
+            )->search_related( 'featureloc_features', {}, { rows => 1 } )
+            ->single;
+        if ( !$row ) {
+            $self->render_json(
+                {   sEcho                => $self->param('sEcho'),
+                    iTotalRecords        => 0,
+                    iTotalDisplayRecords => 0,
+                    aaData               => []
+                }
+            );
+            return;
         }
-    );
+        $est_rs = $self->stash('organism_resultset')->search_related(
+            'features',
+            {   'type.name'                         => 'EST',
+                'featureloc_features.fmin'          => { '<=', $row->fmax },
+                'featureloc_features.fmax'          => { '>=', $row->fmin },
+                'featureloc_features.srcfeature_id' => $row->srcfeature_id
+            },
+            {   join => [
+                    qw/type
+                        featureloc_features/
+                ],
+                prefetch => 'dbxref', 
+                rows => $rows, 
+                page => $page
+            }
+        );
+
+    }
+    else {
+        $est_rs = $self->stash('organism_resultset')->search_related(
+            'features',
+            { 'type.name' => 'EST' },
+            {   join     => 'type',
+                prefetch => 'dbxref',
+                rows     => $rows,
+                page     => $page,
+            }
+        );
+    }
 
     my $data = [];
     while ( my $row = $est_rs->next ) {

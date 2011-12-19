@@ -226,7 +226,6 @@ sub _build_section_base_url {
     my ($self) = @_;
     my $ctx = $self->context;
     return $ctx->url_for( $self->base_url . '/'
-            . $self->parent_feature_type . '/'
             . $self->parent_feature_id . '/'
             . $self->tab )->to_string;
 }

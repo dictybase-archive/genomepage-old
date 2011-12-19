@@ -107,7 +107,7 @@ has '+feature' => (
             { join          => 'type' }
             )->search_related(
             'feature_relationship_objects',
-            { 'type_3.name' => 'deries_from' },
+            { 'type_3.name' => 'derives_from' },
             { join          => 'type' }
             )->search_related(
             'subject',

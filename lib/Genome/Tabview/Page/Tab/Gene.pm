@@ -245,13 +245,15 @@ sub show_product {
 sub show_sequences {
     my ($self) = @_;
     my $gene   = $self->feature;
-    my $start  = $gene->featureloc_features->first->fmin;
-    my $end    = $gene->featureloc_features->first->fmax;
+    my $floc   = $gene->featureloc_features->first;
+    my $start  = $floc->fmin;
+    my $end    = $floc->fmax;
     return $self->model->resultset('Sequence::Featureloc')->count(
         {   'fmin'                => { '<=', $end },
             'fmax'                => { '>=', $start },
-            'feature.organism_id' => $gene->organism_id, 
-            'type.name' => 'EST'
+            'srcfeature_id'       => $floc->srcfeature_id,
+            'feature.organism_id' => $gene->organism_id,
+            'type.name'           => 'EST'
         },
         { join => [ { 'feature' => 'type' } ] }
     );

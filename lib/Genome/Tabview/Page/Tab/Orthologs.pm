@@ -123,7 +123,7 @@ has 'binomial_array' => (
 sub init {
     my ($self) = @_;
     my $gene = Genome::Tabview::JSON::Feature::Gene->new(
-        primary_id => $self->feature->primary_id );
+        source_feature => $self->feature );
 
     my $table = Genome::Tabview::Config::Panel::Item::JSON::Table->new();
     $table->class('general');
@@ -162,42 +162,41 @@ sub init {
     );
 
     my $ortholog_hash;
+    my $source
+        = $gene->ortholog_group->search_related( 'analysisfeatures', {} )
+        ->search_related( 'analysis', {}, { 'rows' => 1 } )->single->program;
     ## -- $ortholog is a BCS::Sequence::Feature object
-    foreach my $ortholog ( $gene->orthologs ) {
+    foreach my $ortholog ( @{ $gene->orthologs } ) {
         my $name = $ortholog->uniquename;
-        my $binomial
-            = $ortholog->organism->genus . $ortholog->organism->species;
-        my @dbxrefs = $ortholog->search_related(
-            'feature_dbxref',
+        my $binomial = sprintf "%s %s", $ortholog->organism->genus,
+            $ortholog->organism->species;
+        my @dbxrefs
+            = $ortholog->search_related( 'feature_dbxrefs', {} )
+            ->search_related(
+            'dbxref',
             { 'db.name' => { '!=', 'GFF_source' } },
             { join      => 'db' }
-        );
+            );
         my $uniprot_links = [
             map {
                 $self->json->link(
-                    url     => $_->db->urlprefix . '/' . $_->accession,
+                    url     => $_->db->urlprefix . $_->accession,
                     caption => $_->accession,
                     type    => 'outer'
                     )
                 } grep { $_->db->name eq 'DB:UniProtKB' } @dbxrefs
         ];
-        my $product = join(
-            ',',
-            map { $_->value } $ortholog->search_related(
-                'featureprops',
-                {   'type.name' => 'product',
-                    'cv.name'   => 'feature_property'
-                },
-                { join => [ { 'type' => 'cv' } ] }
-                )->all
+        my @all_pdts = map { $_->value } $ortholog->search_related(
+            'featureprops',
+            {   'type.name' => 'product',
+                'cv.name'   => 'feature_property'
+            },
+            { join => [ { 'type' => 'cv' } ] }
         );
-        my $source
-            = $ortholog->search_related( 'analysisfeatures', {} )
-            ->search_related( 'analysis', {}, { 'rows' => 1 } )
-            ->single->program;
+        my $product = join( ',', @all_pdts );
 
         $ortholog_hash->{$binomial}->{$name}->{linkout} = $self->json->link(
-            url => $ortholog->dbxref->db->urlprefix . '/'
+            url => $ortholog->dbxref->db->urlprefix
                 . $ortholog->dbxref->accession,
             caption => $name,
             type    => 'outer'

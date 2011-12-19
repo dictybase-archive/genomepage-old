@@ -77,35 +77,33 @@ sub startup {
         ->to( 'gene#show', format => 'html' );
 
     ## -- tabs
-    my $general_tab = $geneid->waypoint( '/:tab' )->to('gene#show_tab');
     my $protein_tab = $geneid->waypoint('/protein')->to('protein#show_tab');
     my $feature_tab = $geneid->waypoint('/feature')->to('feature#show_tab');
+    my $general_tab = $geneid->waypoint( '/:tab' )->to('gene#show_tab');
 
     ## -- section
+	my $protein_section = $protein_tab->waypoint(
+        '/:subid',
+        #id     => qr/^[A-Z]{3}\d{4,12}$/,
+        #format => 'json'
+    )->to('protein#show_section');
+    my $feature_section
+        = $feature_tab->waypoint( '/:subid', subid => qr/^[A-Z]{3}\d{4,12}$/ )
+        ->to('feature#show_section');
     $general_tab->route(
         '/:section',
         format  => 'json',
         #section => qr/^(info|genomic_info|product|sequences|links)$/
     )->to('gene#show_section');
-    my $protein_section = $protein_tab->waypoint(
-        '/:id',
-        id     => qr/^[A-Z]{3}_\d{4, 12}$/,
-        format => 'json'
-    )->to('protein#show_section');
-    my $feature_section
-        = $feature_tab->waypoint( '/:id', id => qr/^[A-Z]{3}_\d{4, 12}$/ )
-        ->to('feature#show_section');
 
     ## -- subsection
     $protein_section->route(
         '/:subsection',
         format     => 'json',
-        subsection => [qw/info sequence/]
     )->to('protein#show_subsection');
     $feature_section->route(
         '/:subsection',
         format     => 'json',
-        subsection => [qw/info references/]
     )->to('feature#show_subsection');
 }
 
