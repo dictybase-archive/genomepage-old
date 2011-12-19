@@ -295,8 +295,12 @@ sub ests {
     if ( $count >= 6 ) {
         my $more_link = $self->json->link(
             caption => 'more..',
-            url => $ctx->url_for( $ctx->stash('common_name') . '/' . 'est' )
-                ->to_string,
+            url     => $ctx->url_for(
+                      '/'
+                    . $ctx->stash('common_name') . '/'
+                    . 'est?gene='
+                    . $gene->dbxref->accession
+                )->to_string,
             type => 'outer',
         );
         push @$links, $more_link;
@@ -306,7 +310,8 @@ sub ests {
         unshift @$links, $self->json->link(
             caption => $est->dbxref->accession,
             url     => $ctx->url_for(
-                      $ctx->stash('common_name') . '/' . 'est' . '/'
+                      '/'
+                    . $ctx->stash('common_name') . '/' . 'est' . '/'
                     . $est->dbxref->accession
                 )->to_string,
             type => 'outer',
@@ -361,7 +366,42 @@ sub gene_link {
     );
 }
 
-sub orthologs {
+has 'orthologs' => (
+    is      => 'ro',
+    isa     => 'ArrayRef',
+    lazy    => 1,
+    builder => '_build_orthologs', 
+);
+
+sub _build_orthologs {
+    my ($self) = @_;
+    my $feature = $self->source_feature;
+    my $orthologs = [];
+    if ( my $group = $self->ortholog_group ) {
+        my $rs = $group->search_related(
+            'feature_relationship_objects',
+            { 'type.name' => 'member_of' },
+            { join        => 'type' }
+            )->search_related(
+            'subject',
+            {   'organism.common_name' =>
+                    { '!=', $feature->organism->common_name }
+            },
+            { join => 'organism', prefetch => [qw/dbxref feature_dbxrefs/] }
+            );
+        push @$orthologs, $rs->all;
+    }
+    return $orthologs;
+}
+
+has 'ortholog_group' => (
+    is      => 'ro',
+    isa     => 'Maybe[DBIx::Class::Row]',
+    lazy    => 1,
+    builder => '_build_ortholog_group'
+);
+
+sub _build_ortholog_group {
     my ($self)  = @_;
     my $feature = $self->source_feature;
     my $rs      = $feature->search_related(
@@ -373,19 +413,7 @@ sub orthologs {
         { 'type_2.name' => 'gene_group' },
         { join          => 'type' }
         );
-    my $group_row = $rs->first;
-    return $group_row->search_related(
-        'feature_relationship_objects',
-        { 'type.name' => 'member_of' },
-        { join        => 'type' }
-        )->search_related(
-        'subject',
-        {   'organism.common_name' =>
-                { '!=', $feature->organism->common_name }
-        },
-        { join => 'organism', prefetch => [qw/dbxref feature_dbxrefs/] }
-        )->all;
-
+    return $rs->first;
 }
 
 __PACKAGE__->meta->make_immutable;
