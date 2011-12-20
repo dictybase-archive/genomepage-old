@@ -1,7 +1,7 @@
 <% 
 my $path       = stash('species') || 'default';
 my $yui_root   = '/javascripts/yui/build';
-my @yui_assets = ( 'logger', 'button', 'container', 'menu', );
+my @yui_assets = ( 'logger', 'button', 'container', 'menu', 'paginator');
 my @app_assets = (
     'header', 'body', 'footer', 'gene',
     $path . '/header-skin',
@@ -13,7 +13,8 @@ my @yui_js_min = (
     'yahoo',     'yuiloader',  'container', 'menu',
     'animation', 'element',    'logger',    'connection',
     'json',      'tabview',    'treeview',  'selector',
-    'cookie',    'datasource', 'datatable',
+    'cookie',    'datasource', 'datatable', 'button', 
+    'paginator'
 );
 my @yui_js      = ('yahoo-dom-event');
 my @yui_plugins = ( 'bubbling', 'accordion', 'dispatcher' );
