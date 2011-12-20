@@ -93,14 +93,24 @@ use Genome::Tabview::Config::Panel::Item::JSON::Tree;
 use Genome::Tabview::Config::Panel::Item::JSON::Table;
 extends 'Genome::Tabview::Page::Tab';
 
-has 'inner_id' => (
-    is      => 'rw',
-    isa     => 'Int',
+has 'gene' => (
+    is      => 'ro',
+    isa     => 'Genome::Tabview::JSON::Feature::Gene',
     lazy    => 1,
     default => sub {
-        return int( rand(2000) );
+        my ($self) = @_;
+        return Genome::Tabview::JSON::Feature::Gene->new(
+            source_feature => $self->feature,
+            context        => $self->context,
+            base_url       => $self->base_url
+        );
     }
 );
+
+sub inner_id {
+    my ($self) = @_;
+    return rand(20000) ;
+}
 
 =head2 inner_id
 
@@ -123,12 +133,12 @@ has 'inner_id' => (
 =cut
 
 sub init {
-    my ($self)       = @_;
-    my $config       = Genome::Tabview::Config->new();
-    my $column_panel = Genome::Tabview::Config::Panel->new(
-        layout => 'column',
-        items  => [ $self->topic_tree, $self->references_info ],
-    );
+    my ($self) = @_;
+    my $config = Genome::Tabview::Config->new();
+    my $column_panel
+        = Genome::Tabview::Config::Panel->new( layout => 'column' );
+    $column_panel->add_item( $self->topic_tree );
+    $column_panel->add_item( $self->references_info );
     $config->add_panel($column_panel);
     $self->config($config);
     return $self;
@@ -147,57 +157,56 @@ sub init {
 
 sub topic_tree {
     my ($self) = @_;
-    my $gene   = $self->feature;
-    my $schema = $gene->result_source->schema;
-
     my $tree = Genome::Tabview::Config::Panel::Item::JSON::Tree->new(
         action   => 'filter',
         argument => $self->inner_id . '_table'
     );
 
-    ## get topics by category
-    my $root_topic = $schema->resultset('Cv::Cvterm')->find(
-        {   'cvterm_relationship_subjects.subject_id' => undef,
-            'is_obsolete'                             => 0,
-            'is_relationshiptype'                     => 0,
-            'cv.name' => 'dictyBase_literature_topic'
-        },
-        { join => [ 'cvterm_relationship_subjects', 'cv' ] }
-    );
-    my $topics;
-    foreach
-        my $group ( $root_topic->search_related('cvterm_relationship_objects')
-        ->search_related('subject')->all )
-    {
-        push @{ $topics->{ $group->name } },
-            map { $_->name }
-            $group->search_related('cvterm_relationship_objects')
-            ->search_related( 'subject',
-            { name => { '-in' => $gene->topics } } )->all;
-    }
-
-    foreach my $topic_class ( keys %$topics ) {
-        next if @{ $topics->{$topic_class} } == 0;
-
-        my @child_nodes;
-        foreach my $topic ( @{ $topics->{$topic_class} } ) {
-            push @child_nodes,
-                $tree->node(
-                type  => 'text',
-                label => $topic,
-                title => 'Click to show only papers with ' 
-                    . $topic
-                    . ' topic',
-                );
-        }
-        my $node = $tree->node(
-            type     => 'text',
-            label    => '<b>' . $topic_class . '</b>',
-            expanded => 'true',
-            children => \@child_nodes,
-        ) if $topic_class;
-        $tree->add_node($node);
-    }
+#my $gene   = $self->feature;
+#my $schema = $gene->result_source->schema;
+# get topics by category
+#    my $root_topic = $schema->resultset('Cv::Cvterm')->find(
+#        {   'cvterm_relationship_subjects.subject_id' => undef,
+#            'is_obsolete'                             => 0,
+#            'is_relationshiptype'                     => 0,
+#            'cv.name' => 'dictyBase_literature_topic'
+#        },
+#        { join => [ 'cvterm_relationship_subjects', 'cv' ] }
+#    );
+#    my $topics;
+#    foreach
+#        my $group ( $root_topic->search_related('cvterm_relationship_objects')
+#        ->search_related('subject')->all )
+#    {
+#        push @{ $topics->{ $group->name } },
+#            map { $_->name }
+#            $group->search_related('cvterm_relationship_objects')
+#            ->search_related( 'subject',
+#            { name => { '-in' => $gene->topics } } )->all;
+#    }
+#
+#    foreach my $topic_class ( keys %$topics ) {
+#        next if @{ $topics->{$topic_class} } == 0;
+#
+#        my @child_nodes;
+#        foreach my $topic ( @{ $topics->{$topic_class} } ) {
+#            push @child_nodes,
+#                $tree->node(
+#                type  => 'text',
+#                label => $topic,
+#                title => 'Click to show only papers with '
+#                    . $topic
+#                    . ' topic',
+#                );
+#        }
+#        my $node = $tree->node(
+#            type     => 'text',
+#            label    => '<b>' . $topic_class . '</b>',
+#            expanded => 'true',
+#            children => \@child_nodes,
+#        ) if $topic_class;
+#        $tree->add_node($node);
+#    }
     my $node = $tree->node(
         type  => 'text',
         label => 'Not yet curated',
@@ -225,12 +234,11 @@ sub topic_tree {
 sub references_info {
     my ($self) = @_;
 
-    my $gene = $self->feature;
-    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
-
+    my $gene        = $self->gene;
     my $references  = $gene->num_of_references;
     my $not_curated = $references;
 
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
     $panel->add_item(
         $self->row(
                   'This page displays all the papers associated with '
@@ -263,12 +271,6 @@ sub references_info {
 
 sub reference_table {
     my ($self) = @_;
-    my $gene = Genome::Tabview::JSON::Feature::Gene->new(
-        source_feature => $self->feature,
-        context        => $self->context,
-        base_url       => $self->base_url
-    );
-
     my $table = Genome::Tabview::Config::Panel::Item::JSON::Table->new(
         id        => $self->inner_id . '_table',
         filter    => 'true',
@@ -298,22 +300,33 @@ sub reference_table {
         hidden => 'true'
     );
 
+    my $gene = $self->gene;
     foreach my $reference ( $gene->references ) {
         my $gene_links;
+        ## -- returns first six genes
+        for my $other_gene ( $reference->genes ) {
+            push @$gene_links, $self->json->link(
+                caption => $gene->source_feature->uniquename,
+                type    => 'outer',
+                url     => $self->context->url_for(
+                          $self->context->gene_url . '/'
+                        . $gene->source_feature->dbxref->accession
+                    )->to_string
+            );
+        }
         my $num_of_genes = $reference->num_of_genes - 1;
         if ( $num_of_genes >= 6 ) {
             my $more_link = $self->json->link(
                 caption => 'more..',
                 url     => '/publication/'
-                    . 
-                    . $reference->source_reference->pub_id
+                    . $reference->source_feature->pub_id
                     . '#summary',
                 type  => 'outer',
                 style => 'font-weight: bold; color: #CC0000',
             );
             push @$gene_links, $more_link;
         }
-        my $topics = ('Not yet curated');
+        my @topics = ('Not yet curated');
 
         my $data = {
             ref      => [ $reference->citation ],

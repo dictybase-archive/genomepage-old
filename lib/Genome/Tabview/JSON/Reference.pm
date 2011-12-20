@@ -124,6 +124,16 @@ has 'json' => (
     }
 );
 
+has 'base_url' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        return $self->context->url_for->to_string;
+    }
+);
+
 has 'context' => (
     is  => 'rw',
     isa => 'Mojolicious::Controller'
@@ -232,22 +242,25 @@ sub genes {
         { 'type.name' => 'gene' },
         {   join     => 'type',
             prefetch => 'dbxref',
+            rows     => 6
         }
         );
 
-    my $genes = [
-        map {
-            Genome::Tabview::JSON::Feature::Gene->new( source_feature => $_ )
-            } $genes_rs->all
-    ];
-    return $genes;
+    my @genes = map {
+        Genome::Tabview::JSON::Feature::Gene->new(
+            source_feature => $_,
+            context        => $self->context,
+            base_url       => $self->base_url
+            )
+    } $genes_rs->all;
+    return @genes;
 
 }
 
 sub num_of_genes {
     my ($self) = @_;
-
-    return $self->source_feature->dbrow->search_related( 'feature_pubs', {} )->search_related(
+    return $self->source_feature->dbrow->search_related( 'feature_pubs', {} )
+        ->search_related(
         'feature',
         { 'type.name' => 'gene' },
         { join        => 'type', }

@@ -223,7 +223,7 @@ has '_node_stack' => (
 
 sub node {
     my $self = shift;
-    my ( $type, $label, $title, $expanded, $childrean ) = validated_list(
+    my ( $type, $label, $title, $expanded, $children ) = validated_list(
         \@_,
         type     => { isa => 'Str' },
         label    => { isa => 'Str' },

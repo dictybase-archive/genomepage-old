@@ -94,7 +94,7 @@ extends 'Genome::Tabview::Page::Section';
 has '+feature' => (
     lazy    => 1,
     default => sub {
-    	my ($self) = @_;
+        my ($self) = @_;
         my $rs = $self->model->resultset('Sequence::Feature')->search(
             {   'dbxref.accession' => $self->primary_id,
                 'type.name'        => 'polypeptide'
@@ -163,7 +163,6 @@ sub info {
     return $config;
 }
 
-
 =head2 sequence
 
  Title    : sequence
@@ -174,11 +173,11 @@ sub info {
 =cut
 
 sub sequence {
-    my ($self) = @_;
+    my ($self)  = @_;
     my $protein = $self->feature;
-    my $config = Genome::Tabview::Config->new();
+    my $config  = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
-    $panel->add_item($self->row('Protein Sequence',  $protein->sequence));
+    $panel->add_item( $self->row( 'Protein Sequence', $protein->sequence ) );
     $config->add_panel($panel);
     return $config;
 }
@@ -195,10 +194,10 @@ sub sequence {
 sub links {
     my ($self)  = @_;
     my $protein = $self->feature;
-    my $config = Genome::Tabview::Config->new();
+    my $config  = Genome::Tabview::Config->new();
     my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
-    if (my $link = $protein->external_links) {
-    	$panel->add_item('External Links',  $link);
+    if ( my $link = $protein->external_links ) {
+        $panel->add_item( $self->row( 'External Links', $link ) );
     }
     $config->add_panel($panel);
     return $config;
