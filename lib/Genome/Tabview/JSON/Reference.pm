@@ -239,8 +239,10 @@ sub genes {
         = $self->source_feature->dbrow->search_related( 'feature_pubs', {} )
         ->search_related(
         'feature',
-        { 'type.name' => 'gene' },
-        {   join     => 'type',
+        {   'type.name'            => 'gene',
+            'organism.common_name' => $self->context->stash('common_name')
+        },
+        {   join     => [qw/type organism/],
             prefetch => 'dbxref',
             rows     => 6
         }
