@@ -88,6 +88,7 @@ use namespace::autoclean;
 use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
+use Genome::Tabview::JSON::Feature::Generic;
 extends 'Genome::Tabview::Page::Section';
 
 has '+feature' => (
@@ -97,7 +98,7 @@ has '+feature' => (
         my $rs
             = $self->model->resultset('Sequence::Feature')
             ->search( { 'dbxref.accession' => $self->primary_id },
-            { join => 'type' } );
+            { join => 'dbxref' } );
         return Genome::Tabview::JSON::Feature::Generic->new(
             source_feature => $rs->first,
             base_url       => $self->base_url,
@@ -146,20 +147,20 @@ sub info {
         '[Click on the map to browse the genome from this location]<br>');
 
     my $config = Genome::Tabview::Config->new();
-    my $panel = Genome::Tabview::Config::Panel->new( -layout => 'row' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
 
     $panel->add_item( $self->row( 'Feature Type', $feature->display_type ) );
     $panel->add_item( $self->row( 'Sequence ID',  $feature->primary_id ) );
     $panel->add_item(
         $self->row(
             'Map',
-            [   $gbrowse->text,     $gbrowse->link,
+            [   $gbrowse_text,      $gbrowse_link,
                 $feature->location, $feature->coordinate_table
             ]
         )
     );
 
-    if ( $ext = $feature->external_links ) {
+    if ( my $ext = $feature->external_links ) {
         $panel->add_item( $self->row( 'Links', $ext ) );
     }
     $panel->add_item(
@@ -187,23 +188,19 @@ sub info {
 sub columns {
     my ( $self, @column_data ) = @_;
     my @columns;
-    my $i = 0;
-    foreach my $column (@column_data) {
-        my $json_panel = $self->json_panel($column);
+    foreach my $i (0 .. $#column_data) {
+        my $json_panel = $self->json_panel($column_data[$i]);
         my $class      = $i == 0 ? 'content_table_title' : undef;
         my $colspan    = $i == 0 || @column_data > 2 ? undef : '2';
-
         push @columns,
             Genome::Tabview::Config::Panel::Item::Column->new(
-            -type    => $class,
-            -content => [$json_panel],
-            -colspan => $colspan,
+            type    => $class,
+            content => [$json_panel],
+            colspan => $colspan
             );
-        $i = 1;
     }
     return \@columns;
 }
-
 
 __PACKAGE__->meta->make_immutable;
 

@@ -84,7 +84,6 @@ use namespace::autoclean;
 use Carp;
 use Mouse;
 
-
 has 'base_url' => (
     is      => 'rw',
     isa     => 'Str',
@@ -182,7 +181,6 @@ sub validate_id {
 
 =cut
 
-
 has 'feature' => (
     is      => 'rw',
     isa     => 'DBIx::Class::Row',
@@ -198,6 +196,23 @@ sub _build_feature {
     )->single;
 }
 
+has 'sub_feature' => (
+    is      => 'rw',
+    isa     => 'DBIx::Class::Row',
+    lazy    => 1,
+    builder => '_build_sub_feature'
+);
+
+sub _build_sub_feature {
+    my ($self) = @_;
+    my $rs = $self->feature->search_related(
+        'feature_relationship_objects',
+        { 'type.name' => 'part_of' },
+        { join        => 'type' }
+    )->search_related( 'subject', {}, { prefetch => 'dbxref' } );
+    return $rs->first;
+}
+
 =head2 result
 
  Title    : result
@@ -211,10 +226,8 @@ sub _build_feature {
 sub result {
     my ($self) = @_;
     $self->init();
-    my $conf   = $self->config;
-    my $output = {
-        config => $conf->to_json
-    };
+    my $conf = $self->config;
+    my $output = { config => $conf->to_json };
     return $output;
 }
 
@@ -261,9 +274,6 @@ before 'result' => sub {
         croak "value for $name attribute need to set\n" if !$self->$api;
     }
 };
-
-
-
 
 __PACKAGE__->meta->make_immutable;
 

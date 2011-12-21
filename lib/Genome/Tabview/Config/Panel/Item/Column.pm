@@ -154,7 +154,7 @@ has 'type' => ( isa => 'Str|Undef',  is => 'rw');
 
 =cut
 
-has [qw/rowspan colspan/] => (is => 'rw',  isa => 'Str');
+has [qw/rowspan colspan/] => (is => 'rw',  isa => 'Maybe[Int]');
 
 =head2 to_json
 

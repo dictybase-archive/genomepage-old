@@ -89,39 +89,22 @@ use Genome::Tabview::Config::Panel;
 use Genome::Tabview::Config;
 extends 'Genome::Tabview::Page::Tab';
 
-
 has '+tab' => ( lazy => 1, default => 'feature' );
-has '+parent_feature_id' => (
-    lazy    => 1,
-    default => sub {
-        my ($self) = @_;
-        my $gene = $self->feature->search_related(
-            'feature_relationship_subjects',
-            { 'type.name' => 'part_of' },
-            { join        => 'type' }
-            )->search_related(
-            'object',
-            { 'type_2.name' => 'gene' },
-            {   join     => 'type',
-                prefetch => 'dbxref'
-            }
-            );
-        return $gene->first->dbxref->accession;
-    }
-);
-
 has '+feature' => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        my $row = $self->model->resultset('Sequence::Feature')->search(
-            {   'dbxref.accession' => $self->primary_id,
-            },
-            {   join => [qw/dbxref/],
-                rows => 1
-            }
-        )->single;
-        croak $self->primary_id, " is not a protein\n" if !$row;
+        my $rs
+            = $self->model->resultset('Sequence::Feature')
+            ->search( { 'dbxref.accession' => $self->primary_id, },
+            { join => 'dbxref' } )->search_related(
+            'feature_relationship_objects',
+            { 'type.name' => 'part_of' },
+            { join        => 'type' }
+            )->search_related( 'subject', {}, { prefetch => 'dbxref' } );
+        my $row = $rs->first;
+        croak $self->primary_id, " is not a gene id\n" if !$row;
+        $self->parent_feature_id( $self->primary_id );
         return $row;
     }
 );
@@ -130,7 +113,6 @@ before 'feature' => sub {
     my ($self) = @_;
     croak "Need to set the model attribute\n" if !$self->has_model;
 };
-
 
 =head2 init
 
@@ -145,19 +127,22 @@ before 'feature' => sub {
 sub init {
     my ($self) = @_;
     my $config = Genome::Tabview::Config->new();
-    my $panel  = Genome::Tabview::Config::Panel->new(
-        layout => 'accordion' );
+    my $panel = Genome::Tabview::Config::Panel->new( layout => 'accordion' );
 
-    $panel->add_item($self->accordion(
-        key   => 'info',
-        label => $self->simple_label("General Information"),
-        primary_id => $self->primary_id
-    ));
-    $panel->add_item($self->accordion(
-        key   => 'references',
-        label => $self->simple_label("References"),
-        primary_id => $self->primary_id
-    )) if $self->show_references;
+    $panel->add_item(
+        $self->accordion(
+            key        => 'info',
+            label      => $self->simple_label("General Information"),
+            primary_id => $self->feature->dbxref->accession
+        )
+    );
+    $panel->add_item(
+        $self->accordion(
+            key        => 'references',
+            label      => $self->simple_label("References"),
+            primary_id => $self->feature->dbxref->accession
+        )
+    ) if $self->show_references;
 
     $config->add_panel($panel);
     $self->config($config);

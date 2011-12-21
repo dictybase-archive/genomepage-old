@@ -89,6 +89,15 @@ use Genome::Tabview::JSON::Feature::Protein;
 use Genome::Tabview::JSON::Feature;
 extends 'Genome::Tabview::JSON::Feature';
 
+=head2 display_type
+
+ Title    : display_type
+ Function : returns a formatted display type for the feature
+ Returns  : hash  
+ Args     : none
+ 
+=cut
+
 has 'display_type' => (
     is      => 'ro',
     isa     => 'Str',
@@ -97,7 +106,7 @@ has 'display_type' => (
         my ($self) = @_;
         my ($type) = map { $_->accession }
             grep { $_->db->name eq 'GFF_source' }
-            $self->feature->secondary_dbxrefs;
+            $self->source_feature->secondary_dbxrefs;
         return $type;
     }
 );
@@ -136,7 +145,8 @@ has 'gene' => (
             { 'type_2.name' => 'gene' },
             { join          => 'type', prefetch => 'dbxref' }
             );
-        return $rs->first;
+        my $row = $rs->first;
+        return $row;
     }
 );
 
@@ -182,7 +192,7 @@ has 'gene_url' => (
         my ($self) = @_;
         my $feat = $self->gene;
         return $self->context->url_for(
-            $self->base_url . '/gene/' . $feat->dbxref->accession )
+            $self->context->gene_url . '/' . $feat->dbxref->accession )
             ->to_string;
     }
 );
@@ -193,10 +203,11 @@ has 'protein_url' => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        my $feat = $self->protein;
-        return $self->context->url_for( $self->gene_url
+        my $feat = $self->protein->source_feature;
+        return $self->context->url_for( $self->context->gene_url . '/'
+                . $self->gene->dbxref->accession
                 . '/protein/'
-                . $self->source_feature->dbxref->accession )->to_string;
+                . $feat->dbxref->accession )->to_string;
     }
 );
 
@@ -260,7 +271,7 @@ sub feature_tab_link {
                 . $self->gene->dbxref->accession
                 . '/feature/'
                 . $primary_id
-        )->to_string,
+            )->to_string,
         type => 'tab',
     );
     return $link;
@@ -347,22 +358,6 @@ sub pseudogene_length {
     return 1;
 }
 
-=head2 display_type
-
- Title    : display_type
- Function : returns a formatted display type for the feature
- Returns  : hash  
- Args     : none
- 
-=cut
-
-sub display_type {
-    my ($self) = @_;
-    my $feature = $self->source_feature;
-    my $type = $feature->display_type || $feature->type;
-    return $self->json->text($type);
-}
-
 =head2 accession_number
 
  Title    : accession_number
@@ -377,34 +372,6 @@ sub accession_number {
     my $feature = $self->source_feature();
     my $id      = $feature->external_ids->{'Accession Number'};
     return $self->json->text($id);
-}
-
-=head2 external_links
-
- Title    : external_links
- Function : Returns json formatted external links array for the feature
- Returns  : array  
- Args     : none
- 
-=cut
-
-sub external_links {
-    my ($self)           = @_;
-    my $feature          = $self->source_feature;
-    my $external_id_hash = $feature->external_ids;
-
-    return if !( keys %$external_id_hash );
-
-    my @links;
-    foreach my $key ( keys %$external_id_hash ) {
-        my $link = $self->external_link(
-            -source => $key,
-            -ids    => [ $external_id_hash->{$key} ],
-        );
-
-        push @links, $link if $link;
-    }
-    return @links ? \@links : undef;
 }
 
 =head2 get_fasta_selection
@@ -441,7 +408,7 @@ sub get_fasta_selection {
                   $self->gene_url
                 . 'blast?&primary_id='
                 . $feature->dbxref->accession
-        )->to_string
+            )->to_string
     );
 
     my %params = (

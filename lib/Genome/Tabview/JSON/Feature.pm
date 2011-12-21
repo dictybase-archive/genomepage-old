@@ -137,7 +137,7 @@ has 'reference_feature_url' => (
     default => sub {
         my ($self) = @_;
         my $feat = $self->reference_feature;
-        return $self->context->url_for( $self->base_url . '/'
+        return $self->context->url_for('/'. $self->context->stash('common_name') . '/'
                 . $feat->type->name . '/'
                 . $feat->dbxref->accession )->to_string;
     }
@@ -348,7 +348,8 @@ sub _build_references {
             Genome::Tabview::JSON::Reference->new(
             source_feature =>
                 Modware::Publication::DictyBase->new( dbrow => $row ),
-            context => $self->context
+            context => $self->context, 
+            base_url => $self->base_url
             );
     }
     return $references;

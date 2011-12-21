@@ -94,7 +94,15 @@ has 'primary_id' => (
     is       => 'rw',
     required => 1,
 );
-has 'sub_id' => ( isa => 'Str', is => 'rw' );
+has 'sub_id' => (
+    isa     => 'Str',
+    is      => 'rw',
+    lazy    => 1,
+    default => sub {
+        my ($self) = @_;
+        return $self->sub_feature->dbxref->accession;
+    }
+);
 has 'active_tab' =>
     ( isa => 'Str', is => 'rw', default => 'gene', lazy => 1 );
 
@@ -158,7 +166,7 @@ sub init {
             $self->tab(
                 key        => 'feature',
                 label      => $self->sub_id,
-                primary_id => $self->sub_id,
+                primary_id => $self->primary_id,
                 href =>
                     $ctx->url_for( $prepender . '/feature/' . $self->sub_id )
                     ->to_string
@@ -185,31 +193,33 @@ sub protein_tab {
     my ($self)      = @_;
     my $gene        = $self->feature;
     my $gene_id     = $gene->dbxref->accession;
-    my @transcripts = $gene->search_related(
+    my @proteins = $gene->search_related(
         'feature_relationship_objects',
         { 'type.name' => 'part_of' },
         { join        => 'type' }
         )->search_related(
         'subject',
         { 'type_2.name' => 'mRNA' },
-        { join          => 'type', prefetch => 'dbxref' }
-        )->all;
+        { join          => 'type'}
+        )->search_related('feature_relationship_objects',  {'type_2.name' =>
+        'dervies_from'}, {join => 'type'})->search_related('subject',  {'type.name' =>
+        'polypeptide'}, {join => 'type',  prefetch => 'dbxref'});
 
     my $item;
     my $base_url = $self->base_url;
-    if ( scalar @transcripts > 1 ) {
+    if ( @proteins > 1 ) {
         my $items;
         my @alphabet = ( 'A' .. 'Z' );
 
-        for my $i ( 0 .. $#transcripts ) {
-            my $trans_id = $transcripts[$i]->dbxref->accesion;
+        for my $i ( 0 .. $#proteins ) {
+            my $trans_id = $proteins[$i]->dbxref->accesion;
             my $active   = $i == 0 ? 'true' : undef;
             my $subtab   = $self->tab(
                 key        => 'protein',
                 label      => 'Splice Variant ' . $alphabet[$i],
-                primary_id => $trans_id,
+                primary_id => $proteins[$i],
                 href       => $self->context->url_for(
-                    $base_url . '/' . $gene_id . '/protein/' . $trans_id
+                    $base_url . '/' . $gene_id . '/protein/' . $proteins[$i]
                     )->to_string
             );
             push @$items, $subtab;
@@ -225,18 +235,17 @@ sub protein_tab {
             type    => 'toolbar',
             content => [$panel],
             href    => $self->context->url_for(
-                $base_url . '/' . $gene_id . '/protein'
+                $base_url . '/' . $gene_id . '/protein/'
                 )->to_string
         );
         return $tab;
     }
 
-    my $trans_id = $transcripts[0]->dbxref->accession;
     my $tab      = $self->tab(
-        key        => 'protein',
-        label      => 'Protein Information',
-        href       => $self->context->url_for(
-            $base_url . '/' . $gene_id . '/protein'
+        key   => 'protein',
+        label => 'Protein Information',
+        href  => $self->context->url_for(
+            $base_url . '/' . $gene_id . '/protein/'.$proteins[0]
             )->to_string
     );
     return $tab;

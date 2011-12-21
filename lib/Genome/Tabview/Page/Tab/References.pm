@@ -306,11 +306,11 @@ sub reference_table {
         ## -- returns first six genes
         for my $other_gene ( $reference->genes ) {
             push @$gene_links, $self->json->link(
-                caption => $gene->source_feature->uniquename,
+                caption => $other_gene->source_feature->uniquename,
                 type    => 'outer',
                 url     => $self->context->url_for(
                           $self->context->gene_url . '/'
-                        . $gene->source_feature->dbxref->accession
+                        . $other_gene->source_feature->dbxref->accession
                     )->to_string
             );
         }

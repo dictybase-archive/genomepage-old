@@ -88,7 +88,7 @@ sub startup {
         #format => 'json'
     )->to('protein#show_section');
     my $feature_section
-        = $feature_tab->waypoint( '/:subid', subid => qr/^[A-Z]{3}\d{4,12}$/ )
+        = $feature_tab->waypoint( '/:subid')
         ->to('feature#show_section');
     $general_tab->route(
         '/:section',
