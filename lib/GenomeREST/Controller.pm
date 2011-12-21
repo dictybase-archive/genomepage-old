@@ -70,6 +70,15 @@ sub gene_url {
 	return $self->url_for('/'.$self->stash('common_name'). '/gene')->to_string;
 }
 
+sub panel_to_json {
+	my ($self, $factory) = @_;
+	my $tabview = $factory->instantiate;
+    $tabview->init;
+    my $conf = $tabview->config;
+    return [ map { $_->to_json } $conf->panels ] ;
+
+}
+
 1;    # Magic true value required at end of module
 
 __END__
