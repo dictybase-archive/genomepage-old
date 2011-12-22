@@ -190,9 +190,9 @@ sub init {
 =cut
 
 sub protein_tab {
-    my ($self)      = @_;
-    my $gene        = $self->feature;
-    my $gene_id     = $gene->dbxref->accession;
+    my ($self)   = @_;
+    my $gene     = $self->feature;
+    my $gene_id  = $gene->dbxref->accession;
     my @proteins = $gene->search_related(
         'feature_relationship_objects',
         { 'type.name' => 'part_of' },
@@ -200,10 +200,16 @@ sub protein_tab {
         )->search_related(
         'subject',
         { 'type_2.name' => 'mRNA' },
-        { join          => 'type'}
-        )->search_related('feature_relationship_objects',  {'type_2.name' =>
-        'dervies_from'}, {join => 'type'})->search_related('subject',  {'type.name' =>
-        'polypeptide'}, {join => 'type',  prefetch => 'dbxref'});
+        { join          => 'type' }
+        )->search_related(
+        'feature_relationship_objects',
+        { 'type_3.name' => 'derives_from' },
+        { join          => 'type' }
+        )->search_related(
+        'subject',
+        { 'type_4.name' => 'polypeptide' },
+        { join        => 'type', prefetch => 'dbxref' }
+        );
 
     my $item;
     my $base_url = $self->base_url;
@@ -219,7 +225,10 @@ sub protein_tab {
                 label      => 'Splice Variant ' . $alphabet[$i],
                 primary_id => $proteins[$i],
                 href       => $self->context->url_for(
-                    $base_url . '/' . $gene_id . '/protein/' . $proteins[$i]
+                          $base_url . '/' 
+                        . $gene_id
+                        . '/protein/'
+                        . $proteins[$i]->dbxref->accession
                     )->to_string
             );
             push @$items, $subtab;
@@ -241,12 +250,17 @@ sub protein_tab {
         return $tab;
     }
 
-    my $tab      = $self->tab(
-        key   => 'protein',
-        label => 'Protein Information',
-        href  => $self->context->url_for(
-            $base_url . '/' . $gene_id . '/protein/'.$proteins[0]
-            )->to_string
+    my $protein_url
+        = $self->context->url_for( $base_url . '/' 
+            . $gene_id
+            . '/protein/'
+            . $proteins[0]->dbxref->accession )->to_string;
+
+    my $tab = $self->tab(
+        key    => 'protein',
+        label  => 'Protein Information',
+        href   => $protein_url,
+        source => $protein_url.'.json'
     );
     return $tab;
 }
