@@ -89,7 +89,7 @@ sub show {
 
 sub show_fasta {
     my ($self) = @_;
-    my $header = '>' . $self->stash('id') . '|gene';
+    my $header = '>' . $self->stash('id') ;
     $self->render_text( $header . "\n"
             . $self->formatted_sequence( $self->stash('gene')->residues ) );
 }
