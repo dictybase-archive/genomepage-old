@@ -12,8 +12,8 @@ sub show_tab_html {
         primary_id => $self->stash('id'),
         active_tab => 'protein',
         context    => $self,
-        model      => $self->app->modware->handler, 
-        base_url => $self->gene_url
+        model      => $self->app->modware->handler,
+        base_url   => $self->gene_url
     );
     $self->stash( $db->result );
     $self->render( template => 'gene/show' );
@@ -26,27 +26,28 @@ sub show_tab_json {
         tab        => 'protein',
         primary_id => $self->stash('id'),
         model      => $self->app->modware->handler,
-        base_url   => $self->gene_url, 
+        base_url   => $self->gene_url,
         context    => $self
     );
     $self->render_json( $self->panel_to_json($factory) );
 }
 
 sub show_section_html {
-	my ($self) = @_;
-	$self->show_tab_html;
+    my ($self) = @_;
+    $self->show_tab_html;
 }
 
 sub show_section_json {
     my ($self) = @_;
-    my $factory = Genome::Factory::Tabview::Tab->new(
-        tab        => 'protein',
-        primary_id => $self->stash('id'),
-        context    => $self,
-        model      => $self->app->modware->handler, 
-        base_url => $self->gene_url
-    );
-    $self->render_json( $self->panel_to_json($factory) );
+    $self->show_tab_json;
+#    my $factory = Genome::Factory::Tabview::Tab->new(
+#        tab        => 'protein',
+#        primary_id => $self->stash('id'),
+#        model      => $self->app->modware->handler,
+#        base_url   => $self->gene_url,
+#        context    => $self
+#    );
+#    $self->render_json( $self->panel_to_json($factory) );
 }
 
 sub show_subsection_json {
@@ -56,8 +57,8 @@ sub show_subsection_json {
         tab        => 'protein',
         section    => $self->stash('subsection'),
         context    => $self,
-        model      => $self->app->modware->handler, 
-        base_url => $self->gene_url
+        model      => $self->app->modware->handler,
+        base_url   => $self->gene_url
     );
 
     my $tabview = $factory->instantiate;
