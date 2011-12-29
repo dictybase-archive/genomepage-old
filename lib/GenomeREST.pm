@@ -77,44 +77,27 @@ sub startup {
         ->to( 'gene#show', format => 'html' );
 
     ## -- tabs
-    my $protein_tab = $geneid->waypoint('/protein')->to('protein#show_tab');
-    my $feature_tab = $geneid->waypoint('/feature')->to('feature#show_tab');
-    my $general_tab = $geneid->waypoint( '/:tab' )->to('gene#show_tab');
+    my $protein_tab = $geneid->waypoint('/protein',  format => 'html')->to('protein#show_tab');
+    my $feature_tab = $geneid->waypoint('/feature',  format => 'html')->to('feature#show_tab');
+    my $general_tab = $geneid->waypoint('/:tab',  format => 'html')->to('gene#show_tab');
 
     ## -- section
-	my $protein_section = $protein_tab->waypoint(
-        '/:subid',
-        #id     => qr/^[A-Z]{3}\d{4,12}$/,
-        #format => 'json'
-    )->to('protein#show_section');
+    ## -- currently it maps to the protein tab url for both html and json requests
+    my $protein_section
+        = $protein_tab->waypoint( '/:subid',  format => 'html')->to('protein#show_section');
     my $feature_section
-        = $feature_tab->waypoint( '/:subid')
-        ->to('feature#show_section');
+        = $feature_tab->waypoint('/:subid',  format => 'html')->to('feature#show_section');
     $general_tab->route(
         '/:section',
-        format  => 'json',
-        #section => qr/^(info|genomic_info|product|sequences|links)$/
+        format => 'json',
     )->to('gene#show_section');
 
     ## -- subsection
-    $protein_section->route(
-        '/:subsection',
-        format     => 'json',
-    )->to('protein#show_subsection');
-    $feature_section->route(
-        '/:subsection',
-        format     => 'json',
-    )->to('feature#show_subsection');
+    $protein_section->route( '/:subsection', format => 'json', )
+        ->to('protein#show_subsection');
+    $feature_section->route( '/:subsection', format => 'json', )
+        ->to('feature#show_subsection');
 }
-
-# init database connection
-#    my $datasource = Homology::Chado::DataSource->instance;
-#    $datasource->dsn( $self->config->{database}->{dsn} )
-#        if !$datasource->has_dsn;
-#    $datasource->user( $self->config->{database}->{user} )
-#        if !$datasource->has_user;
-#    $datasource->password( $self->config->{database}->{password} )
-#        if !$datasource->has_password;
 
 1;
 

@@ -32,11 +32,13 @@ sub show_tab {
         return;
     }
     $self->set_organism($common_name);
-
-    if ( $self->stash('format') and $self->stash('format') eq 'json' ) {
-        return $self->show_tab_json;
+    my $api = 'show_tab_'.$self->stash('format');
+    if ($self->can($api)) {
+    	$self->$api;
     }
-    $self->show_tab_html;
+    else {
+        $self->render_not_found;
+    }
 }
 
 sub show_section {
@@ -47,10 +49,14 @@ sub show_section {
         return;
     }
     $self->set_organism($common_name);
-    if ( $self->stash('format') and $self->stash('format') eq 'json' ) {
-        return $self->show_section_json;
+
+    my $api = 'show_section_'.$self->stash('format');
+    if ($self->can($api)) {
+    	$self->$api;
     }
-    $self->show_section_html;
+    else {
+        $self->render_not_found;
+    }
 }
 
 sub show_subsection {
@@ -62,7 +68,14 @@ sub show_subsection {
         return;
     }
     $self->set_organism($common_name);
-    $self->show_subsection_json;
+
+    my $api = 'show_subsection_'.$self->stash('format');
+    if ($self->can($api)) {
+    	$self->$api;
+    }
+    else {
+        $self->render_not_found;
+    }
 }
 
 sub gene_url {

@@ -40,14 +40,23 @@ sub show_section_html {
 sub show_section_json {
     my ($self) = @_;
     $self->show_tab_json;
-#    my $factory = Genome::Factory::Tabview::Tab->new(
-#        tab        => 'protein',
-#        primary_id => $self->stash('id'),
-#        model      => $self->app->modware->handler,
-#        base_url   => $self->gene_url,
-#        context    => $self
-#    );
-#    $self->render_json( $self->panel_to_json($factory) );
+}
+
+sub show_section_fasta {
+    my ($self) = @_;
+    my $protein = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'dbxref.accession' => $self->stash('subid') },
+        { join               => 'dbxref', rows => 1 }
+    )->single;
+    if ( !$protein ) {
+        $self->render_not_found;
+        return;
+    }
+
+    my $header = '>' . $self->stash('subid');
+    $self->render_text(
+        "$header\n" . $self->formatted_sequence( $protein->residues ) );
 }
 
 sub show_subsection_json {
