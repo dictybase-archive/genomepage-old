@@ -65,7 +65,6 @@ sub show_subsection_json {
     $self->render_json( $self->panel_to_json($factory) );
 }
 
-
 sub show_section_fasta {
     my ($self) = @_;
     my $feat = $self->stash('organism_resultset')->search_related(

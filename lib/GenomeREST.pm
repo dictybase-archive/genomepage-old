@@ -92,6 +92,8 @@ sub startup {
         format => 'json',
     )->to('gene#show_section');
 
+	## protein amino acid statistics
+	$protein_section->route('/statistics')->to('protein#stats');
     ## -- subsection
     $protein_section->route( '/:subsection', format => 'json', )
         ->to('protein#show_subsection');

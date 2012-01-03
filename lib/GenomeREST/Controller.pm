@@ -61,7 +61,6 @@ sub show_section {
 
 sub show_subsection {
     my ($self)      = @_;
-    my ($self)      = @_;
     my $common_name = $self->stash('common_name');
     if ( !$self->check_organism($common_name) ) {
         $self->render_not_found;
