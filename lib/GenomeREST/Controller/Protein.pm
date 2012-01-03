@@ -76,4 +76,25 @@ sub show_subsection_json {
     $self->render_json( [ map { $_->to_json } $conf->panels ] );
 }
 
+sub stats {
+    my ($self) = @_;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+    my $rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'dbxref.accession' => $self->stash('subid') },
+        { join               => 'dbxref' }
+    );
+    my $protein = $rs->first;
+    if ( !$protein ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->stash( 'residues' => $protein->residues ,  total => $protein->seqlen);
+}
+
 1;
