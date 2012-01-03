@@ -1,5 +1,5 @@
 <% 
-my $path       = stash('common_name') || 'default';
+my $path = stash 'common_name';
 my $yui_root   = '/javascripts/yui/build';
 my @yui_assets = ( 'container', 'menu' );
 my @app_assets = (

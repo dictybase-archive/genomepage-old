@@ -12,19 +12,19 @@
   </tr>
   <tr>
     <td>Chromosomal (Supercontig)</td>
-    <td><a href="<%= url_for 'current/dna' %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'dna' %>">Fasta format</a></td>
   </tr>
   <tr>
     <td>Coding (spliced mRNA transcript sequences)</td>
-    <td><a href="<%= url_for 'current/mrna' %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'mrna' %>">Fasta format</a></td>
   </tr>
   <tr>
     <td>Protein </td>
-    <td><a href="<%= url_for 'current/protein' %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'protein' %>">Fasta format</a></td>
   </tr>
   <tr>
     <td>Genomic Features </td>
-    <td><a href="<%= url_for 'current/feature' %>">GFF3 format</a></td>
+    <td><a href="<%= url_for 'feature' %>">GFF3 format</a></td>
   </tr>
 </table>
 

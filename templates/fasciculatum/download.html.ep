@@ -12,7 +12,7 @@
   </tr>
   <tr>
     <td>Chromosomal (Supercontig)</td>
-    <td><a href="<%= url_for 'current/dna' %>">Fasta format</a></td>
+    <td><a href="<%= url_for ('current/dna') %>">Fasta format</a></td>
   </tr>
   <tr>
     <td>Coding (spliced mRNA transcript sequences)</td>

@@ -68,25 +68,13 @@ sub index {
 
 sub download {
     my ($self) = @_;
-    if ( !$self->check_organism( $self->stash('common_name') ) ) {
+	my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
         $self->render_not_found;
         return;
     }
-
-    my $filename = $self->req->param('file');
-    if ($filename) {
-        my $dispatcher = Mojolicious::Static->new;
-        $dispatcher->root(
-            catdir( $self->app->config->{download}, $self->stash('species') )
-        );
-        $self->res->headers->content_disposition(
-            qq{'attatchment; filename="$filename"'});
-        $dispatcher->serve( $self, $filename );
-        $self->rendered;
-    }
-    else {
-        $self->render( template => $self->stash('species') . '/download' );
-    }
+    $self->set_organism($common_name);
+    $self->render( $common_name . '/download' );
 }
 
 1;    # Magic true value required at end of module

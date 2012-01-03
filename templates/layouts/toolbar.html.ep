@@ -60,9 +60,10 @@
                                             <div class="bd">
                                                 <ul class="first-of-type">
                                     		          % for my $org(loaded_genomes) {
+                                    		          	 % my $cname = $org->common_name;
                                        			           <li class="yuimenuitem">
                                        				            <a class="yuimenuitemlabel" 
-                                       				             href="/<%= $org->common_name %>/Downloads">
+                                       				             href="<%= url_for("/$cname/current") %> ">
                                        				             <%= sprintf('%s %s', $org->genus, $org->common_name) %>
 																							            </a>
 																						            </li>
