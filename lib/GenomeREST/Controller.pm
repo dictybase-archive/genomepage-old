@@ -2,6 +2,7 @@ package GenomeREST::Controller;
 
 use strict;
 use base 'Mojolicious::Controller';
+use File::Spec::Functions;
 
 sub check_organism {
     my ( $self, $name ) = @_;
@@ -32,9 +33,9 @@ sub show_tab {
         return;
     }
     $self->set_organism($common_name);
-    my $api = 'show_tab_'.$self->stash('format');
-    if ($self->can($api)) {
-    	$self->$api;
+    my $api = 'show_tab_' . $self->stash('format');
+    if ( $self->can($api) ) {
+        $self->$api;
     }
     else {
         $self->render_not_found;
@@ -50,9 +51,9 @@ sub show_section {
     }
     $self->set_organism($common_name);
 
-    my $api = 'show_section_'.$self->stash('format');
-    if ($self->can($api)) {
-    	$self->$api;
+    my $api = 'show_section_' . $self->stash('format');
+    if ( $self->can($api) ) {
+        $self->$api;
     }
     else {
         $self->render_not_found;
@@ -60,7 +61,7 @@ sub show_section {
 }
 
 sub show_subsection {
-    my ($self)      = @_;
+    my ($self) = @_;
     my $common_name = $self->stash('common_name');
     if ( !$self->check_organism($common_name) ) {
         $self->render_not_found;
@@ -68,9 +69,9 @@ sub show_subsection {
     }
     $self->set_organism($common_name);
 
-    my $api = 'show_subsection_'.$self->stash('format');
-    if ($self->can($api)) {
-    	$self->$api;
+    my $api = 'show_subsection_' . $self->stash('format');
+    if ( $self->can($api) ) {
+        $self->$api;
     }
     else {
         $self->render_not_found;
@@ -78,17 +79,49 @@ sub show_subsection {
 }
 
 sub gene_url {
-	my ($self) = @_;
-	return $self->url_for('/'.$self->stash('common_name'). '/gene')->to_string;
+    my ($self) = @_;
+    return $self->url_for( '/' . $self->stash('common_name') . '/gene' )
+        ->to_string;
 }
 
 sub panel_to_json {
-	my ($self, $factory) = @_;
-	my $tabview = $factory->instantiate;
+    my ( $self, $factory ) = @_;
+    my $tabview = $factory->instantiate;
     $tabview->init;
     my $conf = $tabview->config;
-    return [ map { $_->to_json } $conf->panels ] ;
+    return [ map { $_->to_json } $conf->panels ];
 
+}
+
+sub get_download_folder {
+    my ($self) = @_;
+    if ( not defined $self->config->{default}->{download} ) {
+        $self->stash( 'message' => 'Download folder is not configured' );
+        $self->render('missing');
+        return;
+    }
+
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+    return catfile( $self->config->{default}->{download}, $common_name );
+}
+
+sub sendfile {
+    my ( $self, %arg ) = @_;
+    my $sendfile = 1 if $arg{xsendfile};
+    $sendfile = 1 if $self->app->mode eq 'production';
+
+    if ($sendfile) {
+    }
+    else {
+        $self->res->headers->content_type(
+            $arg{type} ? $arg{type} : 'text/plain' );
+        $self->render_static( $arg{file} );
+    }
 }
 
 1;    # Magic true value required at end of module
