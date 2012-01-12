@@ -113,9 +113,10 @@ sub get_download_folder {
 sub sendfile {
     my ( $self, %arg ) = @_;
     my $sendfile = 1 if $arg{xsendfile};
-    $sendfile = 1 if $self->app->mode eq 'production';
+    $sendfile = 1 if $self->app->mode ne 'development';
 
     if ($sendfile) {
+    	# -- Set Xsendfile headers
     }
     else {
         $self->res->headers->content_type(
