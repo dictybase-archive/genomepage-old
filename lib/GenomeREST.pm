@@ -46,9 +46,15 @@ sub startup {
     my $top = $router->waypoint('/')->to('genome#index');
     my $organism
         = $top->waypoint('/:common_name')->name('genome')->to('genome#show');
-    my $download = $organism->waypoint('/current')->name('current')->to('genome#download');
-    $download->route("/$_")->name($_)->to("genome#$_") for qw/dna mrna protein feature/;
-    $download->route("/mitochondria/$_")->to("mitochondria#$_") for qw/dna mrna protein feature/;
+    my $download = $organism->waypoint('/current')->name('current')
+        ->to('genome#download');
+    $download->route( "/$_", format => 'fasta' )->name($_)->to("genome#$_")
+        for qw/dna mrna protein/;
+    $download->route( '/feature', format => 'gff3' )->to('genome#feature');
+    $download->route( '/mitochondria/dna', format => 'fasta' )
+        ->to('mitochondria#dna');
+    $download->route( '/mitochondria/feature', format => 'gff3' )
+        ->to('mitochondria#feature');
 
     ## supercontig
     my $supercontig = $organism->waypoint('/supercontig')->name('supercontig')
@@ -79,23 +85,26 @@ sub startup {
         ->to( 'gene#show', format => 'html' );
 
     ## -- tabs
-    my $protein_tab = $geneid->waypoint('/protein',  format => 'html')->to('protein#show_tab');
-    my $feature_tab = $geneid->waypoint('/feature',  format => 'html')->to('feature#show_tab');
-    my $general_tab = $geneid->waypoint('/:tab',  format => 'html')->to('gene#show_tab');
+    my $protein_tab = $geneid->waypoint( '/protein', format => 'html' )
+        ->to('protein#show_tab');
+    my $feature_tab = $geneid->waypoint( '/feature', format => 'html' )
+        ->to('feature#show_tab');
+    my $general_tab
+        = $geneid->waypoint( '/:tab', format => 'html' )->to('gene#show_tab');
 
     ## -- section
     ## -- currently it maps to the protein tab url for both html and json requests
     my $protein_section
-        = $protein_tab->waypoint( '/:subid',  format => 'html')->to('protein#show_section');
+        = $protein_tab->waypoint( '/:subid', format => 'html' )
+        ->to('protein#show_section');
     my $feature_section
-        = $feature_tab->waypoint('/:subid',  format => 'html')->to('feature#show_section');
-    $general_tab->route(
-        '/:section',
-        format => 'json',
-    )->to('gene#show_section');
+        = $feature_tab->waypoint( '/:subid', format => 'html' )
+        ->to('feature#show_section');
+    $general_tab->route( '/:section', format => 'json', )
+        ->to('gene#show_section');
 
-	## protein amino acid statistics
-	$protein_section->route('/statistics')->to('protein#stats');
+    ## protein amino acid statistics
+    $protein_section->route('/statistics')->to('protein#stats');
     ## -- subsection
     $protein_section->route( '/:subsection', format => 'json', )
         ->to('protein#show_subsection');
