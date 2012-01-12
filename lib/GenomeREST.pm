@@ -48,6 +48,7 @@ sub startup {
         = $top->waypoint('/:common_name')->name('genome')->to('genome#show');
     my $download = $organism->waypoint('/current')->name('current')->to('genome#download');
     $download->route("/$_")->name($_)->to("genome#$_") for qw/dna mrna protein feature/;
+    $download->route("/mitochondria/$_")->to("mitochondria#$_") for qw/dna mrna protein feature/;
 
     ## supercontig
     my $supercontig = $organism->waypoint('/supercontig')->name('supercontig')
