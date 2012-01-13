@@ -58,6 +58,26 @@ sub show {
     $stash{polypeptide_id}
         = $poly_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
 
+    my $nuclear_rs = $org_rs->search_related(
+        'features',
+        { 'type.name' => 'mRNA' },
+        { join        => 'type' }
+        )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
+        ->search_related(
+        'srcfeature',
+        { 'type_2.name' => 'nuclear_sequence' },
+        { join          => [ { 'featureprops' => 'type' } ] }
+        );
+
+    if ( my $nrow = $nuclear_rs->first ) {
+        $self->stash( 'nuclear_genome' => 1 );
+        my $rs = $nrow->search_related( 'feature_pubs', {} )
+            ->search_related( 'pub', {} );
+        if ( my $prow = $rs->first ) {
+            my $id = $prow->pub_id;
+            $stash{pub} = Modware::Publication::DictyBase->find($id);
+        }
+    }
     $stash{template} = 'species';
     $self->render(%stash);
 }
@@ -79,33 +99,49 @@ sub download {
     my $org_rs     = $self->stash('organism_resultset');
     my $nuclear_rs = $org_rs->search_related(
         'features',
-        { 'featureloc_features.srcfeature_id' => undef , 'type.name' => 'nuclear_sequence' },
-        { join => ['featureloc_features',  {featureprops => 'type'}] });
+        { 'type.name' => 'mRNA' },
+        { join        => 'type' }
+        )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
+        ->search_related(
+        'srcfeature',
+        { 'type_2.name' => 'nuclear_sequence' },
+        { join          => [ { 'featureprops' => 'type' } ] }
+        );
 
-	if (my $nrow = $nuclear_rs->first) {
-		$self->stash('nuclear_genome' => 1);
-		my $rs = $nrow->search_related('feature_pubs',  {})->search_related('pub', {});
-		if (my $prow = $rs->first) {
-			my $id = $prow->pub_id;
-			$self->stash('nuclear_pub' => Modware::Publication::DictyBase->find($id));
-			$self->stash('sequence_pub' => 1);
-		}
-	}
+    if ( my $nrow = $nuclear_rs->first ) {
+        $self->stash( 'nuclear_genome' => 1 );
+        my $rs = $nrow->search_related( 'feature_pubs', {} )
+            ->search_related( 'pub', {} );
+        if ( my $prow = $rs->first ) {
+            my $id = $prow->pub_id;
+            $self->stash(
+                'nuclear_pub' => Modware::Publication::DictyBase->find($id) );
+            $self->stash( 'sequence_pub' => 1 );
+        }
+    }
 
-	my $mito_rs = $org_rs->search_related(
+    my $mito_rs = $org_rs->search_related(
         'features',
-        { 'featureloc_features.srcfeature_id' => undef , 'type.name' => 'mitochondrial_DNA' },
-        { join => ['featureloc_features',  {featureprops => 'type'}] });
+        { 'type.name' => 'mRNA' },
+        { join        => 'type' }
+        )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
+        ->search_related(
+        'srcfeature',
+        { 'type_2.name' => 'mitochondrial_DNA' },
+        { join          => [ { 'featureprops' => 'type' } ] }
+        );
 
-	if (my $mrow = $mito_rs->first) {
-		$self->stash('mito_genome' => 1);
-		my $rs = $mrow->search_related('feature_pubs',  {})->search_related('pub', {});
-		if (my $prow = $rs->first) {
-			my $id = $prow->pub_id;
-			$self->stash('mito_pub' => Modware::Publication::DictyBase->find($id));
-			$self->stash('sequence_pub' => 1);
-		}
-	}
+    if ( my $mrow = $mito_rs->first ) {
+        $self->stash( 'mito_genome' => 1 );
+        my $rs = $mrow->search_related( 'feature_pubs', {} )
+            ->search_related( 'pub', {} );
+        if ( my $prow = $rs->first ) {
+            my $id = $prow->pub_id;
+            $self->stash(
+                'mito_pub' => Modware::Publication::DictyBase->find($id) );
+            $self->stash( 'sequence_pub' => 1 );
+        }
+    }
     $self->render( $common_name . '/download' );
 }
 
@@ -118,9 +154,10 @@ sub dna {
     my $org_rs     = $self->stash('organism_resultset');
     my $feature_rs = $org_rs->search_related(
         'features',
-        { 'featureloc_features.srcfeature_id' => undef },
-        { prefetch => 'type', join => 'featureloc_features' }
-    );
+        { 'type.name' => 'mRNA' },
+        { join        => 'type' }
+        )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
+        ->search_related( 'srcfeature',           { prefetch   => 'type' } );
     my $row = $feature_rs->first;
     if ( !$row ) {
         $self->stash( 'message' => 'Reference feature for '
@@ -130,32 +167,49 @@ sub dna {
         return;
     }
 
-    my $file = $self->stash('common_name').'_'.$row->type->name.'.'. $self->stash('format');
-    $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
+    my $file
+        = $self->stash('common_name') . '_'
+        . $row->type->name . '.'
+        . $self->stash('format');
+    $self->sendfile(
+        file => catfile( $folder, $file ),
+        type => 'application/x-fasta'
+    );
 }
 
 sub mrna {
-	my ($self) = @_;
+    my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name').'_coding.'.$self->stash('format');
-    $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
+    my $file
+        = $self->stash('common_name') . '_coding.' . $self->stash('format');
+    $self->sendfile(
+        file => catfile( $folder, $file ),
+        type => 'application/x-fasta'
+    );
 }
 
 sub protein {
-	my ($self) = @_;
+    my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name').'_protein.'.$self->stash('format');
-    $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
+    my $file
+        = $self->stash('common_name') . '_protein.' . $self->stash('format');
+    $self->sendfile(
+        file => catfile( $folder, $file ),
+        type => 'application/x-fasta'
+    );
 }
 
 sub feature {
-	my ($self) = @_;
+    my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name').'_feature.gff3';
-    $self->sendfile(file => catfile($folder, $file),  type => 'application/x-gff3');
+    my $file = $self->stash('common_name') . '_feature.gff3';
+    $self->sendfile(
+        file => catfile( $folder, $file ),
+        type => 'application/x-gff3'
+    );
 }
 
 1;    # Magic true value required at end of module
