@@ -1,3 +1,7 @@
-<p>
-Include literature citation here
-</p>
+<h3>
+Please cite:
+</h3>
+<br/>
+% if (my $pub = stash 'pub') {
+		%== $pub->formatted_citation 
+% }

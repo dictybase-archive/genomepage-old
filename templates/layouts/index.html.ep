@@ -31,9 +31,9 @@
   <h3> Sample entry points for browsing the <i> <%= $abbreviation %> genome </i> </h3>
   <ul>
   	<li> Genome browser </li>
-  	<li> <a href="<%= url_for "gene/$gene_id" %>">Gene (<%= $gene_id %>) </li>
-  	<li> <a href="<%= url_for "gene/$gene_id/feature/$transcript_id"  %>">Transcript (<%= $transcript_id %>) </li>
-  	<li> <a href="<%= url_for "gene/$gene_id/protein/$transcript_id" %>">Protein (<%= $polypeptide_id %>) </li>
+  	<li> <a href="<%= url_for "gene/$gene_id" %>">Gene (<%= $gene_id %>)</a> </li>
+  	<li> <a href="<%= url_for "gene/$gene_id/feature/$transcript_id"  %>">Transcript (<%= $transcript_id %>) </a></li>
+  	<li> <a href="<%= url_for "gene/$gene_id/protein/$transcript_id" %>">Protein (<%= $polypeptide_id %>) </a></li>
 	</ul>
 </div>
 <div id="species-image">

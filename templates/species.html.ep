@@ -1,11 +1,9 @@
-% my $path = stash('common_name') || 'default';
-
-% layout 'default', title => 'Genomic resource for ' . stash('abbreviation'), wrapper => 'threecol' ;
+% layout 'default', title => 'Genomic resource for ' . $abbreviation, wrapper => 'threecol' ;
 
 %= include 'layouts/index' 
 
 <div id="bottom-div">
-	 %= include "$path/index"
+	 %= include "$common_name/index"
 	 %= include 'layouts/literature_citation'
 
 </div>
