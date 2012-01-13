@@ -130,7 +130,7 @@ sub dna {
         return;
     }
 
-    my $file = $self->stash('common_name').'_'.$row->type->name.'.'. $self->stash('format')';
+    my $file = $self->stash('common_name').'_'.$row->type->name.'.'. $self->stash('format');
     $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
 }
 
@@ -138,7 +138,7 @@ sub mrna {
 	my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name').'_coding.'.$self->stash('format')';
+    my $file = $self->stash('common_name').'_coding.'.$self->stash('format');
     $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
 }
 
@@ -146,7 +146,7 @@ sub protein {
 	my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name').'_protein.'.$self->stash('format')';
+    my $file = $self->stash('common_name').'_protein.'.$self->stash('format');
     $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
 }
 
