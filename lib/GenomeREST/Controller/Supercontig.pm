@@ -17,7 +17,6 @@ sub index {
         return;
     }
     $self->set_organism($common_name);
-    $self->render( template => 'supercontig' );
 }
 
 sub fasta {
