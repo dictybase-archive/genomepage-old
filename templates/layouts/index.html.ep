@@ -1,4 +1,3 @@
-% my $path = stash('species') || 'default';
 <h2>
   Welcome to the <i><%= $genus %> <%= $species %></i> web portal!
 </h2>
@@ -13,20 +12,20 @@
       <li><a href="/tools/blast">BLAST tool</a>: The new dictyBase universal dictyostelid
       blast interface to search for similarities between <i><%= $abbreviation %></i> and other genomes
       </li>
-      <li><a href="/<%= $species %>/downloads">Download section </a>: Download
-      mapping between identifiers and genomic sequences in fasta format.
+      <li><a href="<%= url_for "$common_name/current" %>">Download section </a>: 
+      Download genomic sequences, alignments, mapping etc.
       </li>
   </ul>
   <h3>Genome statistics: </h3>
   <ul>
   	<li> <%= $supercontig %> supercontigs </li>
-  	% if (defined stash('contig')) {
-  		<li> <%= stash('contig') %> contigs </li>
+  	% if (stash 'contig') {
+  		<li> <%= stash 'contig' %> contigs </li>
   	% }
   	<li> <%= $gene %> genes </li>
   	<li> <%= $polypeptide %> proteins </li>
-  	% if (defined stash('est')) {
-  		<li> <%= stash('est') %> ests </li>
+  	% if (stash 'est') {
+  		<li> <%= stash 'est' %> ests </li>
   	% }
   </ul>
   <h3> Sample entry points for browsing the <i> <%= $abbreviation %> genome </i> </h3>
@@ -38,6 +37,6 @@
 	</ul>
 </div>
 <div id="species-image">
-  <%= image_tag "$path/index-img.jpg" %> 
+  <%= image_tag "$common_name/index-img.gif" %> 
 </div>
 
