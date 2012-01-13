@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use File::Spec::Functions;
 use Mojolicious::Static;
+use Modware::Publication::DictyBase;
 use base 'GenomeREST::Controller';
 
 sub show {
@@ -74,6 +75,37 @@ sub download {
         return;
     }
     $self->set_organism($common_name);
+
+    my $org_rs     = $self->stash('organism_resultset');
+    my $nuclear_rs = $org_rs->search_related(
+        'features',
+        { 'featureloc_features.srcfeature_id' => undef , 'type.name' => 'nuclear_sequence' },
+        { join => ['featureloc_features',  {featureprops => 'type'}] });
+
+	if (my $nrow = $nuclear_rs->first) {
+		$self->stash('nuclear_genome' => 1);
+		my $rs = $nrow->search_related('feature_pubs',  {})->search_related('pub', {});
+		if (my $prow = $rs->first) {
+			my $id = $prow->pub_id;
+			$self->stash('nuclear_pub' => Modware::Publication::DictyBase->find($id));
+			$self->stash('sequence_pub' => 1);
+		}
+	}
+
+	my $mito_rs = $org_rs->search_related(
+        'features',
+        { 'featureloc_features.srcfeature_id' => undef , 'type.name' => 'mitochondrial_DNA' },
+        { join => ['featureloc_features',  {featureprops => 'type'}] });
+
+	if (my $mrow = $mito_rs->first) {
+		$self->stash('mito_genome' => 1);
+		my $rs = $mrow->search_related('feature_pubs',  {})->search_related('pub', {});
+		if (my $prow = $rs->first) {
+			my $id = $prow->pub_id;
+			$self->stash('mito_pub' => Modware::Publication::DictyBase->find($id));
+			$self->stash('sequence_pub' => 1);
+		}
+	}
     $self->render( $common_name . '/download' );
 }
 
@@ -98,7 +130,7 @@ sub dna {
         return;
     }
 
-    my $file = $self->stash('common_name').'_'.$row->type->name.'.fasta';
+    my $file = $self->stash('common_name').'_'.$row->type->name.'.'. $self->stash('format')';
     $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
 }
 
@@ -106,7 +138,7 @@ sub mrna {
 	my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name').'_coding.fasta';
+    my $file = $self->stash('common_name').'_coding.'.$self->stash('format')';
     $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
 }
 
@@ -114,7 +146,7 @@ sub protein {
 	my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name').'_protein.fasta';
+    my $file = $self->stash('common_name').'_protein.'.$self->stash('format')';
     $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
 }
 

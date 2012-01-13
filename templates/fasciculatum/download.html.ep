@@ -1,30 +1,89 @@
-% layout 'default', title => $abbreviation. ' Downloads', subtitle => $abbreviation .' Downloads';
+% layout 'default', title => $abbreviation . ' Downloads', subtitle => $abbreviation .' Downloads', include_content => 'button', include_template => 'layouts/jquery-ui';
 
+<% content_for button => begin %>
+	<%= javascript begin %>
+			$(document).ready(function() {
+				$('a#download').button();
+			});
+	<% end %>
+<% end %>
 
 <!-- Central Column start -->
-<h3>All data produced by the <%= $abbreviation %> Genome Project are publicly available. Please cite:</h3>
-		<! -- Citation here -->
+<h2>All data produced by 
+	the <%= $abbreviation %> Genome project is publicly available.
+</h2>
+
+% if (stash 'sequence_pub') {
+	% if (my $nuclear_pub = stash 'nuclear_pub') {
+		<h3> For nuclear genome sequence please cite: </h3>
+		%== $nuclear_pub->formatted_citation 
+		% if ($nuclear_pub->source eq 'PUBMED') {
+			<a href="http://ncbi.nlm.nih.gov/pubmed/<%= $nuclear_pub->pubmed_id %>">Pubmed </a>
+		% }
+	  % else {
+			<a href="/publication/<%= $nuclear_pub->id %>">dictyBase</a>
+	  % }
+		<br/>
+	% }
+	% if (my $mito_pub = stash 'mito_pub') {
+		<h3> For mitochondrial genome sequence please cite: </h3>
+		%== $mito_pub->short_citation 
+	  % if ($mito_pub->source eq 'PUBMED') {
+			<a href="http://ncbi.nlm.nih.gov/pubmed/<%= $mito_pub->pubmed_id %>">Pubmed </a>
+		% }
+	  % else {
+			<a href="/publication/<%= $mito_pub->pub_id %>">dictyBase</a>
+	  % }
+	% }
+% }
+
+
+		<br/><br/><br/>
+
+% if (stash 'nuclear_genome') {
 
 <table class="download">
-  <col width="75%"/><col width="25%"/>
+  <col width="60%"/><col width="40%"/>
   <tr>
-    <th colspan="2">Sequences</th>
+    <th colspan="2">Nuclear Genome sequences</th>
   </tr>
   <tr>
     <td>Chromosomal (Supercontig)</td>
-    <td><a href="<%= url_for ('current/dna') %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'current/dna' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Coding (spliced mRNA transcript sequences)</td>
-    <td><a href="<%= url_for 'current/mrna' %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'current/mrna' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Protein </td>
-    <td><a href="<%= url_for 'current/protein' %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'current/protein' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Genomic Features </td>
-    <td><a href="<%= url_for 'current/feature' %>">GFF3 format</a></td>
+    <td><a href="<%= url_for 'current/feature' %>" id="download">Download GFF3</a></td>
   </tr>
 </table>
+
+% }
+
+% if (stash 'mito_genome') {
+
+<table class="download">
+  <col width="60%"/><col width="40%"/>
+  <tr>
+    <th colspan="2">Mitochondrial Genome sequences</th>
+  </tr>
+  <tr>
+    <td>Chromosomal</td>
+    <td><a href="<%= url_for 'current/mitochondria/dna' %>" id="download">Download Fasta</a></td>
+  </tr>
+  <tr>
+    <td>Genomic Features </td>
+    <td><a href="<%= url_for 'current/mitochondria/feature' %>" id="download">Download GFF3</a></td>
+  </tr>
+</table>
+
+% }
+
 

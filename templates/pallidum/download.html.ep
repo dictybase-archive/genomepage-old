@@ -1,5 +1,12 @@
-% layout 'default', title => $abbreviation. ' Downloads', subtitle => $abbreviation .' Downloads';
+% layout 'default', title => $abbreviation . ' Downloads', subtitle => $abbreviation .' Downloads', include_content => 'button', include_template => 'layouts/jquery-ui';
 
+<% content_for button => begin %>
+	<%= javascript begin %>
+			$(document).ready(function() {
+				$('a#download').button();
+			});
+	<% end %>
+<% end %>
 
 <!-- Central Column start -->
 <h2>All data produced by 
@@ -33,26 +40,50 @@
 
 		<br/><br/><br/>
 
+% if (stash 'nuclear_genome') {
+
 <table class="download">
-  <col width="75%"/><col width="25%"/>
+  <col width="60%"/><col width="40%"/>
   <tr>
-    <th colspan="2">Sequences</th>
+    <th colspan="2">Nuclear Genome sequences</th>
   </tr>
   <tr>
     <td>Chromosomal (Supercontig)</td>
-    <td><a href="<%= url_for 'current/dna' %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'current/dna' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Coding (spliced mRNA transcript sequences)</td>
-    <td><a href="<%= url_for 'current/mrna' %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'current/mrna' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Protein </td>
-    <td><a href="<%= url_for 'current/protein' %>">Fasta format</a></td>
+    <td><a href="<%= url_for 'current/protein' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Genomic Features </td>
-    <td><a href="<%= url_for 'current/feature' %>">GFF3 format</a></td>
+    <td><a href="<%= url_for 'current/feature' %>" id="download">Download GFF3</a></td>
   </tr>
 </table>
+
+% }
+
+% if (stash 'mito_genome') {
+
+<table class="download">
+  <col width="60%"/><col width="40%"/>
+  <tr>
+    <th colspan="2">Mitochondrial Genome sequences</th>
+  </tr>
+  <tr>
+    <td>Chromosomal</td>
+    <td><a href="<%= url_for 'current/mitochondria/dna' %>" id="download">Download Fasta</a></td>
+  </tr>
+  <tr>
+    <td>Genomic Features </td>
+    <td><a href="<%= url_for 'current/mitochondria/feature' %>" id="download">Download GFF3</a></td>
+  </tr>
+</table>
+
+% }
+
 
