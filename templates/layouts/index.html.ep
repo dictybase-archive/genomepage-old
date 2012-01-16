@@ -37,6 +37,6 @@
 	</ul>
 </div>
 <div id="species-image">
-  <%= image_tag "$common_name/index-img.gif" %> 
+  <%= image_tag "$common_name/index-img.jpg" %> 
 </div>
 
