@@ -20,7 +20,7 @@ sub show {
     my $feature_rs = $org_rs->search_related( 'features', {},
         { prefetch => 'type', cache => 1 } );
 
-    my %stash;
+    my %stash = map {$_ => 0} qw/supercontig contig gene EST polypeptide/;
     for my $type (qw/supercontig contig gene EST/) {
         my $count = $feature_rs->count( { 'type.name' => $type } );
         if ($count) {

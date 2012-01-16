@@ -1,2 +1,6 @@
-<%= stylesheet_link_tag $_ for ('dataTables',  'dataTables-jui',  'cupertino/jquery-ui')  %>
-<%= javascript_include_tag $_ for ('jquery',  'jquery.dataTables.min') %>
+% my $theme = 'cupertino';
+% if (stash 'jquery_theme') {
+	% $theme = stash 'jquery_theme';	
+% }
+<%= stylesheet_link_tag $_ for ('dataTables',  'dataTables-jui',  "$theme/jquery-ui")  %>
+<%= javascript_include_tag $_ for ('jquery',  'jquery-ui',  'jquery.dataTables.min') %>

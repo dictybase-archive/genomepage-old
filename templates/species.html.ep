@@ -1,4 +1,22 @@
-% layout 'default', title => 'Genomic resource for ' . $abbreviation, wrapper => 'threecol' ;
+% stash jquery_theme => 'smoothness';
+% layout 'default', title => 'Genomic resource for ' . $abbreviation, wrapper => 'threecol' ,  include_content => 'accordion',  include_template => 'layouts/datatables';
+
+<% content_for accordion => begin %>
+	<%= javascript begin %>
+			$(document).ready(function() {
+				$('#accordion').accordion();
+				$('#genome_stat_datatable').dataTable({
+    			"bFilter"  : false, 
+    			"bInfo"    : false, 
+    			"bSort"    : false, 
+    			"bPaginate": false, 
+    			"bJQueryUI": true
+    		}); 
+			});
+	<% end %>
+<% end %>
+
+
 
 %= include 'layouts/index' 
 
