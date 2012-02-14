@@ -461,10 +461,11 @@ sub small_gbrowse_image {
     my $species = $feature->organism->common_name;
     my $track   = $self->display_type;
     my $name    = $self->gbrowse_window($feature);
+    my $base_url = $self->context->app->config->{gbrowse_url};
     my $image
-        = "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=250&type=${track}&keystyle=none&abs=1";
+        = "$base_url/gbrowse_img/$species?name=${name}&width=250&type=${track}&keystyle=none&abs=1";
 
-    my $link    = "/db/cgi-bin/ggb/gbrowse/$species?name=${name}";
+    my $link    = "$base_url/gbrowse/$species?name=${name}";
     my $gbrowse = $self->json->link(
         caption => $image,
         url     => $link,
