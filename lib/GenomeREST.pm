@@ -48,6 +48,8 @@ sub startup {
         = $top->waypoint('/:common_name')->name('genome')->to('genome#show');
     my $download = $organism->waypoint('/current')->name('current')
         ->to('genome#download');
+    $organism->waypoint('/browse')->name('gbrowse')
+        ->to('genome#browse');
     $download->route( "/$_", format => 'fasta' )->name($_)->to("genome#$_")
         for qw/dna mrna protein/;
     $download->route( '/feature', format => 'gff3' )->to('genome#feature');

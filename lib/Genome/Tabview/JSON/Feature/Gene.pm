@@ -334,13 +334,15 @@ sub gbrowse_link {
     my $feature = $self->source_feature;
     my $json    = $self->json;
 
+	my $ctx = $self->context;
     my $name         = $self->gbrowse_window($feature);
     my $track        = "Gene+Gene_Model+tRNA+ncRNA";
-    my $species      = $feature->organism->species;
+    my $species      = $ctx->stash('common_name');
+    my $base_url = $ctx->app->config->{gbrowse};
     my $gbrowse_link = $json->link(
         caption =>
-            "/db/cgi-bin/ggb/gbrowse_img/$species?name=${name}&width=500&type=${track}&keystyle=between&abs=1",
-        url  => "/db/cgi-bin/ggb/gbrowse/$species?name=${name}",
+            "$base_url/gbrowse_img/$species?name=${name}&width=500&type=${track}&keystyle=between&abs=1",
+        url  => "$base_url/gbrowse/$species?name=${name}",
         type => 'gbrowse',
     );
     return $gbrowse_link;

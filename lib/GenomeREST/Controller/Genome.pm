@@ -20,7 +20,7 @@ sub show {
     my $feature_rs = $org_rs->search_related( 'features', {},
         { prefetch => 'type', cache => 1 } );
 
-    my %stash = map {$_ => 0} qw/supercontig contig gene EST polypeptide/;
+    my %stash = map { $_ => 0 } qw/supercontig contig gene EST polypeptide/;
     for my $type (qw/supercontig contig gene EST/) {
         my $count = $feature_rs->count( { 'type.name' => $type } );
         if ($count) {
@@ -211,6 +211,41 @@ sub feature {
         type => 'application/x-gff3'
     );
 }
+
+sub browse {
+    my ($self) = @_;
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+
+    # -- get a random reference feature
+    my $rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'type.name' => 'gene' },
+        { join        => 'type' }
+        )->search_related( 'featureloc_features', {} )
+        ->search_related( 'srcfeature',           {},
+        { order_by => \'dbms_random.value' } );
+
+    my $row          = $rs->first;
+    my $end          = $row->seqlen > 50000 ? 50000 : $row->seqlen;
+    my $gbrowse_base = $self->app->config->{gbrowse_url};
+    my $qstring      = 'name=' . $self->_chado_name($row) . ':1..' . $end;
+
+    if ( $self->stash('format') eq 'json' ) {
+        return $self->render_json(
+            {   gbrowse_base => $gbrowse_base,
+                datasource   => $common_name,
+                query_string => $qstring
+            }
+        );
+    }
+    $self->redirect_to("$gbrowse_base/$common_name?$qstring");
+}
+
 
 1;    # Magic true value required at end of module
 

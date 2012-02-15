@@ -19,37 +19,11 @@
                                <ul class="first-of-type">
                                    <li class="yuimenubaritem first-of-type">
                                       <a class="yuimenubaritemlabel">Genomes</a>
-                                          <div id="genomes" class="yuimenu">
-                                            <div class="bd">
-                                               <ul class="first-of-type">
-                                    		          % for my $org(loaded_genomes) {
-                                       			           <li class="yuimenuitem">
-                                       				            <a class="yuimenuitemlabel" 
-                                       				             href="/<%= $org->common_name %>">
-                                       				             <%= sprintf('%s %s', $org->genus, $org->common_name) %>
-																							            </a>
-																						            </li>
-                                    		          %}
-                                                 </ul>
-                                               </div>
-                                              </div>
+                                         %= include 'layouts/menu/genomes' 
                                         </li>                                            
                                         <li class="yuimenubaritem">
                                           <a class="yuimenubaritemlabel">Genome Browser</a>
-                                          <div id="gbrowse" class="yuimenu">
-                                            <div class="bd">
-                                               <ul class="first-of-type">
-                                    		          % for my $org(loaded_genomes) {
-                                       			           <li class="yuimenuitem">
-                                       				            <a class="yuimenuitemlabel" 
-                                       				             href="/<%= $org->common_name %>/db/cg-bin/ggb/gbrowse/?name=1:1..30000">
-                                       				             <%= sprintf('%s %s', $org->genus, $org->common_name) %>
-																							            </a>
-																						            </li>
-                                    		          %}
-                                                </ul>
-                                            </div>
-                                        </div>
+                                            %= include 'layouts/menu/genome_browser'
                                     </li>
                                     <li class="yuimenubaritem ">
                                         <a class="yuimenubaritemlabel" href="/tools/blast">BLAST</a>
@@ -63,11 +37,11 @@
                                     		          	 % my $cname = $org->common_name;
                                        			           <li class="yuimenuitem">
                                        				            <a class="yuimenuitemlabel" 
-                                       				             href="<%= url_for("/$cname/current") %> ">
+                                       				             href="<%= url_for("/$cname/current") %>">
                                        				             <%= sprintf('%s %s', $org->genus, $org->common_name) %>
 																							            </a>
 																						            </li>
-                                    		          %}
+                                    		           % }
                                                 </ul>
                                             </div>
                                         </div>

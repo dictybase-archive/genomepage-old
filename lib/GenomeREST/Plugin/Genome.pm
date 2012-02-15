@@ -5,7 +5,7 @@ use Mojo::Base -base;
 use Mojo::Base 'Mojolicious::Plugin';
 use GenomeREST::Organism;
 use GenomeREST::Feature::Source;
-use Data::Dump qw/pp/;
+use JSON qw/decode_json/;
 
 has '_genomes';
 has 'feat2seqtype' => sub {
@@ -36,7 +36,34 @@ sub register {
             return @$genomes;
         }
     );
+    $app->helper(
+        genome2browser_url => sub {
+            my ( $c, $org ) = @_;
+            my $common_name = $org->common_name;
+            my $gbrowse_base = $c->app->config->{gbrowse_url}.'/gbrowse';
 
+            if ($common_name eq 'discoideum') {
+            	return $gbrowse_base.'/discoideum?name=6:1..50000'
+            }
+
+            # -- get a random reference feature
+            my $rs
+                = $c->app->modware->handler->resultset('Organism::Organism')
+                ->search( { 'common_name' => $common_name } )->search_related(
+                'features',
+                { 'type.name' => 'gene' },
+                { join        => 'type' }
+                )->search_related( 'featureloc_features', {} )
+                ->search_related( 'srcfeature',           {},
+                { order_by => \'dbms_random.value' } );
+
+            my $row          = $rs->first;
+            my $end          = $row->seqlen > 50000 ? 50000 : $row->seqlen;
+            my $qstring = 'name=' . $c->_chado_name($row) . ':1..' . $end;
+            my $str     = "$gbrowse_base/$common_name?$qstring";
+            return $str;
+        }
+    );
     $app->helper(
         infer_seq_from_genome => sub {
             my ( $c, $floc ) = @_;

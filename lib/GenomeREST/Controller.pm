@@ -95,7 +95,7 @@ sub panel_to_json {
 
 sub get_download_folder {
     my ($self) = @_;
-    if ( not defined $self->config->{default}->{download} ) {
+    if ( not defined $self->app->config->{default}->{download} ) {
         $self->stash( 'message' => 'Download folder is not configured' );
         $self->render('missing');
         return;
@@ -123,6 +123,11 @@ sub sendfile {
             $arg{type} ? $arg{type} : 'text/plain' );
         $self->render_static( $arg{file} );
     }
+}
+
+sub _chado_name {
+    my ( $self, $row ) = @_;
+    return $row->name ? $row->name : $row->uniquename;
 }
 
 1;    # Magic true value required at end of module
