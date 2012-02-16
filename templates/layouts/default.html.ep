@@ -53,7 +53,9 @@ my @app_js = ('menu');
               </div>
     				</div>
     				<div class="column-left">
-    				  <div id="column-left-content"><%= stash 'left_column' %></div>
+    				  <div id="column-left-content">
+    				  	%= include 'layouts/index/left-column'
+    				  </div>
     				</div>
     				<div class="column-right"><%= stash 'left_column' %></div>
     		  </div>

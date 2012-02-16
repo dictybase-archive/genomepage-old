@@ -246,6 +246,78 @@ sub browse {
     $self->redirect_to("$gbrowse_base/$common_name?$qstring");
 }
 
+sub lsearch {
+    my ($self) = @_;
+
+    my $common_name = $self->stash('common_name');
+    if ( !$self->check_organism($common_name) ) {
+        $self->render_not_found;
+        return;
+    }
+    $self->set_organism($common_name);
+
+    my $types
+        = $common_name eq 'purpureum'
+        ? [qw/supercontig contig gene EST/]
+        : [qw/supercontig contig gene mRNA EST polypeptide/];
+
+    my $rs = $self->stash('organism_resultset')->search_related(
+        'features',
+        { 'type.name' => { -in => $types } },
+        {   'join'     => 'type',
+            'group_by' => 'type.name',
+             'order_by' => 'type.name',
+            'select'   => [
+                'type.name',
+                { max => 'seqlen', -as => 'maxlen' },
+                { min => 'seqlen', -as => 'minlen' },
+                { round => { avg => 'seqlen' }, -as => 'avglen' },
+                { median => 'seqlen', -as => 'medianlen' },
+            ]
+        }
+    );
+    my $data;
+    while ( my $row = $rs->next ) {
+        push @$data,
+            [
+            $row->type->name,           $row->get_column('minlen'),
+            $row->get_column('maxlen'), $row->get_column('avglen'),
+            $row->get_column('medianlen')
+            ];
+    }
+
+    if ( $common_name eq 'purpureum' ) {
+        my $dpurs = $self->stash('organism_resultset')->search_related(
+            'features',
+            {   'type.name'        => { -in => [qw/mRNA polypeptide/] },
+                'db.name'          => 'GFF_source',
+                'dbxref.accession' => 'JGI'
+            },
+            {   'join' =>
+                    [ 'type', { 'feature_dbxrefs' => { 'dbxref' => 'db' } } ],
+                'group_by' => 'type.name',
+                'order_by' => 'type.name',
+                'select'   => [
+                    'type.name',
+                    { max => 'seqlen', -as => 'maxlen' },
+                    { min => 'seqlen', -as => 'minlen' },
+                    { round => { avg => 'seqlen' }, -as => 'avglen' },
+                    { median => 'seqlen', -as => 'medianlen' },
+                ]
+            }
+        );
+        while ( my $drow = $dpurs->next ) {
+            push @$data,
+                [
+                $drow->type->name,           $drow->get_column('minlen'),
+                $drow->get_column('maxlen'), $drow->get_column('avglen'),
+                $drow->get_column('medianlen')
+                ];
+
+        }
+    }
+    $self->render_json( { sEcho => $self->param('sEcho'), aaData => $data } );
+}
 
 1;    # Magic true value required at end of module
 

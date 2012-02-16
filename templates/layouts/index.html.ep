@@ -24,7 +24,7 @@
   	<li> <a href="<%= url_for "gene/$gene_id/protein/$transcript_id" %>">Protein (<%= $polypeptide_id %>) </a></li>
 	</ul>
 
-  <div style="margin-top:20px;margin-bottom:30px;width:60%;font-size:80%;">
+  <div style="margin-top:20px;margin-bottom:30px;width:70%;font-size:80%;">
   <h3>Genome statistics: </h3>
   <div id="accordion">
   	<h4><a href="#"> Counts </a></h4>
@@ -33,22 +33,39 @@
 				<thead>
 					<tr>
 						<th> Feature type </th>
-						<th> Count </th>
+						<th> Number </th>
 					</tr>
 				</thead>
 				<tbody>
 			   % for my $type(qw/supercontig contig EST gene polypeptide/) {
-						<tr>
-      				<td><%= $type %></td>
-      				<td><%= stash($type) %></td>
-	  				</tr>
+      				% if (stash($type) > 0) {
+								<tr>
+      						<td><%= $type %></td>
+      						<td><%= stash($type) %></td>
+	  						</tr>
+      				% }
 			   % }
     		</tbody>
 			</table>																
   	</div>
 		<h4><a href="#"> Feature lengths </a></h4>
   	<div>
-  			<p> What length </p>
+			<table id="feature_count_datatable" class="display">                    
+				<thead>
+					<tr>
+						<th> Feature type </th>
+						<th> Min </th>
+						<th> Max </th>
+						<th> Ave </th>
+						<th> Median </th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+      			<td colspan="5" class="dataTables_empty">Loading data from server ....</td>
+	  			</tr>
+    		</tbody>
+			</table>
   	</div>
 	</div>
   </div>
