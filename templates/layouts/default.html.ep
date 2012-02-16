@@ -54,7 +54,9 @@ my @app_js = ('menu');
     				</div>
     				<div class="column-left">
     				  <div id="column-left-content">
-    				  	%= include 'layouts/index/left-column'
+    				  	% if (stash 'left_column') {
+    				  	   %= include 'layouts/index/left-column'
+    				  	% }
     				  </div>
     				</div>
     				<div class="column-right"><%= stash 'left_column' %></div>

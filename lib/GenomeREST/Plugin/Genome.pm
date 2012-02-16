@@ -59,7 +59,7 @@ sub register {
 
             my $row          = $rs->first;
             my $end          = $row->seqlen > 50000 ? 50000 : $row->seqlen;
-            my $qstring = 'name=' . $c->_chado_name($row) . ':1..' . $end;
+            my $qstring = 'name=' . $self->_chado_name($row) . ':1..' . $end;
             my $str     = "$gbrowse_base/$common_name?$qstring";
             return $str;
         }
@@ -147,4 +147,12 @@ sub _genomes_from_db {
 
     return [ values %$common_name2org ];
 }
+
+sub _chado_name {
+    my ( $self, $row ) = @_;
+    return $row->name ? $row->name : $row->uniquename;
+}
+
+
+
 1;

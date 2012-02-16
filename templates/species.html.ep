@@ -1,5 +1,5 @@
 % stash jquery_theme => 'smoothness';
-% layout 'default', title => 'Genomic resource for ' . $abbreviation, wrapper => 'threecol' ,  include_content => 'accordion',  include_template => 'layouts/datatables';
+% layout 'default', title => 'Genomic resource for ' . $abbreviation, wrapper => 'threecol' ,  include_content => 'accordion',  include_template => 'layouts/datatables', left_column => 1;
 
 <% content_for accordion => begin %>
 	<%= javascript begin %>
