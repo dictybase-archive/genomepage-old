@@ -6,7 +6,7 @@
     This site contains:
   </h3>
   <ul>
-      <li><a href="/gbrowse/<%= $species %>">Genome Browser</a>: For displaying annotations
+      <li><a href="<%= $self->app->config->{gbrowse_url}.'/gbrowse/'.$common_name %>">Genome Browser</a>: For displaying annotations
       on <i> <%= $abbreviation %> </i> genome.
       </li>
       <li><a href="/tools/blast">BLAST tool</a>: The new dictyBase universal dictyostelid

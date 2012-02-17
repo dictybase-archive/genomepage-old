@@ -16,7 +16,14 @@
     								return '<a href="/' + "<%= $common_name %>" + '/supercontig/' + obj.aData[0] + '">' + obj.aData[0] + '</a>'; 
     							}, 
     							"aTargets": [ 0 ]
+    						}, 
+								{
+    							"fnRender": function (obj) {
+    								return '<a href="' + obj.aData[3] + '">' + '<%= image_tag 'gbrowse.png', height => 19, width => 80 %>' + '</a>'; 
+    							}, 
+    							"aTargets": [ 3 ]
     						}
+
     			], 
     			"bJQueryUI": true
     		});
@@ -31,6 +38,7 @@
 			<th> Name </th>
 			<th> Length(bp) </th>
 			<th> Genes </th>
+			<th> Gbrowse </th>
 		</tr>
 	</thead>
 	<tbody>

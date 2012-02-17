@@ -34,14 +34,19 @@ sub search {
             page     => $page
         }
     );
-    my $data = [];
+    my $data   = [];
+    my $gb2url = $self->gbrowse_url;
     while ( my $row = $gene_rs->next ) {
         my $seqlen = $row->seqlen;
         if ( !$seqlen ) {
             my $floc = $row->featureloc_features->first;
             $seqlen = sprintf( "%.1f", ( $floc->fmax - $floc->fmin ) / 1000 );
         }
-        push @$data, [ $row->dbxref->accession, $seqlen ];
+        push @$data,
+            [
+            $row->dbxref->accession, $seqlen,
+            $gb2url . $self->_chado_name( $row )
+            ];
     }
     my $total = $gene_rs->pager->total_entries;
     $self->render_json(
@@ -89,7 +94,7 @@ sub show {
 
 sub show_fasta {
     my ($self) = @_;
-    my $header = '>' . $self->stash('id') ;
+    my $header = '>' . $self->stash('id');
     $self->render_text( $header . "\n"
             . $self->formatted_sequence( $self->stash('gene')->residues ) );
 }

@@ -16,6 +16,12 @@
     								return '<a href="/' + "<%= $common_name %>" + '/gene/' + obj.aData[0] + '">' + obj.aData[0] + '</a>'; 
     							}, 
     							"aTargets": [ 0 ]
+    						}, 
+    						{
+    							"fnRender": function (obj) {
+    								return '<a href="' + obj.aData[2] + '">' + '<%= image_tag 'gbrowse.png', height => 19, width => 80 %>' + '</a>'; 
+    							}, 
+    							"aTargets": [ 2 ]
     						}
     			], 
     			"bJQueryUI": true
@@ -30,6 +36,7 @@
 		<tr>
 			<th> ID </th>
 			<th> Length(kb) </th>
+			<th> Gbrowse </th>
 		</tr>
 	</thead>
 	<tbody>

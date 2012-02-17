@@ -63,20 +63,15 @@ sub search {
         }
     );
 
-    my $data = [];
-    my $gb2url
-        = $self->app->config->{gbrowse_url}
-        . '/gbrowse/'
-        . $self->stash('common_name')
-        . '?name=';
-
+    my $data   = [];
+    my $gb2url = $self->gbrowse_url;
     while ( my $row = $contig_rs->next ) {
         my $name   = $self->_chado_name($row);
         my $length = $row->seqlen;
-        my $end    = $length > 30000 ? '1..30000' : '1..' . $length;
+        my $coor    = $length > 30000 ? '1..30000' : '1..' . $length;
         push @$data,
             [ $row->dbxref->accession, $length,
-            $gb2url . $name . ':' . $end ];
+            $gb2url . $name . ':' . $coor ];
     }
     my $total = $contig_rs->pager->total_entries;
     $self->render_json(

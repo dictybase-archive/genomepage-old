@@ -78,13 +78,15 @@ sub search {
     );
 
     my $data;
+    my $gb2url = $self->gbrowse_url;
     while ( my $row = $supercontig_rs->next ) {
+        my $length = $model->resultset('Sequence::Feature')
+            ->find( { uniquename => $row->uniquename } )->seqlen;
+        my $coor = $length > 50000 ? '1..50000' : '1..' . $length;
         push @$data,
             [
-            $row->dbxref->accession,
-            $model->resultset('Sequence::Feature')
-                ->find( { uniquename => $row->uniquename } )->seqlen,
-            $row->get_column('gene_count')
+            $row->dbxref->accession,        $length,
+            $row->get_column('gene_count'), $gb2url. $self->_chado_name($row) . ':' . $coor
             ];
     }
     my $total = $supercontig_rs->pager->total_entries;
@@ -125,10 +127,13 @@ sub show {
 sub show_fasta {
     my ($self) = @_;
     my $header = '>' . $self->stash('id') . '|supercontig';
-    $self->render_text( $header . "\n"
-            . $self->formatted_sequence( $self->stash('supercontig')->residues ) );
+    $self->render_text(
+        $header . "\n"
+            . $self->formatted_sequence(
+            $self->stash('supercontig')->residues
+            )
+    );
 }
-
 
 1;    # Magic true value required at end of module
 
