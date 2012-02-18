@@ -459,13 +459,13 @@ sub small_gbrowse_image {
     my ($self)  = @_;
     my $feature = $self->source_feature;
     my $species = $feature->organism->common_name;
-    my $track   = $self->display_type;
+    my $track   = $feature->type->name eq 'mRNA' ? 'Genemodel' : $feature->type->name;
     my $name    = $self->gbrowse_window($feature);
     my $base_url = $self->context->app->config->{gbrowse_url};
     my $image
-        = "$base_url/gbrowse_img/$species?name=${name}&width=250&type=${track}&keystyle=none&abs=1";
+        = "$base_url/gbrowse_img/$species?name=$name;width=150;type=$track;abs=1";
 
-    my $link    = "$base_url/gbrowse/$species?name=${name}";
+    my $link    = "$base_url/gbrowse/$species?name=$name";
     my $gbrowse = $self->json->link(
         caption => $image,
         url     => $link,

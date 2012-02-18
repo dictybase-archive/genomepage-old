@@ -336,12 +336,12 @@ sub gbrowse_link {
 
 	my $ctx = $self->context;
     my $name         = $self->gbrowse_window($feature);
-    my $track        = "Gene+Gene_Model+tRNA+ncRNA";
+    my $track        = "Gene+Genemodel+tRNA+rRNA";
     my $species      = $ctx->stash('common_name');
     my $base_url = $ctx->app->config->{gbrowse_url};
     my $gbrowse_link = $json->link(
         caption =>
-            "$base_url/gbrowse_img/$species?name=${name}&width=500&type=${track}&keystyle=between&abs=1",
+            "$base_url/gbrowse_img/$species?q=${name};width=400;t=${track};b=1",
         url  => "$base_url/gbrowse/$species?name=${name}",
         type => 'gbrowse',
     );
