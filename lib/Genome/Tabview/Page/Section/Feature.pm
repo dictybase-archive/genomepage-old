@@ -154,9 +154,8 @@ sub info {
     $panel->add_item(
         $self->row(
             'Map',
-            [   $gbrowse_text,      $gbrowse_link,
-                $feature->location, $feature->coordinate_table
-            ]
+            [ $gbrowse_text,      $gbrowse_link, ],
+            [ $feature->location, $feature->coordinate_table ]
         )
     );
 
@@ -188,8 +187,8 @@ sub info {
 sub columns {
     my ( $self, @column_data ) = @_;
     my @columns;
-    foreach my $i (0 .. $#column_data) {
-        my $json_panel = $self->json_panel($column_data[$i]);
+    foreach my $i ( 0 .. $#column_data ) {
+        my $json_panel = $self->json_panel( $column_data[$i] );
         my $class      = $i == 0 ? 'content_table_title' : undef;
         my $colspan    = $i == 0 || @column_data > 2 ? undef : '2';
         push @columns,
