@@ -154,10 +154,10 @@ sub dna {
     my $org_rs     = $self->stash('organism_resultset');
     my $feature_rs = $org_rs->search_related(
         'features',
-        { 'type.name' => 'mRNA' },
+        { 'type.name' => 'gene' },
         { join        => 'type' }
         )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
-        ->search_related( 'srcfeature',           { prefetch   => 'type' } );
+        ->search_related( 'srcfeature', {}, { prefetch => 'type' } );
     my $row = $feature_rs->first;
     if ( !$row ) {
         $self->stash( 'message' => 'Reference feature for '
@@ -167,12 +167,19 @@ sub dna {
         return;
     }
 
-    my $file
-        = $self->stash('common_name') . '_'
-        . $row->type->name . '.'
-        . $self->stash('format');
+    my $file = catfile( $folder,
+              $self->stash('common_name') . '_'
+            . $row->type->name . '.'
+            . $self->stash('format') );
+
+    if (!-e $file){
+    	$self->stash(message => "$file file not found");
+    	$self->render('missing');
+    	return;
+    }
+
     $self->sendfile(
-        file => catfile( $folder, $file ),
+        file => $file,
         type => 'application/x-fasta'
     );
 }
@@ -266,7 +273,7 @@ sub lsearch {
         { 'type.name' => { -in => $types } },
         {   'join'     => 'type',
             'group_by' => 'type.name',
-             'order_by' => 'type.name',
+            'order_by' => 'type.name',
             'select'   => [
                 'type.name',
                 { max => 'seqlen', -as => 'maxlen' },

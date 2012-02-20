@@ -3,6 +3,8 @@ package GenomeREST::Controller;
 use strict;
 use base 'Mojolicious::Controller';
 use File::Spec::Functions;
+use Mojo::Asset::File;
+use File::Basename;
 
 sub check_organism {
     my ( $self, $name ) = @_;
@@ -107,7 +109,7 @@ sub get_download_folder {
         return;
     }
     $self->set_organism($common_name);
-    return catfile( $self->config->{default}->{download}, $common_name );
+    return catdir( $self->app->config->{default}->{download}, $common_name );
 }
 
 sub sendfile {
@@ -116,12 +118,16 @@ sub sendfile {
     $sendfile = 1 if $self->app->mode ne 'development';
 
     if ($sendfile) {
-    	# -- Set Xsendfile headers
+
+        # -- Set Xsendfile headers
     }
     else {
+        $self->res->content->asset(
+            Mojo::Asset::File->new( path => $arg{file} ) );
         $self->res->headers->content_type(
             $arg{type} ? $arg{type} : 'text/plain' );
-        $self->render_static( $arg{file} );
+		$self->res->headers->content_disposition("attachment;filename=".basename($arg{file}));
+        $self->rendered(200);
     }
 }
 
