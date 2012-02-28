@@ -304,6 +304,17 @@ sub transcript {
     return 1;
 }
 
+has 'is_protein_coding' => (
+    is      => 'ro',
+    isa     => 'Bool',
+    default => sub {
+        my ($self) = @_;
+        return 1 if $self->source_feature->type->name eq 'mRNA';
+        return 0;
+    }, 
+    lazy => 1
+);
+
 =head2 transcript_length
 
  Title    : transcript_length
@@ -318,9 +329,7 @@ sub transcript_length {
     my ($self) = @_;
     return if !$self->transcript;
     my $feature = $self->source_feature;
-    my $length  = dicty::MiscUtility::commify(
-        length( $feature->sequence( -type => 'Spliced transcript' ) ) );
-    return $self->json->text( $length . ' nt' );
+    return $self->json->text( $feature->seqlen . ' nt' );
     return 1;
 }
 
@@ -459,8 +468,9 @@ sub small_gbrowse_image {
     my ($self)  = @_;
     my $feature = $self->source_feature;
     my $species = $feature->organism->common_name;
-    my $track   = $feature->type->name eq 'mRNA' ? 'Genemodel' : $feature->type->name;
-    my $name    = $self->gbrowse_window($feature);
+    my $track
+        = $feature->type->name eq 'mRNA' ? 'Genemodel' : $feature->type->name;
+    my $name     = $self->gbrowse_window($feature);
     my $base_url = $self->context->app->config->{gbrowse_url};
     my $image
         = "$base_url/gbrowse_img/$species?name=$name;width=150;type=$track;abs=1";

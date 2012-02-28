@@ -83,7 +83,6 @@ package Genome::Tabview::Page::Tab::Gene;
 
 use namespace::autoclean;
 use Carp;
-use Carp::Always;
 use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
@@ -199,13 +198,15 @@ override 'init' => sub {
 
 sub show_genomic_info {
     my ($self) = @_;
-    my $gene = $self->feature;
-
-    my $primary_feature_rs = $gene->search_related(
+    my $primary_feature_rs = $self->feature->search_related(
         'feature_relationship_objects',
         { 'type.name' => 'part_of' },
         { join        => 'type' }
-    )->search_related( 'subject', {}, { prefetch => 'type' } );
+    )->search_related( 'subject', {}, {} );
+    return $primary_feature_rs->count;
+
+
+=begin  BlockComment  # BlockCommentNo_1
 
     if ( !$primary_feature_rs->count ) {
         return;
@@ -215,6 +216,11 @@ sub show_genomic_info {
     return $primary_feature_rs->first->type->name =~ m{RNA|pseudogene}ix
         ? 1
         : 0;
+
+=end    BlockComment  # BlockCommentNo_1
+
+=cut
+
 }
 
 =head2 show_product

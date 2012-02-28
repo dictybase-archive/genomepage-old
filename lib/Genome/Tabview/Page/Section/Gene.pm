@@ -84,7 +84,6 @@ package Genome::Tabview::Page::Section::Gene;
 
 use strict;
 use namespace::autoclean;
-use Carp::Always;
 use Mouse;
 use Genome::Tabview::Config;
 use Genome::Tabview::Config::Panel;
@@ -221,7 +220,7 @@ sub product {
 
     my @panels;
     my @primary_ids;
-    foreach my $feature ( $gene->coding_transcripts ) {
+    foreach my $feature ( $gene->transcripts ) {
         my $panel = Genome::Tabview::Config::Panel->new( layout => 'row' );
         my $rows = $self->product_coordinates($feature);
         $panel->add_item($_) for @$rows;
@@ -297,7 +296,7 @@ sub product_coordinates {
     push @rows, $row;
 
     my $length_row;
-    if ( $feature->protein ) {
+    if ( $feature->is_protein_coding ) {
         $length_row
             = $self->row( 'Protein Length', $feature->protein->length );
     }
@@ -314,7 +313,7 @@ sub product_coordinates {
     }
     push @rows, $length_row if $length_row;
 
-    if ( $feature->protein ) {
+    if ( $feature->is_protein_coding ) {
         push @rows,
             $self->row(
             'Protein Molecular Weight',
