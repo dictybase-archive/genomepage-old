@@ -1,0 +1,4 @@
+ <h3>
+    The <i><%= $abbreviation %></i> genome was sequenced as a collaboration between the<br>
+    Leibniz Institute for Age Research and Fritz Lipmann Institute. 
+ </h3>

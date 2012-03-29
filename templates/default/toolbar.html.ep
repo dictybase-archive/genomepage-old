@@ -1,4 +1,4 @@
-<% my $path = stash('species') || 'default'; %>
+<% my $path = stash('common_name') || 'default'; %>
 <div id="shadow-container">
     <div class="shadow">
         <div id="container-top">
@@ -33,38 +33,41 @@
                                         <a class="yuimenubaritemlabel">Genomes</a>
                                         <div id="genomes" class="yuimenu">
                                             <div class="bd">
-                                                <ul class="first-of-type">
-                                                    <li class="yuimenuitem">
-                                                        <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
-                                                    </li>                                                            
-                                                    <li class="yuimenuitem">
-                                                        <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
-                                                    </li>
-                                                </ul>
+                                               <ul class="first-of-type">
+                                                  <li class="yuimenuitem">
+                                                     <a class="yuimenuitemlabel" href="/discoideum">Dictyostelium discoideum</a>
+                                                  </li>
+                                                  <li class="yuimenuitem">
+                                                     <a class="yuimenuitemlabel" href="/purpureum">Dictyostelium purpureum</a>
+                                                  </li>
+                                                  <li class="yuimenuitem">
+                                                     <a class="yuimenuitemlabel" href="/fasciculatum">Dictyostelium fasciculatum</a>
+                                                  </li>
+                                                  <li class="yuimenuitem">
+                                                     <a class="yuimenuitemlabel" href="/pallidum">Polysphondylium pallidum</a>
+                                                  </li>
+                                               </ul>
                                             </div>
                                         </div>
                                     </li>                                            
                                     <li class="yuimenubaritem">
-                                        <a class="yuimenubaritemlabel" href="/purpureum/gbrowse/">Genome Browser</a>
+                                        <a class="yuimenubaritemlabel">Genome Browser</a>
                                         <div id="gbrowse" class="yuimenu">
                                             <div class="bd">
-                                                <ul class="first-of-type">
-                                                    <li class="yuimenuitem">
-                                                        <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_1:1..30000">scaffold_1</a>
-                                                    </li>
-                                                    <li class="yuimenuitem">
-                                                        <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_2:1..30000">scaffold_2</a>
-                                                    </li>
-                                                    <li class="yuimenuitem">
-                                                        <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_3:1..30000">scaffold_4</a>
-                                                    </li>       
-                                                    <li class="yuimenuitem">
-                                                        <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_4:1..30000">scaffold_4</a>
-                                                    </li>                                  
-                                                    <li class="yuimenuitem">
-                                                        <a class="yuimenuitemlabel" href="/purpureum/downloads/contig_information.html">more..</a>
-                                                    </li>                                                                                               
-                                                </ul>
+                                               <ul class="first-of-type">
+                                                   <li class="yuimenuitem">
+                                                       <a class="yuimenuitemlabel" href="/discoideum/db/cgi-bin/ggb/gbrowse/?name=1:1..30000">Dictyostelium discoideum</a>
+                                                   </li>                                                            
+                                                   <li class="yuimenuitem">
+                                                       <a class="yuimenuitemlabel" href="/purpureum/gbrowse/?name=scaffold_1:1..30000">Dictyostelium purpureum</a>
+                                                   </li>
+                                                   <li class="yuimenuitem">
+                                                       <a class="yuimenuitemlabel" href="/fasciculatum/gbrowse/?name=GL883006:1..30000">Dictyostelium fasciculatum</a>
+                                                   </li>
+                                                   <li class="yuimenuitem">
+                                                       <a class="yuimenuitemlabel" href="/pallidum/gbrowse/?name=GL290983:1..30000">Polysphondylium pallidum</a>
+                                                   </li>
+                                               </ul>
                                             </div>
                                         </div>
                                     </li>
@@ -72,7 +75,25 @@
                                         <a class="yuimenubaritemlabel" href="/tools/blast">BLAST</a>
                                     </li>
                                     <li class="yuimenubaritem">
-                                        <a class="yuimenubaritemlabel" href="/purpureum/downloads">Download</a>
+                                        <a class="yuimenubaritemlabel">Download</a>
+                                        <div id="download" class="yuimenu">
+                                            <div class="bd">
+                                                <ul class="first-of-type">
+                                                    <li class="yuimenuitem">
+                                                        <a class="yuimenuitemlabel" href="/discoideum/Downloads/">Dictyostelium discoideum</a>
+                                                    </li>                                                             
+                                                    <li class="yuimenuitem">
+                                                        <a class="yuimenuitemlabel" href="/purpureum/downloads/">Dictyostelium purpureum</a>
+                                                    </li>                                                                                                                       
+                                                    <li class="yuimenuitem">
+                                                        <a class="yuimenuitemlabel" href="/fasciculatum/downloads/">Dictyostelium fasciculatum</a>
+                                                    </li>                                                                                                                       
+                                                    <li class="yuimenuitem">
+                                                        <a class="yuimenuitemlabel" href="/pallidum/downloads/">Polysphondylium pallidum</a>
+                                                    </li>                                                                                                                       
+                                                </ul>
+                                            </div>
+                                        </div>
                                     </li>
                                 </ul>
                             </div>

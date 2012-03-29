@@ -7,27 +7,22 @@ use GenomeREST::Builder;
 my $builder = GenomeREST::Builder->new(
     module_name  => 'GenomeREST',
     license      => 'perl',
-    dist_author  => 'Yulia Bushmanova <y-bushmanova@northwestern.edu>',
+    dist_author  => 'Siddhartha Basu<siddhartha-basu@northwestern.edu>',
     dist_version => '1.4.1',
     requires     => {
         'Mojolicious'                 => '1.21',
-        'YAML::XS'                    => '',
+        'YAML::XS'                    => '0.34',
         'Plack'                       => '0.9941',
         'Module::Versions'            => '0.02',
         'FCGI::Engine'                => '0.16',
-        'Homology::Group'             => '',
         'Modware'                     => '0.001',
         'Mojolicious::Plugin::Bundle' => '0.001',
         'Mojolicious::Plugin::Cache'  => '0.0011',
-        'dicty::Tests::Data'          => '',
-        'dicty::Search::Gene'         => '',
-        'dicty::UI::Tabview::Config'  => '',
+        'MouseX::Params::Validate'    => '0.04',
+        'MouseX::NativeTraits'        => '1.07',
+        'JSON'                        => '2.50'
     },
-    configure_requires => {
-        'Try::Tiny'    => '0.09',
-        'TAP::Harness' => '3.22',
-    },
-    add_to_cleanup => ['GenomeREST-*'],
+    add_to_cleanup => ['GenomeREST- *'],
     create_readme  => 1,
 );
 

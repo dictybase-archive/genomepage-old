@@ -1,0 +1,38 @@
+% stash jquery_theme => 'smoothness';
+% layout 'default', title => 'Genomic resource for ' . $abbreviation, wrapper => 'threecol' ,  include_content => 'accordion',  include_template => 'layouts/datatables', left_column => 1;
+
+<% content_for accordion => begin %>
+	<%= javascript begin %>
+			$(document).ready(function() {
+				$('#accordion').accordion({autoHeight:false});
+				$('#genome_stat_datatable').dataTable({
+    			"bFilter"  : false, 
+    			"bInfo"    : false, 
+    			"bSort"    : false, 
+    			"bPaginate": false, 
+    			"bJQueryUI": true
+    		}); 
+
+				$('#feature_count_datatable').dataTable({
+    			"bFilter"  : false, 
+    			"bInfo"    : false, 
+    			"bSort"    : false, 
+    			"bPaginate": false, 
+    			"bProcessing": true, 
+    			"bServerSide": true, 
+    			"bJQueryUI": true, 
+    			"sAjaxSource": "<%= url_for("$common_name/feature/length/search.datatable") %>"
+    		}); 
+			});
+	<% end %>
+<% end %>
+
+
+
+%= include 'layouts/index' 
+
+<div id="bottom-div">
+	 %= include "$common_name/index"
+	 %= include 'layouts/literature_citation'
+
+</div>

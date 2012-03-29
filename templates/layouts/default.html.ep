@@ -1,9 +1,9 @@
 <% 
-my $path       = stash('species') || 'default';
+my $path = stash 'common_name';
 my $yui_root   = '/javascripts/yui/build';
 my @yui_assets = ( 'container', 'menu' );
 my @app_assets = (
-    'header', 'body', 'footer',
+    'header', 'body', 'footer', 'messages', 
     $path . '/header-skin',
     $path . '/body-skin',
     $path . '/footer-skin'
@@ -16,7 +16,7 @@ my @yui_js = ('yahoo-dom-event');
 my @app_js = ('menu');
 %>
 
-<!doctype html>
+<html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -32,11 +32,14 @@ my @app_js = ('menu');
     <%= javascript_include_tag "yui/build/$_/$_" foreach @yui_js %>
     <%= javascript_include_tag "yui/build/$_/$_\-min" foreach @yui_js_min %>
     <%= javascript_include_tag $_ foreach @app_js  %>
+
+    <%= include stash('include_template') if defined stash('include_template') %>
+    <%= content_for stash('include_content') if defined stash('include_content') %>
     
     <title><%= stash 'title' %></title>
   </head>
   <body class="yui-skin-sam">
-    <%= $self->render_partial(template => $path.'/toolbar') %>
+    %= include 'layouts/toolbar'
     <div id="container">
       <div class="wrapper <%= (stash 'wrapper') || 'threecol-wide' %>">
         <div id="subnav">
@@ -50,7 +53,11 @@ my @app_js = ('menu');
               </div>
     				</div>
     				<div class="column-left">
-    				  <div id="column-left-content"><%= stash 'left_column' %></div>
+    				  <div id="column-left-content">
+    				  	% if (stash 'left_column') {
+    				  	   %= include 'layouts/index/left-column'
+    				  	% }
+    				  </div>
     				</div>
     				<div class="column-right"><%= stash 'left_column' %></div>
     		  </div>

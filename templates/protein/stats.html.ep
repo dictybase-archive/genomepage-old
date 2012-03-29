@@ -1,0 +1,57 @@
+<html>
+ <head>
+ 	<title> Amino acid statistics for protein <%= $subid %> </title>
+    %= stylesheet_link_tag 'legacy-style'
+ 	</head>
+ 	<body>
+ 	<table width="100%" cellspacing="0" cellpadding="0">
+ 	   <tbody>
+ 	     <tr>
+ 	       <td width="129" class="topSpace">
+ 	       	 %= image_tag 'header_logo.png'
+ 	       </td>
+ 	       <td class="popup_header_title"></td>
+ 	       <td width="129" class="topSpace">&nbsp;</td>
+       </tr>
+       <tr>
+        <td height="2" align="left" colspan="3" class="blue"></td>
+       </tr>
+ 	   </tbody>
+ 	 </table>
+	<table cellspacing="10"><tbody><tr><td>
+		<center>
+		<br/>
+   <table border="1" cellpadding="3" cellspacing="0" width="150">
+      <tbody>
+        <tr>
+          <th colspan="3">Amino Acid Composition </th>
+        </tr>
+        % for my $symbol(protein_alpha()) {
+        	  % if (my $count = amino_count($symbol, $residues)) {
+        	    <tr>
+        	      <td> <%= amino_label($symbol) %></td> 
+        	      <td> <%= $count %></td>
+        	      <td nowrap=""> <%= amino_percent($count,$total) %></td>
+					    </tr>
+					  % }
+        % }
+       </tbody>
+    </table>
+<br>
+<form><input value="Close" onclick="window.close();" type="button"></form>
+</center>
+</td></tr></tbody></table>
+
+<table height="1" width="100%">
+   <tbody>
+     <tr>
+      <td colspan="5" class="separator">
+        %= image_tag 'bluepix.png'
+      </td>
+     </tr>
+   </tbody>
+</table>
+
+
+ 	</body>
+ </html>

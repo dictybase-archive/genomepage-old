@@ -1,0 +1,77 @@
+<h2>
+  Welcome to the <i><%= $genus %> <%= $species %></i> web portal!
+</h2>
+<div id="main-info">
+  <h3>
+    This site contains:
+  </h3>
+  <ul>
+      <li><a href="<%= $self->app->config->{gbrowse_url}.'/gbrowse/'.$common_name %>">Genome Browser</a>: For displaying annotations
+      on <i> <%= $abbreviation %> </i> genome.
+      </li>
+      <li><a href="/tools/blast">BLAST tool</a>: The new dictyBase universal dictyostelid
+      blast interface to search for similarities between <i><%= $abbreviation %></i> and other genomes
+      </li>
+      <li><a href="<%= url_for "$common_name/current" %>">Download section </a>: 
+      Download genomic sequences, alignments, mapping etc.
+      </li>
+  </ul>
+  <h3> Sample entry points for browsing the <i> <%= $abbreviation %> genome </i> </h3>
+  <ul>
+  	<li> Genome browser </li>
+  	<li> <a href="<%= url_for "gene/$gene_id" %>">Gene (<%= $gene_id %>)</a> </li>
+  	<li> <a href="<%= url_for "gene/$gene_id/feature/$transcript_id"  %>">Transcript (<%= $transcript_id %>) </a></li>
+  	<li> <a href="<%= url_for "gene/$gene_id/protein/$transcript_id" %>">Protein (<%= $polypeptide_id %>) </a></li>
+	</ul>
+
+  <div style="margin-top:20px;margin-bottom:30px;width:70%;font-size:80%;">
+  <h3>Genome statistics: </h3>
+  <div id="accordion">
+  	<h4><a href="#"> Counts </a></h4>
+  	<div>
+			<table id="genome_stat_datatable" class="display">                    
+				<thead>
+					<tr>
+						<th> Feature type </th>
+						<th> Number </th>
+					</tr>
+				</thead>
+				<tbody>
+			   % for my $type(qw/supercontig contig EST gene polypeptide/) {
+      				% if (stash($type) > 0) {
+								<tr>
+      						<td><%= $type %></td>
+      						<td><%= stash($type) %></td>
+	  						</tr>
+      				% }
+			   % }
+    		</tbody>
+			</table>																
+  	</div>
+		<h4><a href="#"> Feature lengths </a></h4>
+  	<div>
+			<table id="feature_count_datatable" class="display">                    
+				<thead>
+					<tr>
+						<th> Feature type </th>
+						<th> Min </th>
+						<th> Max </th>
+						<th> Ave </th>
+						<th> Median </th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+      			<td colspan="5" class="dataTables_empty">Loading data from server ....</td>
+	  			</tr>
+    		</tbody>
+			</table>
+  	</div>
+	</div>
+  </div>
+
+</div>
+<div id="species-image">
+  <%= image_tag "$common_name/index-img.jpg" %> 
+</div>
+

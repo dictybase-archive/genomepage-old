@@ -1,0 +1,30 @@
+% layout 'default', title => $abbreviation. ' Downloads', subtitle => $abbreviation .' Downloads';
+
+
+<!-- Central Column start -->
+<h3>All data produced by the <%= $abbreviation %> Genome Project are publicly available. Please cite:</h3>
+		<! -- Citation here -->
+
+<table class="download">
+  <col width="75%"/><col width="25%"/>
+  <tr>
+    <th colspan="2">Sequences</th>
+  </tr>
+  <tr>
+    <td>Chromosomal (Supercontig)</td>
+    <td><a href="<%= url_for 'dna' %>">Fasta format</a></td>
+  </tr>
+  <tr>
+    <td>Coding (spliced mRNA transcript sequences)</td>
+    <td><a href="<%= url_for 'mrna' %>">Fasta format</a></td>
+  </tr>
+  <tr>
+    <td>Protein </td>
+    <td><a href="<%= url_for 'protein' %>">Fasta format</a></td>
+  </tr>
+  <tr>
+    <td>Genomic Features </td>
+    <td><a href="<%= url_for 'feature' %>">GFF3 format</a></td>
+  </tr>
+</table>
+
