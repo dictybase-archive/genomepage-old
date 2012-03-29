@@ -8,7 +8,7 @@
 #however exclude the sample conf
 !*.sample*
 !fcgi_conf.yaml
-!deploy.conf
+!apache.conf
 
 
 #exclude various folder
