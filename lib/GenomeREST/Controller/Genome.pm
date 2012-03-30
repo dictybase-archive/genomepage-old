@@ -189,7 +189,7 @@ sub mrna {
     my $folder = $self->get_download_folder;
     return if !$folder;
     my $file
-        = $self->stash('common_name') . '_coding.' . $self->stash('format');
+        = $self->stash('common_name') . '_cds.' . $self->stash('format');
     $self->sendfile(
         file => catfile( $folder, $file ),
         type => 'application/x-fasta'
@@ -201,7 +201,7 @@ sub protein {
     my $folder = $self->get_download_folder;
     return if !$folder;
     my $file
-        = $self->stash('common_name') . '_protein.' . $self->stash('format');
+        = $self->stash('common_name') . '_polypeptide.' . $self->stash('format');
     $self->sendfile(
         file => catfile( $folder, $file ),
         type => 'application/x-fasta'
