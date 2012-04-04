@@ -114,6 +114,12 @@ sub get_download_folder {
 
 sub sendfile {
     my ( $self, %arg ) = @_;
+    if ( !-e $arg{file} ) {
+        $self->stash( 'message' => "Download file could not be found" );
+        $self->res->code(404);
+        $self->render(template => 'missing',  format => 'html');
+        return;
+    }
     my $sendfile = 1 if $arg{xsendfile};
     $sendfile = 1 if $self->app->mode ne 'development';
 
@@ -126,7 +132,8 @@ sub sendfile {
             Mojo::Asset::File->new( path => $arg{file} ) );
         $self->res->headers->content_type(
             $arg{type} ? $arg{type} : 'text/plain' );
-		$self->res->headers->content_disposition("attachment;filename=".basename($arg{file}));
+        $self->res->headers->content_disposition(
+            "attachment;filename=" . basename( $arg{file} ) );
         $self->rendered(200);
     }
 }

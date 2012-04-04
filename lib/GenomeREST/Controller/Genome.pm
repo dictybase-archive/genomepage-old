@@ -217,6 +217,7 @@ sub feature {
         file => catfile( $folder, $file ),
         type => 'application/x-gff3'
     );
+    return;
 }
 
 sub browse {
