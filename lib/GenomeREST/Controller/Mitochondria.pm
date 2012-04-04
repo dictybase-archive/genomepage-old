@@ -25,16 +25,29 @@ sub dna {
         return;
     }
 
-    my $file = $self->stash('common_name').'_mitochondrial.'.$self->stash('format');
-    $self->sendfile(file => catfile($folder, $file),  type => 'application/x-fasta');
+    my $file
+        = $self->stash('common_name')
+        . '_mitochondrial_'
+        . $row->type->name . '.'
+        . $self->stash('format');
+    $self->sendfile(
+        file => catfile( $folder, $file ),
+        type => 'application/x-fasta'
+    );
 }
 
 sub feature {
-	my ($self) = @_;
+    my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name').'_mitochondrial_feature.'.$self->stash('format');
-    $self->sendfile(file => catfile($folder, $file),  type => 'application/x-gff3');
+    my $file
+        = $self->stash('common_name')
+        . '_mitochondrial.'
+        . $self->stash('format');
+    $self->sendfile(
+        file => catfile( $folder, $file ),
+        type => 'application/x-gff3'
+    );
 }
 
 1;    # Magic true value required at end of module
