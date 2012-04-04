@@ -42,7 +42,7 @@ sub feature {
     return if !$folder;
     my $file
         = $self->stash('common_name')
-        . '_mitochondrial_feature.'
+        . '_mitochondrial.'
         . $self->stash('format');
     $self->sendfile(
         file => catfile( $folder, $file ),

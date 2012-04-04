@@ -212,7 +212,7 @@ sub feature {
     my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file = $self->stash('common_name') . '_feature.gff3';
+    my $file = $self->stash('common_name') . '.gff3';
     $self->sendfile(
         file => catfile( $folder, $file ),
         type => 'application/x-gff3'
