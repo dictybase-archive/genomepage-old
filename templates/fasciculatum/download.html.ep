@@ -76,7 +76,7 @@
   </tr>
   <tr>
     <td>Chromosomal</td>
-    <td><a href="<%= url_for 'current/mitochondria/dna.gff3' %>" id="download">Download Fasta</a></td>
+    <td><a href="<%= url_for 'current/mitochondria/dna.fasta' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Genomic Features </td>
