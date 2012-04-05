@@ -3,8 +3,8 @@ package GenomeREST::Controller;
 use strict;
 use base 'Mojolicious::Controller';
 use File::Spec::Functions;
-use Mojo::Asset::File;
 use File::Basename;
+use Mojolicious::Static;
 
 sub check_organism {
     my ( $self, $name ) = @_;
@@ -114,21 +114,30 @@ sub get_download_folder {
 
 sub sendfile {
     my ( $self, %arg ) = @_;
-    my $sendfile = 1 if $arg{xsendfile};
-    $sendfile = 1 if $self->app->mode ne 'development';
-
-    if ($sendfile) {
-
-        # -- Set Xsendfile headers
+    if ( !-e $arg{file} ) {
+        $self->stash( 'message' => "Download file could not be found" );
+        $self->res->code(404);
+        $self->render( template => 'missing', format => 'html' );
+        return;
     }
-    else {
-        $self->res->content->asset(
-            Mojo::Asset::File->new( path => $arg{file} ) );
-        $self->res->headers->content_type(
+    #my $sendfile = 1 if $arg{xsendfile};
+    #$sendfile = 1 if $self->app->mode ne 'development';
+    #        $self->res->content->asset(
+    #            Mojo::Asset::File->new( path => $arg{file} ) );
+
+    my $dispatcher = Mojolicious::Static->new;
+    $dispatcher->root(
+        catfile(
+            $self->app->config->{default}->{download},
+            $self->stash('common_name')
+        )
+    );
+    $self->res->headers->content_type(
             $arg{type} ? $arg{type} : 'text/plain' );
-		$self->res->headers->content_disposition("attachment;filename=".basename($arg{file}));
-        $self->rendered(200);
-    }
+    $self->res->headers->content_disposition(
+        "attachment;filename=" . basename( $arg{file} ) );
+    $dispatcher->serve( $self, basename( $arg{file} ) );
+    $self->rendered(200);
 }
 
 sub _chado_name {

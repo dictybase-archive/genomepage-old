@@ -49,19 +49,19 @@
   </tr>
   <tr>
     <td>Chromosomal (Supercontig)</td>
-    <td><a href="<%= url_for 'current/dna' %>" id="download">Download Fasta</a></td>
+    <td><a href="<%= url_for 'current/dna.fasta' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Coding (spliced mRNA transcript sequences)</td>
-    <td><a href="<%= url_for 'current/mrna' %>" id="download">Download Fasta</a></td>
+    <td><a href="<%= url_for 'current/mrna.fasta' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Protein </td>
-    <td><a href="<%= url_for 'current/protein' %>" id="download">Download Fasta</a></td>
+    <td><a href="<%= url_for 'current/protein.fasta' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Genomic Features </td>
-    <td><a href="<%= url_for 'current/feature' %>" id="download">Download GFF3</a></td>
+    <td><a href="<%= url_for 'current/feature.gff3' %>" id="download">Download GFF3</a></td>
   </tr>
 </table>
 
@@ -76,11 +76,11 @@
   </tr>
   <tr>
     <td>Chromosomal</td>
-    <td><a href="<%= url_for 'current/mitochondria/dna' %>" id="download">Download Fasta</a></td>
+    <td><a href="<%= url_for 'current/mitochondria/dna.fasta' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
     <td>Genomic Features </td>
-    <td><a href="<%= url_for 'current/mitochondria/feature' %>" id="download">Download GFF3</a></td>
+    <td><a href="<%= url_for 'current/mitochondria/feature.gff3' %>" id="download">Download GFF3</a></td>
   </tr>
 </table>
 

@@ -21,7 +21,7 @@ sub dna {
         $self->stash( 'message' => 'Mitochondria sequence for '
                 . $self->stash('common_name')
                 . ' not found' );
-        $self->render('missing');
+        $self->render('missing',  format => 'html');
         return;
     }
 
