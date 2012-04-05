@@ -12,7 +12,7 @@
   nproc:            3
   pidfile:         "/tmp/genomerest.pid"
   socket:          "/tmp/genomerest.socket"
-  additional_args: ['-E',  'devprod',  '-e',  'enable "Plack::Middleware::XSendfile"']
+  additional_args: ['-E',  'devprod']
 - name:            "staging.server"
   server_class:    "FCGI::Engine::Manager::Server::Plackup"
   scriptname:      "script/genomerest.psgi"
