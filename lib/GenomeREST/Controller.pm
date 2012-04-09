@@ -109,7 +109,7 @@ sub get_download_folder {
         return;
     }
     $self->set_organism($common_name);
-    return catdir( $self->app->config->{default}->{download}, $common_name );
+    return $self->app->config->{default}->{download};
 }
 
 sub sendfile {
