@@ -120,20 +120,16 @@ sub sendfile {
         $self->render( template => 'missing', format => 'html' );
         return;
     }
+
     #my $sendfile = 1 if $arg{xsendfile};
     #$sendfile = 1 if $self->app->mode ne 'development';
     #        $self->res->content->asset(
     #            Mojo::Asset::File->new( path => $arg{file} ) );
 
     my $dispatcher = Mojolicious::Static->new;
-    $dispatcher->root(
-        catfile(
-            $self->app->config->{default}->{download},
-            $self->stash('common_name')
-        )
-    );
+    $dispatcher->root( $self->app->config->{default}->{download});
     $self->res->headers->content_type(
-            $arg{type} ? $arg{type} : 'text/plain' );
+        $arg{type} ? $arg{type} : 'text/plain' );
     $self->res->headers->content_disposition(
         "attachment;filename=" . basename( $arg{file} ) );
     $dispatcher->serve( $self, basename( $arg{file} ) );

@@ -172,12 +172,6 @@ sub dna {
             . $row->type->name . '.'
             . $self->stash('format') );
 
-    if (!-e $file){
-    	$self->stash(message => "$file file not found");
-    	$self->render('missing');
-    	return;
-    }
-
     $self->sendfile(
         file => $file,
         type => 'application/x-fasta'
