@@ -16,7 +16,7 @@
 - name:            "staging.server"
   server_class:    "FCGI::Engine::Manager::Server::Plackup"
   scriptname:      "script/genomerest.psgi"
-  nproc:            2
+  nproc:            3
   pidfile:         "/tmp/genomerest.pid"
   socket:          "/tmp/genomerest.socket"
   additional_args: ['-e',  'staging']
