@@ -13,17 +13,23 @@ sub dna {
     my $org_rs     = $self->stash('organism_resultset');
     my $feature_rs = $org_rs->search_related(
         'features',
-        { 'featureloc_features.srcfeature_id' => undef },
-        { prefetch => 'type', join => 'featureloc_features' }
+        {   'featureloc_features.srcfeature_id'       => undef,
+            'feature_relationship_subjects.object_id' => undef
+        },
+        {   prefetch => 'type',
+            join => [ 'featureloc_features', 'feature_relationship_subjects' ]
+        }
     );
     my $row = $feature_rs->first;
     if ( !$row ) {
         $self->stash( 'message' => 'Mitochondria sequence for '
                 . $self->stash('common_name')
                 . ' not found' );
-        $self->render('missing',  format => 'html');
+        $self->render( 'missing', format => 'html' );
         return;
     }
+
+    $self->app->log->debug( "downloading type ", $row->type->name );
 
     my $file
         = $self->stash('common_name')
