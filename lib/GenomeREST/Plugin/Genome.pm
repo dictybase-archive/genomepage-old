@@ -156,7 +156,12 @@ sub _genomes_from_db {
         genus       => 'Dictyostelium'
     ) if not exists $common_name2org->{discoideum};
 
-    return [ values %$common_name2org ];
+    return [
+        sort {
+                   $a->genus cmp $b->genus
+                || $a->common_name cmp $b->common_name
+            } values %$common_name2org
+    ];
 }
 
 sub _chado_name {
