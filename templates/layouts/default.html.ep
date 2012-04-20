@@ -59,7 +59,7 @@ my @app_js = ('menu');
     				  	% }
     				  </div>
     				</div>
-    				<div class="column-right"><%= stash 'left_column' %></div>
+    				<div class="column-right"></div>
     		  </div>
         </div>
       </div>

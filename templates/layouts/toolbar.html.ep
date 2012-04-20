@@ -8,7 +8,7 @@
             <table>
                 <tr>
                     <td rowspan="2">
-                        <a href = "/discoideum"><%= image_tag "$path/logo.gif" %></a>
+                        <a href="<%= url_for "$path" %>"><%= image_tag "$path/logo.gif" %></a>
                     </td>
                 </tr>
                 <tr class="menu">
