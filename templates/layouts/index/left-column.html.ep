@@ -6,7 +6,12 @@
 		% if (stash($type) > 0) {
 			% my $ltype = lc $type;
 			<div style="padding-top:5px;padding-bottom:5px;">
+			% if ($type eq 'gene'){
+		  	<%= link_to "List of $type (Search)" => url_for("$common_name/$ltype") %>
+		  % }
+		  % else {
 		  	<%= link_to "List of $type" => url_for("$common_name/$ltype") %>
+		  % }
 		  </div>
 		% }
 	% }
