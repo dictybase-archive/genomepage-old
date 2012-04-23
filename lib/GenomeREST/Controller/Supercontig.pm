@@ -80,13 +80,14 @@ sub search {
     my $data;
     my $gb2url = $self->gbrowse_url;
     while ( my $row = $supercontig_rs->next ) {
-        my $length = $model->resultset('Sequence::Feature')
-            ->find( { uniquename => $row->uniquename } )->seqlen;
+        my $frow = $model->resultset('Sequence::Feature')
+            ->find( { uniquename => $row->uniquename } );
+		my $length = $frow->seqlen;
         my $coor = $length > 50000 ? '1..50000' : '1..' . $length;
         push @$data,
             [
             $row->dbxref->accession,        $length,
-            $row->get_column('gene_count'), $gb2url. $self->_chado_name($row) . ':' . $coor
+            $row->get_column('gene_count'), $gb2url. $self->_chado_name($frow) . ':' . $coor
             ];
     }
     my $total = $supercontig_rs->pager->total_entries;
