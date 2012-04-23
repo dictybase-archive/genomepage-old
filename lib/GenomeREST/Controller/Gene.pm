@@ -44,8 +44,8 @@ sub search {
         }
         push @$data,
             [
-            $row->dbxref->accession, $seqlen,
-            $gb2url . $self->_chado_name( $row )
+            $row->dbxref->accession, $row->name ? $row->name : undef,
+            $seqlen, $gb2url . $self->_chado_name($row)
             ];
     }
     my $total = $gene_rs->pager->total_entries;
