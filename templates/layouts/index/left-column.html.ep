@@ -1,13 +1,14 @@
 <div 
-  style="margin: 50 10 10 10;padding: 8 2 8 13;
+  style="margin: 50 10 30 10;padding: 8 2 8 13;
         font-size: 140%; border:0.5px solid black;
         background-color:#F5F5F5">
 	% for my $type (qw/supercontig contig EST gene/) {
 		% if (stash($type) > 0) {
 			% my $ltype = lc $type;
 			<div style="padding-top:5px;padding-bottom:5px;">
-		  	<%= link_to "List of $type".'s' => url_for("$common_name/$ltype") %>
+		  	<%= link_to "List of $type" => url_for("$common_name/$ltype") %>
 		  </div>
 		% }
 	% }
-</div>
+ </div>
+
