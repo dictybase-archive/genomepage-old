@@ -1,4 +1,4 @@
-% layout 'default', title => 'Supercontig page',  include_content => 'datatables', include_template => 'layouts/datatables' ;
+% layout 'default', title => 'List of supercontig',  include_content => 'datatables', include_template => 'layouts/datatables' ;
 
 <% content_for datatables => begin %>
 	<%= javascript begin %>

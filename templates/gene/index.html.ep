@@ -1,4 +1,4 @@
-% layout 'default', title => 'Contig page',  include_content => 'datatables', include_template => 'layouts/datatables' ;
+% layout 'default', title => 'List of gene',  include_content => 'datatables', include_template => 'layouts/datatables' ;
 
 <% content_for datatables => begin %>
 	<%= javascript begin %>

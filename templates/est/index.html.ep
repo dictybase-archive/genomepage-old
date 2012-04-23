@@ -1,4 +1,4 @@
-% layout 'default', title => 'List of ESTs',  include_content => 'datatables', include_template => 'layouts/datatables' ;
+% layout 'default', title => 'List of EST',  include_content => 'datatables', include_template => 'layouts/datatables' ;
 % my $source_url = '/'.$common_name.'/est/search.datatable';
 % if (my $gene_id = $self->param('gene')) {
 %  $source_url .= '?gene='.$gene_id;
