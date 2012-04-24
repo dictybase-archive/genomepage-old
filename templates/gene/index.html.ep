@@ -4,13 +4,15 @@
 	<%= javascript begin %>
     	$(document).ready(function() {
     		$('#genome_datatable').dataTable({
-    			"bFilter": false, 
     			"sPaginationType": "full_numbers", 
+    			"iDisplayLength": 25, 
+    			"oLanguage": { "sSearch": "Search ID or Name" }, 
     			"bProcessing": true, 
+    			"bSort"    : false, 
     			"bServerSide": true, 
     			"sAjaxSource": "/<%= $common_name %>/gene/search.datatable", 
     			"aoColumnDefs": [
-    						{ "sClass": 'center',  "aTargets": [ 0,  1 ] }, 
+    						{ "sClass": 'center',  "aTargets": [ 0,  1 , 2] }, 
     						{
     							"fnRender": function (obj) {
     								return '<a href="/' + "<%= $common_name %>" + '/gene/' + obj.aData[0] + '">' + obj.aData[0] + '</a>'; 
@@ -21,7 +23,7 @@
     							"fnRender": function (obj) {
     								return '<a href="' + obj.aData[2] + '">' + '<%= image_tag 'gbrowse.png', height => 19, width => 80 %>' + '</a>'; 
     							}, 
-    							"aTargets": [ 2 ]
+    							"aTargets": [ 3 ]
     						}
     			], 
     			"bJQueryUI": true
@@ -35,6 +37,7 @@
 	<thead>
 		<tr>
 			<th> ID </th>
+			<th> Name </th>
 			<th> Length(kb) </th>
 			<th> Gbrowse </th>
 		</tr>
