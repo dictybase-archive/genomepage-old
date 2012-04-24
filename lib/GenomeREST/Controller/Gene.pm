@@ -25,15 +25,36 @@ sub search {
     my $rows = $self->param('iDisplayLength');
     my $page = $self->param('iDisplayStart') / $rows + 1;
 
-    my $gene_rs = $self->stash('organism_resultset')->search_related(
-        'features',
-        { 'type.name' => 'gene' },
-        {   join     => 'type',
-            prefetch => [qw/dbxref featureloc_features/],
-            rows     => $rows,
-            page     => $page
-        }
-    );
+    my $gene_rs;
+    if ( my $term = $self->param('sSearch') ) {
+        $gene_rs = $self->stash('organism_resultset')->search_related(
+            'features',
+            {   -and => [
+                    'type.name' => 'gene',
+                    -or         => [
+                        'features.name'       => { 'like' => $term . '%' },
+                        'features.uniquename' => $term,
+                    ]
+                ]
+            },
+            {   join     => 'type',
+                prefetch => [qw/dbxref featureloc_features/],
+                rows     => $rows,
+                page     => $page
+            }
+        );
+    }
+    else {
+        $gene_rs = $self->stash('organism_resultset')->search_related(
+            'features',
+            { 'type.name' => 'gene' },
+            {   join     => 'type',
+                prefetch => [qw/dbxref featureloc_features/],
+                rows     => $rows,
+                page     => $page
+            }
+        );
+    }
     my $data   = [];
     my $gb2url = $self->gbrowse_url;
     while ( my $row = $gene_rs->next ) {
