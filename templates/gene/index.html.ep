@@ -15,13 +15,14 @@
     						{ "sClass": 'center',  "aTargets": [ 0,  1 , 2] }, 
     						{
     							"fnRender": function (obj) {
-    								return '<a href="/' + "<%= $common_name %>" + '/gene/' + obj.aData[0] + '">' + obj.aData[0] + '</a>'; 
+    								return '<a href="/' + "<%= $common_name %>" + '/gene/' + obj.aData[0]
+    								                         + '" target="_blank">' + obj.aData[0] + '</a>'; 
     							}, 
     							"aTargets": [ 0 ]
     						}, 
     						{
     							"fnRender": function (obj) {
-    								return '<a href="' + obj.aData[2] + '">' + '<%= image_tag 'gbrowse.png', height => 19, width => 80 %>' + '</a>'; 
+    								return '<a href="' + obj.aData[3] + '" target="_blank">' + '<%= image_tag 'gbrowse.png', height => 19, width => 80 %>' + '</a>'; 
     							}, 
     							"aTargets": [ 3 ]
     						}
