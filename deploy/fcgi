@@ -31,6 +31,13 @@ before_install_dependencies() {
      carton install http://cpan.metacpan.org/authors/id/A/AB/ABRAXXA/DBIx-Class-0.08127.tar.gz
    fi
 
+	local mojo_version=`__check_perl_module_version Mojolicious`
+	if [ `echo "$mojo_version < $mojolicious" | bc` -eq 1 ];then
+     echo " ----> Installing mojolicious 1.21"
+     curl -o mojolicious.tar.gz -s -k -L https://github.com/kraih/mojo/tarball/v1.21 \
+                        && carton install mojolicious.tar.gz && rm mojolicious.tar.gz
+  fi
+
 	local bundle_version=`__check_perl_module_version Mojolicious::Plugin::Bundle`
 	if [ `echo "$bundle_version < $bundle" | bc` -eq 1 ];then
      echo "------> Installing Mojolicious::Plugin::Bundle 0.005"
@@ -46,12 +53,6 @@ before_install_dependencies() {
                           && carton install modware.tar.gz && rm modware.tar.gz
   fi
 
-	local mojo_version=`__check_perl_module_version Mojolicious`
-	if [ `echo "$mojo_version < $mojolicious" | bc` -eq 1 ];then
-     echo " ----> Installing mojolicious 1.21"
-     curl -o mojolicious.tar.gz -s -k -L https://github.com/kraih/mojo/tarball/v1.21 \
-                        && carton install mojolicious.tar.gz && rm mojolicious.tar.gz
-  fi
 
 }
 
