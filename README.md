@@ -1,3 +1,2 @@
-Web application for gene page display
-====================================
+### Web application for gene page display
 
