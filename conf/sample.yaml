@@ -1,0 +1,22 @@
+default:
+ download: 'folder'
+
+tab:
+ dynamic: feature
+
+database:
+ dsn: dsn
+ user: user
+ password: pass
+ opt: LongTruncOk
+ 
+relative_url_root: '/assets'
+gbrowse_url: '/browser'
+
+#cache:
+#    driver: File
+#    root_dir: '/home/ubuntu/dictyBase/Apps/genomepage/cache'
+#    depth: 8
+#    namespace: dictygene
+#    expires_in: '7 days'
+
