@@ -62,6 +62,10 @@ create_daemontools_runfile(){
   local RUN_FILE=$2
   local LOCAL_LIB=$3
   local APP_DIR=$4
+  local SERVICE=${APP_DIR}/service
+  local APP_SERVICE=${SERVICE}/${PROJECT}runner
+
+	! [ -d $APP_SERVICE ] && mkdir -p $APP_SERVICE
 
   echo -e "#!/bin/sh\nexec 2>1&\n" > $RUN_FILE
   echo "export HOME=$HOME" >> $RUN_FILE
@@ -84,7 +88,6 @@ after_create_daemontools_runfile() {
   local APP_DIR=$4
   local SERVICE=${APP_DIR}/service
   local APP_SERVICE=${SERVICE}/${PROJECT}runner
-  local RUN_FILE=${APP_SERVICE}/run
 
 	! [ -d $APP_SERVICE ] && mkdir -p $APP_SERVICE
 
