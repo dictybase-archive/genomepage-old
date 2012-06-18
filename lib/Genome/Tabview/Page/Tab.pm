@@ -83,7 +83,6 @@ use Mouse;
 use Mouse::Util::TypeConstraints;
 use MouseX::Params::Validate;
 use Carp;
-use Carp::Always;
 use Genome::Tabview::Config::Panel::Item::JSON;
 use Genome::Tabview::Config::Panel::Item::Accordion;
 

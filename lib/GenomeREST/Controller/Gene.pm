@@ -4,7 +4,7 @@ use strict;
 use Genome::Tabview::Page::Gene;
 use Genome::Factory::Tabview::Tab;
 use Genome::Factory::Tabview::Section;
-use Carp::Always;
+use Carp;
 use base 'GenomeREST::Controller';
 
 sub index {

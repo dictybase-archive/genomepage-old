@@ -80,7 +80,7 @@ package Genome::Tabview::Page::Gene;
 
 use strict;
 use namespace::autoclean;
-use Carp::Always;
+use Carp;
 use Mouse;
 use MouseX::Params::Validate;
 use Genome::Tabview::Config;
