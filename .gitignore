@@ -24,7 +24,7 @@ MANIFEST
 MYMETA*
 META
 
-Rexfile
+Rexfile*
 
 #exclude Build.PL
 !Build.PL
