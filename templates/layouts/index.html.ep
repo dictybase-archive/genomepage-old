@@ -9,7 +9,7 @@
       <li><a href="<%= $self->app->config->{gbrowse_url}.'/gbrowse/'.$common_name %>">Genome Browser</a>: For displaying annotations
       on <i> <%= $abbreviation %> </i> genome.
       </li>
-      <li><a href="/tools/blast">BLAST tool</a>: The new dictyBase universal dictyostelid
+      <li><a href="/tools/blast">BLAST tool</a>: The updated dictyBase universal dictyostelid
       blast interface to search for similarities between <i><%= $abbreviation %></i> and other genomes
       </li>
       <li><a href="<%= url_for "$common_name/current" %>">Download section </a>: 
