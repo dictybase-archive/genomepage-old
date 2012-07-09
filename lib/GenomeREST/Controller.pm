@@ -10,19 +10,24 @@ sub check_organism {
     my ( $self, $name ) = @_;
     my $model = $self->app->modware->handler;
     return $model->resultset('Organism::Organism')
-        ->count( { 'common_name' => $name } );
+      ->count( { 'common_name' => $name } );
 }
 
 sub set_organism {
     my ( $self, $name ) = @_;
-    my $model  = $self->app->modware->handler;
-    my $org_rs = $model->resultset('Organism::Organism')
-        ->search( { 'common_name' => $name } );
+    my $model = $self->app->modware->handler;
+    my $org_rs =
+      $model->resultset('Organism::Organism')
+      ->search( { 'common_name' => $name } );
     my $org_row = $org_rs->first;
 
     $self->stash( $_ => $org_row->$_ ) for qw/species genus abbreviation/;
     if ( $org_row->species =~ /^(\S+)\s+\S+$/ ) {
         $self->stash( 'species' => $1 );
+    }
+    if ( $org_row->abbreviation =~ m/\S+.\S+/ ) {
+        ( my $abbr = $org_row->abbreviation ) =~ s/\./\. /;
+        $self->stash( 'abbreviation' => $abbr );
     }
     $self->stash( 'organism_resultset' => $org_rs );
 }
@@ -83,7 +88,7 @@ sub show_subsection {
 sub gene_url {
     my ($self) = @_;
     return $self->url_for( '/' . $self->stash('common_name') . '/gene' )
-        ->to_string;
+      ->to_string;
 }
 
 sub panel_to_json {
@@ -127,9 +132,8 @@ sub sendfile {
     #            Mojo::Asset::File->new( path => $arg{file} ) );
 
     my $dispatcher = Mojolicious::Static->new;
-    $dispatcher->root( $self->app->config->{default}->{download});
-    $self->res->headers->content_type(
-        $arg{type} ? $arg{type} : 'text/plain' );
+    $dispatcher->root( $self->app->config->{default}->{download} );
+    $self->res->headers->content_type( $arg{type} ? $arg{type} : 'text/plain' );
     $self->res->headers->content_disposition(
         "attachment;filename=" . basename( $arg{file} ) );
     $dispatcher->serve( $self, basename( $arg{file} ) );
