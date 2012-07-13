@@ -63,8 +63,8 @@
       					<td width="20%" class="content_table_title">Analysis</td>
       					<td width="80%" class="content_table_data">
          					<input type="button" 
-         						onclick="window.open('/tools/blast/?primary_id='<%= $id %> )" 
-         						value="BLAST" name="BLAST">
+         						onclick="window.open('/tools/blast/?primary_id=<%= $id %>')" name='BLAST' 
+         						value='BLAST' />
       					</td>
    						</tr>
    						<tr>
