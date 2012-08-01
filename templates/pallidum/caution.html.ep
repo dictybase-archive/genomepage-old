@@ -1,0 +1,4 @@
+
+<p><b>
+The <i><%= $genus %> <%= $species %></i>genes have not been manually curated. Please use the gene predictions and nomenclature based on best bidirectional hits with <i>D. discoideum</i> with caution!
+</b></p>

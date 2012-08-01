@@ -16,6 +16,9 @@
       Download genomic sequences, alignments, mapping etc.
       </li>
   </ul>
+
+  %= include "$common_name/caution"	
+
   <h3> Sample entry points for browsing the <i> <%= $abbreviation %> genome </i> </h3>
   <ul>
   	<!-- <li> Genome browser </li> -->
