@@ -1,7 +1,6 @@
 package GenomeREST;
 
 use strict;
-
 #use Homology::Chado::DataSource;
 use base 'Mojolicious';
 
@@ -22,7 +21,7 @@ sub startup {
     $self->plugin('asset_tag_helpers');
     if ( defined $self->config->{cache} ) {
         $self->plugin(
-            'cache-action',
+            'GenomeREST::Plugin::Cache::Action',
             $self->{config}->{cache}
         );
     }

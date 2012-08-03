@@ -13,7 +13,6 @@
 
 #exclude various folder
 log
-cache
 
 #Perl's build specific stuff
 Build
