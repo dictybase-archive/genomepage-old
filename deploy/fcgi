@@ -12,6 +12,7 @@ install_dependencies() {
 after_install_dependencies() {
    echo "------> Installing plack and dependencies for fcgi deployment"
    cd $1
+   carton install CHI::Driver::Memcached
    carton install Plack FCGI FCGI::ProcManager FCGI::Engine
 
 }
