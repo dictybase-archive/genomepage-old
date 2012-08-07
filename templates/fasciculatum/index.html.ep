@@ -1,4 +1,5 @@
+  
  <h3>
     The <i><%= $abbreviation %></i> genome was sequenced as a collaboration between the<br>
-    Leibniz Institute for Age Research and Fritz Lipmann Institute. 
+	 Leibniz Institute for Age Research, Fritz Lipmann Institute, and the University of Dundee.
  </h3>
