@@ -413,10 +413,10 @@ sub get_fasta_selection {
         caption => 'BLAST',
         type    => 'tab',
         url     => $self->context->url_for(
-                          $self->gene_url
-                        . '/blast?primary_id='
-                        . $feature->dbxref->accession
-                    )->to_string
+                  $self->gene_url
+                . '/blast?primary_id='
+                . $feature->dbxref->accession
+            )->to_string
     );
 
     my %params = (
