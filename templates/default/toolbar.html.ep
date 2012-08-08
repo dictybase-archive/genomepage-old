@@ -101,7 +101,7 @@
                     </td>
                     <td><%= image_tag "$path/menu-top-right.gif" %></td>
                     <td id="about_help">
-                        <a href="/db/cgi-bin/dictyBase/suggestion">Contact</a> 
+                        <a href="/dicty/db/cgi-bin/dictyBase/suggestion">Contact</a> 
                     </td>                            
                 </tr>
             </table>
