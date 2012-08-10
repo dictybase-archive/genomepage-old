@@ -1,3 +1,4 @@
+
 <h2>
   Welcome to the <i><%= $genus %> <%= $species %></i> web portal!
 </h2>
@@ -18,17 +19,21 @@
   </ul>
   <h3> Sample entry points for browsing the <i> <%= $abbreviation %> genome </i> </h3>
   <ul>
-  	<!-- <li> Genome browser </li> -->
   	<li> <a href="<%= url_for "$common_name/gene/$gene_id" %>">Gene (<%= $gene_id %>)</a> </li>
   	<li> <a href="<%= url_for "$common_name/gene/$gene_id/feature/$transcript_id"  %>">Transcript (<%= $transcript_id %>) </a></li>
   	<li> <a href="<%= url_for "$common_name/gene/$gene_id/protein/$transcript_id" %>">Protein (<%= $polypeptide_id %>) </a></li>
 	</ul>
 
-  <div style="margin-top:20px;margin-bottom:30px;width:70%;font-size:80%;">
   <h3>Genome statistics: </h3>
-  <div id="accordion">
-  	<h4><a href="#"> Counts </a></h4>
-  	<div>
+  <div style="margin-top:20px;margin-bottom:30px;width:70%;font-size:80%;">
+  
+  <div id="tabs">
+      <ul>
+	  	<li><a href="#counts">Counts</a></li>
+		<li><a href="#feature_lengths">Feature lengths</a></li>
+	  </ul>
+
+  	<div id="counts">
 			<table id="genome_stat_datatable" class="display">                    
 				<thead>
 					<tr>
@@ -48,8 +53,8 @@
     		</tbody>
 			</table>																
   	</div>
-		<h4><a href="#"> Feature lengths </a></h4>
-  	<div>
+
+  	<div id="feature_lengths">
 			<table id="feature_count_datatable" class="display">                    
 				<thead>
 					<tr>
@@ -67,10 +72,10 @@
     		</tbody>
 			</table>
   	</div>
-	</div>
-  </div>
+	</div> <!-- tabs END HERE -->
+  </div> <!-- Genome statistics STYLE ENDS HERE  -->
+</div> <!-- main-info ENDS HERE -->
 
-</div>
 <div id="species-image">
   <%= image_tag "$common_name/index-img.jpg" %> 
    % if ($species eq 'pallidum') {

@@ -4,25 +4,27 @@
 <% content_for accordion => begin %>
 	<%= javascript begin %>
 			$(document).ready(function() {
-				$('#accordion').accordion({autoHeight:false});
+				
+				$('#tabs').tabs({});
+
 				$('#genome_stat_datatable').dataTable({
-    			"bFilter"  : false, 
-    			"bInfo"    : false, 
-    			"bSort"    : false, 
-    			"bPaginate": false, 
-    			"bJQueryUI": true
-    		}); 
+    				"bFilter"  : false, 
+    				"bInfo"    : false, 
+    				"bSort"    : false, 
+    				"bPaginate": false, 
+    				"bJQueryUI": true
+    			}); 
 
 				$('#feature_count_datatable').dataTable({
-    			"bFilter"  : false, 
-    			"bInfo"    : false, 
-    			"bSort"    : false, 
-    			"bPaginate": false, 
-    			"bProcessing": true, 
-    			"bServerSide": true, 
-    			"bJQueryUI": true, 
-    			"sAjaxSource": "<%= url_for("$common_name/feature/length/search.datatable") %>"
-    		}); 
+    				"bFilter"  : false, 
+    				"bInfo"    : false, 
+    				"bSort"    : false, 
+    				"bPaginate": false, 
+    				"bProcessing": true, 
+    				"bServerSide": true, 
+    				"bJQueryUI": true, 
+    				"sAjaxSource": "<%= url_for("$common_name/feature/length/search.datatable") %>"
+    			}); 
 			});
 	<% end %>
 <% end %>
