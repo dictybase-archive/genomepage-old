@@ -17,7 +17,8 @@ sub show {
     $self->set_organism($common_name);
 
     my $org_rs = $self->stash('organism_resultset');
-    my $feature_rs = $org_rs->search_related( 'features', {},
+    my $feature_rs =
+      $org_rs->search_related( 'features', {},
         { prefetch => 'type', cache => 1 } );
 
     my %stash = map { $_ => 0 } qw/supercontig contig gene EST polypeptide/;
@@ -32,47 +33,48 @@ sub show {
     my $gene_rs = $feature_rs->search( { 'type.name' => 'gene' } );
 
     #-- walk down for transcript
-    my $trans_rs
-        = $gene_rs->search_related( 'feature_relationship_objects', {}, {} )
-        ->search_related(
+    my $trans_rs =
+      $gene_rs->search_related( 'feature_relationship_objects', {}, {} )
+      ->search_related(
         'subject',
         { 'type_2.name' => 'mRNA' },
         { 'join'        => 'type' }
-        );
+      );
 
     ## -- now down for polypeptide
-    my $poly_rs
-        = $trans_rs->search_related( 'feature_relationship_objects', {}, {} )
-        ->search_related(
+    my $poly_rs =
+      $trans_rs->search_related( 'feature_relationship_objects', {}, {} )
+      ->search_related(
         'subject',
         { 'type_3.name' => 'polypeptide' },
         { 'join'        => 'type', }
-        );
+      );
 
     $stash{polypeptide} = $poly_rs->count( {}, { select => 'feature_id' } );
 
-    $stash{gene_id}
-        = $gene_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
-    $stash{transcript_id}
-        = $trans_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
-    $stash{polypeptide_id}
-        = $poly_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
+    $stash{gene_id} =
+      $gene_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
+    $stash{transcript_id} =
+      $trans_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
+    $stash{polypeptide_id} =
+      $poly_rs->search( {}, { rows => 1 } )->single->dbxref->accession;
 
     my $nuclear_rs = $org_rs->search_related(
         'features',
         { 'type.name' => 'mRNA' },
         { join        => 'type' }
-        )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
-        ->search_related(
+      )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
+      ->search_related(
         'srcfeature',
         { 'type_2.name' => 'nuclear_sequence' },
         { join          => [ { 'featureprops' => 'type' } ] }
-        );
+      );
 
     if ( my $nrow = $nuclear_rs->first ) {
         $self->stash( 'nuclear_genome' => 1 );
-        my $rs = $nrow->search_related( 'feature_pubs', {} )
-            ->search_related( 'pub', {} );
+        my $rs =
+          $nrow->search_related( 'feature_pubs', {} )
+          ->search_related( 'pub',               {} );
         if ( my $prow = $rs->first ) {
             my $id = $prow->pub_id;
             $stash{pub} = Modware::Publication::DictyBase->find($id);
@@ -101,17 +103,18 @@ sub download {
         'features',
         { 'type.name' => 'mRNA' },
         { join        => 'type' }
-        )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
-        ->search_related(
+      )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
+      ->search_related(
         'srcfeature',
         { 'type_2.name' => 'nuclear_sequence' },
         { join          => [ { 'featureprops' => 'type' } ] }
-        );
+      );
 
     if ( my $nrow = $nuclear_rs->first ) {
         $self->stash( 'nuclear_genome' => 1 );
-        my $rs = $nrow->search_related( 'feature_pubs', {} )
-            ->search_related( 'pub', {} );
+        my $rs =
+          $nrow->search_related( 'feature_pubs', {} )
+          ->search_related( 'pub',               {} );
         if ( my $prow = $rs->first ) {
             my $id = $prow->pub_id;
             $self->stash(
@@ -124,17 +127,18 @@ sub download {
         'features',
         { 'type.name' => 'mRNA' },
         { join        => 'type' }
-        )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
-        ->search_related(
+      )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
+      ->search_related(
         'srcfeature',
         { 'type_2.name' => 'mitochondrial_DNA' },
         { join          => [ { 'featureprops' => 'type' } ] }
-        );
+      );
 
     if ( my $mrow = $mito_rs->first ) {
         $self->stash( 'mito_genome' => 1 );
-        my $rs = $mrow->search_related( 'feature_pubs', {} )
-            ->search_related( 'pub', {} );
+        my $rs =
+          $mrow->search_related( 'feature_pubs', {} )
+          ->search_related( 'pub',               {} );
         if ( my $prow = $rs->first ) {
             my $id = $prow->pub_id;
             $self->stash(
@@ -156,21 +160,21 @@ sub dna {
         'features',
         { 'type.name' => 'gene' },
         { join        => 'type' }
-        )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
-        ->search_related( 'srcfeature', {}, { prefetch => 'type' } );
+      )->search_related( 'featureloc_features', { 'locgroup' => 0 } )
+      ->search_related( 'srcfeature', {}, { prefetch => 'type' } );
     my $row = $feature_rs->first;
     if ( !$row ) {
         $self->stash( 'message' => 'Reference feature for '
-                . $self->stash('common_name')
-                . ' not found' );
+              . $self->stash('common_name')
+              . ' not found' );
         $self->render('missing');
         return;
     }
 
     my $file = catfile( $folder,
-              $self->stash('common_name') . '_'
-            . $row->type->name . '.'
-            . $self->stash('format') );
+            $self->stash('common_name') . '_'
+          . $row->type->name . '.'
+          . $self->stash('format') );
 
     $self->sendfile(
         file => $file,
@@ -182,8 +186,18 @@ sub mrna {
     my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file
-        = $self->stash('common_name') . '_cds.' . $self->stash('format');
+    my $file = $self->stash('common_name') . '_cds.' . $self->stash('format');
+    $self->sendfile(
+        file => catfile( $folder, $file ),
+        type => 'application/x-fasta'
+    );
+}
+
+sub est {
+    my ($self) = @_;
+    my $folder = $self->get_download_folder;
+    return if !$folder;
+    my $file = $self->stash('common_name') . '_est.' . 'zip';
     $self->sendfile(
         file => catfile( $folder, $file ),
         type => 'application/x-fasta'
@@ -194,8 +208,8 @@ sub protein {
     my ($self) = @_;
     my $folder = $self->get_download_folder;
     return if !$folder;
-    my $file
-        = $self->stash('common_name') . '_polypeptide.' . $self->stash('format');
+    my $file =
+      $self->stash('common_name') . '_polypeptide.' . $self->stash('format');
     $self->sendfile(
         file => catfile( $folder, $file ),
         type => 'application/x-fasta'
@@ -214,6 +228,18 @@ sub feature {
     return;
 }
 
+sub misc {
+    my ( $self, $type ) = @_;
+    my $folder = $self->get_download_folder;
+    return if !$folder;
+    my $file =
+      $self->stash('common_name') . $type . '.' . $self->stash('format');
+    $self->sendfile(
+        file => catfile( $folder, $file ),
+        type => 'application/x-txt'
+    );
+}
+
 sub browse {
     my ($self) = @_;
     my $common_name = $self->stash('common_name');
@@ -228,8 +254,8 @@ sub browse {
         'features',
         { 'type.name' => 'gene' },
         { join        => 'type' }
-        )->search_related( 'featureloc_features', {} )
-        ->search_related( 'srcfeature',           {},
+      )->search_related( 'featureloc_features', {} )
+      ->search_related( 'srcfeature',           {},
         { order_by => \'dbms_random.value' } );
 
     my $row          = $rs->first;
@@ -239,7 +265,8 @@ sub browse {
 
     if ( $self->stash('format') eq 'json' ) {
         return $self->render_json(
-            {   gbrowse_base => $gbrowse_base,
+            {
+                gbrowse_base => $gbrowse_base,
                 datasource   => $common_name,
                 query_string => $qstring
             }
@@ -258,15 +285,16 @@ sub lsearch {
     }
     $self->set_organism($common_name);
 
-    my $types
-        = $common_name eq 'purpureum'
-        ? [qw/supercontig contig gene EST/]
-        : [qw/supercontig contig gene mRNA EST polypeptide/];
+    my $types =
+      $common_name eq 'purpureum'
+      ? [qw/supercontig contig gene EST/]
+      : [qw/supercontig contig gene mRNA EST polypeptide/];
 
     my $rs = $self->stash('organism_resultset')->search_related(
         'features',
         { 'type.name' => { -in => $types } },
-        {   'join'     => 'type',
+        {
+            'join'     => 'type',
             'group_by' => 'type.name',
             'order_by' => 'type.name',
             'select'   => [
@@ -281,22 +309,24 @@ sub lsearch {
     my $data;
     while ( my $row = $rs->next ) {
         push @$data,
-            [
+          [
             $row->type->name,           $row->get_column('minlen'),
             $row->get_column('maxlen'), $row->get_column('avglen'),
             $row->get_column('medianlen')
-            ];
+          ];
     }
 
     if ( $common_name eq 'purpureum' ) {
         my $dpurs = $self->stash('organism_resultset')->search_related(
             'features',
-            {   'type.name'        => { -in => [qw/mRNA polypeptide/] },
+            {
+                'type.name'        => { -in => [qw/mRNA polypeptide/] },
                 'db.name'          => 'GFF_source',
                 'dbxref.accession' => 'JGI'
             },
-            {   'join' =>
-                    [ 'type', { 'feature_dbxrefs' => { 'dbxref' => 'db' } } ],
+            {
+                'join' =>
+                  [ 'type', { 'feature_dbxrefs' => { 'dbxref' => 'db' } } ],
                 'group_by' => 'type.name',
                 'order_by' => 'type.name',
                 'select'   => [
@@ -310,11 +340,11 @@ sub lsearch {
         );
         while ( my $drow = $dpurs->next ) {
             push @$data,
-                [
+              [
                 $drow->type->name,           $drow->get_column('minlen'),
                 $drow->get_column('maxlen'), $drow->get_column('avglen'),
                 $drow->get_column('medianlen')
-                ];
+              ];
 
         }
     }

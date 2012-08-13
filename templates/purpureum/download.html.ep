@@ -86,4 +86,23 @@
 
 % }
 
+<table class="download">
+	<col width="60%"/><col width="40%" />
+	<tr>
+		<th colspan="2">Miscellaneous</th>
+	</tr>
+	<tr>
+		<td>DPU_G - JGI mapping</td>
+		<td><a href="<%= url_for 'downloads/mapping.txt'  %>" id="download">Download</a></td>
+	</tr>
+	<tr>
+		<td>Ortholog information</td>
+		<td><a href="<%= url_for 'downloads/ortholog.txt'  %>" id="download">Download</a></td>
+	</tr>
+	<tr>
+		<td>EST sequences</td>
+		<td><a href="<%= url_for 'downloads/est.fasta'  %>" id="download">Download Fasta</a></td>
+	</tr>
+</table>
+
 
