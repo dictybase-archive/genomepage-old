@@ -82,11 +82,11 @@
 <div id="species-image">
   <%= image_tag "$common_name/index-img.jpg" %> 
    % if ($species eq 'pallidum') {
-		<p style="font-size:12px"><i>Source:</i> P. Fey</p>
+		<p style="font-size:12px"><i>Source:</i> Petra Fey</p>
    % } elsif ($species eq 'purpureum') {
 		<p style="font-size:12px"><i>Source:</i> <a href="http://www.ncbi.nlm.nih.gov/pubmed/18950497" target="_blank">PMID:18950497</a></p>
    % } elsif ($species eq 'fasciculatum') {
-		<p style="font-size:12px"><i>Source:</i> <a href="http://sacgb.fli-leibniz.de/cgi/index.pl" target="_blank">SACGB</a></p>
+		<p style="font-size:12px"><i>Source:</i> Thomas Winckler</a></p>
    % }
 </div>
 
