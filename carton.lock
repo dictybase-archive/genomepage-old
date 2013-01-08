@@ -21886,6 +21886,86 @@
          },
          "version" : "0.06"
       },
+      "Memoize" : {
+         "dist" : "Memoize-1.03",
+         "module" : "Memoize",
+         "mymeta" : {
+            "abstract" : "unknown",
+            "author" : [
+               "unknown"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.56, CPAN::Meta::Converter version 2.120921",
+            "license" : [
+               "unknown"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "Memoize",
+            "no_index" : {
+               "directory" : [
+                  "t",
+                  "inc"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {}
+               }
+            },
+            "release_status" : "stable",
+            "version" : "1.03"
+         },
+         "name" : "Memoize",
+         "pathname" : "M/MJ/MJD/Memoize-1.03.tgz",
+         "provides" : {
+            "Memoize" : {
+               "file" : "Memoize.pm",
+               "version" : "1.03"
+            },
+            "Memoize::AnyDBM_File" : {
+               "file" : "Memoize/AnyDBM_File.pm",
+               "version" : "1.03"
+            },
+            "Memoize::Expire" : {
+               "file" : "Memoize/Expire.pm",
+               "version" : "1.03"
+            },
+            "Memoize::ExpireFile" : {
+               "file" : "Memoize/ExpireFile.pm",
+               "version" : "1.03"
+            },
+            "Memoize::ExpireTest" : {
+               "file" : "Memoize/ExpireTest.pm",
+               "version" : "1.03"
+            },
+            "Memoize::NDBM_File" : {
+               "file" : "Memoize/NDBM_File.pm",
+               "version" : "1.03"
+            },
+            "Memoize::SDBM_File" : {
+               "file" : "Memoize/SDBM_File.pm",
+               "version" : "1.03"
+            },
+            "Memoize::Storable" : {
+               "file" : "Memoize/Storable.pm",
+               "version" : "1.03"
+            }
+         },
+         "version" : "1.03"
+      },
       "Memoize::ExpireLRU" : {
          "dist" : "Memoize-ExpireLRU-0.55",
          "module" : "Memoize::ExpireLRU",
