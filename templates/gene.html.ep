@@ -1,0 +1,37 @@
+% layout 'default', title => 'Contig page',  include_content => 'datatables', include_template => 'layouts/datatables' ;
+
+<% content_for datatables => begin %>
+	<%= javascript begin %>
+    	$(document).ready(function() {
+    		$('#genome_datatable').dataTable({
+    			"bFilter": false, 
+    			"sPaginationType": "full_numbers", 
+    			"bProcessing": true, 
+    			"bServerSide": true, 
+    			"sAjaxSource": "/<%= $common_name %>/gene/search.datatable", 
+    			"aoColumnDefs": [
+    						{ "sClass": 'center',  "aTargets": [ 0,  1 , 2] }
+    			], 
+    			"bJQueryUI": true
+    		});
+    	});
+    <% end %>
+<% end %>
+
+<!-- Central Column start -->
+<table id="genome_datatable" class="display">                    
+	<thead>
+		<tr>
+			<th> ID </th>
+			<th> Name </th>
+			<th> Length(kb) </th>
+		</tr>
+	</thead>
+	<tbody>
+    <tr>
+      <td colspan="5" class="dataTables_empty">Loading data from server ....</td>
+	  </tr>
+  </tbody>
+</table>																
+
+

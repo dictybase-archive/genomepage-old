@@ -1,65 +1,108 @@
-% layout 'default', title => 'D. purpureum Downloads', subtitle => 'Downloads';
+% layout 'default', title => $abbreviation . ' Downloads', subtitle => $abbreviation .' Downloads', include_content => 'button', include_template => 'layouts/jquery-ui';
+
+<% content_for button => begin %>
+	<%= javascript begin %>
+			$(document).ready(function() {
+				$('a#download').button();
+			});
+	<% end %>
+<% end %>
 
 <!-- Central Column start -->
-<h3>All data produced by the D. purpureum Genome Project are publicly available. Please cite:</h3>
-<br>
-Comparative genomics of the social amoebae Dictyostelium discoideum and Dictyostelium purpureum, 
-<br/>
-<p>
-Sucgang R, Kuo A, Tian X, Salerno W, Parikh A, Feasley CL, Dalin E, Tu H, Huang E, Barry K, Lindquist E, Shapiro H, Bruce D, Schmutz J, Salamov A, Fey P, Gaudet P, Anjard C, Babu MM, Basu S, Bushmanova Y, van der Wel H, Katoh-Kurasawa M, Dinh C, Coutinho PM, Saito T, Elias M, Schaap P, Kay RR, Henrissat B, Eichinger L, Rivero F, Putnam NH, West CM, Loomis WF, Chisholm RL, Shaulsky G, Strassmann JE, Queller DC, Kuspa A, Grigoriev IV.
-</p>
-Genome Biol. 2011 Feb 28;12(2):R20.<br/><br/>
+<h2>All data produced by 
+	the <%= $abbreviation %> Genome project is publicly available.
+</h2>
+
+% if (stash 'sequence_pub') {
+	% if (my $nuclear_pub = stash 'nuclear_pub') {
+		<h3> For nuclear genome sequence please cite: </h3>
+		%== $nuclear_pub->formatted_citation 
+		% if ($nuclear_pub->source eq 'PUBMED') {
+			<a href="http://ncbi.nlm.nih.gov/pubmed/<%= $nuclear_pub->pubmed_id %>">Pubmed </a>
+		% }
+	  % else {
+			<a href="/publication/<%= $nuclear_pub->id %>">dictyBase</a>
+	  % }
+		<br/>
+	% }
+	% if (my $mito_pub = stash 'mito_pub') {
+		<h3> For mitochondrial genome sequence please cite: </h3>
+		%== $mito_pub->short_citation 
+	  % if ($mito_pub->source eq 'PUBMED') {
+			<a href="http://ncbi.nlm.nih.gov/pubmed/<%= $mito_pub->pubmed_id %>">Pubmed </a>
+		% }
+	  % else {
+			<a href="/publication/<%= $mito_pub->pub_id %>">dictyBase</a>
+	  % }
+	% }
+% }
+
+
+		<br/><br/><br/>
+
+% if (stash 'nuclear_genome') {
+
 <table class="download">
-  <col width="75%"/><col width="25%"/>
+  <col width="60%"/><col width="40%"/>
   <tr>
-    <th colspan="2">Gene Information</th>
+    <th colspan="2">Nuclear Genome sequences</th>
   </tr>
   <tr>
-    <td>DPU_G - JGI mapping</td>
-    <td><a href="/<%= $species %>/downloads?file=GeneID-JGI.txt">[tab-delimited]</a></td>
+    <td>Chromosomal (Supercontig)</td>
+    <td><a href="<%= url_for 'current/dna.fasta' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
-    <td>Ortholog information <i>(Aug 25, 2010)</i><br></td>
-    <td><a href="/<%= $species %>/downloads?file=ortholog_information.txt">[tab delimited]</a></td>
+    <td>Coding (spliced mRNA transcript sequences)</td>
+    <td><a href="<%= url_for 'current/mrna.fasta' %>" id="download">Download Fasta</a></td>
+  </tr>
+  <tr>
+    <td>Protein </td>
+    <td><a href="<%= url_for 'current/protein.fasta' %>" id="download">Download Fasta</a></td>
+  </tr>
+  <tr>
+    <td>Genomic Features </td>
+    <td><a href="<%= url_for 'current/feature.gff3' %>" id="download">Download GFF3</a></td>
   </tr>
 </table>
-<br/>
+
+% }
+
+% if (stash 'mito_genome') {
+
 <table class="download">
-  <col width="75%"/><col width="25%"/>
+  <col width="60%"/><col width="40%"/>
   <tr>
-    <th colspan="2">Sequences and Alignments</th>
+    <th colspan="2">Mitochondrial Genome sequences</th>
   </tr>
   <tr>
-    <td>Sequences in FASTA format</td>
-    <td><a href="/<%= $species %>/downloads/fasta">[fasta download area]</a></td>
+    <td>Chromosomal</td>
+    <td><a href="<%= url_for 'current/mitochondria/dna.fasta' %>" id="download">Download Fasta</a></td>
   </tr>
   <tr>
-    <td>D. discoideum proteins aligned on D. purpureum genome by TBLASTN (75%)</td>
-    <td><a href="/<%= $species %>/downloads?file=matched.ddb.gz">[zip file]</a></td>
-  </tr>
-  <tr>
-    <td>D. discoideum proteins with no hits in D. purpureum(25%)</td>
-    <td><a href="/<%= $species %>/downloads?file=unmatched.ddb.gz">[zip file]</a></td>
-  </tr>
-  <tr>
-    <td>ESTs aligned to the genome by BLASTN (57%)</td>
-    <td><a href="/<%= $species %>/downloads?file=aligned_ests.fa.gz">[zip file]</a></td>
-  </tr>
-  <tr>
-    <td>ESTs with no hits on the genome (43%)</td>
-    <td><a href="/<%= $species %>/downloads?file=unaligned_ests.fa.gz">[zip file]</a></td>
+    <td>Genomic Features </td>
+    <td><a href="<%= url_for 'current/mitochondria/feature.gff3' %>" id="download">Download GFF3</a></td>
   </tr>
 </table>
-<br/>
+
+% }
+
 <table class="download">
-  <col width="75%"/><col width="25%"/>
-  <tr>
-    <th colspan="2">Chromosomal Information</th>
-  </tr>
-  <tr>
-    <td>Information  about 838 unassembled contigs with links to Genome Browser</td>
-    <td><a href="/<%= $species %>/contig/page/1">[view]</a></td>
-  </tr>
-</table> 
+	<col width="60%"/><col width="40%" />
+	<tr>
+		<th colspan="2">Miscellaneous</th>
+	</tr>
+	<tr>
+		<td>DPU_G - JGI mapping</td>
+		<td><a href="<%= url_for 'downloads/mapping.txt'  %>" id="download">Download</a></td>
+	</tr>
+	<tr>
+		<td>Ortholog information</td>
+		<td><a href="<%= url_for 'downloads/ortholog.txt'  %>" id="download">Download</a></td>
+	</tr>
+	<tr>
+		<td>EST sequences</td>
+		<td><a href="<%= url_for 'downloads/est.fasta'  %>" id="download">Download Fasta</a></td>
+	</tr>
+</table>
 
 

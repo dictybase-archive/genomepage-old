@@ -1,161 +1,122 @@
 package GenomeREST;
 
 use strict;
-use Homology::Chado::DataSource;
+
+#use Homology::Chado::DataSource;
 use base 'Mojolicious';
 
 # This will run once at startup
 sub startup {
     my ($self) = @_;
 
+    ##-- plugin loading sections
     $self->plugin('yml_config');
-    $self->plugin('modware-oracle');
+    $self->plugin(
+        'modware-oracle',
+        {
+            dsn      => $self->config->{database}->{dsn},
+            user     => $self->config->{database}->{user},
+            password => $self->config->{database}->{password},
+            attr     => { LongReadLen => 2**25 },
+        }
+    );
     $self->plugin('asset_tag_helpers');
-    $self->plugin('GenomeREST::Plugin::Validate::Organism');
-    $self->plugin('GenomeREST::Plugin::Validate::Gene');
-    $self->plugin('GenomeREST::Plugin::DefaultHelpers');
-    
     if ( defined $self->config->{cache} ) {
-        ## -- add the new cache plugin
-        $self->plugin(
-            'cache-action',
-            {   actions => [qw/index tab section sub_section/],
-                options => {
-                    driver     => $self->config->{cache}->{driver},
-                    root_dir   => $self->config->{cache}->{root_dir},
-                    namespace  => $self->config->{cache}->{namespace},
-                    depth      => $self->config->{cache}->{depth},
-                    expires_in => $self->config->{cache}->{expires_in}
-                }
-            }
-        );
+        $self->plugin( 'GenomeREST::Plugin::Cache::Action',
+            $self->{config}->{cache} );
     }
+    $self->plugin('GenomeREST::Plugin::Genome');
+    $self->plugin('GenomeREST::Plugin::DefaultHelpers');
 
-    ## routing setup
+    ##-- routing setup
     my $router = $self->routes();
-    my $base = $router->namespace();
+    my $base   = $router->namespace();
     $router->namespace( $base . '::Controller' );
 
-    ## first brige: validate organism (species)
-    my $species = $router->bridge('/:name')->to('genome#validate');
+    ## -- genomes
+    my $top = $router->waypoint('/')->to('genome#index');
+    my $organism =
+      $top->waypoint('/:common_name')->name('genome')->to('genome#show');
+    my $download =
+      $organism->waypoint('/current')->name('current')->to('genome#download');
 
-    ## all that goes under..
-    $species->route('/')->to('genome#index');
-    $species->route('/contig')->to('genome#contig');
-    $species->route('/contig/page/:page')->to('genome#contig_with_page');
-    $species->route('/downloads')->to('genome#download');
+    $organism->route('/browse')->name('gbrowse')->to('genome#browse');
+    $organism->route( '/feature/length/search', format => 'datatable' )
+      ->to('genome#lsearch');
 
-    ## second brige for gene id/name validation
-    my $gene = $species->bridge('/gene/:id')->to('gene#validate');
+    $download->route( "/$_", format => 'fasta' )->name($_)->to("genome#$_")
+      for qw/dna mrna protein/;
+    $download->route( '/feature', format => 'gff3' )->to('genome#feature');
+    $download->route( '/mitochondria/dna', format => 'fasta' )
+      ->to('mitochondria#dna');
+    $download->route( '/mitochondria/feature', format => 'gff3' )
+      ->to('mitochondria#feature');
 
-    $gene->route('/')->name('gene')->to( 'gene#index', format => 'html' );
-    $gene->route('/:tab')->to('gene#tab');
-    $gene->route('/:tab/:section')->to('gene#section');
-    $gene->route('/:tab/:subid/:section')->to('gene#section');
+    # Misc downloads
+    my $misc_downloads =
+      $organism->waypoint('/downloads')->name('downloads')
+      ->to('genome#download');
+    $misc_downloads->route( '/est', format => 'fasta' )->to('genome#est');
+    $misc_downloads->route( "/:type",  format => 'txt' )
+      ->to('genome#misc');
 
-    ## init database connection
-    my $datasource = Homology::Chado::DataSource->instance;
-    $datasource->dsn( $self->config->{database}->{dsn} )
-        if !$datasource->has_dsn;
-    $datasource->user( $self->config->{database}->{user} )
-        if !$datasource->has_user;
-    $datasource->password( $self->config->{database}->{password} )
-        if !$datasource->has_password;
+    ## supercontig
+    my $supercontig =
+      $organism->waypoint('/supercontig')->name('supercontig')
+      ->to('supercontig#index');
+    $supercontig->route( '/search', format => 'datatable' )->name('super_pager')
+      ->to('supercontig#search');
+    $supercontig->route('/:id')->to( 'supercontig#show', format => 'html' );
+
+    ## -- contig
+    my $contig =
+      $organism->waypoint('/contig')->name('contig')->to('contig#index');
+    $contig->route( '/search', format => 'datatable' )->name('contig_pager')
+      ->to('contig#search');
+    $contig->route('/:id')->to( 'contig#show', format => 'html' );
+
+    ## -- est
+    my $est = $organism->waypoint('/est')->name('est')->to('est#index');
+    $est->route( '/search', format => 'datatable' )->name('est_pager')
+      ->to('est#search');
+    $est->route('/:id')->to( 'est#show', format => 'html' );
+
+    ### ---
+    my $gene =
+      $organism->waypoint('/gene')->name('all_genes')->to('gene#index');
+    $gene->route( '/search', format => 'datatable' )->name('gene_pager')
+      ->to('gene#search');
+    my $geneid =
+      $gene->waypoint('/:id')->name('gene')
+      ->to( 'gene#show', format => 'html' );
+
+    ## -- tabs
+    my $protein_tab =
+      $geneid->waypoint( '/protein', format => 'html' )->to('protein#show_tab');
+    my $feature_tab =
+      $geneid->waypoint( '/feature', format => 'html' )->to('feature#show_tab');
+    my $general_tab =
+      $geneid->waypoint( '/:tab', format => 'html' )->to('gene#show_tab');
+
+    ## -- section
+    ## -- currently it maps to the protein tab url for both html and json requests
+    my $protein_section =
+      $protein_tab->waypoint( '/:subid', format => 'html' )
+      ->to('protein#show_section');
+    my $feature_section =
+      $feature_tab->waypoint( '/:subid', format => 'html' )
+      ->to('feature#show_section');
+    $general_tab->route( '/:section', format => 'json', )
+      ->to('gene#show_section');
+
+    ## protein amino acid statistics
+    $protein_section->route('/statistics')->to('protein#stats');
+    ## -- subsection
+    $protein_section->route( '/:subsection', format => 'json', )
+      ->to('protein#show_subsection');
+    $feature_section->route( '/:subsection', format => 'json', )
+      ->to('feature#show_subsection');
 }
 
 1;
 
-__END__
-
-=head1 NAME
-
-GenomeREST - Web Framework
-
-=head1 SYNOPSIS
-
-    use base 'GenomeREST';
-    sub startup {
-        my $self = shift;
-
-        my $r = $self->routes;
-
-        $r->route('/:controller/:action')
-          ->to(controller => 'foo', action => 'bar');
-    }
-
-=head1 DESCRIPTION
-
-L<Mojolicous> is a web framework built upon L<Mojo>.
-
-See L<Mojo::Manual::GenomeREST> for user friendly documentation.
-
-=head1 ATTRIBUTES
-
-L<GenomeREST> inherits all attributes from L<Mojo> and implements the
-following new ones.
-
-=head2 C<mode>
-
-    my $mode = $mojo->mode;
-    $mojo    = $mojo->mode('production');
-
-Returns the current mode if called without arguments.
-Returns the invocant if called with arguments.
-Defaults to C<$ENV{MOJO_MODE}> or C<development>.
-
-    my $mode = $mojo->mode;
-    if ($mode =~ m/^dev/) {
-        do_debug_output();
-    }
-
-=head2 C<renderer>
-
-    my $renderer = $mojo->renderer;
-    $mojo        = $mojo->renderer(GenomeREST::Renderer->new);
-
-=head2 C<routes>
-
-    my $routes = $mojo->routes;
-    $mojo      = $mojo->routes(GenomeREST::Dispatcher->new);
-
-=head2 C<static>
-
-    my $static = $mojo->static;
-    $mojo      = $mojo->static(MojoX::Dispatcher::Static->new);
-
-=head2 C<types>
-
-    my $types = $mojo->types;
-    $mojo     = $mojo->types(MojoX::Types->new)
-
-=head1 METHODS
-
-L<GenomeREST> inherits all methods from L<Mojo> and implements the following
-new ones.
-
-=head2 C<new>
-
-    my $mojo = GenomeREST->new;
-
-Returns a new L<GenomeREST> object.
-This method will call the method C<${mode}_mode> if it exists.
-(C<$mode> being the value of the attribute C<mode>).
-For example in production mode, C<production_mode> will be called.
-
-=head2 C<build_ctx>
-
-    my $c = $mojo->build_ctx($tx);
-
-=head2 C<dispatch>
-
-    $mojo->dispatch($c);
-
-=head2 C<handler>
-
-    $tx = $mojo->handler($tx);
-
-=head2 C<startup>
-
-    $mojo->startup($tx);
-
-=cut

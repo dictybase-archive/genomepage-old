@@ -8,19 +8,18 @@ sub register {
     $app->helper(
         check_gene => sub {
             my ( $c, $id ) = @_;
-            my $model = $app->modware->handler;
+            my $organism_rs = $c->stash('organism_rs');
 
-            my $feat = $model->resultset('Sequence::Feature')->search(
+            my $feat = $organism_rs->search_related( 'features',
                 {   -and => [
                         -or => [
-                            'UPPER(me.name)'      => uc $id,
+                            'UPPER(features.name)'      => uc $id,
                             'dbxref.accession' => $id
                         ],
-                        'organism.species' => $c->stash('species'),
                         'type.name'        => 'gene'
                     ]
                 },
-                {   join  => [ 'organism', 'dbxref', 'type' ],
+                {   join  => [ 'dbxref', 'type' ],
                     cache => 1
                 }
             )->single;

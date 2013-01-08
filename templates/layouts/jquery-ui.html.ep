@@ -1,0 +1,2 @@
+<%= stylesheet_link_tag   'cupertino/jquery-ui'  %>
+<%= javascript_include_tag $_ for ('jquery',  'jquery-ui') %>

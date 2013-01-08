@@ -2,30 +2,53 @@ package GenomeREST::Plugin::Validate::Organism;
 
 use strict;
 use base qw/Mojolicious::Plugin/;
+use Data::Dumper;
 
 sub register {
     my ( $self, $app ) = @_;
     $app->helper(
         check_organism => sub {
-            my ( $c, $name ) = @_;
-            my $model = $app->modware->handler;
+            my ( $c, $species ) = @_;
+            my $model        = $app->modware->handler;
+            my $phylonode_rs = $model->resultset('Phylogeny::Phylonode');
 
-            my ($organism) = $model->resultset('Organism::Organism')->search(
-                {   -or => [
-                        { common_name  => $name },
-                        { abbreviation => $name },
-                        { species      => $name },
-                    ]
+            my $nodes_rs = $phylonode_rs->search(
+                {   'label'     => { 'like', '%' . $species },
+                    'type.name' => 'species'
+                },
+                { 'join' => 'type' }
+            );
+
+            if ( $nodes_rs->count > 1 ) {
+                $c->app->log->warn(
+                    "more than one species matching $species found in database"
+                );
+                return 0;
+            }
+
+            my $taxon    = $nodes_rs->single;
+            my $genus    = $taxon->search_related('parent_phylonode')->single->label;
+            my $child_rs = $phylonode_rs->search(
+                {   left_idx => {
+                        -between => [ $taxon->left_idx, $taxon->right_idx ]
+                    }
                 }
             );
-            return if !$organism;
+
+            my $organism_rs = $child_rs->related_resultset('phylonode_organism')->related_resultset('organism');
+
+            if ( !$organism_rs->count ) {
+                $c->app->log->warn(
+                    "no organism matching $species found in database");
+                return 0;
+            }
 
             $c->stash(
-                species      => $organism->species,
-                abbreviation => $organism->abbreviation,
-                genus        => $organism->genus,
-                common_name  => $organism->common_name,
+                organism_rs  => $organism_rs,
+                genus        => $genus,
+                abbreviation => substr( $genus, 0, 1 ) . '.' . $species,
             );
+
             1;
         }
     );

@@ -1,3 +1,6 @@
+release-2-20
+    * Added memcached for caching
+    * Added memcached in production
 release-2-19 
     * Fixed incompatibilities with Mojolicious 0.999936
     * Rewrote tests with Test::Mojo

@@ -6,13 +6,13 @@
 *.yaml
 
 #however exclude the sample conf
-!*.sample*
+!sample.yaml
 !fcgi_conf.yaml
+!apache.conf
 
 
 #exclude various folder
 log
-cache
 
 #Perl's build specific stuff
 Build
@@ -23,5 +23,11 @@ MANIFEST
 MYMETA*
 META
 
+Rexfile*
+
 #exclude Build.PL
 !Build.PL
+
+
+.carton/
+local/

@@ -1,33 +1,28 @@
 #!/usr/bin/perl -w
 use strict;
-use warnings;
-use lib 'lib';
-use GenomeREST::Builder;
+use Module::Build;
 
-my $builder = GenomeREST::Builder->new(
+my $builder = Module::Build->new(
     module_name  => 'GenomeREST',
     license      => 'perl',
-    dist_author  => 'Yulia Bushmanova <y-bushmanova@northwestern.edu>',
+    dist_author  => 'Siddhartha Basu<siddhartha-basu@northwestern.edu>',
     dist_version => '1.4.1',
     requires     => {
         'Mojolicious'                 => '1.21',
-        'YAML::XS'                    => '',
-        'Plack'                       => '0.9941',
         'Module::Versions'            => '0.02',
-        'FCGI::Engine'                => '0.16',
-        'Homology::Group'             => '',
         'Modware'                     => '0.001',
-        'Mojolicious::Plugin::Bundle' => '0.001',
+        'Mojolicious::Plugin::Bundle' => '0.005',
         'Mojolicious::Plugin::Cache'  => '0.0011',
-        'dicty::Tests::Data'          => '',
-        'dicty::Search::Gene'         => '',
-        'dicty::UI::Tabview::Config'  => '',
+        'MouseX::Params::Validate'    => '0.04',
+        'MouseX::NativeTraits'        => '1.07',
+        'JSON'                        => '2.50', 
+        'DBIx::Class'                 => '0.08127',
+        'Math::BigInt'                => '1.99',
+        'Math::Base36'                => '0.09',
+        'DBI'                         => '1.51',
+        'DBD::Oracle'                 => '1.27'
     },
-    configure_requires => {
-        'Try::Tiny'    => '0.09',
-        'TAP::Harness' => '3.22',
-    },
-    add_to_cleanup => ['GenomeREST-*'],
+    add_to_cleanup => ['GenomeREST- *'],
     create_readme  => 1,
 );
 

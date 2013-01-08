@@ -1,0 +1,49 @@
+% layout 'default', title => 'List of contig',  include_content => 'datatables', include_template => 'layouts/datatables' ;
+
+<% content_for datatables => begin %>
+	<%= javascript begin %>
+    	$(document).ready(function() {
+    		$('#genome_datatable').dataTable({
+    			"bFilter": false, 
+    			"sPaginationType": "full_numbers", 
+    			"bProcessing": true, 
+    			"bServerSide": true, 
+    			"sAjaxSource": "/<%= $common_name %>/contig/search.datatable", 
+    			"aoColumnDefs": [
+    						{ "sClass": 'center',  "aTargets": [ 0,  1 , 2] }, 
+    						{
+    							"fnRender": function (obj) {
+    								return '<a href="/' + "<%= $common_name %>" + '/contig/' + obj.aData[0] + '">' + obj.aData[0] + '</a>'; 
+    							}, 
+    							"aTargets": [ 0 ]
+    						}, 
+								{
+    							"fnRender": function (obj) {
+    								return '<a href="' + obj.aData[2] + '">' + '<%= image_tag 'gbrowse.png', height => 19, width => 80 %>' + '</a>'; 
+    							}, 
+    							"aTargets": [ 2 ]
+    						}
+    			], 
+    			"bJQueryUI": true
+    		});
+    	});
+    <% end %>
+<% end %>
+
+<!-- Central Column start -->
+<table id="genome_datatable" class="display">                    
+	<thead>
+		<tr>
+			<th> Contig ID </th>
+			<th> Length(bp) </th>
+			<th> Gbrowse </th>
+		</tr>
+	</thead>
+	<tbody>
+    <tr>
+      <td colspan="5" class="dataTables_empty">Loading data from server ....</td>
+	  </tr>
+  </tbody>
+</table>																
+
+

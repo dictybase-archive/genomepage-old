@@ -1,0 +1,61 @@
+% my $path = stash('common_name') || 'default'; 
+<div id="shadow-container">
+    <div class="shadow">
+        <div id="container-top">
+            <div id="descriptor">
+              <b><%= stash('genus') . ' ' . stash('common_name') %></b>
+            </div>
+            <table>
+                <tr>
+                    <td rowspan="2">
+                        <a href="<%= url_for "/$path"  %>"><%= image_tag "$path/logo.gif" %></a>
+                    </td>
+                </tr>
+                <tr class="menu">
+                    <td><%= image_tag "$path/menu-top-left.gif" %></td>
+                    <td>
+                        <div id="menu-top" class="yuimenubar yuimenubarnav">
+                            <div class="bd">
+                               <ul class="first-of-type">
+                                   <li class="yuimenubaritem first-of-type">
+                                      <a class="yuimenubaritemlabel">Genomes</a>
+                                         %= include 'layouts/menu/genomes' 
+                                        </li>                                            
+                                        <li class="yuimenubaritem">
+                                          <a class="yuimenubaritemlabel">Genome Browser</a>
+                                            %= include 'layouts/menu/genome_browser'
+                                    </li>
+                                    <li class="yuimenubaritem ">
+                                        <a class="yuimenubaritemlabel" href="/tools/blast">BLAST</a>
+                                    </li>
+                                    <li class="yuimenubaritem">
+                                        <a class="yuimenubaritemlabel">Download</a>
+                                        <div id="download" class="yuimenu">
+                                            <div class="bd">
+                                                <ul class="first-of-type">
+                                    		          % for my $org(loaded_genomes) {
+                                    		          	 % my $cname = $org->common_name;
+                                       			           <li class="yuimenuitem">
+                                       				            <a class="yuimenuitemlabel" 
+                                       				             href="<%= url_for("/$cname/current") %>">
+                                       				             <%= sprintf('%s %s', $org->genus, $org->common_name) %>
+																							            </a>
+																						            </li>
+                                    		           % }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                    <td><%= image_tag "$path/menu-top-right.gif" %></td>
+                    <td id="about_help">
+                        <a href="/db/cgi-bin/dictyBase/suggestion">Contact</a> 
+                    </td>                            
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
