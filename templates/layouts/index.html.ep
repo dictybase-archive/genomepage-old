@@ -93,7 +93,13 @@
    </div>
 
   <div class="phylogeny-image top40">
-      <%= image_tag "$common_name/phylogeny.jpg",  width => '310',  height => '210' %>
+      <%= image_tag "$common_name/phylogeny.jpg",  width => '300',  height => '210' %>
+      <p style="width:72%;"> 
+        Phylogeny of 5 Dictyostelid species: constructed from 32 orthologous genes in
+        all species with genome sequence using Entamoeba histolytica as the outgroup. The
+         statistical support for all the nodes is 100%. <br/> 
+         <i> By Pauline  Schaap </i>
+      </p>
   </div>
 
 </div> <!-- species-image-generic ends -->
