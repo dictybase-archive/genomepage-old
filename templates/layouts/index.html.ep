@@ -79,14 +79,29 @@
   </div> <!-- Genome statistics STYLE ENDS HERE  -->
 </div> <!-- main-info ENDS HERE -->
 
-<div id="species-image">
-  <%= image_tag "$common_name/index-img.jpg" %> 
-   % if ($species eq 'pallidum') {
-		<p style="font-size:12px"><i>Source:</i> Petra Fey</p>
-   % } elsif ($species eq 'purpureum') {
-		<p style="font-size:12px"><i>Source:</i> <a href="http://www.ncbi.nlm.nih.gov/pubmed/18950497" target="_blank">PMID:18950497</a></p>
-   % } elsif ($species eq 'fasciculatum') {
-		<p style="font-size:12px"><i>Source:</i> Thomas Winckler</a></p>
-   % }
-</div>
+<div class="species-image-generic gap30">
+  <div id="species-image">
+     <%= image_tag "$common_name/index-img.jpg" ,  height => '220' %> 
+     % if ($species eq 'pallidum') {
+		   <p style="font-size:12px; text-align:center;"><i>Source:</i> Petra Fey</p>
+     % } elsif ($species eq 'purpureum') {
+		   <p style="font-size:12px; text-align:center;"><i>Source:</i> 
+		        <a href="http://www.ncbi.nlm.nih.gov/pubmed/18950497" target="_blank">PMID:18950497</a></p>
+     % } elsif ($species eq 'fasciculatum') {
+		   <p style="font-size:12px; text-align:center;"><i>Source:</i> Thomas Winckler</a></p>
+     % }
+   </div>
+
+  <div class="phylogeny-image top40">
+      <%= image_tag "$common_name/phylogeny.jpg",  width => '300',  height => '210' %>
+      <p style="width:72%;"> 
+        Phylogeny of 5 Dictyostelid species: constructed from 32 orthologous genes in
+        all species with genome sequence using Entamoeba histolytica as the outgroup. The
+         statistical support for all the nodes is 100%. <br/> 
+         <i> By Pauline  Schaap </i>
+      </p>
+  </div>
+
+</div> <!-- species-image-generic ends -->
+
 
